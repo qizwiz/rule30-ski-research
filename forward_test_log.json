@@ -1,0 +1,19 @@
+{
+  "test_started": "2026-01-05T06:31:34.496745",
+  "starting_cash": 100.0,
+  "current_state": {
+    "timestamp": "2026-01-05T06:31:34.496726",
+    "signal": "HOLD",
+    "price": 135.33596801757812,
+    "reason": "Waiting for entry signal (Above cloud: False, TK bullish: True)",
+    "cash": 100.0,
+    "position_size": 0,
+    "entry_price": 0,
+    "position_value": 0,
+    "total_value": 100.0,
+    "unrealized_profit": 0,
+    "unrealized_pct": 0
+  },
+  "trades": [],
+  "trade_count": 0
+}
