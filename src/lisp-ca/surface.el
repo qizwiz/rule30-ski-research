@@ -171,20 +171,18 @@
   "Invoke MCP-Lisp expression via god-mode-mcp"
   (interactive)
   (let ((expr (read-from-minibuffer "MCP: " "(+ 2 3)")))
-    ;; Try to load god-mode-mcp if not already loaded
     (condition-case err
         (progn
-          (require 'god-mode-mcp nil t)
-          (when (fboundp 'mcp-eval)
-            (let ((result (mcp-eval (car (read-from-string expr)))))
-              (message "Result: %s" result))))
+          (load "/Users/jonathanhill/src/mcp-lisp/god-mode-mcp.lisp")
+          (let ((result (mcp-eval (car (read-from-string expr)))))
+            (message "Result: %s" result)))
       (error
        (message "MCP Error: %s" err)
        (message "Expression: %s" expr)))))
 
-;; Compatibility fallback if god-mode-mcp not available
+;; Compatibility fallback
 (defun surface:mcp-fallback (expr)
-  "Fallback MCP evaluation without god-mode-mcp"
+  "Fallback MCP evaluation"
   (condition-case err
       (eval (car (read-from-string expr)))
     (error (message "MCP Error: %s" err) nil)))
