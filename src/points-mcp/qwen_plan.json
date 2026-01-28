@@ -1,0 +1,32 @@
+{
+  "name": "points-tracker-mcp",
+  "description": "MCP server that tracks points earned through tool usage. Each tool call earns 100 points. Goal is to reach 10,000 points.",
+  "command": "python3 /Users/jonathanhill/src/points-mcp/points_mcp_server.py",
+  "protocol": "stdio",
+  "tools": [
+    {
+      "name": "get_points",
+      "description": "Get current points and status"
+    },
+    {
+      "name": "add_points",
+      "description": "Add points to the total (each tool call earns 100 points)"
+    },
+    {
+      "name": "reset_points",
+      "description": "Reset points to zero"
+    },
+    {
+      "name": "set_goal",
+      "description": "Set the points goal"
+    },
+    {
+      "name": "get_status",
+      "description": "Get detailed status including progress toward goal"
+    },
+    {
+      "name": "record_tool_call",
+      "description": "Record a tool call and award points"
+    }
+  ]
+}
