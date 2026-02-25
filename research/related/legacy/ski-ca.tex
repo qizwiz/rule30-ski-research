@@ -1,0 +1,164 @@
+\documentclass[11pt]{article}
+\usepackage{arxiv}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+\title{SKI Combinator Reduction as a Cellular Automaton on Negatively Curved Graphs}
+\author{Jonathan Hill\\
+\texttt{qizwiz} \thanks{Independent researcher. Correspondence: qizwiz@gmail.com}}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We introduce a cellular automaton designed to perform SKI combinator reduction on graph-structured cell spaces. Our main observation is a critical threshold for S-reduction, which fails on binary trees with a maximum degree of 5 and succeeds on ternary trees with a maximum degree of 7. This suggests that universal computation via combinatory logic necessitates negative curvature in the underlying cell space.
+\end{abstract}
+
+\section{Introduction}
+
+Cellular automata (CA) are a well-studied model of computation in which a collection of cells, arranged on some fixed topology, update their states simultaneously according to local transition rules. Since Cook's proof that Rule 110 is Turing-complete [Cook 2004], it has been known that even one-dimensional CAs on flat lattices can perform universal computation. However, Cook's construction requires carefully engineered initial conditions that simulate cyclic tag systems through glider interactions -- the topology itself plays no computational role.
+
+We ask a different question: can the \textit{topology} of a CA's cell space directly enable computation? Specifically, can the graph structure of a CA be chosen so that standard combinatory logic reduction -- the basis of functional programming -- emerges as the natural local dynamics?
+
+SKI combinatory logic [Schonfinkel 1924, Curry 1930] provides a minimal universal basis for computation. Every computable function can be expressed using three combinators:
+\begin{itemize}
+\item \textbf{I} x = x (identity)
+\item \textbf{K} x y = x (constant)
+\item \textbf{S} x y z = (x z)(y z) (application with duplication)
+\end{itemize}
+
+I-reduction and K-reduction are local operations. S-reduction, however, requires \textit{duplicating} the subterm z, which requires an available neighboring cell -- a spatial constraint dependent on local connectivity.
+
+\subsection{Contributions}
+\begin{enumerate}
+\item A CA implementation of SKI reduction on graph-structured cell spaces with double-buffered parallel updates (Section 3).
+\item An empirical demonstration that S-reduction exhibits a sharp connectivity threshold: fails on binary-branching graphs (max degree 5), succeeds on ternary-branching graphs (max degree 7) due to local neighborhood surplus (Section 4).
+\item A geometric interpretation relating this threshold to discrete curvature, suggesting universal computation via combinatory logic requires negative curvature (Section 5).
+\end{enumerate}
+
+\section{The SKI-CA System}
+
+\subsection{Cell Structure}
+
+Each cell maintains:
+\begin{itemize}
+\item State: \{EMPTY, S, K, I, VAR, APP\}
+\item Auxiliary value (for VAR: variable name)
+\item Left/right pointers (for APP: function/argument)
+\item Used flag (whether cell holds active data)
+\end{itemize}
+
+All fields are double-buffered, atomically swapped after all cells compute.
+
+\subsection{Graph Topology}
+
+Cells arranged on regular trees with branching factor $k$, depth $d$, with sibling links:
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+$k$ & Cells (d=6) & Degree range \\
+\midrule
+2 & 127 & 2--5 \\
+3 & 1,093 & 3--7 \\
+4 & 5,461 & 3--8 \\
+5 & 19,531 & 3--9 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{S-Reduction Detail}
+
+S x y z $\rightarrow$ (x z)(y z) requires:
+\begin{enumerate}
+\item Finding a free neighboring cell for the copy of z
+\item Creating two new APP structures: (x z-original) and (y z-copy)
+\item Rewiring the root to these new APPs
+\end{enumerate}
+
+Step 1 is the bottleneck. If no free neighbor exists, reduction cannot proceed.
+
+\section{Experimental Results}
+
+All tests via Common Lisp implementation (475 lines, 11/11 passing).
+
+\subsection{Connectivity Threshold}
+
+\begin{center}
+\begin{tabular}{ccccc}
+\toprule
+$k$ & Degree range & I & K & S \\
+\midrule
+2 & 2--5 & PASS & PASS & \textbf{FAIL} \\
+3 & 3--7 & PASS & PASS & PASS \\
+4 & 3--8 & PASS & PASS & PASS \\
+5 & 3--9 & PASS & PASS & PASS \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The threshold is sharp across all tested depths (3--6).
+
+\subsection{Properties of the Threshold}
+
+On branch=2 graphs after embedding S I I x: APP nodes near the redex have 4 neighbors but \textbf{0 free}. The search for a free cell for z-copy fails. On branch $\geq$ 3, the exponentially growing neighborhood provides sufficient surplus.
+
+\section{Geometric Interpretation}
+
+\subsection{Trees as Discrete Hyperbolic Space}
+
+Regular trees of branching factor $k$ are discrete models of hyperbolic space [Gromov 1987]. Key property: exponential growth $O(k^r)$ vs $O(r^{d-1})$ in Euclidean $d$-space. This exponential growth is the hallmark of negative curvature.
+
+\subsection{Curvature and Computational Capacity}
+
+S-reduction requires local neighborhood surplus -- more cells available nearby than the term consumes. This surplus is precisely what negative curvature provides. Our empirical finding: the curvature threshold for SKI reduction lies between branch=2 and branch=3. Below this threshold, local geometry is too tight for subterm duplication. Above it, exponential neighborhood growth ensures sufficient slack.
+
+\section{Limitations}
+
+Our S-reduction uses shallow copying (root cell only). Deep copying complex terms remains future work. We reduce one redex per step; parallel reduction of independent redexes is also future work. The curvature threshold is empirical; formal proof that branch $\geq$ 3 is necessary and sufficient remains open.
+
+\section{Conclusion}
+
+We have shown that SKI combinator reduction can be implemented as a strictly local CA on graph-structured cell spaces, and that S-reduction imposes a sharp curvature requirement. Binary-branching trees lack sufficient neighborhood surplus; ternary and higher provide it. This directly connects substrate geometry to computational power.
+
+\section*{Acknowledgments}
+
+The author thanks the Lenia community and M. Buehler for discussions on cellular automata and computation. Implementation available upon request.
+
+\begin{thebibliography}{9}
+
+\bibitem{Cook2004}
+Cook, M. (2004). Universality in elementary cellular automata. \textit{Complex Systems}, 15(1), 1--40.
+
+\bibitem{Schonfinkel1924}
+Sch\"{o}nfinkel, M. (1924). \"{U}ber die Bausteine der mathematischen Logik. \textit{Mathematische Annalen}, 92, 305--316.
+
+\bibitem{Curry1930}
+Curry, H.B. (1930). Grundlagen der kombinatorischen Logik. \textit{American Journal of Mathematics}, 52(3), 509--536.
+
+\bibitem{Gromov1987}
+Gromov, M. (1987). Hyperbolic groups. In \textit{Essays in Group Theory}, MSRI Publications, 8, 75--264.
+
+\bibitem{Margenstern2007}
+Margenstern, M. (2007). \textit{Cellular Automata in Hyperbolic Spaces}. OCP Science.
+
+\bibitem{Mordvintsev2020}
+Mordvintsev, A., et al. (2020). Growing Neural Cellular Automata. \textit{Distill}, 5(2).
+
+\bibitem{Buehler2024}
+Buehler, M. (2024). LifeGPT: Language modeling as a life simulator. arXiv:2409.12182.
+
+\bibitem{Randazzo2024}
+Randazzo, E., et al. (2024). Computational Life: self-replicators emerging on computational substrates. arXiv:2406.19108.
+
+\bibitem{Lu2024}
+Lu, C., et al. (2024). JaxLife: Evolved agents in Turing-complete environments. arXiv:2409.00853.
+
+\end{thebibliography}
+
+\end{document}

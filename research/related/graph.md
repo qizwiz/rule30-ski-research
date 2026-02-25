@@ -1,0 +1,95 @@
+# Related Work Graph
+
+This is a lightweight map from idea → artifacts.
+
+## SKI/Combinator/Reduction
+- `/Users/jonathanhill/src/openclaw-openclaw-full/rule30-ski-topology/rule30_rheology.tex`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/self-improving-skill-manager/SKILL.md`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/ca-topology-toolkit/SKILL.md`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/rule30-ski-topology/README.md`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/rule30-ski-topology/extract_basins.py`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/rule30-ski-topology/ski_graph_engine.py`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/ski_graph_engine.py`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/ski_rule30_center.py`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/ski_ca_analyzer.py`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/ui/src/ui/views/agents-panels-tools-skills.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/ui/src/ui/views/agents-panels-tools-skills.browser.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/gateway/server.skills-status.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/gateway/protocol/schema/agents-models-skills.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/cron/service.skips-main-jobs-empty-systemevent-text.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/cron/service.issue-17852-daily-skip.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/cron/service.issue-16156-list-skips-cron.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/cron/isolated-agent/run.skill-filter.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/cron/isolated-agent.skips-delivery-without-whatsapp-recipient-besteffortdeliver-true.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/commands/onboard-skills.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/cli/skills-cli.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/cli/skills-cli.formatting.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/cli/skills-cli.commands.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/auto-reply/reply/get-reply-inline-actions.skip-when-config-empty.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills/workspace.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills/plugin-skills.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills/frontmatter.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills/env-overrides.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills/config.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills/bundled-dir.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills.summarize-skill-description.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills.resolveskillspromptforrun.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills.loadworkspaceskillentries.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills.e2e-test-helpers.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills.e2e-test-helpers.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills.compact-skill-paths.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills.buildworkspaceskillstatus.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills.buildworkspaceskillsnapshot.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills.build-workspace-skills-prompt.syncs-merged-skills-into-target-workspace.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills.build-workspace-skills-prompt.prefers-workspace-skills-managed-skills.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills.build-workspace-skills-prompt.applies-bundled-allowlist-without-affecting-workspace-skills.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills.agents-skills-directory.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills-status.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills-status.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills-install.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills-install.test-mocks.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills-install.download.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills-install.download-test-utils.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/skills-install-fallback.test.ts`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/src/agents/sandbox-skills.test.ts`
+
+## Rule30/CA
+- `/Users/jonathanhill/src/openclaw-openclaw-full/rule30-ski-topology/rule30_rheology.tex`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/arxiv_submission/rule30_rheology.tex`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/papers/rule30_rheology.canonical.tex`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/rule30_rheology.tex`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/rule30-ski-topology/README.md`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/rule30-ski-topology/extract_basins.py`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/rule30-ski-topology/ski_graph_engine.py`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/rule30_matrix.py`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/ski_rule30_center.py`
+- `/Users/jonathanhill/src/ftmcp/ai-cellular-automata/src/cell-agent.js`
+- `/Users/jonathanhill/src/ftmcp/ai-cellular-automata/run-with-real-ai.sh`
+- `/Users/jonathanhill/src/ftmcp/ai-cellular-automata/package.json`
+- `/Users/jonathanhill/src/ftmcp/ai-cellular-automata/src/demo-self-improvement.js`
+- `/Users/jonathanhill/src/ftmcp/ai-cellular-automata/src/grid-manager.js`
+- `/Users/jonathanhill/src/ftmcp/simple-math-mcp/ai-cellular-automata/ai-cellular-automata/package-lock.json`
+- `/Users/jonathanhill/src/ftmcp/simple-math-mcp/ai-cellular-automata/ai-cellular-automata/src/self-improving-cell.js`
+- `/Users/jonathanhill/src/ftmcp/simple-math-mcp/ai-cellular-automata/ai-cellular-automata/src/grid-manager.js`
+- `/Users/jonathanhill/src/ftmcp/simple-math-mcp/ai-cellular-automata/ai-cellular-automata/src/cell-agent.js`
+- `/Users/jonathanhill/src/ftmcp/simple-math-mcp/ai-cellular-automata/ai-cellular-automata/package.json`
+- `/Users/jonathanhill/src/ftmcp/ai-cellular-automata/src/self-improving-cell.js`
+
+## Basins/Tamari
+- `/Users/jonathanhill/src/openclaw-openclaw-full/rule30-ski-topology/extract_basins.py`
+- `/Users/jonathanhill/src/openclaw-openclaw-full/extract_basins.py`
+- `/Users/jonathanhill/src/topological-ca/basin_inference_ca.lisp`
+- `/Users/jonathanhill/src/topological-ca/stochastic_associahedron.lisp`
+- `/Users/jonathanhill/src/topological-ca/associahedron_ca.lisp`
+- `/Users/jonathanhill/src/topological-ca/secondary_basin.lisp`
+- `/Users/jonathanhill/src/PARENTHETICAL_TEST.md`
+- `/Users/jonathanhill/src/PARENTHETICAL_README.md`
+- `/Users/jonathanhill/src/test_opencode_parenthetical.py`
+- `/Users/jonathanhill/src/test_parenthetical.py`
+
+## Irreducibility
+- `/Users/jonathanhill/src/openclaw-openclaw-full/true_irreducibility_test.py`
+- `/Users/jonathanhill/src/n8n/packages/@n8n/nodes-langchain/nodes/tools/ToolWolframAlpha/ToolWolframAlpha.node.ts`
+- `/Users/jonathanhill/src/n8n/packages/@n8n/nodes-langchain/credentials/WolframAlphaApi.credentials.ts`
+
