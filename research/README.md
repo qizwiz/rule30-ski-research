@@ -48,3 +48,4 @@ Funding kit:
 - `research/funding/overview.md`
 - `research/funding/outreach_email.md`
 - `research/funding/pitch.md`
+- `research/funding/next_90_days.md`
