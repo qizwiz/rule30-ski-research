@@ -12,7 +12,7 @@ This work introduces a canonical, graph-shared combinatory representation of Cel
 - **Inter-Basin Theorem (Lean 4):** every SKI reduction step strictly changes the parenthetical skeleton (basin) of the expression. This establishes monotonic structural progression and rules out basin self-loops.
 
 ## Empirical Results
-- **Quadratic Subterm Growth:** direct construction of the Rule 30 center-cell dependency cone yields an $O(N^2)$ bound on distinct subterms under maximal sharing, as opposed to $O(3^N)$ AST growth.
+- **Quadratic-Scale Subterm Growth (Empirical):** direct construction of the Rule 30 center-cell dependency cone shows quadratic-scale growth in distinct subterms under maximal sharing over the measured range, versus exponential AST growth without sharing.
 - **Basin Prefix Invariance:** observed prefix stability of basin skeletons for $N \ge 3$ (Basin Stabilization Conjecture).
 
 ## Why This Matters

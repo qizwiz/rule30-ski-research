@@ -47,7 +47,7 @@
 \maketitle
 
 \begin{abstract}
-We introduce a canonical graph-shared combinatory compilation of Cellular Automata (specifically Elementary Rule 30). By compiling the local CA update rule into pure SKI Combinator Calculus and evaluating the global spacetime dependency cone via maximally shared term-graph reduction, we map the discrete bit-wise evolution of the CA into structural transformations on the Tamari lattice. We present three bounded representational results: (1) We machine-verify the Inter-Basin Theorem in Lean 4, proving that every SKI reduction strictly alters the parenthetical skeleton of the expression, confirming term-graph monotonicity. (2) We demonstrate that a term quotient construction strictly bounds the distinct combinator subterms of the Rule 30 light-cone to an $O(N^2)$ Directed Acyclic Graph (DAG), resolving the $O(3^N)$ exponential Abstract Syntax Tree (AST) explosion. (3) We observe empirical prefix invariance in the reduction skeletons and propose the Basin Stabilization Conjecture. While this does not yet provide an $O(\log N)$ computational evaluation shortcut to break irreducibility, this framework provides a novel, structurally tractable representation of CA evolution for future analysis in rewriting theory.
+We introduce a canonical graph-shared combinatory compilation of Cellular Automata (specifically Elementary Rule 30). By compiling the local CA update rule into pure SKI Combinator Calculus and evaluating the global spacetime dependency cone via maximally shared term-graph reduction, we map the discrete bit-wise evolution of the CA into structural transformations on the Tamari lattice. We present three results: (1) We machine-verify the Inter-Basin Theorem in Lean 4, proving that every SKI reduction strictly alters the parenthetical skeleton of the expression, confirming term-graph monotonicity. (2) We report empirical quadratic-scale growth in distinct combinator subterms for the Rule 30 light-cone under maximal sharing (tested through Generation 50), contrasting with exponential AST growth without sharing. (3) We observe empirical prefix invariance in the reduction skeletons and propose the Basin Stabilization Conjecture. While this does not yet provide an $O(\log N)$ computational evaluation shortcut to break irreducibility, this framework provides a structurally tractable representation of CA evolution for future analysis in rewriting theory.
 \end{abstract}
 
 \section{Introduction}
@@ -91,11 +91,11 @@ We empirically generated the exact unreduced SKI combinator DAG representing the
 50 & $7.1 \times 10^{23}$ & 6,532 & 6,350 \\
 \hline
 \end{tabular}
-\caption{The $O(N^2)$ growth of distinct SKI subterms in the shared-graph representation vs. the exponential AST.}
+\caption{Empirical quadratic-scale growth of distinct SKI subterms in the shared-graph representation vs. the exponential AST.}
 \label{tab:growth}
 \end{table}
 
-Table \ref{tab:growth} confirms that the canonical sharing construction bounds the static representation of the Rule 30 computation strictly to the $O(N^2)$ spatial geometry of the dependency cone. 
+Table \ref{tab:growth} shows empirical quadratic-scale growth over the measured range, consistent with the dependency-cone geometry under maximal sharing. 
 
 \subsection{The Basin Stabilization Conjecture}
 While tracking the normal-order graph reductions, we extracted the literal string representation of the parenthetical basins. We observed a phenomenon where the outermost dependency bracketing remains invariant.

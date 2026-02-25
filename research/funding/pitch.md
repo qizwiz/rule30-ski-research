@@ -12,7 +12,7 @@ I compile the local Rule 30 update rule into SKI combinators, then construct the
 
 ## Results
 - **Formal proof (Lean 4):** Inter‑Basin Theorem — every SKI reduction step strictly changes the basin skeleton (no basin self‑loops).  
-- **Empirical:** distinct subterms in the shared DAG grow as $O(N^2)$ vs. $O(3^N)$ AST growth.  
+- **Empirical:** distinct subterms in the shared DAG show quadratic-scale growth over measured generations, vs. exponential AST growth without sharing.  
 - **Conjecture:** basin prefix stabilization for Rule 30 center cell after $N \ge 3$.
 
 ## Why It Matters
