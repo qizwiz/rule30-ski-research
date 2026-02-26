@@ -8,6 +8,7 @@ Files:
 - `roadmap.md`: proof milestones and dependencies
 - `lower_bound_core.md`: claim-hygienic lower-bound scaffold and blockers
 - `m4_submission_gate.md`: M4 submission-readiness gate with proved/empirical/conjectural split
+- `submission_packet.md`: external-claim evidence map and pre-submission checklist
 - `exactness_bridge.md`: Phase 3 bridge obligations and Lean-ready theorem skeletons
 - `phase3_obligation_matrix.md`: obligation-by-obligation status map for Phase 3 bridge closure
 - `lean/Prize3Model.lean`: Lean skeleton for formalization

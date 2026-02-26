@@ -33,6 +33,8 @@ This checklist is optimized for speed-to-credibility and funding conversations.
   - Proved (artifact-level foundation only)
   - Empirical (debug/repro only, not proof)
   - Conjectural (exactness-to-work bridge still open)
+- Before external claim text, verify against:
+  - `prize3/submission_packet.md`
 - Add one explicit line in each external document:
   - "Prize3 lower-bound theorem is not yet proved in-repo."
 
