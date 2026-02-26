@@ -29,6 +29,12 @@ This checklist is optimized for speed-to-credibility and funding conversations.
   - Empirical (script outputs)
   - Conjectural (future work)
 - Remove or reword any claim that implies solved irreducibility.
+- For Prize3 language, require all three labels explicitly:
+  - Proved (artifact-level foundation only)
+  - Empirical (debug/repro only, not proof)
+  - Conjectural (exactness-to-work bridge still open)
+- Add one explicit line in each external document:
+  - "Prize3 lower-bound theorem is not yet proved in-repo."
 
 ## 4. Package for Reviewers
 - Ensure these docs are present and linked from `research/README.md`:
@@ -43,6 +49,7 @@ This checklist is optimized for speed-to-credibility and funding conversations.
 1. Publish preprint package (`rule30_rheology` + Lean + scripts).
 2. Publish portfolio index and reproducibility docs.
 3. Send targeted outreach emails with one-pager + links.
+4. Defer any Prize3 theorem claim language until `prize3/roadmap.md` Phase 4 is complete.
 
 ## 6. Outreach Readiness
 - Contact card in every outreach asset:

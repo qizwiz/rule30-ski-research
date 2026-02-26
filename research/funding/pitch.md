@@ -19,6 +19,8 @@ I compile the local Rule 30 update rule into SKI combinators, then construct the
 - **Proved:** Prize3 model/statement freeze and foundational dependency-width lemmas in `prize3/`.
 - **Empirical:** no empirical claim is used as proof of Prize3 lower bound.
 - **Conjectural:** final exactness-to-work bridge for `Work_A(n)=Omega(n)` remains open.
+- **Submission status:** not yet claim-ready for a Prize3 theorem submission.
+- **Safe line for outreach:** "We have a formalized lower-bound scaffold and foundational lemmas; the decisive bridge lemma is still open."
 
 ## Why It Matters
 This reframes Rule 30 from a black‑box dynamical system into a structured rewriting trajectory. It opens the door to formal invariants, new complexity bounds, and the possibility of geodesic interpretations on the Tamari lattice.

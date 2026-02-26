@@ -25,8 +25,13 @@ This creates a bridge between CA dynamics and term-rewriting/associahedron geome
 
 ## Prize3 Claim Snapshot (2026-02-26)
 - **Proved (artifact-level):** frozen model + theorem statement + foundational cone/required-data proxy lemmas in `prize3/` and `prize3/lean/Prize3Model.lean`.
-- **Empirical:** none used as proof for Prize3 lower bound.
+- **Empirical (Prize3-specific):** none used as proof for the lower bound.
 - **Conjectural / in-progress:** exactness-to-work bridge needed to complete `Work_A(n) = Omega(n)` in `M_cone_exact`.
+
+## Submission-Readiness Gate (Prize3)
+- **Gate status:** not claim-ready for a Prize3 lower-bound theorem submission.
+- **Reason:** Phase 3 no-skip/exactness bridge is still open.
+- **Safe external phrasing:** "Foundational artifacts and lemmas are in place; the final lower-bound bridge remains open."
 
 ## Artifacts
 - Paper: `papers/rule30_rheology.canonical.pdf`
