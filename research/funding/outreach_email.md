@@ -8,6 +8,8 @@ I’m an independent researcher working on a new structural framework for cellul
 
 I’d love 15 minutes of feedback on whether the framing and next steps make sense in your domain (rewriting systems / formal methods / CA). If helpful, I can share the paper and repo.
 
+Prize3 status (claim hygiene): Prize3 lower-bound theorem is not yet proved in-repo. Proved: model/statement freeze and foundational lemmas. Empirical: runtime/repro observations only (not proof). Conjectural: exactness-to-work bridge completion.
+
 Thanks,
 Jonathan Hill
 jonathan.f.hill@gmail.com

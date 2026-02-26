@@ -24,13 +24,14 @@ This creates a bridge between CA dynamics and term-rewriting/associahedron geome
 3. **Tight Complexity Bounds:** derive explicit constants for the $O(N^2)$ bound under hash-consed graph sharing.
 
 ## Prize3 Claim Snapshot (2026-02-26)
-- **Proved (artifact-level):** frozen model + theorem statement + foundational cone/required-data proxy lemmas in `prize3/` and `prize3/lean/Prize3Model.lean`.
+- **Proved (artifact-level):** frozen model + theorem statement + foundational cone/required-data proxy lemmas + conditional no-skip bridge scaffold (`must_observe_required`) in `prize3/` and `prize3/lean/Prize3Model.lean`.
 - **Empirical (Prize3-specific):** none used as proof for the lower bound.
 - **Conjectural / in-progress:** exactness-to-work bridge needed to complete `Work_A(n) = Omega(n)` in `M_cone_exact`.
 
 ## Submission-Readiness Gate (Prize3)
 - **Gate status:** not claim-ready for a Prize3 lower-bound theorem submission.
 - **Reason:** Phase 3 no-skip/exactness bridge is still open.
+- **Required status line:** "Prize3 lower-bound theorem is not yet proved in-repo."
 - **Safe external phrasing:** "Foundational artifacts and lemmas are in place; the final lower-bound bridge remains open."
 
 ## Artifacts

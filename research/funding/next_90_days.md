@@ -37,6 +37,12 @@ Goal: get funded by showing credible momentum, not by claiming the prize early.
   - conjectured
 - Every claim must point to a file and command.
 
+## Prize3 status line (required in external-facing updates)
+- Prize3 lower-bound theorem is not yet proved in-repo.
+- Proved: model/statement freeze + foundational dependency-width/proxy lemmas + conditional bridge scaffold.
+- Empirical: reproducibility/debug runs only; not used as proof.
+- Conjectural: Rule 30-specific witness and cost-transfer bridge to `Work_A(n) = Omega(n)`.
+
 ## Metrics to track biweekly
 - Number of proved lemmas in `prize3/lean`
 - Number of assumptions still unresolved
