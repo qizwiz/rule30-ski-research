@@ -30,6 +30,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `work_ge_requiredCells_implies_two_mul_plus_one`
   - `work_ge_requiredCells_implies_two_mul`
   - `requiredAt_le_two_mul`
+  - `work_ge_requiredCells_implies_requiredAt_le_work`
 
 ## Empirical (not proof)
 - No Prize3 lower-bound empirical estimate is treated as proof in this track.
@@ -65,6 +66,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
 - If an accounting hypothesis `requiredCells n ≤ work n` is provided, Lean now proves:
   - `n + 1 ≤ work n`
   - `n ≤ work n`
+  - For every required index `i`, `i ≤ work n`
 - This is a scaffold result only. It does **not** discharge the Rule 30-specific witness/accounting obligations by itself.
 
 ## Current blocker

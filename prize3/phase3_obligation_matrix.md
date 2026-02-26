@@ -24,7 +24,7 @@ Purpose: track the exactness-bridge obligations needed before any lower-bound th
   - Repro logs and runtime checks only.
 - Conjectural / pending:
   - Rule 30 witness-construction lemmas that instantiate `h_witness`.
-  - Concrete accounting bridge from observed required units to `work`.
+  - Concrete accounting bridge from observed required units to `work` (only conditional scaffold lemmas are proved so far).
 
 ## Obligation Matrix
 | ID | Obligation | Status | Evidence / Artifact | Notes |
@@ -32,7 +32,7 @@ Purpose: track the exactness-bridge obligations needed before any lower-bound th
 | O1 | Concrete Rule 30 state/output model for bridge section | Open | `prize3/rule30_witness_obligations.md` | Must be Lean-compatible and deterministic. |
 | O2 | Rule 30 indistinguishability witness discharging `h_witness` | Open | `prize3/lean/Prize3Model.lean` (interface only) | Highest-risk technical gap. |
 | O3 | No-skip instantiated for concrete Rule 30 target | Open | Follows from O2 + existing bridge lemmas | Currently only abstractly proved. |
-| O4 | Accounting transfer: observed required units -> `Work_A(n)` | Open | Cost-transfer scaffold already present | Must avoid hidden assumptions. |
+| O4 | Accounting transfer: observed required units -> `Work_A(n)` | Open | `work_ge_requiredCells_implies_requiredAt_le_work` + prior cost-transfer scaffold in `prize3/lean/Prize3Model.lean` | Still conditional on explicit accounting hypothesis; concrete Rule 30 instantiation missing. |
 | O5 | Composition to final asymptotic theorem statement | Open | `prize3/statement.md` | Blocked on O2-O4. |
 
 ## Immediate Unblocked Next Steps

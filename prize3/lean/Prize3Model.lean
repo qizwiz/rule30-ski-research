@@ -374,6 +374,16 @@ theorem requiredAt_le_two_mul (n i : Nat) (hReq : requiredAt n i) : i <= 2 * n :
     simpa [Nat.succ_eq_add_one, Nat.add_comm] using hReq
   exact Nat.lt_succ_iff.mp hSucc
 
+-- Conditional per-index transfer: any required index is bounded by work
+-- once explicit accounting requiredCells n <= work n is supplied.
+theorem work_ge_requiredCells_implies_requiredAt_le_work
+    (work : Nat -> Nat)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n i, requiredAt n i -> i <= work n := by
+  intro n i hReq
+  exact Nat.le_trans (requiredAt_le_two_mul n i hReq)
+    (work_ge_requiredCells_implies_two_mul work h_account n)
+
 end CostTransferScaffold
 
 end Prize3
