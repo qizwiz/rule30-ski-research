@@ -30,6 +30,7 @@ Plain meaning: required-data proxy is always nonzero (base sanity for cost trans
 - [x] Add full cone-interval observation corollaries in Lean (`observes_cone_interval_of_exact`, `observes_two_mul_of_exact`) under scaffold hypotheses.
 - [x] Add required-interval boundary lemmas in Lean (`requiredAt_iff_le_two_mul`, `requiredAt_two_mul`, `not_requiredAt_two_mul_succ`) to stabilize witness index obligations.
 - [x] Add bidirectional endpoint support lemmas in Lean (`requiredAt_of_le_two_mul`, `not_requiredAt_of_two_mul_lt`) for witness-case splits.
+- [x] Add exact inside/outside split lemmas in Lean (`not_requiredAt_iff_two_mul_lt`, `requiredAt_or_two_mul_lt`) for deterministic witness branching.
 - [x] Add Phase 3 obligation matrix artifact in `prize3/phase3_obligation_matrix.md` for submission-readiness tracking.
 - [ ] Formalize what data is required to determine center cell at generation `n` (Rule 30-specific witness construction beyond proxy).
 - [ ] Discharge no-skip for Rule 30 by proving witness obligations under `M_cone_exact`.
@@ -37,6 +38,7 @@ Plain meaning: required-data proxy is always nonzero (base sanity for cost trans
 ## Phase 4: Lower-bound core
 - [x] Add conditional cost-transfer lemmas in Lean (`work_ge_requiredCells_implies_linear_plus_one`, `work_ge_requiredCells_implies_linear`) under explicit accounting hypothesis.
 - [x] Add equivalent arithmetic transfer forms in Lean (`work_ge_requiredCells_implies_coneWidth`, `work_ge_requiredCells_implies_two_mul_plus_one`) to reduce downstream rewriting friction.
+- [x] Add weaker arithmetic transfer form (`work_ge_requiredCells_implies_two_mul`) for constant-free lower-bound steps.
 - [ ] Prove `Work_A(n) = Omega(n)` for every valid exact algorithm `A` in `M_cone_exact`.
 
 ## Validation command

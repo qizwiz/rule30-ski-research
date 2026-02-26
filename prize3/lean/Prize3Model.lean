@@ -170,6 +170,23 @@ theorem not_requiredAt_of_two_mul_lt (n i : Nat) (h : 2 * n < i) : ¬ requiredAt
   have hLe : i <= 2 * n := (requiredAt_iff_le_two_mul n i).1 hReq
   exact Nat.not_lt_of_ge hLe h
 
+-- Complement form: an index is outside required data exactly when it is beyond 2n.
+theorem not_requiredAt_iff_two_mul_lt (n i : Nat) : ¬ requiredAt n i ↔ 2 * n < i := by
+  constructor
+  · intro hNotReq
+    apply Nat.lt_of_not_ge
+    intro hLe
+    exact hNotReq ((requiredAt_iff_le_two_mul n i).2 hLe)
+  · intro hLt hReq
+    have hLe : i <= 2 * n := (requiredAt_iff_le_two_mul n i).1 hReq
+    exact Nat.not_lt_of_ge hLe hLt
+
+-- Every index either lies in the required interval or is strictly beyond it.
+theorem requiredAt_or_two_mul_lt (n i : Nat) : requiredAt n i ∨ 2 * n < i := by
+  by_cases hReq : requiredAt n i
+  · exact Or.inl hReq
+  · exact Or.inr ((not_requiredAt_iff_two_mul_lt n i).1 hReq)
+
 -- Required indices remain required when advancing one generation.
 theorem requiredAt_monotone_gen (n i : Nat) : requiredAt n i -> requiredAt (n + 1) i := by
   intro hReq
@@ -340,6 +357,15 @@ theorem work_ge_requiredCells_implies_two_mul_plus_one
     forall n, 2 * n + 1 <= work n := by
   intro n
   simpa [coneWidth] using work_ge_requiredCells_implies_coneWidth work h_account n
+
+-- A weaker but sometimes cleaner arithmetic form from the same accounting hypothesis.
+theorem work_ge_requiredCells_implies_two_mul
+    (work : Nat -> Nat)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, 2 * n <= work n := by
+  intro n
+  exact Nat.le_trans (Nat.le_succ (2 * n))
+    (work_ge_requiredCells_implies_two_mul_plus_one work h_account n)
 
 -- Required indices are bounded by the cone interval's right endpoint proxy.
 theorem requiredAt_le_two_mul (n i : Nat) (hReq : requiredAt n i) : i <= 2 * n := by

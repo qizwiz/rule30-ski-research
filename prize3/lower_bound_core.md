@@ -18,6 +18,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `requiredAt_of_le_n` (proved: every `i ≤ n` lies in required interval under current proxy)
   - `requiredAt_iff_le_two_mul` (proved: required interval is exactly `0 ≤ i ≤ 2n`)
   - `requiredAt_of_le_two_mul` / `not_requiredAt_of_two_mul_lt` (proved: both inclusion and strict-outside exclusion at cone endpoint)
+  - `not_requiredAt_iff_two_mul_lt` / `requiredAt_or_two_mul_lt` (proved: exact inside/outside partition at the `2n` boundary)
   - `requiredAt_two_mul` / `not_requiredAt_two_mul_succ` (proved boundary inclusions/exclusions)
   - `observes_prefix_of_exact` (proved: under scaffold hypotheses, exactness forces observation of every `i ≤ n`)
   - `observes_self_of_exact` (proved corollary: under same hypotheses, exactness forces observation of index `n`)
@@ -27,6 +28,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `work_ge_requiredCells_implies_linear`
   - `work_ge_requiredCells_implies_coneWidth`
   - `work_ge_requiredCells_implies_two_mul_plus_one`
+  - `work_ge_requiredCells_implies_two_mul`
   - `requiredAt_le_two_mul`
 
 ## Empirical (not proof)
