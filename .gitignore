@@ -1,5 +1,8 @@
 *.aux
 *.log
 *.out
+logs/autopilot/
+.autopilot_enabled
+.autopilot_stop
 
 dist/arxiv/
