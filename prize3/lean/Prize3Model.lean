@@ -23,8 +23,13 @@ theorem coneWidth_ge_n_plus_one (n : Nat) : n + 1 ≤ coneWidth n := by
   unfold coneWidth
   have h0 : n ≤ n + n := Nat.le_add_right n n
   have h : n ≤ 2 * n := by
-    simpa [Nat.two_mul] using h0
+    rw [Nat.two_mul]
+    exact h0
   simpa [Nat.succ_eq_add_one] using Nat.succ_le_succ h
+
+-- Width is at least n (weaker form often useful for cost-transfer side conditions).
+theorem coneWidth_ge_n (n : Nat) : n ≤ coneWidth n := by
+  exact Nat.le_trans (Nat.le_succ n) (coneWidth_ge_n_plus_one n)
 
 -- Width increase per generation is exactly 2.
 theorem coneWidth_succ (n : Nat) : coneWidth (n + 1) = coneWidth n + 2 := by
@@ -48,6 +53,10 @@ theorem requiredCells_eq_coneWidth (n : Nat) : requiredCells n = coneWidth n := 
 -- Required-data proxy is at least linear in n.
 theorem requiredCells_ge_n_plus_one (n : Nat) : n + 1 ≤ requiredCells n := by
   simpa [requiredCells] using coneWidth_ge_n_plus_one n
+
+-- Required-data proxy is at least n.
+theorem requiredCells_ge_n (n : Nat) : n ≤ requiredCells n := by
+  simpa [requiredCells] using coneWidth_ge_n n
 
 -- Required-data proxy is monotone in n.
 theorem requiredCells_monotone (n : Nat) : requiredCells n ≤ requiredCells (n + 1) := by

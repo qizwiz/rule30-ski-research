@@ -40,7 +40,7 @@ This checklist is optimized for speed-to-credibility and funding conversations.
 - Ensure these docs are present and linked from `research/README.md`:
   - `research/funding/overview.md`
   - `research/funding/pitch.md`
-  - `research/funding/research_statement.md`
+  - `research/funding/next_90_days.md`
   - `research/related/portfolio_index.md`
 - Keep one canonical artifact index:
   - `research/related/canon.md`
@@ -60,3 +60,11 @@ This checklist is optimized for speed-to-credibility and funding conversations.
   - What is proved?
   - What is measured?
   - What is next and fundable in 6-12 months?
+
+## 7. Prize3 External Wording Gate
+- Every external artifact must include this exact status line:
+  - "Prize3 lower-bound theorem is not yet proved in-repo."
+- Every external artifact must include a three-way split:
+  - Proved (artifact-level lemmas only)
+  - Empirical (repro/debug only, not proof)
+  - Conjectural (exactness-to-work bridge still open)
