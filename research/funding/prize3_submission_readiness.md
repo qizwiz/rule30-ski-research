@@ -17,7 +17,7 @@ This note is for funding/outreach context only. It does not claim theorem comple
   - Non-beyond-boundary requiredness lemmas (`requiredAt_of_not_two_mul_lt`, `requiredAt_of_not_two_mul_add_two_lt_next_gen`) for direct requiredness closure in both `n` and `n+1` boundary cases
   - Exactness split corollary (`observes_or_two_mul_lt_of_exact`) for claim-safe witness branching
   - Non-beyond-boundary observation corollaries (`observes_of_not_two_mul_lt_of_exact`, `observes_of_not_two_mul_add_two_lt_next_gen_of_exact`) for direct branch closure without extra arithmetic rewrites
-  - Conditional cost-transfer scaffold (explicit accounting hypothesis), including per-index bound `work_ge_requiredCells_implies_requiredAt_le_work`
+  - Conditional cost-transfer scaffold (explicit accounting hypothesis), including per-index bounds `work_ge_requiredCells_implies_requiredAt_le_work`, `work_ge_requiredCells_implies_requiredAt_next_gen_le_work` and next-generation endpoint bound `work_ge_requiredCells_implies_two_mul_add_two_next_gen`
   - Phase 3 obligation matrix with explicit open/closed status (`prize3/phase3_obligation_matrix.md`)
 - Empirical (not proof):
   - Repro/runtime checks only; no empirical estimate is used as a Prize3 proof step.

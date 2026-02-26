@@ -601,6 +601,29 @@ theorem work_ge_requiredCells_implies_requiredAt_le_work
   exact Nat.le_trans (requiredAt_le_two_mul n i hReq)
     (work_ge_requiredCells_implies_two_mul work h_account n)
 
+-- Next-generation arithmetic corollary under the same accounting hypothesis.
+theorem work_ge_requiredCells_implies_two_mul_add_two_next_gen
+    (work : Nat -> Nat)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, 2 * n + 2 <= work (n + 1) := by
+  intro n
+  have hStrong : 2 + 2 * n + 1 <= work (n + 1) := by
+    simpa [Nat.mul_add, Nat.add_comm, Nat.add_left_comm, Nat.add_assoc]
+      using work_ge_requiredCells_implies_two_mul_plus_one work h_account (n + 1)
+  have hStep : 2 * n + 2 <= 2 + 2 * n + 1 := by
+    calc
+      2 * n + 2 = 2 + 2 * n := by simp [Nat.add_comm]
+      _ <= 2 + 2 * n + 1 := Nat.le_succ (2 + 2 * n)
+  exact Nat.le_trans hStep hStrong
+
+-- Next-generation per-index transfer (explicit n+1 form) for bridge composition.
+theorem work_ge_requiredCells_implies_requiredAt_next_gen_le_work
+    (work : Nat -> Nat)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n i, requiredAt (n + 1) i -> i <= work (n + 1) := by
+  intro n i hReq
+  exact work_ge_requiredCells_implies_requiredAt_le_work work h_account (n + 1) i hReq
+
 end CostTransferScaffold
 
 end Prize3

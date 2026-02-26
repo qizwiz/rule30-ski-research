@@ -38,8 +38,10 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `work_ge_requiredCells_implies_coneWidth`
   - `work_ge_requiredCells_implies_two_mul_plus_one`
   - `work_ge_requiredCells_implies_two_mul`
+  - `work_ge_requiredCells_implies_two_mul_add_two_next_gen`
   - `requiredAt_le_two_mul`
   - `work_ge_requiredCells_implies_requiredAt_le_work`
+  - `work_ge_requiredCells_implies_requiredAt_next_gen_le_work`
 
 ## Empirical (not proof)
 - No Prize3 lower-bound empirical estimate is treated as proof in this track.
