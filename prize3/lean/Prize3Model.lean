@@ -570,6 +570,26 @@ theorem not_observes_next_gen_implies_not_required_next_gen_of_exact
   exact hNotObs
     (must_observe_required (cell := cell) A target h_obs_det h_exact h_witness (n + 1) i hReq)
 
+-- Next-generation split in requiredness language: every index at n+1 is observed or not required.
+theorem observes_or_not_required_next_gen_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, A.observes (n + 1) i ∨ ¬ requiredAt (n + 1) i := by
+  intro n i
+  rcases observes_or_two_mul_add_two_lt_next_gen_of_exact
+      (cell := cell) A target h_obs_det h_exact h_witness n i with hObs | hLt
+  · exact Or.inl hObs
+  · exact Or.inr (not_requiredAt_of_two_mul_add_two_lt_next_gen n i hLt)
+
 -- Exactness implies at least one required index is observed at each generation.
 theorem exists_observed_required_of_exact
     (A : Algorithm State)
