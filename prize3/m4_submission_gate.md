@@ -32,3 +32,4 @@ Purpose: keep M4 progress and external readiness aligned without overstating the
 - [ ] No-skip and cost-transfer steps are instantiated without hidden assumptions.
 - [ ] Independent review note exists with explicit objection list and dispositions.
 - [ ] External docs include proved/empirical/conjectural split and required status line verbatim.
+- [ ] External wording is checked against `prize3/external_claim_guardrails.md`.
