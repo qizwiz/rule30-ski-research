@@ -23,8 +23,9 @@ Plain meaning: required-data proxy is always nonzero (base sanity for cost trans
 ## Phase 3: Information-flow lemmas
 - [x] Formalize a first required-data proxy (`requiredCells n := coneWidth n`) in Lean.
 - [x] Freeze exactness-to-work bridge obligations and theorem skeletons in `prize3/exactness_bridge.md`.
-- [ ] Formalize what data is required to determine center cell at generation `n` (beyond proxy).
-- [ ] Show exactness forbids skipping required dependency information under `M_cone_exact`.
+- [x] Add abstract no-skip bridge lemma in Lean (`must_observe_required`) with explicit hypotheses.
+- [ ] Formalize what data is required to determine center cell at generation `n` (Rule 30-specific witness construction beyond proxy).
+- [ ] Discharge no-skip for Rule 30 by proving witness obligations under `M_cone_exact`.
 
 ## Phase 4: Lower-bound core
 - [ ] Prove `Work_A(n) = Omega(n)` for every valid exact algorithm `A` in `M_cone_exact`.

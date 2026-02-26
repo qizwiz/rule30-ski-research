@@ -13,6 +13,8 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `coneWidth_succ`
   - `coneWidth_monotone`
   - requirement-proxy lemmas on `requiredCells`
+- Formalized conditional no-skip bridge skeleton in Lean:
+  - `must_observe_required` (proved from explicit observation-determinism, exactness, and witness hypotheses)
 
 ## Empirical (not proof)
 - No Prize3 lower-bound empirical estimate is treated as proof in this track.
@@ -43,9 +45,9 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - Use unit-cost accounting to map resolved required units to `Work_A(n)` lower bound.
 
 ## Current blocker
-- Step 3 is not fully formalized yet: exactness-to-work bridge needs a precise adversarial or indistinguishability lemma in Lean.
+- Step 3 is only partially formalized: abstract bridge logic is proved, but Rule 30-specific indistinguishability witness lemmas are still missing.
 
 ## Immediate next steps
-1. Introduce a formal notion of algorithm observation trace under `M_cone_exact`.
-2. State and prove a no-skip lemma against exact correctness.
-3. Refactor the final theorem statement into Lean-ready quantified form.
+1. Instantiate the abstract bridge scaffold with a concrete Rule 30 state/output model.
+2. Prove Rule 30-specific witness lemmas needed by `must_observe_required`.
+3. Add cost-transfer lemmas linking observed required units to `Work_A(n)`.

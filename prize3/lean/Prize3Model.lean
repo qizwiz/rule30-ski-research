@@ -70,4 +70,95 @@ theorem requiredCells_succ (n : Nat) : requiredCells (n + 1) = requiredCells n +
 theorem requiredCells_pos (n : Nat) : 0 < requiredCells n := by
   simpa [requiredCells] using coneWidth_pos n
 
+/-!
+  Phase 3 bridge scaffold (claim-hygienic):
+  These lemmas do not prove the Prize3 lower bound.
+  They formalize a minimal observation/no-skip interface so the final
+  exactness-to-work bridge can be discharged with explicit hypotheses.
+-/
+
+section BridgeScaffold
+
+variable {State : Type}
+variable (cell : State -> Nat -> Bool)
+
+structure Algorithm (State : Type) where
+  run : Nat -> State -> Bool
+  observes : Nat -> Nat -> Prop
+
+def agreesOnObserved (A : Algorithm State) (n : Nat) (s1 s2 : State) : Prop :=
+  forall i, A.observes n i -> cell s1 i = cell s2 i
+
+def exactFor (A : Algorithm State) (target : Nat -> State -> Bool) : Prop :=
+  forall n s, A.run n s = target n s
+
+def requiredAt (n i : Nat) : Prop :=
+  i < requiredCells n
+
+-- If an algorithm only depends on observed units, and exactness can be broken
+-- whenever a required unit is left unobserved, that required unit must be observed.
+theorem must_observe_required
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, requiredAt n i -> A.observes n i := by
+  intro n i hReq
+  by_cases hObs : A.observes n i
+  · exact hObs
+  · rcases h_witness n i hReq hObs with ⟨s1, s2, hAgree, hTargetNe⟩
+    have hRunEq : A.run n s1 = A.run n s2 := h_obs_det n s1 s2 hAgree
+    have hTargetEq : target n s1 = target n s2 := by
+      rw [← h_exact n s1, ← h_exact n s2]
+      exact hRunEq
+    exact False.elim (hTargetNe hTargetEq)
+
+-- Required index 0 is always present, useful as a base sanity check.
+theorem requiredAt_zero (n : Nat) : requiredAt n 0 := by
+  unfold requiredAt requiredCells coneWidth
+  have hpos : 0 < 2 * n + 1 := Nat.succ_pos (2 * n)
+  exact hpos
+
+-- Minimal exactness-to-work bridge corollary at the base index.
+theorem observes_zero_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n, A.observes n 0 := by
+  intro n
+  exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness n 0 (requiredAt_zero n)
+
+-- General exactness-to-observation bridge on all required indices.
+theorem observes_required_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, requiredAt n i -> A.observes n i := by
+  exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness
+
+end BridgeScaffold
+
 end Prize3

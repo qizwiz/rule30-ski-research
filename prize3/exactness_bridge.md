@@ -10,28 +10,29 @@ Purpose: freeze the missing Phase 3 bridge obligations in a Lean-ready form, wit
   - `requiredCells_ge_n`
   - `requiredCells_succ`
   - `requiredCells_monotone`
+- Conditional no-skip bridge scaffold in Lean (logic-level, hypothesis-explicit):
+  - `must_observe_required`
+  - `requiredAt_zero`
 
 ## Empirical (not proof)
 - None required for this bridge.
 - Runtime tests/logs are only reproducibility checks.
 
 ## Conjectural / pending formalization
-- Observation trace model for deterministic algorithms in `M_cone_exact`.
-- Indistinguishability lemma:
-  - If two inputs are equal on all observed required units and differ on an unobserved required unit, exact output cannot be guaranteed for both.
-- No-skip lemma:
-  - Any always-correct deterministic algorithm must resolve every required unit in the worst case.
+- Concrete Rule 30 state model for the abstract bridge interface (`State`, `cell`, and `target` instantiation).
+- Indistinguishability witness construction specialized to Rule 30 center-cell exactness:
+  - For any unobserved required index, construct two states that agree on observed units but force different exact outputs.
 - Cost transfer lemma:
   - Worst-case `Work_A(n)` lower-bounds the number of resolved required units.
 
 ## Lean-ready theorem skeletons (draft)
-1. `unobserved_required_unit_breaks_exactness`
-2. `exact_algorithm_reads_all_required`
-3. `work_ge_requiredCells`
-4. Final transfer: `Work_A(n) = Omega(n)` via `requiredCells_ge_n_plus_one`
+1. `must_observe_required` (proved under explicit hypotheses)
+2. Rule 30-specific witness lemma (pending)
+3. `work_ge_requiredCells` (pending)
+4. Final transfer: `Work_A(n) = Omega(n)` via `requiredCells_ge_n_plus_one` (pending)
 
 ## Blocker
-- Need precise formal type for algorithm observation traces before proving indistinguishability.
+- Need Rule 30-specific witness construction to discharge `h_witness` in `must_observe_required`.
 
 ## Immediate next step
-- Introduce a minimal abstract `Observes A n i : Prop` interface in Lean and prove the first no-skip consequence against exactness.
+- Instantiate the abstract bridge scaffold with a concrete Rule 30 center-cell target and prove the first witness lemma for small required indices.
