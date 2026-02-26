@@ -36,6 +36,11 @@ theorem coneWidth_monotone (n : Nat) : coneWidth n ≤ coneWidth (n + 1) := by
   rw [coneWidth_succ]
   exact Nat.le_add_right (coneWidth n) 2
 
+-- Width is always positive.
+theorem coneWidth_pos (n : Nat) : 0 < coneWidth n := by
+  unfold coneWidth
+  exact Nat.succ_pos (2 * n)
+
 -- Required-data proxy agrees definitionally with cone width.
 theorem requiredCells_eq_coneWidth (n : Nat) : requiredCells n = coneWidth n := by
   rfl
@@ -47,5 +52,13 @@ theorem requiredCells_ge_n_plus_one (n : Nat) : n + 1 ≤ requiredCells n := by
 -- Required-data proxy is monotone in n.
 theorem requiredCells_monotone (n : Nat) : requiredCells n ≤ requiredCells (n + 1) := by
   simpa [requiredCells] using coneWidth_monotone n
+
+-- Required-data proxy grows by exactly 2 each generation.
+theorem requiredCells_succ (n : Nat) : requiredCells (n + 1) = requiredCells n + 2 := by
+  simpa [requiredCells] using coneWidth_succ n
+
+-- Required-data proxy is always positive.
+theorem requiredCells_pos (n : Nat) : 0 < requiredCells n := by
+  simpa [requiredCells] using coneWidth_pos n
 
 end Prize3

@@ -32,6 +32,16 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
 3. Connect required information volume to minimum work under `M_cone_exact` exactness constraints.
 4. Discharge constants/quantifiers to obtain asymptotic lower bound.
 
+## Bridge obligations (Step 3 decomposition)
+- Observation model:
+  - Formalize what it means for an algorithm run to have "read/resolved" a dependency-relevant unit.
+- Indistinguishability lemma:
+  - If two initial slices agree on all observed units but differ on at least one unobserved required unit, exact output cannot be guaranteed for both.
+- No-skip consequence:
+  - Any always-correct deterministic algorithm must resolve every required unit in the worst case.
+- Cost transfer:
+  - Use unit-cost accounting to map resolved required units to `Work_A(n)` lower bound.
+
 ## Current blocker
 - Step 3 is not fully formalized yet: exactness-to-work bridge needs a precise adversarial or indistinguishability lemma in Lean.
 

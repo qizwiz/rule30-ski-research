@@ -14,6 +14,12 @@ Plain meaning: each generation increases cone width by exactly 2.
 - [x] `coneWidth_monotone`
 Plain meaning: dependency cone width never decreases.
 
+- [x] `requiredCells_succ`
+Plain meaning: required-data proxy increases by exactly 2 each generation.
+
+- [x] `requiredCells_pos`
+Plain meaning: required-data proxy is always nonzero (base sanity for cost transfer).
+
 ## Phase 3: Information-flow lemmas
 - [x] Formalize a first required-data proxy (`requiredCells n := coneWidth n`) in Lean.
 - [ ] Formalize what data is required to determine center cell at generation `n` (beyond proxy).
