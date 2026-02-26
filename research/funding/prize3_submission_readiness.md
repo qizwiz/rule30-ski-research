@@ -9,6 +9,7 @@ This note is for funding/outreach context only. It does not claim theorem comple
   - Frozen model + statement (`prize3/model.md`, `prize3/statement.md`)
   - Foundational cone/proxy lemmas in Lean (`prize3/lean/Prize3Model.lean`)
   - Conditional no-skip scaffold (`must_observe_required`) and support lemmas including `observes_self_of_exact` and `observes_two_mul_of_exact`
+  - Next-generation observation corollaries under the same explicit hypotheses (`observes_required_next_gen_of_exact`, `observes_prefix_next_gen_of_exact`)
   - Required-interval split lemmas (`not_requiredAt_iff_two_mul_lt`, `requiredAt_or_two_mul_lt`) for witness case partitioning
   - Conditional cost-transfer scaffold (explicit accounting hypothesis), including per-index bound `work_ge_requiredCells_implies_requiredAt_le_work`
   - Phase 3 obligation matrix with explicit open/closed status (`prize3/phase3_obligation_matrix.md`)
