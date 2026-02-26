@@ -95,6 +95,9 @@ def exactFor (A : Algorithm State) (target : Nat -> State -> Bool) : Prop :=
 def requiredAt (n i : Nat) : Prop :=
   i < requiredCells n
 
+theorem requiredAt_iff (n i : Nat) : requiredAt n i ↔ i < requiredCells n := by
+  rfl
+
 -- If an algorithm only depends on observed units, and exactness can be broken
 -- whenever a required unit is left unobserved, that required unit must be observed.
 theorem must_observe_required
@@ -131,6 +134,21 @@ theorem requiredAt_of_le_n (n i : Nat) (h : i ≤ n) : requiredAt n i := by
   unfold requiredAt
   have hi_succ : i < n + 1 := Nat.lt_succ_of_le h
   exact Nat.lt_of_lt_of_le hi_succ (requiredCells_ge_n_plus_one n)
+
+-- Any index strictly below n+1 is required at generation n.
+theorem requiredAt_of_lt_n_plus_one (n i : Nat) (h : i < n + 1) : requiredAt n i := by
+  unfold requiredAt
+  exact Nat.lt_of_lt_of_le h (requiredCells_ge_n_plus_one n)
+
+-- In particular, index n is always required.
+theorem requiredAt_self (n : Nat) : requiredAt n n := by
+  exact requiredAt_of_le_n n n (Nat.le_refl n)
+
+-- Required indices remain required when advancing one generation.
+theorem requiredAt_monotone_gen (n i : Nat) : requiredAt n i -> requiredAt (n + 1) i := by
+  intro hReq
+  unfold requiredAt at *
+  exact Nat.lt_of_lt_of_le hReq (requiredCells_monotone n)
 
 -- Minimal exactness-to-work bridge corollary at the base index.
 theorem observes_zero_of_exact
