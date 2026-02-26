@@ -221,4 +221,37 @@ theorem exists_observed_required_of_exact
 
 end BridgeScaffold
 
+/-!
+  Phase 4 pre-bridge (conditional cost transfer):
+  These are purely conditional inequalities. They do not claim a Prize3
+  lower bound unless a concrete accounting hypothesis is instantiated.
+-/
+
+section CostTransferScaffold
+
+-- If work dominates requiredCells pointwise, linear lower bounds follow immediately.
+theorem work_ge_requiredCells_implies_linear_plus_one
+    (work : Nat -> Nat)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, n + 1 <= work n := by
+  intro n
+  exact Nat.le_trans (requiredCells_ge_n_plus_one n) (h_account n)
+
+-- A weaker linear form (constant c = 1) from the same accounting hypothesis.
+theorem work_ge_requiredCells_implies_linear
+    (work : Nat -> Nat)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, n <= work n := by
+  intro n
+  exact Nat.le_trans (requiredCells_ge_n n) (h_account n)
+
+-- Required indices are bounded by the cone interval's right endpoint proxy.
+theorem requiredAt_le_two_mul (n i : Nat) (hReq : requiredAt n i) : i <= 2 * n := by
+  unfold requiredAt requiredCells coneWidth at hReq
+  have hSucc : i < Nat.succ (2 * n) := by
+    simpa [Nat.succ_eq_add_one, Nat.add_comm] using hReq
+  exact Nat.lt_succ_iff.mp hSucc
+
+end CostTransferScaffold
+
 end Prize3

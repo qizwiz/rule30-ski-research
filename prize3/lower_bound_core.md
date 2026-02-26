@@ -17,6 +17,10 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `must_observe_required` (proved from explicit observation-determinism, exactness, and witness hypotheses)
   - `requiredAt_of_le_n` (proved: every `i ≤ n` lies in required interval under current proxy)
   - `observes_prefix_of_exact` (proved: under scaffold hypotheses, exactness forces observation of every `i ≤ n`)
+- Formalized conditional cost-transfer scaffold in Lean:
+  - `work_ge_requiredCells_implies_linear_plus_one`
+  - `work_ge_requiredCells_implies_linear`
+  - `requiredAt_le_two_mul`
 
 ## Empirical (not proof)
 - No Prize3 lower-bound empirical estimate is treated as proof in this track.
@@ -45,6 +49,12 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - Any always-correct deterministic algorithm must resolve every required unit in the worst case.
 - Cost transfer:
   - Use unit-cost accounting to map resolved required units to `Work_A(n)` lower bound.
+
+## Conditional theorem fragment (proved, not yet instantiated)
+- If an accounting hypothesis `requiredCells n ≤ work n` is provided, Lean now proves:
+  - `n + 1 ≤ work n`
+  - `n ≤ work n`
+- This is a scaffold result only. It does **not** discharge the Rule 30-specific witness/accounting obligations by itself.
 
 ## Current blocker
 - Step 3 is only partially formalized: abstract bridge logic is proved, but Rule 30-specific indistinguishability witness lemmas are still missing.

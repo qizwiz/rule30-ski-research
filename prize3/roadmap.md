@@ -30,6 +30,7 @@ Plain meaning: required-data proxy is always nonzero (base sanity for cost trans
 - [ ] Discharge no-skip for Rule 30 by proving witness obligations under `M_cone_exact`.
 
 ## Phase 4: Lower-bound core
+- [x] Add conditional cost-transfer lemmas in Lean (`work_ge_requiredCells_implies_linear_plus_one`, `work_ge_requiredCells_implies_linear`) under explicit accounting hypothesis.
 - [ ] Prove `Work_A(n) = Omega(n)` for every valid exact algorithm `A` in `M_cone_exact`.
 
 ## Validation command
