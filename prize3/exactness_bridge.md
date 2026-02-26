@@ -13,6 +13,9 @@ Purpose: freeze the missing Phase 3 bridge obligations in a Lean-ready form, wit
 - Conditional no-skip bridge scaffold in Lean (logic-level, hypothesis-explicit):
   - `must_observe_required`
   - `requiredAt_zero`
+  - `requiredAt_iff_le_two_mul`
+  - `requiredAt_two_mul`
+  - `not_requiredAt_two_mul_succ`
 
 ## Empirical (not proof)
 - None required for this bridge.

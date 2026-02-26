@@ -140,9 +140,25 @@ theorem requiredAt_of_lt_n_plus_one (n i : Nat) (h : i < n + 1) : requiredAt n i
   unfold requiredAt
   exact Nat.lt_of_lt_of_le h (requiredCells_ge_n_plus_one n)
 
+-- A required index is exactly an index in the interval [0, 2n].
+theorem requiredAt_iff_le_two_mul (n i : Nat) : requiredAt n i ↔ i <= 2 * n := by
+  unfold requiredAt requiredCells coneWidth
+  have h : i < Nat.succ (2 * n) ↔ i <= 2 * n := Nat.lt_succ_iff
+  simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
+
 -- In particular, index n is always required.
 theorem requiredAt_self (n : Nat) : requiredAt n n := by
   exact requiredAt_of_le_n n n (Nat.le_refl n)
+
+-- Right endpoint of the dependency interval is required.
+theorem requiredAt_two_mul (n : Nat) : requiredAt n (2 * n) := by
+  exact (requiredAt_iff_le_two_mul n (2 * n)).2 (Nat.le_refl (2 * n))
+
+-- First index after the dependency interval is not required.
+theorem not_requiredAt_two_mul_succ (n : Nat) : ¬ requiredAt n (2 * n + 1) := by
+  intro hReq
+  have hLe : 2 * n + 1 <= 2 * n := (requiredAt_iff_le_two_mul n (2 * n + 1)).1 hReq
+  exact Nat.not_succ_le_self (2 * n) hLe
 
 -- Required indices remain required when advancing one generation.
 theorem requiredAt_monotone_gen (n i : Nat) : requiredAt n i -> requiredAt (n + 1) i := by

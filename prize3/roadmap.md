@@ -26,6 +26,7 @@ Plain meaning: required-data proxy is always nonzero (base sanity for cost trans
 - [x] Freeze Rule 30 witness-obligation decomposition in `prize3/rule30_witness_obligations.md`.
 - [x] Add abstract no-skip bridge lemma in Lean (`must_observe_required`) with explicit hypotheses.
 - [x] Add prefix-observation bridge corollary in Lean (`observes_prefix_of_exact`) under scaffold hypotheses.
+- [x] Add required-interval boundary lemmas in Lean (`requiredAt_iff_le_two_mul`, `requiredAt_two_mul`, `not_requiredAt_two_mul_succ`) to stabilize witness index obligations.
 - [ ] Formalize what data is required to determine center cell at generation `n` (Rule 30-specific witness construction beyond proxy).
 - [ ] Discharge no-skip for Rule 30 by proving witness obligations under `M_cone_exact`.
 
