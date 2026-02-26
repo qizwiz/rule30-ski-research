@@ -41,6 +41,7 @@ This checklist is optimized for speed-to-credibility and funding conversations.
   - `research/funding/overview.md`
   - `research/funding/pitch.md`
   - `research/funding/next_90_days.md`
+  - `research/funding/prize3_submission_readiness.md`
   - `research/related/portfolio_index.md`
 - Keep one canonical artifact index:
   - `research/related/canon.md`

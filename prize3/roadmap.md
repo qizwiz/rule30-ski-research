@@ -27,11 +27,13 @@ Plain meaning: required-data proxy is always nonzero (base sanity for cost trans
 - [x] Add abstract no-skip bridge lemma in Lean (`must_observe_required`) with explicit hypotheses.
 - [x] Add prefix-observation bridge corollary in Lean (`observes_prefix_of_exact`) under scaffold hypotheses.
 - [x] Add required-interval boundary lemmas in Lean (`requiredAt_iff_le_two_mul`, `requiredAt_two_mul`, `not_requiredAt_two_mul_succ`) to stabilize witness index obligations.
+- [x] Add bidirectional endpoint support lemmas in Lean (`requiredAt_of_le_two_mul`, `not_requiredAt_of_two_mul_lt`) for witness-case splits.
 - [ ] Formalize what data is required to determine center cell at generation `n` (Rule 30-specific witness construction beyond proxy).
 - [ ] Discharge no-skip for Rule 30 by proving witness obligations under `M_cone_exact`.
 
 ## Phase 4: Lower-bound core
 - [x] Add conditional cost-transfer lemmas in Lean (`work_ge_requiredCells_implies_linear_plus_one`, `work_ge_requiredCells_implies_linear`) under explicit accounting hypothesis.
+- [x] Add equivalent arithmetic transfer forms in Lean (`work_ge_requiredCells_implies_coneWidth`, `work_ge_requiredCells_implies_two_mul_plus_one`) to reduce downstream rewriting friction.
 - [ ] Prove `Work_A(n) = Omega(n)` for every valid exact algorithm `A` in `M_cone_exact`.
 
 ## Validation command

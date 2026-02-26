@@ -146,6 +146,10 @@ theorem requiredAt_iff_le_two_mul (n i : Nat) : requiredAt n i ↔ i <= 2 * n :=
   have h : i < Nat.succ (2 * n) ↔ i <= 2 * n := Nat.lt_succ_iff
   simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
 
+-- Any index up to the cone endpoint is required.
+theorem requiredAt_of_le_two_mul (n i : Nat) (h : i <= 2 * n) : requiredAt n i := by
+  exact (requiredAt_iff_le_two_mul n i).2 h
+
 -- In particular, index n is always required.
 theorem requiredAt_self (n : Nat) : requiredAt n n := by
   exact requiredAt_of_le_n n n (Nat.le_refl n)
@@ -159,6 +163,12 @@ theorem not_requiredAt_two_mul_succ (n : Nat) : ¬ requiredAt n (2 * n + 1) := b
   intro hReq
   have hLe : 2 * n + 1 <= 2 * n := (requiredAt_iff_le_two_mul n (2 * n + 1)).1 hReq
   exact Nat.not_succ_le_self (2 * n) hLe
+
+-- Any index strictly beyond the cone endpoint is not required.
+theorem not_requiredAt_of_two_mul_lt (n i : Nat) (h : 2 * n < i) : ¬ requiredAt n i := by
+  intro hReq
+  have hLe : i <= 2 * n := (requiredAt_iff_le_two_mul n i).1 hReq
+  exact Nat.not_lt_of_ge hLe h
 
 -- Required indices remain required when advancing one generation.
 theorem requiredAt_monotone_gen (n i : Nat) : requiredAt n i -> requiredAt (n + 1) i := by
@@ -260,6 +270,22 @@ theorem work_ge_requiredCells_implies_linear
     forall n, n <= work n := by
   intro n
   exact Nat.le_trans (requiredCells_ge_n n) (h_account n)
+
+-- Under the same accounting hypothesis, work also dominates cone width directly.
+theorem work_ge_requiredCells_implies_coneWidth
+    (work : Nat -> Nat)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, coneWidth n <= work n := by
+  intro n
+  simpa [requiredCells] using h_account n
+
+-- Expanded arithmetic form useful for explicit constant accounting.
+theorem work_ge_requiredCells_implies_two_mul_plus_one
+    (work : Nat -> Nat)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, 2 * n + 1 <= work n := by
+  intro n
+  simpa [coneWidth] using work_ge_requiredCells_implies_coneWidth work h_account n
 
 -- Required indices are bounded by the cone interval's right endpoint proxy.
 theorem requiredAt_le_two_mul (n i : Nat) (hReq : requiredAt n i) : i <= 2 * n := by
