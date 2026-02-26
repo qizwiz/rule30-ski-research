@@ -178,6 +178,16 @@ theorem requiredAt_or_two_mul_add_two_lt_next_gen (n i : Nat) :
   · exact Or.inl hReq
   · exact Or.inr (Nat.lt_of_not_ge (fun hLe => hReq ((requiredAt_next_gen_iff_le_two_mul_add_two n i).2 hLe)))
 
+-- Next-generation complement form: outside required data is exactly beyond 2n+2.
+theorem not_requiredAt_iff_two_mul_add_two_lt_next_gen (n i : Nat) :
+    ¬ requiredAt (n + 1) i ↔ 2 * n + 2 < i := by
+  constructor
+  · intro hNotReq
+    exact Nat.lt_of_not_ge
+      (fun hLe => hNotReq ((requiredAt_next_gen_iff_le_two_mul_add_two n i).2 hLe))
+  · intro hLt hReq
+    exact Nat.not_lt_of_ge ((requiredAt_next_gen_iff_le_two_mul_add_two n i).1 hReq) hLt
+
 -- In particular, index n is always required.
 theorem requiredAt_self (n : Nat) : requiredAt n n := by
   exact requiredAt_of_le_n n n (Nat.le_refl n)
@@ -397,6 +407,24 @@ theorem observes_two_mul_add_two_next_gen_of_exact
   intro n
   simpa [Nat.mul_add, Nat.add_comm]
     using observes_two_mul_of_exact (cell := cell) A target h_obs_det h_exact h_witness (n + 1)
+
+-- At generation n+1, exactness forces observation over the full interval i <= 2n+2.
+theorem observes_next_gen_interval_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, i <= 2 * n + 2 -> A.observes (n + 1) i := by
+  intro n i hi
+  exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness (n + 1) i
+    ((requiredAt_next_gen_iff_le_two_mul_add_two n i).2 hi)
 
 -- Split form for witness case analysis: either an index is observed, or it lies beyond 2n.
 theorem observes_or_two_mul_lt_of_exact
