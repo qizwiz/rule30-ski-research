@@ -164,6 +164,20 @@ theorem requiredAt_of_le_two_mul_add_one_next_gen (n i : Nat) (h : i <= 2 * n + 
   have h' : i <= 2 * n + 2 := Nat.le_trans h (Nat.le_succ (2 * n + 1))
   exact (requiredAt_next_gen_iff_le_two_mul_add_two n i).2 h'
 
+-- Any index strictly beyond the next-generation endpoint is not required.
+theorem not_requiredAt_of_two_mul_add_two_lt_next_gen (n i : Nat) (h : 2 * n + 2 < i) :
+    ¬ requiredAt (n + 1) i := by
+  intro hReq
+  have hLe : i <= 2 * n + 2 := (requiredAt_next_gen_iff_le_two_mul_add_two n i).1 hReq
+  exact Nat.not_lt_of_ge hLe h
+
+-- Next-generation split: every index is either required at n+1 or beyond 2n+2.
+theorem requiredAt_or_two_mul_add_two_lt_next_gen (n i : Nat) :
+    requiredAt (n + 1) i ∨ 2 * n + 2 < i := by
+  by_cases hReq : requiredAt (n + 1) i
+  · exact Or.inl hReq
+  · exact Or.inr (Nat.lt_of_not_ge (fun hLe => hReq ((requiredAt_next_gen_iff_le_two_mul_add_two n i).2 hLe)))
+
 -- In particular, index n is always required.
 theorem requiredAt_self (n : Nat) : requiredAt n n := by
   exact requiredAt_of_le_n n n (Nat.le_refl n)
@@ -402,6 +416,24 @@ theorem observes_or_two_mul_lt_of_exact
   rcases requiredAt_or_two_mul_lt n i with hReq | hLt
   · exact Or.inl (must_observe_required (cell := cell) A target h_obs_det h_exact h_witness n i hReq)
   · exact Or.inr hLt
+
+-- Next-generation split corollary: exactness implies observed-or-beyond-(2n+2) at n+1.
+theorem observes_or_two_mul_add_two_lt_next_gen_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, A.observes (n + 1) i ∨ 2 * n + 2 < i := by
+  intro n i
+  simpa [Nat.mul_add, Nat.add_comm, Nat.add_left_comm, Nat.add_assoc]
+    using observes_or_two_mul_lt_of_exact (cell := cell) A target h_obs_det h_exact h_witness (n + 1) i
 
 -- Exactness implies at least one required index is observed at each generation.
 theorem exists_observed_required_of_exact
