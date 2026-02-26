@@ -15,6 +15,8 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - requirement-proxy lemmas on `requiredCells`
 - Formalized conditional no-skip bridge skeleton in Lean:
   - `must_observe_required` (proved from explicit observation-determinism, exactness, and witness hypotheses)
+  - `requiredAt_of_le_n` (proved: every `i ≤ n` lies in required interval under current proxy)
+  - `observes_prefix_of_exact` (proved: under scaffold hypotheses, exactness forces observation of every `i ≤ n`)
 
 ## Empirical (not proof)
 - No Prize3 lower-bound empirical estimate is treated as proof in this track.

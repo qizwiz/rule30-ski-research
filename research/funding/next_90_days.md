@@ -33,13 +33,13 @@ Goal: get funded by showing credible momentum, not by claiming the prize early.
 - Never imply prize solved unless theorem is complete.
 - Always separate:
   - proved
-  - measured
-  - conjectured
+  - empirical
+  - conjectural
 - Every claim must point to a file and command.
 
 ## Prize3 status line (required in external-facing updates)
 - Prize3 lower-bound theorem is not yet proved in-repo.
-- Proved: model/statement freeze + foundational dependency-width/proxy lemmas + conditional bridge scaffold.
+- Proved: model/statement freeze + foundational dependency-width/proxy lemmas + conditional bridge scaffold (including prefix-observation corollary under explicit hypotheses).
 - Empirical: reproducibility/debug runs only; not used as proof.
 - Conjectural: Rule 30-specific witness and cost-transfer bridge to `Work_A(n) = Omega(n)`.
 

@@ -126,6 +126,12 @@ theorem requiredAt_zero (n : Nat) : requiredAt n 0 := by
   have hpos : 0 < 2 * n + 1 := Nat.succ_pos (2 * n)
   exact hpos
 
+-- Any index up to n lies in the required interval [0, requiredCells n).
+theorem requiredAt_of_le_n (n i : Nat) (h : i ≤ n) : requiredAt n i := by
+  unfold requiredAt
+  have hi_succ : i < n + 1 := Nat.lt_succ_of_le h
+  exact Nat.lt_of_lt_of_le hi_succ (requiredCells_ge_n_plus_one n)
+
 -- Minimal exactness-to-work bridge corollary at the base index.
 theorem observes_zero_of_exact
     (A : Algorithm State)
@@ -158,6 +164,42 @@ theorem observes_required_of_exact
           agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
     forall n i, requiredAt n i -> A.observes n i := by
   exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness
+
+-- Under the same hypotheses, exactness forces observation of every index i <= n.
+theorem observes_prefix_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, i ≤ n -> A.observes n i := by
+  intro n i hi
+  exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness n i
+    (requiredAt_of_le_n n i hi)
+
+-- Exactness implies at least one required index is observed at each generation.
+theorem exists_observed_required_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n, exists i, requiredAt n i /\ A.observes n i := by
+  intro n
+  refine ⟨0, requiredAt_zero n, ?_⟩
+  exact observes_zero_of_exact (cell := cell) A target h_obs_det h_exact h_witness n
 
 end BridgeScaffold
 
