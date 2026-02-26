@@ -24,6 +24,8 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `observes_self_of_exact` (proved corollary: under same hypotheses, exactness forces observation of index `n`)
   - `observes_cone_interval_of_exact` / `observes_two_mul_of_exact` (proved corollaries: under scaffold hypotheses, exactness forces observation over `i ≤ 2n`, including endpoint `i = 2n`)
   - `observes_required_next_gen_of_exact` / `observes_prefix_next_gen_of_exact` (proved: under same scaffold hypotheses, required/prefix indices at generation `n` are forced observed at generation `n+1`)
+  - `requiredAt_next_gen_iff_le_two_mul_add_two` / `requiredAt_of_le_two_mul_add_one_next_gen` (proved: explicit `n+1` boundary characterization and inclusion up to `2n+1`)
+  - `observes_two_mul_add_one_next_gen_of_exact` / `observes_two_mul_add_two_next_gen_of_exact` (proved: under same scaffold hypotheses, exactness forces observation at key `n+1` boundary points)
 - Formalized conditional cost-transfer scaffold in Lean:
   - `work_ge_requiredCells_implies_linear_plus_one`
   - `work_ge_requiredCells_implies_linear`

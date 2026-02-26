@@ -10,6 +10,7 @@ This note is for funding/outreach context only. It does not claim theorem comple
   - Foundational cone/proxy lemmas in Lean (`prize3/lean/Prize3Model.lean`)
   - Conditional no-skip scaffold (`must_observe_required`) and support lemmas including `observes_self_of_exact` and `observes_two_mul_of_exact`
   - Next-generation observation corollaries under the same explicit hypotheses (`observes_required_next_gen_of_exact`, `observes_prefix_next_gen_of_exact`)
+  - Next-generation boundary support/corollaries (`requiredAt_next_gen_iff_le_two_mul_add_two`, `requiredAt_of_le_two_mul_add_one_next_gen`, `observes_two_mul_add_one_next_gen_of_exact`, `observes_two_mul_add_two_next_gen_of_exact`)
   - Required-interval split lemmas (`not_requiredAt_iff_two_mul_lt`, `requiredAt_or_two_mul_lt`) for witness case partitioning
   - Exactness split corollary (`observes_or_two_mul_lt_of_exact`) for claim-safe witness branching
   - Conditional cost-transfer scaffold (explicit accounting hypothesis), including per-index bound `work_ge_requiredCells_implies_requiredAt_le_work`

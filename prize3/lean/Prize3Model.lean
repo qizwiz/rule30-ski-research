@@ -150,6 +150,20 @@ theorem requiredAt_iff_le_two_mul (n i : Nat) : requiredAt n i ↔ i <= 2 * n :=
 theorem requiredAt_of_le_two_mul (n i : Nat) (h : i <= 2 * n) : requiredAt n i := by
   exact (requiredAt_iff_le_two_mul n i).2 h
 
+-- Next-generation required interval is exactly [0, 2n + 2].
+theorem requiredAt_next_gen_iff_le_two_mul_add_two (n i : Nat) :
+    requiredAt (n + 1) i ↔ i <= 2 * n + 2 := by
+  calc
+    requiredAt (n + 1) i ↔ i <= 2 * (n + 1) := requiredAt_iff_le_two_mul (n + 1) i
+    _ ↔ i <= 2 * n + 2 := by
+      simp [Nat.mul_add, Nat.add_comm]
+
+-- Any index up to 2n+1 is required at generation n+1.
+theorem requiredAt_of_le_two_mul_add_one_next_gen (n i : Nat) (h : i <= 2 * n + 1) :
+    requiredAt (n + 1) i := by
+  have h' : i <= 2 * n + 2 := Nat.le_trans h (Nat.le_succ (2 * n + 1))
+  exact (requiredAt_next_gen_iff_le_two_mul_add_two n i).2 h'
+
 -- In particular, index n is always required.
 theorem requiredAt_self (n : Nat) : requiredAt n n := by
   exact requiredAt_of_le_n n n (Nat.le_refl n)
@@ -316,6 +330,24 @@ theorem observes_prefix_next_gen_of_exact
   exact observes_required_next_gen_of_exact (cell := cell) A target h_obs_det h_exact h_witness n i
     (requiredAt_of_le_n n i hi)
 
+-- At generation n+1, exactness forces observation of index 2n+1.
+theorem observes_two_mul_add_one_next_gen_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n, A.observes (n + 1) (2 * n + 1) := by
+  intro n
+  exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness (n + 1) (2 * n + 1)
+    (requiredAt_of_le_two_mul_add_one_next_gen n (2 * n + 1) (Nat.le_refl (2 * n + 1)))
+
 -- In particular, exactness forces observation of the cone endpoint i = 2n.
 theorem observes_two_mul_of_exact
     (A : Algorithm State)
@@ -333,6 +365,24 @@ theorem observes_two_mul_of_exact
   intro n
   exact observes_cone_interval_of_exact (cell := cell) A target h_obs_det h_exact h_witness n (2 * n)
     (Nat.le_refl (2 * n))
+
+-- Endpoint form at generation n+1, rewritten as 2n+2.
+theorem observes_two_mul_add_two_next_gen_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n, A.observes (n + 1) (2 * n + 2) := by
+  intro n
+  simpa [Nat.mul_add, Nat.add_comm]
+    using observes_two_mul_of_exact (cell := cell) A target h_obs_det h_exact h_witness (n + 1)
 
 -- Split form for witness case analysis: either an index is observed, or it lies beyond 2n.
 theorem observes_or_two_mul_lt_of_exact
