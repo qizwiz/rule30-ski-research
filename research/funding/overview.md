@@ -37,4 +37,5 @@ This creates a bridge between CA dynamics and term-rewriting/associahedron geome
 ## Artifacts
 - Paper: `papers/rule30_rheology.canonical.pdf`
 - Lean proof: `lean_proofs/InterBasin.lean`
+- Prize3 Lean scaffold: `prize3/lean/Prize3Model.lean`
 - Reproducible scripts: `research/README.md`

@@ -39,4 +39,5 @@ This reframes Rule 30 from a black‑box dynamical system into a structured rewr
 ## Artifacts
 - Canonical paper: `papers/rule30_rheology.canonical.pdf`
 - Lean proof: `lean_proofs/InterBasin.lean`
+- Prize3 Lean scaffold: `prize3/lean/Prize3Model.lean`
 - Repro scripts: `research/README.md`

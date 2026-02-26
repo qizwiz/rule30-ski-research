@@ -10,6 +10,8 @@ This checklist is optimized for speed-to-credibility and funding conversations.
   - `scripts/sync_papers.sh`
 - Confirm Lean theorem compiles:
   - `lean lean_proofs/InterBasin.lean`
+- Confirm Prize3 M4 scaffold compiles (claim-hygiene gate):
+  - `lean prize3/lean/Prize3Model.lean`
 
 ## 2. Reproducibility Pass
 - Run core scripts and keep outputs in-repo:
@@ -25,7 +27,7 @@ This checklist is optimized for speed-to-credibility and funding conversations.
 
 ## 3. Claim Hygiene
 - In the paper and one-pagers, separate:
-  - Proven (Lean theorem)
+  - Proven (Lean theorem + Prize3 scaffold lemmas)
   - Empirical (script outputs)
   - Conjectural (future work)
 - Remove or reword any claim that implies solved irreducibility.
