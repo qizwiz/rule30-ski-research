@@ -12,6 +12,8 @@ Purpose: track the exactness-bridge obligations needed before any lower-bound th
     - `observes_self_of_exact`
     - `observes_cone_interval_of_exact`
     - `observes_two_mul_of_exact`
+    - `observes_required_next_gen_of_exact`
+    - `observes_prefix_next_gen_of_exact`
   - Required-interval arithmetic support:
     - `requiredAt_iff_le_two_mul`
     - `requiredAt_of_le_two_mul`

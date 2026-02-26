@@ -280,6 +280,42 @@ theorem observes_cone_interval_of_exact
   exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness n i
     (requiredAt_of_le_two_mul n i hi)
 
+-- If an index is required at generation n, exactness forces it observed at generation n+1 as well.
+theorem observes_required_next_gen_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, requiredAt n i -> A.observes (n + 1) i := by
+  intro n i hReq
+  exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness (n + 1) i
+    (requiredAt_monotone_gen n i hReq)
+
+-- Prefix form of next-generation forcing: every i <= n must be observed at generation n+1.
+theorem observes_prefix_next_gen_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, i <= n -> A.observes (n + 1) i := by
+  intro n i hi
+  exact observes_required_next_gen_of_exact (cell := cell) A target h_obs_det h_exact h_witness n i
+    (requiredAt_of_le_n n i hi)
+
 -- In particular, exactness forces observation of the cone endpoint i = 2n.
 theorem observes_two_mul_of_exact
     (A : Algorithm State)
