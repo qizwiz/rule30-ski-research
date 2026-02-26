@@ -334,6 +334,25 @@ theorem observes_two_mul_of_exact
   exact observes_cone_interval_of_exact (cell := cell) A target h_obs_det h_exact h_witness n (2 * n)
     (Nat.le_refl (2 * n))
 
+-- Split form for witness case analysis: either an index is observed, or it lies beyond 2n.
+theorem observes_or_two_mul_lt_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, A.observes n i ∨ 2 * n < i := by
+  intro n i
+  rcases requiredAt_or_two_mul_lt n i with hReq | hLt
+  · exact Or.inl (must_observe_required (cell := cell) A target h_obs_det h_exact h_witness n i hReq)
+  · exact Or.inr hLt
+
 -- Exactness implies at least one required index is observed at each generation.
 theorem exists_observed_required_of_exact
     (A : Algorithm State)
