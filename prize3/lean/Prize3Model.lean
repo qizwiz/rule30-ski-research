@@ -188,6 +188,13 @@ theorem not_requiredAt_iff_two_mul_add_two_lt_next_gen (n i : Nat) :
   · intro hLt hReq
     exact Nat.not_lt_of_ge ((requiredAt_next_gen_iff_le_two_mul_add_two n i).1 hReq) hLt
 
+-- Next-generation non-beyond-boundary form: not being beyond 2n+2 forces requiredness at n+1.
+theorem requiredAt_of_not_two_mul_add_two_lt_next_gen (n i : Nat)
+    (hNotLt : ¬ (2 * n + 2 < i)) : requiredAt (n + 1) i := by
+  by_cases hReq : requiredAt (n + 1) i
+  · exact hReq
+  · exact False.elim (hNotLt ((not_requiredAt_iff_two_mul_add_two_lt_next_gen n i).1 hReq))
+
 -- In particular, index n is always required.
 theorem requiredAt_self (n : Nat) : requiredAt n n := by
   exact requiredAt_of_le_n n n (Nat.le_refl n)
@@ -218,6 +225,12 @@ theorem not_requiredAt_iff_two_mul_lt (n i : Nat) : ¬ requiredAt n i ↔ 2 * n 
   · intro hLt hReq
     have hLe : i <= 2 * n := (requiredAt_iff_le_two_mul n i).1 hReq
     exact Nat.not_lt_of_ge hLe hLt
+
+-- Non-beyond-boundary form: not being beyond 2n forces requiredness at generation n.
+theorem requiredAt_of_not_two_mul_lt (n i : Nat) (hNotLt : ¬ (2 * n < i)) : requiredAt n i := by
+  by_cases hReq : requiredAt n i
+  · exact hReq
+  · exact False.elim (hNotLt ((not_requiredAt_iff_two_mul_lt n i).1 hReq))
 
 -- Every index either lies in the required interval or is strictly beyond it.
 theorem requiredAt_or_two_mul_lt (n i : Nat) : requiredAt n i ∨ 2 * n < i := by
