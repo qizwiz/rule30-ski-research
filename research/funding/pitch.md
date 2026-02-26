@@ -15,6 +15,11 @@ I compile the local Rule 30 update rule into SKI combinators, then construct the
 - **Empirical:** distinct subterms in the shared DAG show quadratic-scale growth over measured generations, vs. exponential AST growth without sharing.  
 - **Conjecture:** basin prefix stabilization for Rule 30 center cell after $N \ge 3$.
 
+## Prize3 Claim Hygiene (Current)
+- **Proved:** Prize3 model/statement freeze and foundational dependency-width lemmas in `prize3/`.
+- **Empirical:** no empirical claim is used as proof of Prize3 lower bound.
+- **Conjectural:** final exactness-to-work bridge for `Work_A(n)=Omega(n)` remains open.
+
 ## Why It Matters
 This reframes Rule 30 from a black‑box dynamical system into a structured rewriting trajectory. It opens the door to formal invariants, new complexity bounds, and the possibility of geodesic interpretations on the Tamari lattice.
 

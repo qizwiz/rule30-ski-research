@@ -15,7 +15,8 @@ Plain meaning: each generation increases cone width by exactly 2.
 Plain meaning: dependency cone width never decreases.
 
 ## Phase 3: Information-flow lemmas
-- [ ] Formalize what data is required to determine center cell at generation `n`.
+- [x] Formalize a first required-data proxy (`requiredCells n := coneWidth n`) in Lean.
+- [ ] Formalize what data is required to determine center cell at generation `n` (beyond proxy).
 - [ ] Show exactness forbids skipping required dependency information under `M_cone_exact`.
 
 ## Phase 4: Lower-bound core

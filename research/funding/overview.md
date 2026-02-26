@@ -23,6 +23,11 @@ This creates a bridge between CA dynamics and term-rewriting/associahedron geome
 2. **Geodesic Characterization:** test if reduction trajectories are geodesics in the Tamari lattice.
 3. **Tight Complexity Bounds:** derive explicit constants for the $O(N^2)$ bound under hash-consed graph sharing.
 
+## Prize3 Claim Snapshot (2026-02-26)
+- **Proved (artifact-level):** frozen model + theorem statement + foundational cone/required-data proxy lemmas in `prize3/` and `prize3/lean/Prize3Model.lean`.
+- **Empirical:** none used as proof for Prize3 lower bound.
+- **Conjectural / in-progress:** exactness-to-work bridge needed to complete `Work_A(n) = Omega(n)` in `M_cone_exact`.
+
 ## Artifacts
 - Paper: `papers/rule30_rheology.canonical.pdf`
 - Lean proof: `lean_proofs/InterBasin.lean`

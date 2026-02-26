@@ -14,6 +14,9 @@ structure Model where
 -- Width of the dependency cone at generation n
 def coneWidth (n : Nat) : Nat := 2 * n + 1
 
+-- Conservative proxy for information that must be resolved at generation n.
+def requiredCells (n : Nat) : Nat := coneWidth n
+
 -- First foundational fact: width is at least n+1.
 -- This is intentionally simple, but nontrivial and reusable.
 theorem coneWidth_ge_n_plus_one (n : Nat) : n + 1 ≤ coneWidth n := by
@@ -32,5 +35,17 @@ theorem coneWidth_succ (n : Nat) : coneWidth (n + 1) = coneWidth n + 2 := by
 theorem coneWidth_monotone (n : Nat) : coneWidth n ≤ coneWidth (n + 1) := by
   rw [coneWidth_succ]
   exact Nat.le_add_right (coneWidth n) 2
+
+-- Required-data proxy agrees definitionally with cone width.
+theorem requiredCells_eq_coneWidth (n : Nat) : requiredCells n = coneWidth n := by
+  rfl
+
+-- Required-data proxy is at least linear in n.
+theorem requiredCells_ge_n_plus_one (n : Nat) : n + 1 ≤ requiredCells n := by
+  simpa [requiredCells] using coneWidth_ge_n_plus_one n
+
+-- Required-data proxy is monotone in n.
+theorem requiredCells_monotone (n : Nat) : requiredCells n ≤ requiredCells (n + 1) := by
+  simpa [requiredCells] using coneWidth_monotone n
 
 end Prize3
