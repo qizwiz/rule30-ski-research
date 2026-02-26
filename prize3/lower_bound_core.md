@@ -21,6 +21,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `requiredAt_two_mul` / `not_requiredAt_two_mul_succ` (proved boundary inclusions/exclusions)
   - `observes_prefix_of_exact` (proved: under scaffold hypotheses, exactness forces observation of every `i ≤ n`)
   - `observes_self_of_exact` (proved corollary: under same hypotheses, exactness forces observation of index `n`)
+  - `observes_cone_interval_of_exact` / `observes_two_mul_of_exact` (proved corollaries: under scaffold hypotheses, exactness forces observation over `i ≤ 2n`, including endpoint `i = 2n`)
 - Formalized conditional cost-transfer scaffold in Lean:
   - `work_ge_requiredCells_implies_linear_plus_one`
   - `work_ge_requiredCells_implies_linear`
@@ -47,6 +48,8 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
 4. Discharge constants/quantifiers to obtain asymptotic lower bound.
 
 ## Bridge obligations (Step 3 decomposition)
+- Obligation matrix status artifact:
+  - `prize3/phase3_obligation_matrix.md` (tracks open/closed obligations O1-O5 with evidence references)
 - Observation model:
   - Formalize what it means for an algorithm run to have "read/resolved" a dependency-relevant unit.
 - Indistinguishability lemma:
