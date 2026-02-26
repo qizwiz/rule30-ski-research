@@ -515,6 +515,61 @@ theorem observes_of_not_two_mul_add_two_lt_next_gen_of_exact
   · exact hObs
   · exact False.elim (hNotLt hLt)
 
+-- Contrapositive bridge form: under exactness hypotheses, unobserved implies not required.
+theorem not_observes_implies_not_required_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, ¬ (A.observes n i) -> ¬ requiredAt n i := by
+  intro n i hNotObs hReq
+  exact hNotObs
+    (must_observe_required (cell := cell) A target h_obs_det h_exact h_witness n i hReq)
+
+-- Split form in requiredness language: every index is observed or not required.
+theorem observes_or_not_required_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, A.observes n i ∨ ¬ requiredAt n i := by
+  intro n i
+  rcases observes_or_two_mul_lt_of_exact (cell := cell) A target h_obs_det h_exact h_witness n i with hObs | hLt
+  · exact Or.inl hObs
+  · exact Or.inr (not_requiredAt_of_two_mul_lt n i hLt)
+
+-- Next-generation contrapositive form: unobserved at n+1 implies not required at n+1.
+theorem not_observes_next_gen_implies_not_required_next_gen_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, ¬ (A.observes (n + 1) i) -> ¬ requiredAt (n + 1) i := by
+  intro n i hNotObs hReq
+  exact hNotObs
+    (must_observe_required (cell := cell) A target h_obs_det h_exact h_witness (n + 1) i hReq)
+
 -- Exactness implies at least one required index is observed at each generation.
 theorem exists_observed_required_of_exact
     (A : Algorithm State)
