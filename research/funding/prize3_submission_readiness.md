@@ -8,7 +8,7 @@ This note is for funding/outreach context only. It does not claim theorem comple
 - Proved (in-repo):
   - Frozen model + statement (`prize3/model.md`, `prize3/statement.md`)
   - Foundational cone/proxy lemmas in Lean (`prize3/lean/Prize3Model.lean`)
-  - Conditional no-skip scaffold (`must_observe_required`) and boundary support lemmas
+  - Conditional no-skip scaffold (`must_observe_required`) and support lemmas including `observes_self_of_exact`
   - Conditional cost-transfer scaffold (explicit accounting hypothesis)
 - Empirical (not proof):
   - Repro/runtime checks only; no empirical estimate is used as a Prize3 proof step.

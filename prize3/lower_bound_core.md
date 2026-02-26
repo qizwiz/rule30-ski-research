@@ -20,6 +20,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `requiredAt_of_le_two_mul` / `not_requiredAt_of_two_mul_lt` (proved: both inclusion and strict-outside exclusion at cone endpoint)
   - `requiredAt_two_mul` / `not_requiredAt_two_mul_succ` (proved boundary inclusions/exclusions)
   - `observes_prefix_of_exact` (proved: under scaffold hypotheses, exactness forces observation of every `i ≤ n`)
+  - `observes_self_of_exact` (proved corollary: under same hypotheses, exactness forces observation of index `n`)
 - Formalized conditional cost-transfer scaffold in Lean:
   - `work_ge_requiredCells_implies_linear_plus_one`
   - `work_ge_requiredCells_implies_linear`

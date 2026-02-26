@@ -227,6 +227,24 @@ theorem observes_prefix_of_exact
   exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness n i
     (requiredAt_of_le_n n i hi)
 
+-- In particular, exactness forces observation of the center-prefix endpoint i = n.
+theorem observes_self_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n, A.observes n n := by
+  intro n
+  exact observes_prefix_of_exact (cell := cell) A target h_obs_det h_exact h_witness n n
+    (Nat.le_refl n)
+
 -- Exactness implies at least one required index is observed at each generation.
 theorem exists_observed_required_of_exact
     (A : Algorithm State)
