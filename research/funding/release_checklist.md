@@ -35,6 +35,8 @@ This checklist is optimized for speed-to-credibility and funding conversations.
   - Conjectural (exactness-to-work bridge still open)
 - Before external claim text, verify against:
   - `prize3/submission_packet.md`
+  - `prize3/m4_submission_gate.md`
+  - `prize3/lower_bound_core.md`
 - Add one explicit line in each external document:
   - "Prize3 lower-bound theorem is not yet proved in-repo."
 
