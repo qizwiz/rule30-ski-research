@@ -32,6 +32,8 @@ Purpose: track the exactness-bridge obligations needed before any lower-bound th
     - `not_requiredAt_of_two_mul_lt`
     - `observes_next_gen_interval_of_exact`
     - `observes_or_two_mul_add_two_lt_next_gen_of_exact`
+    - `observes_of_not_two_mul_lt_of_exact`
+    - `observes_of_not_two_mul_add_two_lt_next_gen_of_exact`
 - Empirical (not proof):
   - Repro logs and runtime checks only.
 - Conjectural / pending:

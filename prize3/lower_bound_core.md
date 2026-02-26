@@ -29,6 +29,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `observes_two_mul_add_one_next_gen_of_exact` / `observes_two_mul_add_two_next_gen_of_exact` (proved: under same scaffold hypotheses, exactness forces observation at key `n+1` boundary points)
   - `observes_next_gen_interval_of_exact` (proved: under same scaffold hypotheses, exactness forces observation for every index `i ≤ 2n+2` at generation `n+1`)
   - `observes_or_two_mul_add_two_lt_next_gen_of_exact` (proved: under same scaffold hypotheses, exactness gives observed-or-beyond split at `n+1` boundary `2n+2`)
+  - `observes_of_not_two_mul_lt_of_exact` / `observes_of_not_two_mul_add_two_lt_next_gen_of_exact` (proved: under same scaffold hypotheses, non-beyond-boundary form turns split lemmas into direct observation conclusions at `n` and `n+1`)
 - Formalized conditional cost-transfer scaffold in Lean:
   - `work_ge_requiredCells_implies_linear_plus_one`
   - `work_ge_requiredCells_implies_linear`

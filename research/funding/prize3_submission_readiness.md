@@ -15,6 +15,7 @@ This note is for funding/outreach context only. It does not claim theorem comple
   - Next-generation full-interval observation corollary (`observes_next_gen_interval_of_exact`)
   - Required-interval split lemmas (`not_requiredAt_iff_two_mul_lt`, `requiredAt_or_two_mul_lt`) for witness case partitioning
   - Exactness split corollary (`observes_or_two_mul_lt_of_exact`) for claim-safe witness branching
+  - Non-beyond-boundary observation corollaries (`observes_of_not_two_mul_lt_of_exact`, `observes_of_not_two_mul_add_two_lt_next_gen_of_exact`) for direct branch closure without extra arithmetic rewrites
   - Conditional cost-transfer scaffold (explicit accounting hypothesis), including per-index bound `work_ge_requiredCells_implies_requiredAt_le_work`
   - Phase 3 obligation matrix with explicit open/closed status (`prize3/phase3_obligation_matrix.md`)
 - Empirical (not proof):

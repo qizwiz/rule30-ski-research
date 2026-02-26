@@ -445,6 +445,25 @@ theorem observes_or_two_mul_lt_of_exact
   · exact Or.inl (must_observe_required (cell := cell) A target h_obs_det h_exact h_witness n i hReq)
   · exact Or.inr hLt
 
+-- Non-beyond-boundary form: if i is not strictly beyond 2n, exactness forces observation at n.
+theorem observes_of_not_two_mul_lt_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, ¬ (2 * n < i) -> A.observes n i := by
+  intro n i hNotLt
+  rcases observes_or_two_mul_lt_of_exact (cell := cell) A target h_obs_det h_exact h_witness n i with hObs | hLt
+  · exact hObs
+  · exact False.elim (hNotLt hLt)
+
 -- Next-generation split corollary: exactness implies observed-or-beyond-(2n+2) at n+1.
 theorem observes_or_two_mul_add_two_lt_next_gen_of_exact
     (A : Algorithm State)
@@ -462,6 +481,26 @@ theorem observes_or_two_mul_add_two_lt_next_gen_of_exact
   intro n i
   simpa [Nat.mul_add, Nat.add_comm, Nat.add_left_comm, Nat.add_assoc]
     using observes_or_two_mul_lt_of_exact (cell := cell) A target h_obs_det h_exact h_witness (n + 1) i
+
+-- Next-generation non-beyond-boundary form: if i is not beyond 2n+2, exactness forces observation at n+1.
+theorem observes_of_not_two_mul_add_two_lt_next_gen_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, ¬ (2 * n + 2 < i) -> A.observes (n + 1) i := by
+  intro n i hNotLt
+  rcases observes_or_two_mul_add_two_lt_next_gen_of_exact
+      (cell := cell) A target h_obs_det h_exact h_witness n i with hObs | hLt
+  · exact hObs
+  · exact False.elim (hNotLt hLt)
 
 -- Exactness implies at least one required index is observed at each generation.
 theorem exists_observed_required_of_exact
