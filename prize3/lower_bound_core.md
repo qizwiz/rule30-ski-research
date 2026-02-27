@@ -41,6 +41,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `not_observes_implies_not_required_of_exact` / `not_observes_next_gen_implies_not_required_next_gen_of_exact` (proved contrapositives: under same scaffold hypotheses, unobserved implies not-required at `n` and `n+1`)
   - `not_observes_implies_two_mul_lt_of_exact` / `not_observes_next_gen_implies_two_mul_add_two_lt_next_gen_of_exact` (proved arithmetic contrapositives: under same scaffold hypotheses, unobserved implies strictly beyond the cone boundary at `n` and `n+1`)
   - `observes_or_not_required_of_exact` / `observes_or_not_required_next_gen_of_exact` (proved: under same scaffold hypotheses, exactness yields observed-or-not-required split without arithmetic side condition at `n` and `n+1`)
+  - `exists_observed_required_of_exact` / `exists_observed_required_next_gen_of_exact` (proved existence corollaries: under same scaffold hypotheses, exactness forces at least one required observed index at `n` and `n+1`)
 - Formalized conditional cost-transfer scaffold in Lean:
   - `work_ge_requiredCells_implies_linear_plus_one`
   - `work_ge_requiredCells_implies_linear`

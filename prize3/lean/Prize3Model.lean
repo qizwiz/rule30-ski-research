@@ -730,6 +730,25 @@ theorem exists_observed_required_of_exact
   refine ⟨0, requiredAt_zero n, ?_⟩
   exact observes_zero_of_exact (cell := cell) A target h_obs_det h_exact h_witness n
 
+-- Next-generation existence form: exactness also forces an observed required
+-- index at generation n+1.
+theorem exists_observed_required_next_gen_of_exact
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n, exists i, requiredAt (n + 1) i /\ A.observes (n + 1) i := by
+  intro n
+  refine ⟨2 * n + 2, requiredAt_two_mul_add_two_next_gen n, ?_⟩
+  exact observes_two_mul_add_two_next_gen_of_exact (cell := cell) A target h_obs_det h_exact h_witness n
+
 end BridgeScaffold
 
 /-!
