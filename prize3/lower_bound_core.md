@@ -17,6 +17,8 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `must_observe_required` (proved from explicit observation-determinism, exactness, and witness hypotheses)
   - `must_observe_required_of_le_two_mul_witness` (proved adapter: boundary-form witness obligations `i ≤ 2n` discharge the same bridge goal)
   - `must_observe_required_next_gen_of_le_two_mul_witness` (proved next-generation corollary of the same boundary-form adapter)
+  - `must_observe_required_of_not_two_mul_lt_witness` (proved adapter: equivalent non-beyond-boundary witness obligations `¬(2n < i)` discharge the same bridge goal)
+  - `must_observe_required_next_gen_of_not_two_mul_lt_witness` (proved next-generation corollary of the same non-beyond-boundary adapter)
   - `requiredAt_of_le_n` (proved: every `i ≤ n` lies in required interval under current proxy)
   - `requiredAt_iff_le_two_mul` (proved: required interval is exactly `0 ≤ i ≤ 2n`)
   - `requiredAt_of_le_two_mul` / `not_requiredAt_of_two_mul_lt` (proved: both inclusion and strict-outside exclusion at cone endpoint)

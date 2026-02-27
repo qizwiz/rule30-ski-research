@@ -316,6 +316,45 @@ theorem requiredAt_iff_not_two_mul_lt (n i : Nat) : requiredAt n i ↔ ¬ (2 * n
   · intro hNotLt
     exact requiredAt_of_not_two_mul_lt n i hNotLt
 
+-- Boundary-complement witness adapter: discharge the bridge using the equivalent
+-- non-beyond-boundary form ¬(2n < i) instead of requiredAt n i.
+theorem must_observe_required_of_not_two_mul_lt_witness
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness_not_two_mul_lt :
+      forall n i,
+        ¬ (2 * n < i) ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, requiredAt n i -> A.observes n i := by
+  intro n i hReq
+  exact must_observe_required (cell := cell) A target h_obs_det h_exact
+    (fun n' i' hReq' hNotObs =>
+      h_witness_not_two_mul_lt n' i' ((requiredAt_iff_not_two_mul_lt n' i').1 hReq') hNotObs)
+    n i hReq
+
+-- Next-generation corollary of the boundary-complement witness adapter.
+theorem must_observe_required_next_gen_of_not_two_mul_lt_witness
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness_not_two_mul_lt :
+      forall n i,
+        ¬ (2 * n < i) ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, requiredAt (n + 1) i -> A.observes (n + 1) i := by
+  intro n i hReq
+  exact must_observe_required_of_not_two_mul_lt_witness
+    (cell := cell) A target h_obs_det h_exact h_witness_not_two_mul_lt (n + 1) i hReq
+
 -- Every index either lies in the required interval or is strictly beyond it.
 theorem requiredAt_or_two_mul_lt (n i : Nat) : requiredAt n i ∨ 2 * n < i := by
   by_cases hReq : requiredAt n i
