@@ -13,9 +13,9 @@ Purpose: keep M4 progress and external readiness aligned without overstating the
   - Frozen model and target statement (`prize3/model.md`, `prize3/statement.md`).
   - Foundation lemmas on cone/proxy growth and monotonicity (`prize3/lean/Prize3Model.lean`).
   - Conditional bridge lemmas under explicit hypotheses (`must_observe_required`, `observes_prefix_of_exact`, `observes_self_of_exact`).
-  - Rule 30 concrete witness compositions and normalized adapters under explicit pointwise-difference witness hypotheses (`must_observe_required_rule30_of_pointwise_diff_witness`, `must_observe_required_next_gen_rule30_of_pointwise_diff_witness`, `must_observe_of_not_two_mul_lt_rule30_of_pointwise_diff_witness`, `must_observe_next_gen_of_not_two_mul_add_two_lt_rule30_of_pointwise_diff_witness`).
+  - Rule 30 concrete witness compositions and normalized adapters under explicit pointwise-difference witness hypotheses (`must_observe_required_rule30_of_pointwise_diff_witness`, `must_observe_required_rule30_center_of_pointwise_diff_witness_not_two_mul_lt`, `must_observe_required_next_gen_rule30_of_pointwise_diff_witness`, `must_observe_of_not_two_mul_lt_rule30_of_pointwise_diff_witness`, `must_observe_of_not_two_mul_lt_rule30_center_of_pointwise_diff_witness`, `must_observe_next_gen_of_not_two_mul_add_two_lt_rule30_of_pointwise_diff_witness`, `must_observe_required_next_gen_rule30_center_of_pointwise_diff_witness_not_two_mul_add_two_lt`).
   - Conditional cost-transfer lemmas under explicit accounting hypothesis.
-  - Conditional exactness+accounting composition lemmas (`required_observed_and_bounded_of_exact_and_accounting`, `required_observed_and_bounded_next_gen_of_exact_and_accounting`).
+  - Conditional exactness+accounting composition lemmas (`required_observed_and_bounded_of_exact_and_accounting`, `required_observed_and_bounded_next_gen_of_exact_and_accounting`) plus Rule 30 center-target next-generation specializations in boundary and non-beyond-boundary forms (`observed_and_bounded_next_gen_rule30_center_of_le_two_mul_add_two_of_pointwise_diff_witness_and_accounting`, `observed_and_bounded_next_gen_rule30_center_of_not_two_mul_add_two_lt_of_pointwise_diff_witness_and_accounting`).
 - Empirical (not proof):
   - Repro/runtime checks and script outputs only.
   - No empirical estimate is used as a proof step for Prize3.
