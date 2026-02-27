@@ -117,6 +117,113 @@ def rule30Local (p q r : Bool) : Bool := p != (q || r)
 def rule30CenterOneStep (s : Rule30State) : Bool :=
   rule30Local (rule30Cell s 0) (rule30Cell s 1) (rule30Cell s 2)
 
+-- Center after two Rule30 steps from indices 0..4 of the initial slice.
+def rule30CenterTwoStep (s : Rule30State) : Bool :=
+  rule30Local
+    (rule30Local (rule30Cell s 0) (rule30Cell s 1) (rule30Cell s 2))
+    (rule30Local (rule30Cell s 1) (rule30Cell s 2) (rule30Cell s 3))
+    (rule30Local (rule30Cell s 2) (rule30Cell s 3) (rule30Cell s 4))
+
+-- Center after three Rule30 steps from indices 0..6 of the initial slice.
+def rule30CenterThreeStep (s : Rule30State) : Bool :=
+  rule30Local
+    (rule30Local
+      (rule30Local (rule30Cell s 0) (rule30Cell s 1) (rule30Cell s 2))
+      (rule30Local (rule30Cell s 1) (rule30Cell s 2) (rule30Cell s 3))
+      (rule30Local (rule30Cell s 2) (rule30Cell s 3) (rule30Cell s 4)))
+    (rule30Local
+      (rule30Local (rule30Cell s 1) (rule30Cell s 2) (rule30Cell s 3))
+      (rule30Local (rule30Cell s 2) (rule30Cell s 3) (rule30Cell s 4))
+      (rule30Local (rule30Cell s 3) (rule30Cell s 4) (rule30Cell s 5)))
+    (rule30Local
+      (rule30Local (rule30Cell s 2) (rule30Cell s 3) (rule30Cell s 4))
+      (rule30Local (rule30Cell s 3) (rule30Cell s 4) (rule30Cell s 5))
+      (rule30Local (rule30Cell s 4) (rule30Cell s 5) (rule30Cell s 6)))
+
+-- Center after four Rule30 steps from indices 0..8 of the initial slice.
+def rule30CenterFourStep (s : Rule30State) : Bool :=
+  let a0 := rule30Local (rule30Cell s 0) (rule30Cell s 1) (rule30Cell s 2)
+  let a1 := rule30Local (rule30Cell s 1) (rule30Cell s 2) (rule30Cell s 3)
+  let a2 := rule30Local (rule30Cell s 2) (rule30Cell s 3) (rule30Cell s 4)
+  let a3 := rule30Local (rule30Cell s 3) (rule30Cell s 4) (rule30Cell s 5)
+  let a4 := rule30Local (rule30Cell s 4) (rule30Cell s 5) (rule30Cell s 6)
+  let a5 := rule30Local (rule30Cell s 5) (rule30Cell s 6) (rule30Cell s 7)
+  let a6 := rule30Local (rule30Cell s 6) (rule30Cell s 7) (rule30Cell s 8)
+  let b0 := rule30Local a0 a1 a2
+  let b1 := rule30Local a1 a2 a3
+  let b2 := rule30Local a2 a3 a4
+  let b3 := rule30Local a3 a4 a5
+  let b4 := rule30Local a4 a5 a6
+  let c0 := rule30Local b0 b1 b2
+  let c1 := rule30Local b1 b2 b3
+  let c2 := rule30Local b2 b3 b4
+  rule30Local c0 c1 c2
+
+-- Small-horizon center target dispatcher (n = 0..3).
+def rule30CenterSmall (n : Nat) (s : Rule30State) : Bool :=
+  match n with
+  | 0 => rule30Cell s 0
+  | 1 => rule30CenterOneStep s
+  | 2 => rule30CenterTwoStep s
+  | 3 => rule30CenterThreeStep s
+  | 4 => rule30CenterFourStep s
+  | _ => rule30Cell s n
+
+-- Recursive center evaluator on a finite cone slice:
+-- `n+1` depends on three shifted `n`-step center evaluations.
+def rule30CenterRec : Nat -> Rule30State -> Bool
+  | 0, s => rule30Cell s 0
+  | Nat.succ k, s =>
+      rule30Local
+        (rule30CenterRec k s)
+        (rule30CenterRec k (fun j => s (j + 1)))
+        (rule30CenterRec k (fun j => s (j + 2)))
+
+theorem rule30CenterRec_eq_small_0 (s : Rule30State) :
+    rule30CenterRec 0 s = rule30CenterSmall 0 s := by
+  rfl
+
+theorem rule30CenterRec_eq_small_1 (s : Rule30State) :
+    rule30CenterRec 1 s = rule30CenterSmall 1 s := by
+  rfl
+
+theorem rule30CenterRec_eq_small_2 (s : Rule30State) :
+    rule30CenterRec 2 s = rule30CenterSmall 2 s := by
+  rfl
+
+theorem rule30CenterRec_eq_small_3 (s : Rule30State) :
+    rule30CenterRec 3 s = rule30CenterSmall 3 s := by
+  rfl
+
+theorem rule30CenterRec_eq_small_4 (s : Rule30State) :
+    rule30CenterRec 4 s = rule30CenterSmall 4 s := by
+  rfl
+
+theorem rule30CenterRec_eq_small_of_le_four (n : Nat) (hN : n <= 4) (s : Rule30State) :
+    rule30CenterRec n s = rule30CenterSmall n s := by
+  cases n with
+  | zero =>
+    simpa using rule30CenterRec_eq_small_0 s
+  | succ n =>
+    cases n with
+    | zero =>
+      simpa using rule30CenterRec_eq_small_1 s
+    | succ n =>
+      cases n with
+      | zero =>
+        simpa using rule30CenterRec_eq_small_2 s
+      | succ n =>
+        cases n with
+        | zero =>
+          simpa using rule30CenterRec_eq_small_3 s
+        | succ n =>
+          cases n with
+          | zero =>
+            simpa using rule30CenterRec_eq_small_4 s
+          | succ n =>
+            have hGt : 4 < Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ n)))) := by simp
+            exact False.elim (Nat.not_lt_of_ge hN hGt)
+
 -- Single-index perturbation seed state.
 def stateFlipAt (i : Nat) (b : Bool) : Rule30State :=
   fun j => if j = i then b else false
@@ -124,6 +231,16 @@ def stateFlipAt (i : Nat) (b : Bool) : Rule30State :=
 theorem stateFlipAt_agree_except (i j : Nat) (hj : j ≠ i) :
     rule30Cell (stateFlipAt i false) j = rule30Cell (stateFlipAt i true) j := by
   simp [rule30Cell, stateFlipAt, hj]
+
+-- Override one index on top of an arbitrary base state.
+def stateFlipAtOnBase (base : Rule30State) (i : Nat) (b : Bool) : Rule30State :=
+  fun j => if j = i then b else base j
+
+theorem stateFlipAtOnBase_agree_except
+    (base : Rule30State) (i j : Nat) (b1 b2 : Bool) (hj : j ≠ i) :
+    rule30Cell (stateFlipAtOnBase base i b1) j =
+      rule30Cell (stateFlipAtOnBase base i b2) j := by
+  simp [rule30Cell, stateFlipAtOnBase, hj]
 
 theorem one_step_center_witness_i0 :
     exists s1 s2,
@@ -302,6 +419,28 @@ theorem one_step_center_h_witness_seed
     apply hNotObs
     simpa [hji] using hObs)
 
+-- Concrete zero-step h_witness seed in bridge form.
+theorem zero_step_center_h_witness_seed
+    (A : Algorithm Rule30State) :
+    forall i,
+      requiredAt 0 i ->
+      ¬ (A.observes 0 i) ->
+      exists s1 s2,
+        agreesOnObserved rule30Cell A 0 s1 s2 /\ rule30Cell s1 0 ≠ rule30Cell s2 0 := by
+  intro i hReq hNotObs
+  have hi0 : i = 0 := by
+    have hLe : i <= 2 * 0 := (requiredAt_iff_le_two_mul 0 i).1 hReq
+    have : i = 0 := Nat.eq_zero_of_le_zero (by simpa using hLe)
+    exact this
+  subst hi0
+  refine ⟨stateFlipAt 0 false, stateFlipAt 0 true, ?_, ?_⟩
+  · intro j hObs
+    exact stateFlipAt_agree_except 0 j (by
+      intro hj0
+      apply hNotObs
+      simpa [hj0] using hObs)
+  · decide
+
 -- One-step center witness seed in explicit arithmetic form i <= 2.
 theorem one_step_center_h_witness_seed_of_le_two
     (A : Algorithm Rule30State) :
@@ -314,6 +453,867 @@ theorem one_step_center_h_witness_seed_of_le_two
   exact one_step_center_h_witness_seed A i
     ((requiredAt_iff_le_two_mul 1 i).2 (by simpa using hLe))
     hNotObs
+
+-- Concrete two-step h_witness seed in bridge form at index i=0.
+theorem two_step_center_h_witness_seed_i0
+    (A : Algorithm Rule30State) :
+    ¬ (A.observes 2 0) ->
+    exists s1 s2,
+      agreesOnObserved rule30Cell A 2 s1 s2 /\ rule30CenterTwoStep s1 ≠ rule30CenterTwoStep s2 := by
+  intro hNotObs
+  refine ⟨stateFlipAt 0 false, stateFlipAt 0 true, ?_, ?_⟩
+  · intro j hObs
+    exact stateFlipAt_agree_except 0 j (by
+      intro hj0
+      apply hNotObs
+      simpa [hj0] using hObs)
+  · decide
+
+theorem two_step_center_witness_i1 :
+    exists s1 s2,
+      (forall j, j ≠ 1 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterTwoStep s1 ≠ rule30CenterTwoStep s2 := by
+  let base : Rule30State := stateFlipAt 4 true
+  refine ⟨stateFlipAtOnBase base 1 false, stateFlipAtOnBase base 1 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAtOnBase_agree_except base 1 j false true hj
+  · decide
+
+theorem two_step_center_witness_i2 :
+    exists s1 s2,
+      (forall j, j ≠ 2 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterTwoStep s1 ≠ rule30CenterTwoStep s2 := by
+  let base : Rule30State := stateFlipAt 4 true
+  refine ⟨stateFlipAtOnBase base 2 false, stateFlipAtOnBase base 2 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAtOnBase_agree_except base 2 j false true hj
+  · decide
+
+theorem two_step_center_witness_i3 :
+    exists s1 s2,
+      (forall j, j ≠ 3 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterTwoStep s1 ≠ rule30CenterTwoStep s2 := by
+  refine ⟨stateFlipAt 3 false, stateFlipAt 3 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAt_agree_except 3 j hj
+  · decide
+
+theorem two_step_center_witness_i4 :
+    exists s1 s2,
+      (forall j, j ≠ 4 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterTwoStep s1 ≠ rule30CenterTwoStep s2 := by
+  refine ⟨stateFlipAt 4 false, stateFlipAt 4 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAt_agree_except 4 j hj
+  · decide
+
+-- Concrete two-step witness family across the full two-step required interval.
+theorem two_step_center_witness_of_le_four (i : Nat) (hLe : i ≤ 4) :
+    exists s1 s2,
+      (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterTwoStep s1 ≠ rule30CenterTwoStep s2 := by
+  cases i with
+  | zero =>
+    refine ⟨stateFlipAt 0 false, stateFlipAt 0 true, ?_, ?_⟩
+    · intro j hj
+      exact stateFlipAt_agree_except 0 j hj
+    · decide
+  | succ i =>
+    cases i with
+    | zero =>
+      simpa using two_step_center_witness_i1
+    | succ i =>
+      cases i with
+      | zero =>
+        simpa using two_step_center_witness_i2
+      | succ i =>
+        cases i with
+        | zero =>
+          simpa using two_step_center_witness_i3
+        | succ i =>
+          cases i with
+          | zero =>
+            simpa using two_step_center_witness_i4
+          | succ i =>
+            have hGt : 4 < Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ i)))) := by
+              simp
+            exact False.elim (Nat.not_lt_of_ge hLe hGt)
+
+-- Concrete two-step h_witness seed in bridge form:
+-- for each required index at n=2, produce agreeing-on-observed states with
+-- different two-step center outputs.
+theorem two_step_center_h_witness_seed
+    (A : Algorithm Rule30State) :
+    forall i,
+      requiredAt 2 i ->
+      ¬ (A.observes 2 i) ->
+      exists s1 s2,
+        agreesOnObserved rule30Cell A 2 s1 s2 /\ rule30CenterTwoStep s1 ≠ rule30CenterTwoStep s2 := by
+  intro i hReq hNotObs
+  have hLe : i ≤ 4 := by
+    have hLe' : i <= 2 * 2 := (requiredAt_iff_le_two_mul 2 i).1 hReq
+    simpa using hLe'
+  rcases two_step_center_witness_of_le_four i hLe with ⟨s1, s2, hEqExcept, hNe⟩
+  refine ⟨s1, s2, ?_, hNe⟩
+  intro j hObs
+  exact hEqExcept j (by
+    intro hji
+    apply hNotObs
+    simpa [hji] using hObs)
+
+-- Two-step center witness seed in explicit arithmetic form i <= 4.
+theorem two_step_center_h_witness_seed_of_le_four
+    (A : Algorithm Rule30State) :
+    forall i,
+      i <= 4 ->
+      ¬ (A.observes 2 i) ->
+      exists s1 s2,
+        agreesOnObserved rule30Cell A 2 s1 s2 /\ rule30CenterTwoStep s1 ≠ rule30CenterTwoStep s2 := by
+  intro i hLe hNotObs
+  exact two_step_center_h_witness_seed A i
+    ((requiredAt_iff_le_two_mul 2 i).2 (by simpa using hLe))
+    hNotObs
+
+theorem three_step_center_witness_i0 :
+    exists s1 s2,
+      (forall j, j ≠ 0 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterThreeStep s1 ≠ rule30CenterThreeStep s2 := by
+  refine ⟨stateFlipAt 0 false, stateFlipAt 0 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAt_agree_except 0 j hj
+  · decide
+
+theorem three_step_center_witness_i1 :
+    exists s1 s2,
+      (forall j, j ≠ 1 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterThreeStep s1 ≠ rule30CenterThreeStep s2 := by
+  refine ⟨stateFlipAt 1 false, stateFlipAt 1 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAt_agree_except 1 j hj
+  · decide
+
+theorem three_step_center_witness_i2 :
+    exists s1 s2,
+      (forall j, j ≠ 2 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterThreeStep s1 ≠ rule30CenterThreeStep s2 := by
+  refine ⟨stateFlipAt 2 false, stateFlipAt 2 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAt_agree_except 2 j hj
+  · decide
+
+theorem three_step_center_witness_i3 :
+    exists s1 s2,
+      (forall j, j ≠ 3 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterThreeStep s1 ≠ rule30CenterThreeStep s2 := by
+  refine ⟨stateFlipAt 3 false, stateFlipAt 3 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAt_agree_except 3 j hj
+  · decide
+
+theorem three_step_center_witness_i4 :
+    exists s1 s2,
+      (forall j, j ≠ 4 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterThreeStep s1 ≠ rule30CenterThreeStep s2 := by
+  let base : Rule30State := stateFlipAt 6 true
+  refine ⟨stateFlipAtOnBase base 4 false, stateFlipAtOnBase base 4 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAtOnBase_agree_except base 4 j false true hj
+  · decide
+
+theorem three_step_center_witness_i5 :
+    exists s1 s2,
+      (forall j, j ≠ 5 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterThreeStep s1 ≠ rule30CenterThreeStep s2 := by
+  refine ⟨stateFlipAt 5 false, stateFlipAt 5 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAt_agree_except 5 j hj
+  · decide
+
+theorem three_step_center_witness_i6 :
+    exists s1 s2,
+      (forall j, j ≠ 6 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterThreeStep s1 ≠ rule30CenterThreeStep s2 := by
+  refine ⟨stateFlipAt 6 false, stateFlipAt 6 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAt_agree_except 6 j hj
+  · decide
+
+-- Concrete three-step witness family across the full three-step required interval.
+theorem three_step_center_witness_of_le_six (i : Nat) (hLe : i ≤ 6) :
+    exists s1 s2,
+      (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterThreeStep s1 ≠ rule30CenterThreeStep s2 := by
+  cases i with
+  | zero =>
+    simpa using three_step_center_witness_i0
+  | succ i =>
+    cases i with
+    | zero =>
+      simpa using three_step_center_witness_i1
+    | succ i =>
+      cases i with
+      | zero =>
+        simpa using three_step_center_witness_i2
+      | succ i =>
+        cases i with
+        | zero =>
+          simpa using three_step_center_witness_i3
+        | succ i =>
+          cases i with
+          | zero =>
+            simpa using three_step_center_witness_i4
+          | succ i =>
+            cases i with
+            | zero =>
+              simpa using three_step_center_witness_i5
+            | succ i =>
+              cases i with
+              | zero =>
+                simpa using three_step_center_witness_i6
+              | succ i =>
+                have hGt : 6 < Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ i)))))) := by
+                  simp
+                exact False.elim (Nat.not_lt_of_ge hLe hGt)
+
+-- Concrete three-step h_witness seed in bridge form:
+-- for each required index at n=3, produce agreeing-on-observed states with
+-- different three-step center outputs.
+theorem three_step_center_h_witness_seed
+    (A : Algorithm Rule30State) :
+    forall i,
+      requiredAt 3 i ->
+      ¬ (A.observes 3 i) ->
+      exists s1 s2,
+        agreesOnObserved rule30Cell A 3 s1 s2 /\ rule30CenterThreeStep s1 ≠ rule30CenterThreeStep s2 := by
+  intro i hReq hNotObs
+  have hLe : i ≤ 6 := by
+    have hLe' : i <= 2 * 3 := (requiredAt_iff_le_two_mul 3 i).1 hReq
+    simpa using hLe'
+  rcases three_step_center_witness_of_le_six i hLe with ⟨s1, s2, hEqExcept, hNe⟩
+  refine ⟨s1, s2, ?_, hNe⟩
+  intro j hObs
+  exact hEqExcept j (by
+    intro hji
+    apply hNotObs
+    simpa [hji] using hObs)
+
+theorem four_step_center_witness_i0 :
+    exists s1 s2,
+      (forall j, j ≠ 0 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterFourStep s1 ≠ rule30CenterFourStep s2 := by
+  refine ⟨stateFlipAt 0 false, stateFlipAt 0 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAt_agree_except 0 j hj
+  · decide
+
+theorem four_step_center_witness_i1 :
+    exists s1 s2,
+      (forall j, j ≠ 1 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterFourStep s1 ≠ rule30CenterFourStep s2 := by
+  let base : Rule30State := stateFlipAt 6 true
+  refine ⟨stateFlipAtOnBase base 1 false, stateFlipAtOnBase base 1 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAtOnBase_agree_except base 1 j false true hj
+  · decide
+
+theorem four_step_center_witness_i2 :
+    exists s1 s2,
+      (forall j, j ≠ 2 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterFourStep s1 ≠ rule30CenterFourStep s2 := by
+  let base : Rule30State := stateFlipAt 4 true
+  refine ⟨stateFlipAtOnBase base 2 false, stateFlipAtOnBase base 2 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAtOnBase_agree_except base 2 j false true hj
+  · decide
+
+theorem four_step_center_witness_i3 :
+    exists s1 s2,
+      (forall j, j ≠ 3 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterFourStep s1 ≠ rule30CenterFourStep s2 := by
+  let base : Rule30State := stateFlipAt 4 true
+  refine ⟨stateFlipAtOnBase base 3 false, stateFlipAtOnBase base 3 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAtOnBase_agree_except base 3 j false true hj
+  · decide
+
+theorem four_step_center_witness_i4 :
+    exists s1 s2,
+      (forall j, j ≠ 4 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterFourStep s1 ≠ rule30CenterFourStep s2 := by
+  refine ⟨stateFlipAt 4 false, stateFlipAt 4 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAt_agree_except 4 j hj
+  · decide
+
+theorem four_step_center_witness_i5 :
+    exists s1 s2,
+      (forall j, j ≠ 5 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterFourStep s1 ≠ rule30CenterFourStep s2 := by
+  let base : Rule30State := stateFlipAt 7 true
+  refine ⟨stateFlipAtOnBase base 5 false, stateFlipAtOnBase base 5 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAtOnBase_agree_except base 5 j false true hj
+  · decide
+
+theorem four_step_center_witness_i6 :
+    exists s1 s2,
+      (forall j, j ≠ 6 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterFourStep s1 ≠ rule30CenterFourStep s2 := by
+  let base : Rule30State := stateFlipAt 1 true
+  refine ⟨stateFlipAtOnBase base 6 false, stateFlipAtOnBase base 6 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAtOnBase_agree_except base 6 j false true hj
+  · decide
+
+theorem four_step_center_witness_i7 :
+    exists s1 s2,
+      (forall j, j ≠ 7 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterFourStep s1 ≠ rule30CenterFourStep s2 := by
+  refine ⟨stateFlipAt 7 false, stateFlipAt 7 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAt_agree_except 7 j hj
+  · decide
+
+theorem four_step_center_witness_i8 :
+    exists s1 s2,
+      (forall j, j ≠ 8 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterFourStep s1 ≠ rule30CenterFourStep s2 := by
+  refine ⟨stateFlipAt 8 false, stateFlipAt 8 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAt_agree_except 8 j hj
+  · decide
+
+-- Concrete four-step witness family across the full four-step required interval.
+theorem four_step_center_witness_of_le_eight (i : Nat) (hLe : i ≤ 8) :
+    exists s1 s2,
+      (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterFourStep s1 ≠ rule30CenterFourStep s2 := by
+  cases i with
+  | zero =>
+    simpa using four_step_center_witness_i0
+  | succ i =>
+    cases i with
+    | zero =>
+      simpa using four_step_center_witness_i1
+    | succ i =>
+      cases i with
+      | zero =>
+        simpa using four_step_center_witness_i2
+      | succ i =>
+        cases i with
+        | zero =>
+          simpa using four_step_center_witness_i3
+        | succ i =>
+          cases i with
+          | zero =>
+            simpa using four_step_center_witness_i4
+          | succ i =>
+            cases i with
+            | zero =>
+              simpa using four_step_center_witness_i5
+            | succ i =>
+              cases i with
+              | zero =>
+                simpa using four_step_center_witness_i6
+              | succ i =>
+                cases i with
+                | zero =>
+                  simpa using four_step_center_witness_i7
+                | succ i =>
+                  cases i with
+                  | zero =>
+                    simpa using four_step_center_witness_i8
+                  | succ i =>
+                    have hGt :
+                        8 <
+                          Nat.succ
+                            (Nat.succ
+                              (Nat.succ
+                                (Nat.succ
+                                  (Nat.succ
+                                    (Nat.succ
+                                      (Nat.succ
+                                        (Nat.succ (Nat.succ i)))))))) := by
+                      simp
+                    exact False.elim (Nat.not_lt_of_ge hLe hGt)
+
+-- Concrete four-step h_witness seed in bridge form.
+theorem four_step_center_h_witness_seed
+    (A : Algorithm Rule30State) :
+    forall i,
+      requiredAt 4 i ->
+      ¬ (A.observes 4 i) ->
+      exists s1 s2,
+        agreesOnObserved rule30Cell A 4 s1 s2 /\ rule30CenterFourStep s1 ≠ rule30CenterFourStep s2 := by
+  intro i hReq hNotObs
+  have hLe : i ≤ 8 := by
+    have hLe' : i <= 2 * 4 := (requiredAt_iff_le_two_mul 4 i).1 hReq
+    simpa using hLe'
+  rcases four_step_center_witness_of_le_eight i hLe with ⟨s1, s2, hEqExcept, hNe⟩
+  refine ⟨s1, s2, ?_, hNe⟩
+  intro j hObs
+  exact hEqExcept j (by
+    intro hji
+    apply hNotObs
+    simpa [hji] using hObs)
+
+-- Uniform small-horizon witness constructor seed (n = 0..4).
+theorem small_horizon_center_h_witness_seed_le_four
+    (A : Algorithm Rule30State) :
+    forall n i,
+      n <= 4 ->
+      requiredAt n i ->
+      ¬ (A.observes n i) ->
+      exists s1 s2,
+        agreesOnObserved rule30Cell A n s1 s2 /\ rule30CenterSmall n s1 ≠ rule30CenterSmall n s2 := by
+  intro n i hN hReq hNotObs
+  cases n with
+  | zero =>
+    rcases zero_step_center_h_witness_seed A i hReq hNotObs with ⟨s1, s2, hAgree, hNe⟩
+    exact ⟨s1, s2, hAgree, by simpa [rule30CenterSmall] using hNe⟩
+  | succ n =>
+    cases n with
+    | zero =>
+      rcases one_step_center_h_witness_seed A i hReq hNotObs with ⟨s1, s2, hAgree, hNe⟩
+      exact ⟨s1, s2, hAgree, by simpa [rule30CenterSmall] using hNe⟩
+    | succ n =>
+      cases n with
+      | zero =>
+        rcases two_step_center_h_witness_seed A i hReq hNotObs with ⟨s1, s2, hAgree, hNe⟩
+        exact ⟨s1, s2, hAgree, by simpa [rule30CenterSmall] using hNe⟩
+      | succ n =>
+        cases n with
+        | zero =>
+          rcases three_step_center_h_witness_seed A i hReq hNotObs with ⟨s1, s2, hAgree, hNe⟩
+          exact ⟨s1, s2, hAgree, by simpa [rule30CenterSmall] using hNe⟩
+        | succ n =>
+          cases n with
+          | zero =>
+            rcases four_step_center_h_witness_seed A i hReq hNotObs with ⟨s1, s2, hAgree, hNe⟩
+            exact ⟨s1, s2, hAgree, by simpa [rule30CenterSmall] using hNe⟩
+          | succ n =>
+            have hGt : 4 < Nat.succ (Nat.succ (Nat.succ (Nat.succ (Nat.succ n)))) := by simp
+            exact False.elim (Nat.not_lt_of_ge hN hGt)
+
+-- Small-horizon no-skip closure from exactness + observation determinism (`n <= 4`).
+theorem observes_required_small_horizon_of_exact_le_four
+    (A : Algorithm Rule30State)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact_small :
+      forall n, n <= 4 -> forall s, A.run n s = rule30CenterSmall n s) :
+    forall n i, n <= 4 -> requiredAt n i -> A.observes n i := by
+  intro n i hN hReq
+  by_cases hObs : A.observes n i
+  · exact hObs
+  · rcases small_horizon_center_h_witness_seed_le_four A n i hN hReq hObs with ⟨s1, s2, hAgree, hNe⟩
+    have hRunEq : A.run n s1 = A.run n s2 := h_obs_det n s1 s2 hAgree
+    have hTargetEq : rule30CenterSmall n s1 = rule30CenterSmall n s2 := by
+      rw [← h_exact_small n hN s1, ← h_exact_small n hN s2]
+      exact hRunEq
+    exact False.elim (hNe hTargetEq)
+
+-- Rec-target variant of the uniform small-horizon witness constructor (`n <= 4`).
+theorem small_horizon_center_h_witness_seed_rec_le_four
+    (A : Algorithm Rule30State) :
+    forall n i,
+      n <= 4 ->
+      requiredAt n i ->
+      ¬ (A.observes n i) ->
+      exists s1 s2,
+        agreesOnObserved rule30Cell A n s1 s2 /\ rule30CenterRec n s1 ≠ rule30CenterRec n s2 := by
+  intro n i hN hReq hNotObs
+  rcases small_horizon_center_h_witness_seed_le_four A n i hN hReq hNotObs with
+    ⟨s1, s2, hAgree, hNeSmall⟩
+  refine ⟨s1, s2, hAgree, ?_⟩
+  intro hEqRec
+  apply hNeSmall
+  rw [← rule30CenterRec_eq_small_of_le_four n hN s1, ← rule30CenterRec_eq_small_of_le_four n hN s2]
+  exact hEqRec
+
+-- Rec-target variant of small-horizon no-skip closure (`n <= 4`).
+theorem observes_required_small_horizon_of_exact_rec_le_four
+    (A : Algorithm Rule30State)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact_rec_small :
+      forall n, n <= 4 -> forall s, A.run n s = rule30CenterRec n s) :
+    forall n i, n <= 4 -> requiredAt n i -> A.observes n i := by
+  intro n i hN hReq
+  by_cases hObs : A.observes n i
+  · exact hObs
+  · rcases small_horizon_center_h_witness_seed_rec_le_four A n i hN hReq hObs with
+      ⟨s1, s2, hAgree, hNeRec⟩
+    have hRunEq : A.run n s1 = A.run n s2 := h_obs_det n s1 s2 hAgree
+    have hTargetEq : rule30CenterRec n s1 = rule30CenterRec n s2 := by
+      rw [← h_exact_rec_small n hN s1, ← h_exact_rec_small n hN s2]
+      exact hRunEq
+    exact False.elim (hNeRec hTargetEq)
+
+-- Uniform small-horizon witness constructor seed (n = 0..3).
+theorem small_horizon_center_h_witness_seed
+    (A : Algorithm Rule30State) :
+    forall n i,
+      n <= 3 ->
+      requiredAt n i ->
+      ¬ (A.observes n i) ->
+      exists s1 s2,
+        agreesOnObserved rule30Cell A n s1 s2 /\ rule30CenterSmall n s1 ≠ rule30CenterSmall n s2 := by
+  intro n i hN hReq hNotObs
+  cases n with
+  | zero =>
+    rcases zero_step_center_h_witness_seed A i hReq hNotObs with ⟨s1, s2, hAgree, hNe⟩
+    exact ⟨s1, s2, hAgree, by simpa [rule30CenterSmall] using hNe⟩
+  | succ n =>
+    cases n with
+    | zero =>
+      rcases one_step_center_h_witness_seed A i hReq hNotObs with ⟨s1, s2, hAgree, hNe⟩
+      exact ⟨s1, s2, hAgree, by simpa [rule30CenterSmall] using hNe⟩
+    | succ n =>
+      cases n with
+      | zero =>
+        rcases two_step_center_h_witness_seed A i hReq hNotObs with ⟨s1, s2, hAgree, hNe⟩
+        exact ⟨s1, s2, hAgree, by simpa [rule30CenterSmall] using hNe⟩
+      | succ n =>
+        cases n with
+        | zero =>
+          rcases three_step_center_h_witness_seed A i hReq hNotObs with ⟨s1, s2, hAgree, hNe⟩
+          exact ⟨s1, s2, hAgree, by simpa [rule30CenterSmall] using hNe⟩
+        | succ n =>
+          have hGt : 3 < Nat.succ (Nat.succ (Nat.succ (Nat.succ n))) := by simp
+          exact False.elim (Nat.not_lt_of_ge hN hGt)
+
+-- Small-horizon no-skip closure from exactness + observation determinism.
+theorem observes_required_small_horizon_of_exact
+    (A : Algorithm Rule30State)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact_small :
+      forall n, n <= 3 -> forall s, A.run n s = rule30CenterSmall n s) :
+    forall n i, n <= 3 -> requiredAt n i -> A.observes n i := by
+  intro n i hN hReq
+  by_cases hObs : A.observes n i
+  · exact hObs
+  · rcases small_horizon_center_h_witness_seed A n i hN hReq hObs with ⟨s1, s2, hAgree, hNe⟩
+    have hRunEq : A.run n s1 = A.run n s2 := h_obs_det n s1 s2 hAgree
+    have hTargetEq : rule30CenterSmall n s1 = rule30CenterSmall n s2 := by
+      rw [← h_exact_small n hN s1, ← h_exact_small n hN s2]
+      exact hRunEq
+    exact False.elim (hNe hTargetEq)
+
+-- Per-generation Rule30 center witness predicate for bridge discharge.
+def Rule30CenterWitnessAt
+    (A : Algorithm Rule30State)
+    (target : Nat -> Rule30State -> Bool)
+    (n : Nat) : Prop :=
+  forall i,
+    requiredAt n i ->
+    ¬ (A.observes n i) ->
+    exists s1 s2,
+      agreesOnObserved rule30Cell A n s1 s2 /\ target n s1 ≠ target n s2
+
+-- Small-horizon witness predicate instance for the concrete small target.
+theorem rule30CenterWitnessAt_small_horizon
+    (A : Algorithm Rule30State) :
+    forall n, n <= 3 -> Rule30CenterWitnessAt A rule30CenterSmall n := by
+  intro n hN i hReq hNotObs
+  exact small_horizon_center_h_witness_seed A n i hN hReq hNotObs
+
+-- Small-horizon witness predicate instance for the concrete small target (`n <= 4`).
+theorem rule30CenterWitnessAt_small_horizon_le_four
+    (A : Algorithm Rule30State) :
+    forall n, n <= 4 -> Rule30CenterWitnessAt A rule30CenterSmall n := by
+  intro n hN i hReq hNotObs
+  exact small_horizon_center_h_witness_seed_le_four A n i hN hReq hNotObs
+
+-- Induction scaffold:
+-- if witnesses hold on small horizons and can be propagated one generation
+-- from n to n+1 for n >= 3, then they hold for all n.
+theorem rule30CenterWitnessAt_of_small_horizon_and_step
+    (A : Algorithm Rule30State)
+    (target : Nat -> Rule30State -> Bool)
+    (hBase : forall n, n <= 3 -> Rule30CenterWitnessAt A target n)
+    (hStep :
+      forall n,
+        3 <= n ->
+        Rule30CenterWitnessAt A target n ->
+        Rule30CenterWitnessAt A target (n + 1)) :
+    forall n, Rule30CenterWitnessAt A target n := by
+  intro n
+  induction n with
+  | zero =>
+    exact hBase 0 (by simp)
+  | succ n ih =>
+    by_cases hSmall : Nat.succ n <= 3
+    · exact hBase (Nat.succ n) hSmall
+    · have hGe3 : 3 <= n := by
+        have hLt : 3 < Nat.succ n := Nat.lt_of_not_ge hSmall
+        exact Nat.lt_succ_iff.mp hLt
+      exact hStep n hGe3 ih
+
+-- Variant of the induction scaffold with explicit base horizon `n <= 4`.
+theorem rule30CenterWitnessAt_of_small_horizon_le_four_and_step
+    (A : Algorithm Rule30State)
+    (target : Nat -> Rule30State -> Bool)
+    (hBase : forall n, n <= 4 -> Rule30CenterWitnessAt A target n)
+    (hStep :
+      forall n,
+        4 <= n ->
+        Rule30CenterWitnessAt A target n ->
+        Rule30CenterWitnessAt A target (n + 1)) :
+    forall n, Rule30CenterWitnessAt A target n := by
+  intro n
+  induction n with
+  | zero =>
+    exact hBase 0 (by simp)
+  | succ n ih =>
+    by_cases hSmall : Nat.succ n <= 4
+    · exact hBase (Nat.succ n) hSmall
+    · have hGe4 : 4 <= n := by
+        have hLt : 4 < Nat.succ n := Nat.lt_of_not_ge hSmall
+        exact Nat.lt_succ_iff.mp hLt
+      exact hStep n hGe4 ih
+
+-- Bridge discharge from a full witness family.
+theorem observes_required_of_rule30CenterWitnessAt
+    (A : Algorithm Rule30State)
+    (target : Nat -> Rule30State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (hWitness : forall n, Rule30CenterWitnessAt A target n) :
+    forall n i, requiredAt n i -> A.observes n i := by
+  intro n i hReq
+  exact must_observe_required
+    (cell := rule30Cell)
+    A target h_obs_det h_exact
+    (fun n i hReq' hNotObs => hWitness n i hReq' hNotObs)
+    n i hReq
+
+-- Step adapter:
+-- if we can build next-generation pointwise-difference witnesses in arithmetic
+-- form (`i <= 2*(n+1)`), we obtain the witness predicate at `n+1`.
+theorem rule30CenterWitnessAt_next_gen_of_pointwise_diff
+    (A : Algorithm Rule30State)
+    (target : Nat -> Rule30State -> Bool)
+    (hConcreteNext :
+      forall n i,
+        i <= 2 * (n + 1) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          target (n + 1) s1 ≠ target (n + 1) s2) :
+    forall n, Rule30CenterWitnessAt A target (n + 1) := by
+  intro n i hReq hNotObs
+  have hLe : i <= 2 * (n + 1) := (requiredAt_iff_le_two_mul (n + 1) i).1 hReq
+  rcases hConcreteNext n i hLe hNotObs with ⟨s1, s2, hEqExcept, hNe⟩
+  refine ⟨s1, s2, ?_, hNe⟩
+  intro j hObs
+  exact hEqExcept j (by
+    intro hji
+    apply hNotObs
+    simpa [hji] using hObs)
+
+-- Induction-step constructor:
+-- combine a next-generation concrete witness builder with the generic scaffold.
+theorem rule30CenterWitnessAt_step_of_pointwise_diff
+    (A : Algorithm Rule30State)
+    (target : Nat -> Rule30State -> Bool)
+    (hConcreteNext :
+      forall n i,
+        i <= 2 * (n + 1) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          target (n + 1) s1 ≠ target (n + 1) s2) :
+    forall n,
+      3 <= n ->
+      Rule30CenterWitnessAt A target n ->
+      Rule30CenterWitnessAt A target (n + 1) := by
+  intro n _hGe _hPrev
+  exact rule30CenterWitnessAt_next_gen_of_pointwise_diff A target hConcreteNext n
+
+-- Full witness-family constructor from:
+-- (1) explicit small-horizon base (`n <= 3`) and
+-- (2) next-generation concrete pointwise-difference witnesses.
+theorem rule30CenterWitnessAt_all_of_small_horizon_and_pointwise_next
+    (A : Algorithm Rule30State)
+    (target : Nat -> Rule30State -> Bool)
+    (hBase : forall n, n <= 3 -> Rule30CenterWitnessAt A target n)
+    (hConcreteNext :
+      forall n i,
+        i <= 2 * (n + 1) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          target (n + 1) s1 ≠ target (n + 1) s2) :
+    forall n, Rule30CenterWitnessAt A target n := by
+  exact rule30CenterWitnessAt_of_small_horizon_and_step
+    A target hBase
+    (rule30CenterWitnessAt_step_of_pointwise_diff A target hConcreteNext)
+
+-- Full witness-family constructor from:
+-- (1) explicit small-horizon base (`n <= 4`) and
+-- (2) next-generation concrete pointwise-difference witnesses.
+theorem rule30CenterWitnessAt_all_of_small_horizon_le_four_and_pointwise_next
+    (A : Algorithm Rule30State)
+    (target : Nat -> Rule30State -> Bool)
+    (hBase : forall n, n <= 4 -> Rule30CenterWitnessAt A target n)
+    (hConcreteNext :
+      forall n i,
+        i <= 2 * (n + 1) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          target (n + 1) s1 ≠ target (n + 1) s2) :
+    forall n, Rule30CenterWitnessAt A target n := by
+  exact rule30CenterWitnessAt_of_small_horizon_le_four_and_step
+    A target hBase
+    (fun n _hGe4 _hPrev =>
+      rule30CenterWitnessAt_next_gen_of_pointwise_diff A target hConcreteNext n)
+
+-- Full no-skip closure from the same two ingredients.
+theorem observes_required_of_small_horizon_and_pointwise_next
+    (A : Algorithm Rule30State)
+    (target : Nat -> Rule30State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (hBase : forall n, n <= 3 -> Rule30CenterWitnessAt A target n)
+    (hConcreteNext :
+      forall n i,
+        i <= 2 * (n + 1) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          target (n + 1) s1 ≠ target (n + 1) s2) :
+    forall n i, requiredAt n i -> A.observes n i := by
+  intro n i hReq
+  exact observes_required_of_rule30CenterWitnessAt
+    A target h_obs_det h_exact
+    (rule30CenterWitnessAt_all_of_small_horizon_and_pointwise_next
+      A target hBase hConcreteNext)
+    n i hReq
+
+-- Specialization with the concrete small-horizon base constructor.
+theorem observes_required_of_rule30CenterSmall_base_and_pointwise_next
+    (A : Algorithm Rule30State)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A rule30CenterSmall)
+    (hConcreteNext :
+      forall n i,
+        i <= 2 * (n + 1) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30CenterSmall (n + 1) s1 ≠ rule30CenterSmall (n + 1) s2) :
+    forall n i, requiredAt n i -> A.observes n i := by
+  intro n i hReq
+  exact observes_required_of_small_horizon_and_pointwise_next
+    A rule30CenterSmall h_obs_det h_exact
+    (rule30CenterWitnessAt_small_horizon A) hConcreteNext
+    n i hReq
+
+-- Recursive-target full witness-family constructor from:
+-- (1) rec-target small-horizon base (`n <= 4`) and
+-- (2) recursive-target next-generation pointwise-difference witnesses.
+theorem rule30CenterRec_witness_all_of_small_horizon_and_pointwise_next
+    (A : Algorithm Rule30State)
+    (hConcreteNextRec :
+      forall n i,
+        i <= 2 * (n + 1) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2) :
+    forall n, Rule30CenterWitnessAt A rule30CenterRec n := by
+  exact rule30CenterWitnessAt_all_of_small_horizon_le_four_and_pointwise_next
+    A rule30CenterRec
+    (fun n hN =>
+      by
+        intro i hReq hNotObs
+        exact small_horizon_center_h_witness_seed_rec_le_four A n i hN hReq hNotObs)
+    hConcreteNextRec
+
+-- Recursive-target full no-skip closure from:
+-- deterministic observed semantics + exactness to `rule30CenterRec`
+-- + rec-target next-generation pointwise witnesses.
+theorem observes_required_of_rule30CenterRec_base_and_pointwise_next
+    (A : Algorithm Rule30State)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact_rec : exactFor A rule30CenterRec)
+    (hConcreteNextRec :
+      forall n i,
+        i <= 2 * (n + 1) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2) :
+    forall n i, requiredAt n i -> A.observes n i := by
+  intro n i hReq
+  exact observes_required_of_rule30CenterWitnessAt
+    A rule30CenterRec h_obs_det h_exact_rec
+    (rule30CenterRec_witness_all_of_small_horizon_and_pointwise_next A hConcreteNextRec)
+    n i hReq
+
+-- Concrete n=2 bridge closure: the two-step witness seed forces observation
+-- of every required index at generation 2 under local exactness/determinism.
+theorem observes_required_at_two_of_two_step_center_seed
+    (A : Algorithm Rule30State)
+    (h_obs_det2 :
+      forall s1 s2,
+        agreesOnObserved rule30Cell A 2 s1 s2 -> A.run 2 s1 = A.run 2 s2)
+    (h_exact2 : forall s, A.run 2 s = rule30CenterTwoStep s) :
+    forall i, requiredAt 2 i -> A.observes 2 i := by
+  intro i hReq
+  by_cases hObs : A.observes 2 i
+  · exact hObs
+  · rcases two_step_center_h_witness_seed A i hReq hObs with ⟨s1, s2, hAgree, hTargetNe⟩
+    have hRunEq : A.run 2 s1 = A.run 2 s2 := h_obs_det2 s1 s2 hAgree
+    have hTargetEq : rule30CenterTwoStep s1 = rule30CenterTwoStep s2 := by
+      rw [← h_exact2 s1, ← h_exact2 s2]
+      exact hRunEq
+    exact False.elim (hTargetNe hTargetEq)
+
+-- Concrete n=3 bridge closure: the three-step witness seed forces observation
+-- of every required index at generation 3 under local exactness/determinism.
+theorem observes_required_at_three_of_three_step_center_seed
+    (A : Algorithm Rule30State)
+    (h_obs_det3 :
+      forall s1 s2,
+        agreesOnObserved rule30Cell A 3 s1 s2 -> A.run 3 s1 = A.run 3 s2)
+    (h_exact3 : forall s, A.run 3 s = rule30CenterThreeStep s) :
+    forall i, requiredAt 3 i -> A.observes 3 i := by
+  intro i hReq
+  by_cases hObs : A.observes 3 i
+  · exact hObs
+  · rcases three_step_center_h_witness_seed A i hReq hObs with ⟨s1, s2, hAgree, hTargetNe⟩
+    have hRunEq : A.run 3 s1 = A.run 3 s2 := h_obs_det3 s1 s2 hAgree
+    have hTargetEq : rule30CenterThreeStep s1 = rule30CenterThreeStep s2 := by
+      rw [← h_exact3 s1, ← h_exact3 s2]
+      exact hRunEq
+    exact False.elim (hTargetNe hTargetEq)
+
+-- Concrete n=4 bridge closure: the four-step witness seed forces observation
+-- of every required index at generation 4 under local exactness/determinism.
+theorem observes_required_at_four_of_four_step_center_seed
+    (A : Algorithm Rule30State)
+    (h_obs_det4 :
+      forall s1 s2,
+        agreesOnObserved rule30Cell A 4 s1 s2 -> A.run 4 s1 = A.run 4 s2)
+    (h_exact4 : forall s, A.run 4 s = rule30CenterFourStep s) :
+    forall i, requiredAt 4 i -> A.observes 4 i := by
+  intro i hReq
+  by_cases hObs : A.observes 4 i
+  · exact hObs
+  · rcases four_step_center_h_witness_seed A i hReq hObs with ⟨s1, s2, hAgree, hTargetNe⟩
+    have hRunEq : A.run 4 s1 = A.run 4 s2 := h_obs_det4 s1 s2 hAgree
+    have hTargetEq : rule30CenterFourStep s1 = rule30CenterFourStep s2 := by
+      rw [← h_exact4 s1, ← h_exact4 s2]
+      exact hRunEq
+    exact False.elim (hTargetNe hTargetEq)
 
 -- Center-target witness in direct requiredAt form (h_witness shape).
 theorem witness_rule30_center_requiredAt_of_pointwise_diff
@@ -333,6 +1333,20 @@ theorem witness_rule30_center_requiredAt_of_pointwise_diff
   intro n i hReq hNotObs
   exact witness_rule30_center_le_two_mul_of_pointwise_diff A hConcreteCenter n i
     ((requiredAt_iff_le_two_mul n i).1 hReq) hNotObs
+
+-- Package the direct requiredAt witness adapter as a per-generation witness family.
+theorem rule30CenterWitnessAt_rule30_center_of_pointwise_diff
+    (A : Algorithm Rule30State)
+    (hConcreteCenter :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 n ≠ rule30Cell s2 n) :
+    forall n, Rule30CenterWitnessAt A (fun k s => rule30Cell s k) n := by
+  intro n i hReq hNotObs
+  exact witness_rule30_center_requiredAt_of_pointwise_diff A hConcreteCenter n i hReq hNotObs
 
 -- Center-target witness in direct requiredAt form from non-beyond-boundary
 -- concrete hypotheses (¬(2n < i)).
@@ -356,6 +1370,22 @@ theorem witness_rule30_center_requiredAt_of_pointwise_diff_not_two_mul_lt
     (fun n' i' hLe hNotObs' =>
       hConcreteCenterNotTwoMulLt n' i' (Nat.not_lt_of_ge hLe) hNotObs')
     n i hReq hNotObs
+
+-- Package the non-beyond-boundary requiredAt witness adapter as a
+-- per-generation witness family.
+theorem rule30CenterWitnessAt_rule30_center_of_pointwise_diff_not_two_mul_lt
+    (A : Algorithm Rule30State)
+    (hConcreteCenterNotTwoMulLt :
+      forall n i,
+        ¬ (2 * n < i) ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 n ≠ rule30Cell s2 n) :
+    forall n, Rule30CenterWitnessAt A (fun k s => rule30Cell s k) n := by
+  intro n i hReq hNotObs
+  exact witness_rule30_center_requiredAt_of_pointwise_diff_not_two_mul_lt
+    A hConcreteCenterNotTwoMulLt n i hReq hNotObs
 
 -- Center-target witness in direct next-generation requiredAt form.
 theorem witness_rule30_center_requiredAt_next_gen_of_pointwise_diff
@@ -833,6 +1863,25 @@ theorem must_observe_required_next_gen_rule30_center_of_pointwise_diff_witness_n
       witness_rule30_center_requiredAt_next_gen_of_pointwise_diff_not_two_mul_add_two_lt
         A hConcreteCenterNotTwoMulAddTwoLt n' i'
         (requiredAt_of_not_two_mul_add_two_lt_next_gen n' i' hNotLt) hNotObs) n i hReq
+
+-- Direct center-slice next-generation corollary in non-beyond-boundary form.
+theorem must_observe_next_gen_of_not_two_mul_add_two_lt_rule30_center_of_pointwise_diff_witness
+    (A : Algorithm Rule30State)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A (fun n s => rule30Cell s n))
+    (hConcreteCenterNotTwoMulAddTwoLt :
+      forall n i,
+        ¬ (2 * n + 2 < i) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 (n + 1) ≠ rule30Cell s2 (n + 1)) :
+    forall n i, ¬ (2 * n + 2 < i) -> A.observes (n + 1) i := by
+  intro n i hNotLt
+  exact must_observe_required_next_gen_rule30_center_of_pointwise_diff_witness_not_two_mul_add_two_lt
+    A h_obs_det h_exact hConcreteCenterNotTwoMulAddTwoLt n i
+    (requiredAt_of_not_two_mul_add_two_lt_next_gen n i hNotLt)
 
 -- Every index either lies in the required interval or is strictly beyond it.
 theorem requiredAt_or_two_mul_lt (n i : Nat) : requiredAt n i ∨ 2 * n < i := by
@@ -1666,6 +2715,28 @@ theorem observed_and_bounded_next_gen_rule30_center_of_not_two_mul_add_two_lt_of
       A h_obs_det h_exact hConcreteCenterNotTwoMulAddTwoLt n i hReq
   · exact work_ge_requiredCells_implies_requiredAt_next_gen_le_work work h_account n i hReq
 
+-- Concrete Rule30 center-target next-generation requiredness specialization:
+-- requiredAt (n+1) i directly yields observation and work bound.
+theorem observed_and_bounded_next_gen_rule30_center_of_requiredAt_of_pointwise_diff_witness_not_two_mul_add_two_lt_and_accounting
+    (A : Algorithm Rule30State)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A (fun n s => rule30Cell s n))
+    (hConcreteCenterNotTwoMulAddTwoLt :
+      forall n i,
+        ¬ (2 * n + 2 < i) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 (n + 1) ≠ rule30Cell s2 (n + 1))
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n i, requiredAt (n + 1) i -> (A.observes (n + 1) i /\ i <= work (n + 1)) := by
+  intro n i hReq
+  exact observed_and_bounded_next_gen_rule30_center_of_not_two_mul_add_two_lt_of_pointwise_diff_witness_and_accounting
+    A work h_obs_det h_exact hConcreteCenterNotTwoMulAddTwoLt h_account n i
+    ((requiredAt_iff_not_two_mul_add_two_lt_next_gen n i).1 hReq)
+
 -- Concrete Rule30 center-target endpoint specialization at generation n+1
 -- from the non-beyond-boundary witness form.
 theorem endpoint_next_gen_observed_and_bounded_rule30_center_of_not_two_mul_add_two_lt_of_pointwise_diff_witness_and_accounting
@@ -1877,6 +2948,29 @@ theorem exists_observed_required_and_bounded_rule30_center_of_pointwise_diff_wit
     (cell := rule30Cell) A (fun k s => rule30Cell s k) work h_obs_det h_exact
     (witness_rule30_center_requiredAt_of_pointwise_diff A hConcrete) h_account n
 
+-- Concrete Rule30 center-target existence packaging at generation n from
+-- explicit non-beyond-boundary witness obligations.
+theorem exists_observed_required_and_bounded_rule30_center_of_not_two_mul_lt_of_pointwise_diff_witness_and_accounting
+    (A : Algorithm Rule30State)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A (fun n s => rule30Cell s n))
+    (hConcreteCenterNotTwoMulLt :
+      forall n i,
+        ¬ (2 * n < i) ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 n ≠ rule30Cell s2 n)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, exists i, requiredAt n i /\ A.observes n i /\ i <= work n := by
+  intro n
+  refine ⟨2 * n, (requiredAt_iff_le_two_mul n (2 * n)).2 (Nat.le_refl (2 * n)), ?_⟩
+  exact observed_and_bounded_rule30_center_of_not_two_mul_lt_of_pointwise_diff_witness_and_accounting
+    A work h_obs_det h_exact hConcreteCenterNotTwoMulLt h_account n (2 * n)
+    (Nat.not_lt_of_ge (Nat.le_refl (2 * n)))
+
 -- Concrete Rule30 center-target next-generation existence packaging.
 theorem exists_observed_required_and_bounded_next_gen_rule30_center_of_pointwise_diff_witness_and_accounting
     (A : Algorithm Rule30State)
@@ -1922,6 +3016,39 @@ theorem exists_observed_required_and_bounded_next_gen_rule30_center_of_not_two_m
   refine ⟨2 * n + 2, requiredAt_two_mul_add_two_next_gen n, ?_⟩
   exact endpoint_next_gen_observed_and_bounded_rule30_center_of_not_two_mul_add_two_lt_of_pointwise_diff_witness_and_accounting
     A work h_obs_det h_exact hConcreteCenterNotTwoMulAddTwoLt h_account n
+
+-- Paired existence packaging across adjacent generations in non-beyond-boundary form:
+-- one observed+bounded required index at generation n and one at generation n+1.
+theorem exists_observed_and_bounded_rule30_center_pair_of_not_two_mul_lt_and_not_two_mul_add_two_lt
+    (A : Algorithm Rule30State)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A (fun n s => rule30Cell s n))
+    (hConcreteCenterNotTwoMulLt :
+      forall n i,
+        ¬ (2 * n < i) ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 n ≠ rule30Cell s2 n)
+    (hConcreteCenterNotTwoMulAddTwoLt :
+      forall n i,
+        ¬ (2 * n + 2 < i) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 (n + 1) ≠ rule30Cell s2 (n + 1))
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n,
+      (exists i, requiredAt n i /\ A.observes n i /\ i <= work n) /\
+      (exists i, requiredAt (n + 1) i /\ A.observes (n + 1) i /\ i <= work (n + 1)) := by
+  intro n
+  constructor
+  · exact exists_observed_required_and_bounded_rule30_center_of_not_two_mul_lt_of_pointwise_diff_witness_and_accounting
+      A work h_obs_det h_exact hConcreteCenterNotTwoMulLt h_account n
+  · exact exists_observed_required_and_bounded_next_gen_rule30_center_of_not_two_mul_add_two_lt_of_pointwise_diff_witness_and_accounting
+      A work h_obs_det h_exact hConcreteCenterNotTwoMulAddTwoLt h_account n
 
 -- Next-generation existence packaging: the same conditional structure at n+1.
 theorem exists_observed_required_and_bounded_next_gen_of_exact_and_accounting

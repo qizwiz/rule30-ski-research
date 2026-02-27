@@ -1,6 +1,6 @@
 # Prize3 Lower-Bound Core (M_cone_exact, draft v1)
 
-Date: 2026-02-26
+Date: 2026-02-27
 
 This note isolates the lower-bound core argument in a claim-hygienic way.
 
@@ -46,6 +46,8 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `observes_self_of_exact` (proved corollary: under same hypotheses, exactness forces observation of index `n`)
   - `observes_cone_interval_of_exact` / `observes_two_mul_of_exact` (proved corollaries: under scaffold hypotheses, exactness forces observation over `i ≤ 2n`, including endpoint `i = 2n`)
   - `observes_required_next_gen_of_exact` / `observes_prefix_next_gen_of_exact` (proved: under same scaffold hypotheses, required/prefix indices at generation `n` are forced observed at generation `n+1`)
+  - `rule30CenterWitnessAt_of_small_horizon_le_four_and_step` / `rule30CenterWitnessAt_all_of_small_horizon_le_four_and_pointwise_next` (proved: generic witness-family induction scaffold and constructor upgraded to an explicit `n <= 4` base horizon)
+  - `rule30CenterRec_witness_all_of_small_horizon_and_pointwise_next` (proved: recursive-center witness-family constructor now composes from explicit `n <= 4` rec-target base plus next-generation pointwise witnesses)
   - `requiredAt_next_gen_iff_le_two_mul_add_two` / `requiredAt_of_le_two_mul_add_one_next_gen` (proved: explicit `n+1` boundary characterization and inclusion up to `2n+1`)
   - `requiredAt_next_gen_iff_lt_two_mul_add_two_or_eq_two_mul_add_two` (proved: requiredness at generation `n+1` decomposes into strict-prefix or endpoint case at boundary `2n+2`)
   - `requiredAt_of_le_two_mul_add_two_next_gen` / `requiredAt_two_mul_add_two_next_gen` / `not_requiredAt_two_mul_add_three_next_gen` (proved: explicit `n+1` endpoint inclusion and first-outside exclusion)
