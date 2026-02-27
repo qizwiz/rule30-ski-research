@@ -201,6 +201,97 @@ theorem essential_n4_k7 : Essential 4 ⟨7, by omega⟩ :=
 
 theorem essential_n4_k8 : Essential 4 ⟨8, by omega⟩ :=
   ⟨configOfMask 4 0, by native_decide⟩
+-- ─── BOUNDARY CELL FULL SENSITIVITY (M1) ────────────────────────────────────
+--
+-- We prove the STRONGER statement for the left boundary cell (k=0):
+--   rule30n n (flipCell c ⟨0,...⟩) = !(rule30n n c)   for ALL configs c
+-- This is "full sensitivity" — not just ∃ witness, but ∀ config.
+--
+-- Proof chain:
+--   (1) rule30Local_flip_first:   flipping first arg complements output
+--   (2) caStep_length:            caStep shrinks list by 2
+--   (3) caStep_modifyHead_not:    caStep commutes with flipping the head
+--   (4) caEvolve_modifyHead_not:  n steps propagate the head-flip to the result
+--   (5) ofFn_modifyHead_flipFirst: flipCell at k=0 = modifyHead on configToList
+--   (6) left_boundary_full_sensitive: the theorem itself
+
+-- (1) Flipping the first argument of rule30Local complements the output.
+--     Proof: XOR is linear in its first argument: (!p) XOR x = !(p XOR x).
+theorem rule30Local_flip_first (p q r : Bool) :
+    rule30Local (!p) q r = !(rule30Local p q r) := by
+  cases p <;> cases q <;> cases r <;> rfl
+
+-- (2) caStep reduces list length by exactly 2 (or to 0 if list is too short).
+theorem caStep_length : ∀ l : List Bool, (caStep l).length = l.length - 2
+  | []                  => by simp [caStep]
+  | [_]                 => by simp [caStep]
+  | [_, _]              => by simp [caStep]
+  | _ :: b :: c :: rest => by
+      simp only [caStep, List.length_cons]
+      have := caStep_length (b :: c :: rest)
+      simp only [List.length_cons] at this
+      omega
+
+-- (3) Flipping the head of the input list flips the head of caStep's output.
+--     The tail of caStep's output doesn't depend on the head, so it's unchanged.
+theorem caStep_modifyHead_not (l : List Bool) (h : 3 ≤ l.length) :
+    caStep (l.modifyHead Bool.not) = (caStep l).modifyHead Bool.not := by
+  match l, h with
+  | b :: q :: r :: rest, _ =>
+    simp only [List.modifyHead, caStep, rule30Local_flip_first]
+
+-- (4) After n CA steps on a 2n+1 list, flipping the head flips the final output.
+--     Induction: each step preserves the "flipped-head" invariant via (3).
+theorem caEvolve_modifyHead_not (n : Nat) (l : List Bool) (hl : l.length = 2 * n + 1) :
+    (caEvolve n (l.modifyHead Bool.not)).headD false =
+    !((caEvolve n l).headD false) := by
+  induction n generalizing l with
+  | zero =>
+    -- l has length 1, so l = [b]
+    match l with
+    | [b] => simp [caEvolve, List.modifyHead, List.headD]
+  | succ n ih =>
+    simp only [caEvolve]
+    -- l has length 2(n+1)+1 = 2n+3 ≥ 3, so caStep_modifyHead_not applies
+    have hlen3 : 3 ≤ l.length := by omega
+    rw [caStep_modifyHead_not l hlen3]
+    -- Now apply ih to caStep l, which has length 2n+1
+    apply ih
+    have := caStep_length l
+    omega
+
+-- (5) flipCell at index 0 corresponds to modifyHead Bool.not on configToList.
+--     Both produce a list identical to the original except the first element is flipped.
+theorem ofFn_modifyHead_flipFirst {n : Nat} (c : Config n) :
+    configToList (flipCell c ⟨0, by omega⟩) = (configToList c).modifyHead Bool.not := by
+  simp only [configToList]
+  -- Expand flipCell to its lambda definition
+  unfold flipCell
+  -- Split the head off both sides using List.ofFn_succ, then simplify modifyHead
+  simp only [List.ofFn_succ, List.modifyHead, Fin.ext_iff, Fin.val_zero, ite_true]
+  -- Head: (if 0.val = 0 then !c 0 else c 0) = !c 0  ✓ by ite_true
+  -- Tail: (if (i.succ).val = 0 then !c i.succ else c i.succ) = c i.succ
+  --       reduces to rfl since (i.succ).val = i.val+1 ≠ 0 definitionally
+  rfl
+
+-- (6) THE LEFT BOUNDARY FULL SENSITIVITY THEOREM.
+--     For ALL configs c, flipping the leftmost initial cell complements the output.
+--     This is strictly stronger than "essential": it holds for every config, not just ∃ one.
+theorem left_boundary_full_sensitive (n : Nat) (c : Config n) :
+    rule30n n (flipCell c ⟨0, by omega⟩) = !(rule30n n c) := by
+  simp only [rule30n, ofFn_modifyHead_flipFirst]
+  exact caEvolve_modifyHead_not n (configToList c)
+    (by simp [configToList, List.length_ofFn])
+
+-- Immediate corollary: left boundary is essential for ALL n (no witness needed).
+theorem essential_left_boundary (n : Nat) : Essential n ⟨0, by omega⟩ :=
+  -- Witness: all-zeros config. rule30n gives some value b; flipped gives !b ≠ b.
+  ⟨fun _ => false, by
+    rw [left_boundary_full_sensitive]
+    intro h
+    exact (Bool.not_eq_self _).mp h.symm⟩
+
+-- ─── KEY OPEN THEOREM (the Prize #3 sensitivity lemma) ───────────────────────
 
 -- ─── KEY OPEN THEOREM (the Prize #3 sensitivity lemma) ───────────────────────
 
