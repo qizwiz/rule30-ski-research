@@ -968,6 +968,53 @@ theorem near_endpoint_next_gen_observed_and_bounded_of_exact_and_accounting
     (cell := cell) A target work h_obs_det h_exact h_witness h_account n (2 * n + 1)
     (requiredAt_of_le_two_mul_add_one_next_gen n (2 * n + 1) (Nat.le_refl (2 * n + 1)))
 
+-- Existence packaging at generation n: at least one index is required, observed,
+-- and bounded by work under the same conditional hypotheses.
+theorem exists_observed_required_and_bounded_of_exact_and_accounting
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, exists i, requiredAt n i /\ A.observes n i /\ i <= work n := by
+  intro n
+  refine ⟨0, requiredAt_zero n, ?_⟩
+  constructor
+  · exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness n 0 (requiredAt_zero n)
+  · exact work_ge_requiredCells_implies_requiredAt_le_work work h_account n 0 (requiredAt_zero n)
+
+-- Next-generation existence packaging: the same conditional structure at n+1.
+theorem exists_observed_required_and_bounded_next_gen_of_exact_and_accounting
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, exists i, requiredAt (n + 1) i /\ A.observes (n + 1) i /\ i <= work (n + 1) := by
+  intro n
+  refine ⟨2 * n + 2, requiredAt_two_mul_add_two_next_gen n, ?_⟩
+  constructor
+  · exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness
+      (n + 1) (2 * n + 2) (requiredAt_two_mul_add_two_next_gen n)
+  · exact work_ge_requiredCells_implies_requiredAt_next_gen_le_work work h_account n
+      (2 * n + 2) (requiredAt_two_mul_add_two_next_gen n)
+
 end BridgeCostComposition
 
 end Prize3

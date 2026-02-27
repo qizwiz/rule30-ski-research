@@ -26,6 +26,7 @@ This note is for funding/outreach context only. It does not claim theorem comple
   - Conditional cost-transfer scaffold (explicit accounting hypothesis), including per-index bounds `work_ge_requiredCells_implies_requiredAt_le_work`, `work_ge_requiredCells_implies_requiredAt_next_gen_le_work` and next-generation endpoint/near-endpoint bounds `work_ge_requiredCells_implies_two_mul_add_two_next_gen`, `work_ge_requiredCells_implies_two_mul_add_one_next_gen`
   - Conditional composition scaffold joining exactness+witness+accounting hypotheses (`required_observed_and_bounded_of_exact_and_accounting`, `required_observed_and_bounded_next_gen_of_exact_and_accounting`)
   - Endpoint-specialized conditional composition corollaries (`endpoint_observed_and_bounded_of_exact_and_accounting`, `endpoint_next_gen_observed_and_bounded_of_exact_and_accounting`, `near_endpoint_next_gen_observed_and_bounded_of_exact_and_accounting`)
+  - Existence-form conditional composition corollaries (`exists_observed_required_and_bounded_of_exact_and_accounting`, `exists_observed_required_and_bounded_next_gen_of_exact_and_accounting`)
   - Phase 3 obligation matrix with explicit open/closed status (`prize3/phase3_obligation_matrix.md`)
 - Empirical (not proof):
   - Repro/runtime checks only; no empirical estimate is used as a Prize3 proof step.

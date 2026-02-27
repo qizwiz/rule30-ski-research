@@ -58,6 +58,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `endpoint_observed_and_bounded_of_exact_and_accounting` (proved: under the same scaffold hypotheses, exactness+accounting force observation and work-bound at endpoint `i = 2n`)
   - `endpoint_next_gen_observed_and_bounded_of_exact_and_accounting` (proved: under the same scaffold hypotheses, exactness+accounting force observation and work-bound at next-generation endpoint `i = 2n+2`)
   - `near_endpoint_next_gen_observed_and_bounded_of_exact_and_accounting` (proved: under the same scaffold hypotheses, exactness+accounting force observation and work-bound at near-endpoint `i = 2n+1` in generation `n+1`)
+  - `exists_observed_required_and_bounded_of_exact_and_accounting` / `exists_observed_required_and_bounded_next_gen_of_exact_and_accounting` (proved existence packagings: under the same scaffold hypotheses, there exists at least one required index that is both observed and bounded by work at `n` and `n+1`)
 
 ## Empirical (not proof)
 - No Prize3 lower-bound empirical estimate is treated as proof in this track.
