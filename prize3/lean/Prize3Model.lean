@@ -984,6 +984,49 @@ theorem required_observed_and_bounded_next_gen_of_exact_and_accounting
   · exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness (n + 1) i hReq
   · exact work_ge_requiredCells_implies_requiredAt_next_gen_le_work work h_account n i hReq
 
+-- Non-beyond-boundary adapter at generation n: if i is not beyond 2n,
+-- exactness+witness+accounting force both observation and work bound.
+theorem observed_and_bounded_of_not_two_mul_lt_of_exact_and_accounting
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n i, ¬ (2 * n < i) -> (A.observes n i /\ i <= work n) := by
+  intro n i hNotLt
+  exact required_observed_and_bounded_of_exact_and_accounting
+    (cell := cell) A target work h_obs_det h_exact h_witness h_account n i
+    (requiredAt_of_not_two_mul_lt n i hNotLt)
+
+-- Non-beyond-boundary adapter at generation n+1 in explicit 2n+2 form.
+theorem observed_and_bounded_of_not_two_mul_add_two_lt_next_gen_of_exact_and_accounting
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n i, ¬ (2 * n + 2 < i) -> (A.observes (n + 1) i /\ i <= work (n + 1)) := by
+  intro n i hNotLt
+  exact required_observed_and_bounded_next_gen_of_exact_and_accounting
+    (cell := cell) A target work h_obs_det h_exact h_witness h_account n i
+    (requiredAt_of_not_two_mul_add_two_lt_next_gen n i hNotLt)
+
 -- Endpoint specialization at generation n: index 2n is observed and work-bounded.
 theorem endpoint_observed_and_bounded_of_exact_and_accounting
     (A : Algorithm State)
