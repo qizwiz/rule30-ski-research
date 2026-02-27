@@ -49,6 +49,8 @@ Funding kit:
 - `research/funding/outreach_email.md`
 - `research/funding/pitch.md`
 - `research/funding/next_90_days.md`
+- `research/funding/prize3_submission_readiness.md`
+- `research/funding/prize3_external_snippet.md`
 
 Autopilot:
 - `research/autopilot.md`

@@ -49,6 +49,7 @@ This checklist is optimized for speed-to-credibility and funding conversations.
   - `research/funding/pitch.md`
   - `research/funding/next_90_days.md`
   - `research/funding/prize3_submission_readiness.md`
+  - `research/funding/prize3_external_snippet.md`
   - `research/related/portfolio_index.md`
 - Keep one canonical artifact index:
   - `research/related/canon.md`
@@ -76,3 +77,5 @@ This checklist is optimized for speed-to-credibility and funding conversations.
   - Proved (artifact-level lemmas only)
   - Empirical (repro/debug only, not proof)
   - Conjectural (exactness-to-work bridge still open)
+- Prefer copy/paste from:
+  - `research/funding/prize3_external_snippet.md`
