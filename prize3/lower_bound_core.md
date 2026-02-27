@@ -59,6 +59,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `work_ge_requiredCells_implies_requiredAt_next_gen_le_work`
   - `required_observed_and_bounded_of_exact_and_accounting`
   - `required_observed_and_bounded_next_gen_of_exact_and_accounting`
+  - `observes_or_not_required_and_required_le_work_of_exact_and_accounting` / `observes_or_not_required_next_gen_and_required_le_work_of_exact_and_accounting` (proved split+bound packaging: under same scaffold hypotheses, every index is observed-or-not-required and every required index is bounded by work at `n` and `n+1`)
   - `left_endpoint_observed_and_bounded_of_exact_and_accounting` (proved: under the same scaffold hypotheses, exactness+accounting force observation and work-bound at left endpoint `i = 0`)
   - `left_endpoint_next_gen_observed_and_bounded_of_exact_and_accounting` (proved: under the same scaffold hypotheses, exactness+accounting force observation and work-bound at left endpoint `i = 0` in generation `n+1`)
   - `observed_and_bounded_of_le_two_mul_of_exact_and_accounting` (proved adapter: under the same scaffold hypotheses, boundary form `i ≤ 2n` gives observation+work-bound directly at generation `n`)

@@ -98,6 +98,57 @@ def requiredAt (n i : Nat) : Prop :=
 theorem requiredAt_iff (n i : Nat) : requiredAt n i ↔ i < requiredCells n := by
   rfl
 
+section Rule30WitnessScaffold
+
+-- Concrete Rule 30 state container: cell values indexed by natural positions.
+abbrev Rule30State : Type := Nat -> Bool
+
+-- Concrete cell accessor for the bridge interface.
+def rule30Cell (s : Rule30State) (i : Nat) : Bool := s i
+
+-- Concrete center-target projection at generation n.
+def rule30CenterTarget (trace : Nat -> Rule30State) (n : Nat) : Bool :=
+  rule30Cell (trace n) n
+
+-- Helper: full pointwise agreement implies bridge-form observed agreement.
+theorem agreesOnObserved_of_pointwise_eq
+    (A : Algorithm Rule30State)
+    (n : Nat)
+    (s1 s2 : Rule30State)
+    (hEq : forall i, rule30Cell s1 i = rule30Cell s2 i) :
+    agreesOnObserved rule30Cell A n s1 s2 := by
+  intro i _hi
+  exact hEq i
+
+-- Bounded concrete witness adapter: if two states differ only at an unobserved
+-- index i (within the 2n cone endpoint) and already separate the target output,
+-- this yields the bridge witness form used by must_observe_required*.
+theorem witness_le_two_mul_of_pointwise_diff
+    (A : Algorithm Rule30State)
+    (target : Nat -> Rule30State -> Bool)
+    (hConcrete :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          target n s1 ≠ target n s2) :
+    forall n i,
+      i <= 2 * n ->
+      ¬ (A.observes n i) ->
+      exists s1 s2,
+        agreesOnObserved rule30Cell A n s1 s2 /\ target n s1 ≠ target n s2 := by
+  intro n i hLe hNotObs
+  rcases hConcrete n i hLe hNotObs with ⟨s1, s2, hEqExcept, hTargetNe⟩
+  refine ⟨s1, s2, ?_, hTargetNe⟩
+  intro j hObs
+  exact hEqExcept j (by
+    intro hji
+    apply hNotObs
+    simpa [hji] using hObs)
+
+end Rule30WitnessScaffold
+
 -- If an algorithm only depends on observed units, and exactness can be broken
 -- whenever a required unit is left unobserved, that required unit must be observed.
 theorem must_observe_required
@@ -983,6 +1034,52 @@ theorem required_observed_and_bounded_next_gen_of_exact_and_accounting
   constructor
   · exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness (n + 1) i hReq
   · exact work_ge_requiredCells_implies_requiredAt_next_gen_le_work work h_account n i hReq
+
+-- Split+bound packaging at generation n: every index is observed or not required,
+-- and required indices are explicitly bounded by work.
+theorem observes_or_not_required_and_required_le_work_of_exact_and_accounting
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n i, (A.observes n i ∨ ¬ requiredAt n i) /\ (requiredAt n i -> i <= work n) := by
+  intro n i
+  constructor
+  · exact observes_or_not_required_of_exact (cell := cell) A target h_obs_det h_exact h_witness n i
+  · intro hReq
+    exact work_ge_requiredCells_implies_requiredAt_le_work work h_account n i hReq
+
+-- Next-generation split+bound packaging in explicit n+1 form.
+theorem observes_or_not_required_next_gen_and_required_le_work_of_exact_and_accounting
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n i, (A.observes (n + 1) i ∨ ¬ requiredAt (n + 1) i) /\
+      (requiredAt (n + 1) i -> i <= work (n + 1)) := by
+  intro n i
+  constructor
+  · exact observes_or_not_required_next_gen_of_exact (cell := cell) A target h_obs_det h_exact h_witness n i
+  · intro hReq
+    exact work_ge_requiredCells_implies_requiredAt_next_gen_le_work work h_account n i hReq
 
 -- Non-beyond-boundary adapter at generation n: if i is not beyond 2n,
 -- exactness+witness+accounting force both observation and work bound.
