@@ -13,12 +13,14 @@ This note is for funding/outreach context only. It does not claim theorem comple
   - Next-generation boundary support/corollaries (`requiredAt_next_gen_iff_le_two_mul_add_two`, `requiredAt_of_le_two_mul_add_one_next_gen`, `observes_two_mul_add_one_next_gen_of_exact`, `observes_two_mul_add_two_next_gen_of_exact`)
   - Next-generation split support/corollary (`not_requiredAt_of_two_mul_add_two_lt_next_gen`, `requiredAt_or_two_mul_add_two_lt_next_gen`, `not_requiredAt_iff_two_mul_add_two_lt_next_gen`, `observes_or_two_mul_add_two_lt_next_gen_of_exact`)
   - Next-generation full-interval observation corollary (`observes_next_gen_interval_of_exact`)
+  - Next-generation endpoint helpers (`requiredAt_of_le_two_mul_add_two_next_gen`, `requiredAt_two_mul_add_two_next_gen`, `not_requiredAt_two_mul_add_three_next_gen`)
   - Required-interval split lemmas (`not_requiredAt_iff_two_mul_lt`, `requiredAt_or_two_mul_lt`) for witness case partitioning
   - Non-beyond-boundary requiredness lemmas (`requiredAt_of_not_two_mul_lt`, `requiredAt_of_not_two_mul_add_two_lt_next_gen`) for direct requiredness closure in both `n` and `n+1` boundary cases
   - Exactness split corollary (`observes_or_two_mul_lt_of_exact`) for claim-safe witness branching
   - Non-beyond-boundary observation corollaries (`observes_of_not_two_mul_lt_of_exact`, `observes_of_not_two_mul_add_two_lt_next_gen_of_exact`) for direct branch closure without extra arithmetic rewrites
   - Contrapositive observation/requiredness bridge lemmas (`not_observes_implies_not_required_of_exact`, `not_observes_next_gen_implies_not_required_next_gen_of_exact`) and requiredness-language splits (`observes_or_not_required_of_exact`, `observes_or_not_required_next_gen_of_exact`) under the same explicit hypotheses
   - Conditional cost-transfer scaffold (explicit accounting hypothesis), including per-index bounds `work_ge_requiredCells_implies_requiredAt_le_work`, `work_ge_requiredCells_implies_requiredAt_next_gen_le_work` and next-generation endpoint bound `work_ge_requiredCells_implies_two_mul_add_two_next_gen`
+  - Conditional composition scaffold joining exactness+witness+accounting hypotheses (`required_observed_and_bounded_of_exact_and_accounting`, `required_observed_and_bounded_next_gen_of_exact_and_accounting`)
   - Phase 3 obligation matrix with explicit open/closed status (`prize3/phase3_obligation_matrix.md`)
 - Empirical (not proof):
   - Repro/runtime checks only; no empirical estimate is used as a Prize3 proof step.

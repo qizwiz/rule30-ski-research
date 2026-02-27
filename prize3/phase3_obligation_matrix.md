@@ -26,6 +26,9 @@ Purpose: track the exactness-bridge obligations needed before any lower-bound th
     - `requiredAt_two_mul`
     - `requiredAt_next_gen_iff_le_two_mul_add_two`
     - `requiredAt_of_le_two_mul_add_one_next_gen`
+    - `requiredAt_of_le_two_mul_add_two_next_gen`
+    - `requiredAt_two_mul_add_two_next_gen`
+    - `not_requiredAt_two_mul_add_three_next_gen`
     - `not_requiredAt_of_two_mul_add_two_lt_next_gen`
     - `requiredAt_or_two_mul_add_two_lt_next_gen`
     - `not_requiredAt_iff_two_mul_add_two_lt_next_gen`
@@ -43,7 +46,7 @@ Purpose: track the exactness-bridge obligations needed before any lower-bound th
   - Repro logs and runtime checks only.
 - Conjectural / pending:
   - Rule 30 witness-construction lemmas that instantiate `h_witness`.
-  - Concrete accounting bridge from observed required units to `work` (only conditional scaffold lemmas are proved so far).
+  - Concrete accounting bridge from observed required units to `work` (combined conditional composition lemmas now exist, but concrete Rule 30 instantiation remains open).
 
 ## Obligation Matrix
 | ID | Obligation | Status | Evidence / Artifact | Notes |
@@ -51,7 +54,7 @@ Purpose: track the exactness-bridge obligations needed before any lower-bound th
 | O1 | Concrete Rule 30 state/output model for bridge section | Open | `prize3/rule30_witness_obligations.md` | Must be Lean-compatible and deterministic. |
 | O2 | Rule 30 indistinguishability witness discharging `h_witness` | Open | `prize3/lean/Prize3Model.lean` (interface only) | Highest-risk technical gap. |
 | O3 | No-skip instantiated for concrete Rule 30 target | Open | Follows from O2 + existing bridge lemmas | Currently only abstractly proved. |
-| O4 | Accounting transfer: observed required units -> `Work_A(n)` | Open | `work_ge_requiredCells_implies_requiredAt_le_work`, `work_ge_requiredCells_implies_requiredAt_next_gen_le_work`, `work_ge_requiredCells_implies_two_mul_add_two_next_gen` + prior cost-transfer scaffold in `prize3/lean/Prize3Model.lean` | Still conditional on explicit accounting hypothesis; concrete Rule 30 instantiation missing. |
+| O4 | Accounting transfer: observed required units -> `Work_A(n)` | Open | `work_ge_requiredCells_implies_requiredAt_le_work`, `work_ge_requiredCells_implies_requiredAt_next_gen_le_work`, `required_observed_and_bounded_of_exact_and_accounting`, `required_observed_and_bounded_next_gen_of_exact_and_accounting`, `work_ge_requiredCells_implies_two_mul_add_two_next_gen` + prior cost-transfer scaffold in `prize3/lean/Prize3Model.lean` | Composition lemmas now combine exactness+witness+accounting hypotheses, but concrete Rule 30 instantiation is still missing. |
 | O5 | Composition to final asymptotic theorem statement | Open | `prize3/statement.md` | Blocked on O2-O4. |
 
 ## Immediate Unblocked Next Steps

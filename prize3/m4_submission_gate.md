@@ -14,6 +14,7 @@ Purpose: keep M4 progress and external readiness aligned without overstating the
   - Foundation lemmas on cone/proxy growth and monotonicity (`prize3/lean/Prize3Model.lean`).
   - Conditional bridge lemmas under explicit hypotheses (`must_observe_required`, `observes_prefix_of_exact`, `observes_self_of_exact`).
   - Conditional cost-transfer lemmas under explicit accounting hypothesis.
+  - Conditional exactness+accounting composition lemmas (`required_observed_and_bounded_of_exact_and_accounting`, `required_observed_and_bounded_next_gen_of_exact_and_accounting`).
 - Empirical (not proof):
   - Repro/runtime checks and script outputs only.
   - No empirical estimate is used as a proof step for Prize3.

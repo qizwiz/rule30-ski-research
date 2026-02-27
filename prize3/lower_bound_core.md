@@ -26,6 +26,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `observes_cone_interval_of_exact` / `observes_two_mul_of_exact` (proved corollaries: under scaffold hypotheses, exactness forces observation over `i ≤ 2n`, including endpoint `i = 2n`)
   - `observes_required_next_gen_of_exact` / `observes_prefix_next_gen_of_exact` (proved: under same scaffold hypotheses, required/prefix indices at generation `n` are forced observed at generation `n+1`)
   - `requiredAt_next_gen_iff_le_two_mul_add_two` / `requiredAt_of_le_two_mul_add_one_next_gen` (proved: explicit `n+1` boundary characterization and inclusion up to `2n+1`)
+  - `requiredAt_of_le_two_mul_add_two_next_gen` / `requiredAt_two_mul_add_two_next_gen` / `not_requiredAt_two_mul_add_three_next_gen` (proved: explicit `n+1` endpoint inclusion and first-outside exclusion)
   - `not_requiredAt_of_two_mul_add_two_lt_next_gen` / `requiredAt_or_two_mul_add_two_lt_next_gen` / `not_requiredAt_iff_two_mul_add_two_lt_next_gen` (proved: strict-outside exclusion and exact outside characterization for the `n+1` boundary `2n+2`)
   - `requiredAt_of_not_two_mul_add_two_lt_next_gen` (proved: non-beyond-boundary form yields direct requiredness at generation `n+1`)
   - `observes_two_mul_add_one_next_gen_of_exact` / `observes_two_mul_add_two_next_gen_of_exact` (proved: under same scaffold hypotheses, exactness forces observation at key `n+1` boundary points)
@@ -44,6 +45,8 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `requiredAt_le_two_mul`
   - `work_ge_requiredCells_implies_requiredAt_le_work`
   - `work_ge_requiredCells_implies_requiredAt_next_gen_le_work`
+  - `required_observed_and_bounded_of_exact_and_accounting`
+  - `required_observed_and_bounded_next_gen_of_exact_and_accounting`
 
 ## Empirical (not proof)
 - No Prize3 lower-bound empirical estimate is treated as proof in this track.

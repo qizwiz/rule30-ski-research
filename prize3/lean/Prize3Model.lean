@@ -164,12 +164,26 @@ theorem requiredAt_of_le_two_mul_add_one_next_gen (n i : Nat) (h : i <= 2 * n + 
   have h' : i <= 2 * n + 2 := Nat.le_trans h (Nat.le_succ (2 * n + 1))
   exact (requiredAt_next_gen_iff_le_two_mul_add_two n i).2 h'
 
+-- Any index up to 2n+2 is required at generation n+1.
+theorem requiredAt_of_le_two_mul_add_two_next_gen (n i : Nat) (h : i <= 2 * n + 2) :
+    requiredAt (n + 1) i := by
+  exact (requiredAt_next_gen_iff_le_two_mul_add_two n i).2 h
+
+-- Right endpoint of the next-generation dependency interval is required.
+theorem requiredAt_two_mul_add_two_next_gen (n : Nat) : requiredAt (n + 1) (2 * n + 2) := by
+  exact requiredAt_of_le_two_mul_add_two_next_gen n (2 * n + 2) (Nat.le_refl (2 * n + 2))
+
 -- Any index strictly beyond the next-generation endpoint is not required.
 theorem not_requiredAt_of_two_mul_add_two_lt_next_gen (n i : Nat) (h : 2 * n + 2 < i) :
     ¬ requiredAt (n + 1) i := by
   intro hReq
   have hLe : i <= 2 * n + 2 := (requiredAt_next_gen_iff_le_two_mul_add_two n i).1 hReq
   exact Nat.not_lt_of_ge hLe h
+
+-- First index after the n+1 dependency interval is not required.
+theorem not_requiredAt_two_mul_add_three_next_gen (n : Nat) :
+    ¬ requiredAt (n + 1) (2 * n + 3) := by
+  exact not_requiredAt_of_two_mul_add_two_lt_next_gen n (2 * n + 3) (Nat.lt_succ_self (2 * n + 2))
 
 -- Next-generation split: every index is either required at n+1 or beyond 2n+2.
 theorem requiredAt_or_two_mul_add_two_lt_next_gen (n i : Nat) :
@@ -700,5 +714,61 @@ theorem work_ge_requiredCells_implies_requiredAt_next_gen_le_work
   exact work_ge_requiredCells_implies_requiredAt_le_work work h_account (n + 1) i hReq
 
 end CostTransferScaffold
+
+/-!
+  Phase 5 composition scaffold:
+  These lemmas only combine already-conditional bridge and accounting results.
+  They remain conditional and do not claim a closed Prize3 lower bound.
+-/
+
+section BridgeCostComposition
+
+variable {State : Type}
+variable (cell : State -> Nat -> Bool)
+
+-- Under exactness+witness hypotheses and explicit accounting, each required index
+-- is both observed and bounded by work at generation n.
+theorem required_observed_and_bounded_of_exact_and_accounting
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n i, requiredAt n i -> (A.observes n i /\ i <= work n) := by
+  intro n i hReq
+  constructor
+  · exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness n i hReq
+  · exact work_ge_requiredCells_implies_requiredAt_le_work work h_account n i hReq
+
+-- Next-generation form of the same composition lemma.
+theorem required_observed_and_bounded_next_gen_of_exact_and_accounting
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n i, requiredAt (n + 1) i -> (A.observes (n + 1) i /\ i <= work (n + 1)) := by
+  intro n i hReq
+  constructor
+  · exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness (n + 1) i hReq
+  · exact work_ge_requiredCells_implies_requiredAt_next_gen_le_work work h_account n i hReq
+
+end BridgeCostComposition
 
 end Prize3
