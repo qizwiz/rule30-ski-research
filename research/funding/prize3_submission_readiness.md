@@ -20,9 +20,9 @@ This note is for funding/outreach context only. It does not claim theorem comple
   - Non-beyond-boundary observation corollaries (`observes_of_not_two_mul_lt_of_exact`, `observes_of_not_two_mul_add_two_lt_next_gen_of_exact`) for direct branch closure without extra arithmetic rewrites
   - Contrapositive observation/requiredness bridge lemmas (`not_observes_implies_not_required_of_exact`, `not_observes_next_gen_implies_not_required_next_gen_of_exact`) and arithmetic contrapositive boundary forms (`not_observes_implies_two_mul_lt_of_exact`, `not_observes_next_gen_implies_two_mul_add_two_lt_next_gen_of_exact`) under the same explicit hypotheses
   - Requiredness-language splits (`observes_or_not_required_of_exact`, `observes_or_not_required_next_gen_of_exact`) under the same explicit hypotheses
-  - Conditional cost-transfer scaffold (explicit accounting hypothesis), including per-index bounds `work_ge_requiredCells_implies_requiredAt_le_work`, `work_ge_requiredCells_implies_requiredAt_next_gen_le_work` and next-generation endpoint bound `work_ge_requiredCells_implies_two_mul_add_two_next_gen`
+  - Conditional cost-transfer scaffold (explicit accounting hypothesis), including per-index bounds `work_ge_requiredCells_implies_requiredAt_le_work`, `work_ge_requiredCells_implies_requiredAt_next_gen_le_work` and next-generation endpoint/near-endpoint bounds `work_ge_requiredCells_implies_two_mul_add_two_next_gen`, `work_ge_requiredCells_implies_two_mul_add_one_next_gen`
   - Conditional composition scaffold joining exactness+witness+accounting hypotheses (`required_observed_and_bounded_of_exact_and_accounting`, `required_observed_and_bounded_next_gen_of_exact_and_accounting`)
-  - Endpoint-specialized conditional composition corollaries (`endpoint_observed_and_bounded_of_exact_and_accounting`, `endpoint_next_gen_observed_and_bounded_of_exact_and_accounting`)
+  - Endpoint-specialized conditional composition corollaries (`endpoint_observed_and_bounded_of_exact_and_accounting`, `endpoint_next_gen_observed_and_bounded_of_exact_and_accounting`, `near_endpoint_next_gen_observed_and_bounded_of_exact_and_accounting`)
   - Phase 3 obligation matrix with explicit open/closed status (`prize3/phase3_obligation_matrix.md`)
 - Empirical (not proof):
   - Repro/runtime checks only; no empirical estimate is used as a Prize3 proof step.

@@ -43,6 +43,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `work_ge_requiredCells_implies_two_mul_plus_one`
   - `work_ge_requiredCells_implies_two_mul`
   - `work_ge_requiredCells_implies_two_mul_add_two_next_gen`
+  - `work_ge_requiredCells_implies_two_mul_add_one_next_gen`
   - `requiredAt_le_two_mul`
   - `work_ge_requiredCells_implies_requiredAt_le_work`
   - `work_ge_requiredCells_implies_requiredAt_next_gen_le_work`
@@ -50,6 +51,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `required_observed_and_bounded_next_gen_of_exact_and_accounting`
   - `endpoint_observed_and_bounded_of_exact_and_accounting` (proved: under the same scaffold hypotheses, exactness+accounting force observation and work-bound at endpoint `i = 2n`)
   - `endpoint_next_gen_observed_and_bounded_of_exact_and_accounting` (proved: under the same scaffold hypotheses, exactness+accounting force observation and work-bound at next-generation endpoint `i = 2n+2`)
+  - `near_endpoint_next_gen_observed_and_bounded_of_exact_and_accounting` (proved: under the same scaffold hypotheses, exactness+accounting force observation and work-bound at near-endpoint `i = 2n+1` in generation `n+1`)
 
 ## Empirical (not proof)
 - No Prize3 lower-bound empirical estimate is treated as proof in this track.

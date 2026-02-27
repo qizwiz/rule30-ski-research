@@ -743,6 +743,15 @@ theorem work_ge_requiredCells_implies_two_mul_add_two_next_gen
       _ <= 2 + 2 * n + 1 := Nat.le_succ (2 + 2 * n)
   exact Nat.le_trans hStep hStrong
 
+-- Immediate weakening of the next-generation endpoint bound.
+theorem work_ge_requiredCells_implies_two_mul_add_one_next_gen
+    (work : Nat -> Nat)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, 2 * n + 1 <= work (n + 1) := by
+  intro n
+  exact Nat.le_trans (Nat.le_succ (2 * n + 1))
+    (work_ge_requiredCells_implies_two_mul_add_two_next_gen work h_account n)
+
 -- Next-generation per-index transfer (explicit n+1 form) for bridge composition.
 theorem work_ge_requiredCells_implies_requiredAt_next_gen_le_work
     (work : Nat -> Nat)
@@ -848,6 +857,27 @@ theorem endpoint_next_gen_observed_and_bounded_of_exact_and_accounting
   exact required_observed_and_bounded_next_gen_of_exact_and_accounting
     (cell := cell) A target work h_obs_det h_exact h_witness h_account n (2 * n + 2)
     (requiredAt_two_mul_add_two_next_gen n)
+
+-- Near-endpoint specialization at generation n+1: index 2n+1 is observed and work-bounded.
+theorem near_endpoint_next_gen_observed_and_bounded_of_exact_and_accounting
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, (A.observes (n + 1) (2 * n + 1) /\ 2 * n + 1 <= work (n + 1)) := by
+  intro n
+  exact required_observed_and_bounded_next_gen_of_exact_and_accounting
+    (cell := cell) A target work h_obs_det h_exact h_witness h_account n (2 * n + 1)
+    (requiredAt_of_le_two_mul_add_one_next_gen n (2 * n + 1) (Nat.le_refl (2 * n + 1)))
 
 end BridgeCostComposition
 
