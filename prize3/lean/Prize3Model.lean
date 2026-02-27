@@ -158,6 +158,19 @@ theorem requiredAt_next_gen_iff_le_two_mul_add_two (n i : Nat) :
     _ ↔ i <= 2 * n + 2 := by
       simp [Nat.mul_add, Nat.add_comm]
 
+-- Next-generation requiredness can be split into strict-prefix-or-endpoint form.
+theorem requiredAt_next_gen_iff_lt_two_mul_add_two_or_eq_two_mul_add_two (n i : Nat) :
+    requiredAt (n + 1) i ↔ i < 2 * n + 2 ∨ i = 2 * n + 2 := by
+  constructor
+  · intro hReq
+    have hLe : i <= 2 * n + 2 := (requiredAt_next_gen_iff_le_two_mul_add_two n i).1 hReq
+    exact Nat.lt_or_eq_of_le hLe
+  · intro hSplit
+    rcases hSplit with hLt | hEq
+    · exact (requiredAt_next_gen_iff_le_two_mul_add_two n i).2 (Nat.le_of_lt hLt)
+    · rw [hEq]
+      exact (requiredAt_next_gen_iff_le_two_mul_add_two n (2 * n + 2)).2 (Nat.le_refl (2 * n + 2))
+
 -- Any index up to 2n+1 is required at generation n+1.
 theorem requiredAt_of_le_two_mul_add_one_next_gen (n i : Nat) (h : i <= 2 * n + 1) :
     requiredAt (n + 1) i := by

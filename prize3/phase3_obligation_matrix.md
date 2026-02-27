@@ -25,6 +25,7 @@ Purpose: track the exactness-bridge obligations needed before any lower-bound th
     - `requiredAt_or_two_mul_lt`
     - `requiredAt_two_mul`
     - `requiredAt_next_gen_iff_le_two_mul_add_two`
+    - `requiredAt_next_gen_iff_lt_two_mul_add_two_or_eq_two_mul_add_two`
     - `requiredAt_of_le_two_mul_add_one_next_gen`
     - `requiredAt_of_le_two_mul_add_two_next_gen`
     - `requiredAt_two_mul_add_two_next_gen`
