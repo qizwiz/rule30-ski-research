@@ -16,7 +16,7 @@ I compile the local Rule 30 update rule into SKI combinators, then construct the
 - **Conjecture:** basin prefix stabilization for Rule 30 center cell after $N \ge 3$.
 
 ## Prize3 Claim Hygiene (Current)
-- **Proved:** Prize3 model/statement freeze, foundational dependency-width lemmas, conditional no-skip bridge scaffold, and required-interval boundary lemmas in `prize3/`.
+- **Proved:** Prize3 model/statement freeze, foundational dependency-width lemmas, conditional no-skip bridge scaffold, required-interval boundary lemmas, and arithmetic contrapositive boundary lemmas (`not_observes_implies_two_mul_lt_of_exact`, `not_observes_next_gen_implies_two_mul_add_two_lt_next_gen_of_exact`) in `prize3/`.
 - **Empirical:** no empirical claim is used as proof of Prize3 lower bound.
 - **Conjectural:** final exactness-to-work bridge for `Work_A(n)=Omega(n)` remains open.
 - **Required status line:** "Prize3 lower-bound theorem is not yet proved in-repo."
