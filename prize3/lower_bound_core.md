@@ -13,10 +13,14 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `coneWidth_succ`
   - `coneWidth_monotone`
   - requirement-proxy lemmas on `requiredCells`
-- Formalized conditional no-skip bridge skeleton in Lean:
+  - Formalized conditional no-skip bridge skeleton in Lean:
   - `must_observe_required` (proved from explicit observation-determinism, exactness, and witness hypotheses)
   - `must_observe_required_of_le_two_mul_witness` (proved adapter: boundary-form witness obligations `i ≤ 2n` discharge the same bridge goal)
   - `must_observe_required_next_gen_of_le_two_mul_witness` (proved next-generation corollary of the same boundary-form adapter)
+  - `must_observe_required_rule30_of_pointwise_diff_witness` (proved concrete Rule 30 composition: pointwise-difference witnesses at `i ≤ 2n` discharge the abstract bridge)
+  - `must_observe_required_next_gen_rule30_of_pointwise_diff_witness` (proved next-generation Rule 30 composition under the same pointwise-difference witness interface)
+  - `must_observe_of_not_two_mul_lt_rule30_of_pointwise_diff_witness` (proved Rule 30 non-beyond-boundary adapter: `¬(2n < i)` implies observation under the same concrete witness interface)
+  - `must_observe_next_gen_of_not_two_mul_add_two_lt_rule30_of_pointwise_diff_witness` (proved next-generation Rule 30 non-beyond-boundary adapter: `¬(2n+2 < i)` implies observation under the same concrete witness interface)
   - `must_observe_required_of_not_two_mul_lt_witness` (proved adapter: equivalent non-beyond-boundary witness obligations `¬(2n < i)` discharge the same bridge goal)
   - `must_observe_required_next_gen_of_not_two_mul_lt_witness` (proved next-generation corollary of the same non-beyond-boundary adapter)
   - `must_observe_required_next_gen_of_not_two_mul_add_two_lt_witness` (proved direct next-generation adapter: witness obligations in explicit boundary form `¬(2n+2 < i)` discharge the same bridge goal without rewriting through `2*(n+1)`)

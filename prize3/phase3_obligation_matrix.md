@@ -13,6 +13,10 @@ Purpose: track the exactness-bridge obligations needed before any lower-bound th
     - `must_observe_required_of_not_two_mul_lt_witness`
     - `must_observe_required_next_gen_of_not_two_mul_lt_witness`
     - `must_observe_required_next_gen_of_not_two_mul_add_two_lt_witness`
+    - `must_observe_required_rule30_of_pointwise_diff_witness`
+    - `must_observe_required_next_gen_rule30_of_pointwise_diff_witness`
+    - `must_observe_of_not_two_mul_lt_rule30_of_pointwise_diff_witness`
+    - `must_observe_next_gen_of_not_two_mul_add_two_lt_rule30_of_pointwise_diff_witness`
     - `observes_prefix_of_exact`
     - `observes_self_of_exact`
     - `observes_cone_interval_of_exact`

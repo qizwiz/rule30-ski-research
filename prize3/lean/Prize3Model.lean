@@ -232,6 +232,109 @@ theorem must_observe_required_of_le_two_mul_witness
       h_witness_le_two_mul n i ((requiredAt_iff_le_two_mul n i).1 hReq') hNotObs)
     n i hReq
 
+-- Rule30 concrete witness composition: a pointwise-difference witness at i <= 2n
+-- is enough to discharge the required-index observation bridge directly.
+theorem must_observe_required_rule30_of_pointwise_diff_witness
+    (A : Algorithm Rule30State)
+    (target : Nat -> Rule30State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (hConcrete :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          target n s1 ≠ target n s2) :
+    forall n i, requiredAt n i -> A.observes n i := by
+  intro n i hReq
+  exact must_observe_required_of_le_two_mul_witness
+    (cell := rule30Cell) A target h_obs_det h_exact
+    (witness_le_two_mul_of_pointwise_diff A target hConcrete) n i hReq
+
+-- Concrete center-slice specialization: exact center-cell target at generation n.
+theorem must_observe_required_rule30_center_of_pointwise_diff_witness
+    (A : Algorithm Rule30State)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A (fun n s => rule30Cell s n))
+    (hConcrete :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 n ≠ rule30Cell s2 n) :
+    forall n i, requiredAt n i -> A.observes n i := by
+  intro n i hReq
+  exact must_observe_required_rule30_of_pointwise_diff_witness
+    A (fun n s => rule30Cell s n) h_obs_det h_exact hConcrete n i hReq
+
+-- Rule30 next-generation no-skip composition: reuses the same concrete
+-- pointwise-difference witness adapter at generation n+1.
+theorem must_observe_required_next_gen_rule30_of_pointwise_diff_witness
+    (A : Algorithm Rule30State)
+    (target : Nat -> Rule30State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (hConcrete :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          target n s1 ≠ target n s2) :
+    forall n i, requiredAt (n + 1) i -> A.observes (n + 1) i := by
+  intro n i hReq
+  exact must_observe_required_of_le_two_mul_witness
+    (cell := rule30Cell) A target h_obs_det h_exact
+    (witness_le_two_mul_of_pointwise_diff A target hConcrete) (n + 1) i hReq
+
+-- Rule30 no-skip adapter in non-beyond-boundary form at generation n.
+theorem must_observe_of_not_two_mul_lt_rule30_of_pointwise_diff_witness
+    (A : Algorithm Rule30State)
+    (target : Nat -> Rule30State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (hConcrete :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          target n s1 ≠ target n s2) :
+    forall n i, ¬ (2 * n < i) -> A.observes n i := by
+  intro n i hNotLt
+  have hReq : requiredAt n i := (requiredAt_iff_le_two_mul n i).2 (Nat.le_of_not_gt hNotLt)
+  exact must_observe_required_rule30_of_pointwise_diff_witness
+    A target h_obs_det h_exact hConcrete n i hReq
+
+-- Rule30 no-skip adapter in non-beyond-boundary form at generation n+1.
+theorem must_observe_next_gen_of_not_two_mul_add_two_lt_rule30_of_pointwise_diff_witness
+    (A : Algorithm Rule30State)
+    (target : Nat -> Rule30State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (hConcrete :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          target n s1 ≠ target n s2) :
+    forall n i, ¬ (2 * n + 2 < i) -> A.observes (n + 1) i := by
+  intro n i hNotLt
+  have hLe' : i <= 2 * n + 2 := Nat.le_of_not_gt hNotLt
+  have hLe : i <= 2 * (n + 1) := by
+    simpa [Nat.mul_add, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hLe'
+  have hReq : requiredAt (n + 1) i := (requiredAt_iff_le_two_mul (n + 1) i).2 hLe
+  exact must_observe_required_next_gen_rule30_of_pointwise_diff_witness
+    A target h_obs_det h_exact hConcrete n i hReq
+
 -- Any index up to the cone endpoint is required.
 theorem requiredAt_of_le_two_mul (n i : Nat) (h : i <= 2 * n) : requiredAt n i := by
   exact (requiredAt_iff_le_two_mul n i).2 h
