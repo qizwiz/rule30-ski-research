@@ -70,6 +70,7 @@ Purpose: track the exactness-bridge obligations needed before any lower-bound th
     - `observes_or_not_required_next_gen_of_exact`
     - `exists_observed_required_of_exact`
     - `exists_observed_required_next_gen_of_exact`
+    - `exists_observed_required_and_bounded_next_gen_rule30_center_of_not_two_mul_add_two_lt_of_pointwise_diff_witness_and_accounting`
 - Empirical (not proof):
   - Repro logs and runtime checks only.
 - Conjectural / pending:

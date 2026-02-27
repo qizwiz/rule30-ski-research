@@ -110,6 +110,69 @@ def rule30Cell (s : Rule30State) (i : Nat) : Bool := s i
 def rule30CenterTarget (trace : Nat -> Rule30State) (n : Nat) : Bool :=
   rule30Cell (trace n) n
 
+-- One-step local Rule30 update used for concrete finite witness seeds.
+def rule30Local (p q r : Bool) : Bool := p != (q || r)
+
+-- Center after one Rule30 step from indices 0,1,2 of the initial slice.
+def rule30CenterOneStep (s : Rule30State) : Bool :=
+  rule30Local (rule30Cell s 0) (rule30Cell s 1) (rule30Cell s 2)
+
+-- Single-index perturbation seed state.
+def stateFlipAt (i : Nat) (b : Bool) : Rule30State :=
+  fun j => if j = i then b else false
+
+theorem stateFlipAt_agree_except (i j : Nat) (hj : j ≠ i) :
+    rule30Cell (stateFlipAt i false) j = rule30Cell (stateFlipAt i true) j := by
+  simp [rule30Cell, stateFlipAt, hj]
+
+theorem one_step_center_witness_i0 :
+    exists s1 s2,
+      (forall j, j ≠ 0 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterOneStep s1 ≠ rule30CenterOneStep s2 := by
+  refine ⟨stateFlipAt 0 false, stateFlipAt 0 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAt_agree_except 0 j hj
+  · decide
+
+theorem one_step_center_witness_i1 :
+    exists s1 s2,
+      (forall j, j ≠ 1 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterOneStep s1 ≠ rule30CenterOneStep s2 := by
+  refine ⟨stateFlipAt 1 false, stateFlipAt 1 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAt_agree_except 1 j hj
+  · decide
+
+theorem one_step_center_witness_i2 :
+    exists s1 s2,
+      (forall j, j ≠ 2 -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterOneStep s1 ≠ rule30CenterOneStep s2 := by
+  refine ⟨stateFlipAt 2 false, stateFlipAt 2 true, ?_, ?_⟩
+  · intro j hj
+    exact stateFlipAt_agree_except 2 j hj
+  · decide
+
+-- Concrete one-step witness family across the full one-step required interval.
+theorem one_step_center_witness_of_le_two (i : Nat) (hLe : i ≤ 2) :
+    exists s1 s2,
+      (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+      rule30CenterOneStep s1 ≠ rule30CenterOneStep s2 := by
+  cases i with
+  | zero =>
+    simpa using one_step_center_witness_i0
+  | succ i =>
+    cases i with
+    | zero =>
+      simpa using one_step_center_witness_i1
+    | succ i =>
+      cases i with
+      | zero =>
+        simpa using one_step_center_witness_i2
+      | succ i =>
+        have hGt : 2 < Nat.succ (Nat.succ (Nat.succ i)) := by
+          simp
+        exact False.elim (Nat.not_lt_of_ge hLe hGt)
+
 -- Helper: full pointwise agreement implies bridge-form observed agreement.
 theorem agreesOnObserved_of_pointwise_eq
     (A : Algorithm Rule30State)
@@ -216,6 +279,41 @@ theorem requiredAt_iff_le_two_mul (n i : Nat) : requiredAt n i ↔ i <= 2 * n :=
   unfold requiredAt requiredCells coneWidth
   have h : i < Nat.succ (2 * n) ↔ i <= 2 * n := Nat.lt_succ_iff
   simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
+
+-- Concrete one-step h_witness seed in bridge form:
+-- for each required index at n=1, produce agreeing-on-observed states with
+-- different one-step center outputs.
+theorem one_step_center_h_witness_seed
+    (A : Algorithm Rule30State) :
+    forall i,
+      requiredAt 1 i ->
+      ¬ (A.observes 1 i) ->
+      exists s1 s2,
+        agreesOnObserved rule30Cell A 1 s1 s2 /\ rule30CenterOneStep s1 ≠ rule30CenterOneStep s2 := by
+  intro i hReq hNotObs
+  have hLe : i <= 2 := by
+    have hLe' : i <= 2 * 1 := (requiredAt_iff_le_two_mul 1 i).1 hReq
+    simpa using hLe'
+  rcases one_step_center_witness_of_le_two i hLe with ⟨s1, s2, hEqExcept, hNe⟩
+  refine ⟨s1, s2, ?_, hNe⟩
+  intro j hObs
+  exact hEqExcept j (by
+    intro hji
+    apply hNotObs
+    simpa [hji] using hObs)
+
+-- One-step center witness seed in explicit arithmetic form i <= 2.
+theorem one_step_center_h_witness_seed_of_le_two
+    (A : Algorithm Rule30State) :
+    forall i,
+      i <= 2 ->
+      ¬ (A.observes 1 i) ->
+      exists s1 s2,
+        agreesOnObserved rule30Cell A 1 s1 s2 /\ rule30CenterOneStep s1 ≠ rule30CenterOneStep s2 := by
+  intro i hLe hNotObs
+  exact one_step_center_h_witness_seed A i
+    ((requiredAt_iff_le_two_mul 1 i).2 (by simpa using hLe))
+    hNotObs
 
 -- Center-target witness in direct requiredAt form (h_witness shape).
 theorem witness_rule30_center_requiredAt_of_pointwise_diff
@@ -1524,6 +1622,26 @@ theorem observed_and_bounded_next_gen_rule30_center_of_le_two_mul_add_two_of_poi
     (cell := rule30Cell) A (fun k s => rule30Cell s k) work h_obs_det h_exact
     (witness_rule30_center_requiredAt_of_pointwise_diff A hConcrete) h_account n i hLe
 
+-- Concrete Rule30 center-target endpoint specialization at generation n+1.
+theorem endpoint_next_gen_observed_and_bounded_rule30_center_of_pointwise_diff_witness_and_accounting
+    (A : Algorithm Rule30State)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A (fun n s => rule30Cell s n))
+    (hConcrete :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 n ≠ rule30Cell s2 n)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, (A.observes (n + 1) (2 * n + 2) /\ 2 * n + 2 <= work (n + 1)) := by
+  intro n
+  exact observed_and_bounded_next_gen_rule30_center_of_le_two_mul_add_two_of_pointwise_diff_witness_and_accounting
+    A work h_obs_det h_exact hConcrete h_account n (2 * n + 2) (Nat.le_refl (2 * n + 2))
+
 -- Concrete Rule30 center-target next-generation non-beyond-boundary specialization:
 -- if i is not beyond 2n+2, exactness+witness+accounting force observation and work bound.
 theorem observed_and_bounded_next_gen_rule30_center_of_not_two_mul_add_two_lt_of_pointwise_diff_witness_and_accounting
@@ -1547,6 +1665,28 @@ theorem observed_and_bounded_next_gen_rule30_center_of_not_two_mul_add_two_lt_of
   · exact must_observe_required_next_gen_rule30_center_of_pointwise_diff_witness_not_two_mul_add_two_lt
       A h_obs_det h_exact hConcreteCenterNotTwoMulAddTwoLt n i hReq
   · exact work_ge_requiredCells_implies_requiredAt_next_gen_le_work work h_account n i hReq
+
+-- Concrete Rule30 center-target endpoint specialization at generation n+1
+-- from the non-beyond-boundary witness form.
+theorem endpoint_next_gen_observed_and_bounded_rule30_center_of_not_two_mul_add_two_lt_of_pointwise_diff_witness_and_accounting
+    (A : Algorithm Rule30State)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A (fun n s => rule30Cell s n))
+    (hConcreteCenterNotTwoMulAddTwoLt :
+      forall n i,
+        ¬ (2 * n + 2 < i) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 (n + 1) ≠ rule30Cell s2 (n + 1))
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, (A.observes (n + 1) (2 * n + 2) /\ 2 * n + 2 <= work (n + 1)) := by
+  intro n
+  exact observed_and_bounded_next_gen_rule30_center_of_not_two_mul_add_two_lt_of_pointwise_diff_witness_and_accounting
+    A work h_obs_det h_exact hConcreteCenterNotTwoMulAddTwoLt h_account n (2 * n + 2)
+    (Nat.not_lt_of_ge (Nat.le_refl (2 * n + 2)))
 
 -- Prefix adapter at generation n: i <= n gives observation and work bound.
 theorem observed_and_bounded_of_le_n_of_exact_and_accounting
@@ -1715,6 +1855,73 @@ theorem exists_observed_required_and_bounded_of_exact_and_accounting
   constructor
   · exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness n 0 (requiredAt_zero n)
   · exact work_ge_requiredCells_implies_requiredAt_le_work work h_account n 0 (requiredAt_zero n)
+
+-- Concrete Rule30 center-target existence packaging at generation n.
+theorem exists_observed_required_and_bounded_rule30_center_of_pointwise_diff_witness_and_accounting
+    (A : Algorithm Rule30State)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A (fun n s => rule30Cell s n))
+    (hConcrete :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 n ≠ rule30Cell s2 n)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, exists i, requiredAt n i /\ A.observes n i /\ i <= work n := by
+  intro n
+  exact exists_observed_required_and_bounded_of_exact_and_accounting
+    (cell := rule30Cell) A (fun k s => rule30Cell s k) work h_obs_det h_exact
+    (witness_rule30_center_requiredAt_of_pointwise_diff A hConcrete) h_account n
+
+-- Concrete Rule30 center-target next-generation existence packaging.
+theorem exists_observed_required_and_bounded_next_gen_rule30_center_of_pointwise_diff_witness_and_accounting
+    (A : Algorithm Rule30State)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A (fun n s => rule30Cell s n))
+    (hConcrete :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 n ≠ rule30Cell s2 n)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, exists i, requiredAt (n + 1) i /\ A.observes (n + 1) i /\ i <= work (n + 1) := by
+  intro n
+  refine ⟨2 * n + 2, requiredAt_two_mul_add_two_next_gen n, ?_⟩
+  constructor
+  · exact must_observe_required_rule30_center_of_pointwise_diff_witness
+      A h_obs_det h_exact hConcrete (n + 1) (2 * n + 2) (requiredAt_two_mul_add_two_next_gen n)
+  · exact work_ge_requiredCells_implies_requiredAt_next_gen_le_work work h_account n
+      (2 * n + 2) (requiredAt_two_mul_add_two_next_gen n)
+
+-- Concrete Rule30 center-target next-generation existence packaging from
+-- explicit non-beyond-boundary witness obligations.
+theorem exists_observed_required_and_bounded_next_gen_rule30_center_of_not_two_mul_add_two_lt_of_pointwise_diff_witness_and_accounting
+    (A : Algorithm Rule30State)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A (fun n s => rule30Cell s n))
+    (hConcreteCenterNotTwoMulAddTwoLt :
+      forall n i,
+        ¬ (2 * n + 2 < i) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 (n + 1) ≠ rule30Cell s2 (n + 1))
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, exists i, requiredAt (n + 1) i /\ A.observes (n + 1) i /\ i <= work (n + 1) := by
+  intro n
+  refine ⟨2 * n + 2, requiredAt_two_mul_add_two_next_gen n, ?_⟩
+  exact endpoint_next_gen_observed_and_bounded_rule30_center_of_not_two_mul_add_two_lt_of_pointwise_diff_witness_and_accounting
+    A work h_obs_det h_exact hConcreteCenterNotTwoMulAddTwoLt h_account n
 
 -- Next-generation existence packaging: the same conditional structure at n+1.
 theorem exists_observed_required_and_bounded_next_gen_of_exact_and_accounting
