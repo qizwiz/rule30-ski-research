@@ -769,6 +769,48 @@ theorem required_observed_and_bounded_next_gen_of_exact_and_accounting
   · exact must_observe_required (cell := cell) A target h_obs_det h_exact h_witness (n + 1) i hReq
   · exact work_ge_requiredCells_implies_requiredAt_next_gen_le_work work h_account n i hReq
 
+-- Endpoint specialization at generation n: index 2n is observed and work-bounded.
+theorem endpoint_observed_and_bounded_of_exact_and_accounting
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, (A.observes n (2 * n) /\ 2 * n <= work n) := by
+  intro n
+  exact required_observed_and_bounded_of_exact_and_accounting
+    (cell := cell) A target work h_obs_det h_exact h_witness h_account n (2 * n)
+    (requiredAt_two_mul n)
+
+-- Endpoint specialization at generation n+1: index 2n+2 is observed and work-bounded.
+theorem endpoint_next_gen_observed_and_bounded_of_exact_and_accounting
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, (A.observes (n + 1) (2 * n + 2) /\ 2 * n + 2 <= work (n + 1)) := by
+  intro n
+  exact required_observed_and_bounded_next_gen_of_exact_and_accounting
+    (cell := cell) A target work h_obs_det h_exact h_witness h_account n (2 * n + 2)
+    (requiredAt_two_mul_add_two_next_gen n)
+
 end BridgeCostComposition
 
 end Prize3
