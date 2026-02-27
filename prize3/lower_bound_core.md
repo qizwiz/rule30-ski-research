@@ -22,6 +22,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `must_observe_required_next_gen_of_not_two_mul_add_two_lt_witness` (proved direct next-generation adapter: witness obligations in explicit boundary form `¬(2n+2 < i)` discharge the same bridge goal without rewriting through `2*(n+1)`)
   - `requiredAt_of_le_n` (proved: every `i ≤ n` lies in required interval under current proxy)
   - `requiredAt_iff_le_two_mul` (proved: required interval is exactly `0 ≤ i ≤ 2n`)
+  - `requiredAt_iff_lt_two_mul_or_eq_two_mul` (proved: requiredness at generation `n` decomposes into strict-prefix or endpoint case at boundary `2n`)
   - `requiredAt_of_le_two_mul` / `not_requiredAt_of_two_mul_lt` (proved: both inclusion and strict-outside exclusion at cone endpoint)
   - `not_requiredAt_iff_two_mul_lt` / `requiredAt_or_two_mul_lt` (proved: exact inside/outside partition at the `2n` boundary)
   - `requiredAt_of_not_two_mul_lt` (proved: non-beyond-boundary form yields direct requiredness at generation `n`)

@@ -12,6 +12,7 @@ This note is for funding/outreach context only. It does not claim theorem comple
   - Next-generation observation corollaries under the same explicit hypotheses (`observes_required_next_gen_of_exact`, `observes_prefix_next_gen_of_exact`)
   - Next-generation boundary support/corollaries (`requiredAt_next_gen_iff_le_two_mul_add_two`, `requiredAt_of_le_two_mul_add_one_next_gen`, `observes_two_mul_add_one_next_gen_of_exact`, `observes_two_mul_add_two_next_gen_of_exact`)
   - Next-generation requiredness decomposition support (`requiredAt_next_gen_iff_lt_two_mul_add_two_or_eq_two_mul_add_two`) for explicit strict-prefix/endpoint witness-case splits at boundary `2n+2`
+  - Generation-`n` requiredness decomposition support (`requiredAt_iff_lt_two_mul_or_eq_two_mul`) for explicit strict-prefix/endpoint witness-case splits at boundary `2n`
   - Next-generation split support/corollary (`not_requiredAt_of_two_mul_add_two_lt_next_gen`, `requiredAt_or_two_mul_add_two_lt_next_gen`, `not_requiredAt_iff_two_mul_add_two_lt_next_gen`, `observes_or_two_mul_add_two_lt_next_gen_of_exact`)
   - Next-generation full-interval observation corollary (`observes_next_gen_interval_of_exact`)
   - Next-generation endpoint helpers (`requiredAt_of_le_two_mul_add_two_next_gen`, `requiredAt_two_mul_add_two_next_gen`, `not_requiredAt_two_mul_add_three_next_gen`)

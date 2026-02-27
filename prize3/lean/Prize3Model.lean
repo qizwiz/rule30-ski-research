@@ -147,6 +147,19 @@ theorem requiredAt_iff_le_two_mul (n i : Nat) : requiredAt n i ↔ i <= 2 * n :=
   have h : i < Nat.succ (2 * n) ↔ i <= 2 * n := Nat.lt_succ_iff
   simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
 
+-- Requiredness at generation n can be split into strict-prefix-or-endpoint form.
+theorem requiredAt_iff_lt_two_mul_or_eq_two_mul (n i : Nat) :
+    requiredAt n i ↔ i < 2 * n ∨ i = 2 * n := by
+  constructor
+  · intro hReq
+    have hLe : i <= 2 * n := (requiredAt_iff_le_two_mul n i).1 hReq
+    exact Nat.lt_or_eq_of_le hLe
+  · intro hSplit
+    rcases hSplit with hLt | hEq
+    · exact (requiredAt_iff_le_two_mul n i).2 (Nat.le_of_lt hLt)
+    · rw [hEq]
+      exact (requiredAt_iff_le_two_mul n (2 * n)).2 (Nat.le_refl (2 * n))
+
 -- Boundary-index witness adapter: discharge the bridge with the equivalent
 -- arithmetic form i <= 2n instead of requiredAt n i.
 theorem must_observe_required_of_le_two_mul_witness
