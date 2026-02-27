@@ -222,6 +222,15 @@ theorem requiredAt_of_not_two_mul_add_two_lt_next_gen (n i : Nat)
   · exact hReq
   · exact False.elim (hNotLt ((not_requiredAt_iff_two_mul_add_two_lt_next_gen n i).1 hReq))
 
+-- Next-generation requiredness is equivalent to not being beyond 2n+2.
+theorem requiredAt_iff_not_two_mul_add_two_lt_next_gen (n i : Nat) :
+    requiredAt (n + 1) i ↔ ¬ (2 * n + 2 < i) := by
+  constructor
+  · intro hReq hLt
+    exact Nat.not_lt_of_ge ((requiredAt_next_gen_iff_le_two_mul_add_two n i).1 hReq) hLt
+  · intro hNotLt
+    exact requiredAt_of_not_two_mul_add_two_lt_next_gen n i hNotLt
+
 -- In particular, index n is always required.
 theorem requiredAt_self (n : Nat) : requiredAt n n := by
   exact requiredAt_of_le_n n n (Nat.le_refl n)
@@ -258,6 +267,14 @@ theorem requiredAt_of_not_two_mul_lt (n i : Nat) (hNotLt : ¬ (2 * n < i)) : req
   by_cases hReq : requiredAt n i
   · exact hReq
   · exact False.elim (hNotLt ((not_requiredAt_iff_two_mul_lt n i).1 hReq))
+
+-- Requiredness is equivalent to not being beyond 2n.
+theorem requiredAt_iff_not_two_mul_lt (n i : Nat) : requiredAt n i ↔ ¬ (2 * n < i) := by
+  constructor
+  · intro hReq hLt
+    exact Nat.not_lt_of_ge ((requiredAt_iff_le_two_mul n i).1 hReq) hLt
+  · intro hNotLt
+    exact requiredAt_of_not_two_mul_lt n i hNotLt
 
 -- Every index either lies in the required interval or is strictly beyond it.
 theorem requiredAt_or_two_mul_lt (n i : Nat) : requiredAt n i ∨ 2 * n < i := by
