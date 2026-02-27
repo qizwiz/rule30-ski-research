@@ -8,6 +8,8 @@ Purpose: track the exactness-bridge obligations needed before any lower-bound th
 - Proved (in-repo):
   - Abstract no-skip bridge interface and logic in Lean:
     - `must_observe_required`
+    - `must_observe_required_of_le_two_mul_witness`
+    - `must_observe_required_next_gen_of_le_two_mul_witness`
     - `observes_prefix_of_exact`
     - `observes_self_of_exact`
     - `observes_cone_interval_of_exact`

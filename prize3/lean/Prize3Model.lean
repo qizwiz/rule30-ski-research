@@ -123,6 +123,7 @@ theorem must_observe_required
       exact hRunEq
     exact False.elim (hTargetNe hTargetEq)
 
+
 -- Required index 0 is always present, useful as a base sanity check.
 theorem requiredAt_zero (n : Nat) : requiredAt n 0 := by
   unfold requiredAt requiredCells coneWidth
@@ -146,6 +147,27 @@ theorem requiredAt_iff_le_two_mul (n i : Nat) : requiredAt n i ↔ i <= 2 * n :=
   have h : i < Nat.succ (2 * n) ↔ i <= 2 * n := Nat.lt_succ_iff
   simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
 
+-- Boundary-index witness adapter: discharge the bridge with the equivalent
+-- arithmetic form i <= 2n instead of requiredAt n i.
+theorem must_observe_required_of_le_two_mul_witness
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness_le_two_mul :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, requiredAt n i -> A.observes n i := by
+  intro n i hReq
+  exact must_observe_required (cell := cell) A target h_obs_det h_exact
+    (fun n i hReq' hNotObs =>
+      h_witness_le_two_mul n i ((requiredAt_iff_le_two_mul n i).1 hReq') hNotObs)
+    n i hReq
+
 -- Any index up to the cone endpoint is required.
 theorem requiredAt_of_le_two_mul (n i : Nat) (h : i <= 2 * n) : requiredAt n i := by
   exact (requiredAt_iff_le_two_mul n i).2 h
@@ -157,6 +179,24 @@ theorem requiredAt_next_gen_iff_le_two_mul_add_two (n i : Nat) :
     requiredAt (n + 1) i ↔ i <= 2 * (n + 1) := requiredAt_iff_le_two_mul (n + 1) i
     _ ↔ i <= 2 * n + 2 := by
       simp [Nat.mul_add, Nat.add_comm]
+
+-- Next-generation corollary of the boundary-index witness adapter.
+theorem must_observe_required_next_gen_of_le_two_mul_witness
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness_le_two_mul :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2) :
+    forall n i, requiredAt (n + 1) i -> A.observes (n + 1) i := by
+  intro n i hReq
+  exact must_observe_required_of_le_two_mul_witness
+    (cell := cell) A target h_obs_det h_exact h_witness_le_two_mul (n + 1) i hReq
 
 -- Next-generation requiredness can be split into strict-prefix-or-endpoint form.
 theorem requiredAt_next_gen_iff_lt_two_mul_add_two_or_eq_two_mul_add_two (n i : Nat) :
