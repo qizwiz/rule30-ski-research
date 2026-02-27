@@ -19,6 +19,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `must_observe_required_next_gen_of_le_two_mul_witness` (proved next-generation corollary of the same boundary-form adapter)
   - `must_observe_required_of_not_two_mul_lt_witness` (proved adapter: equivalent non-beyond-boundary witness obligations `¬(2n < i)` discharge the same bridge goal)
   - `must_observe_required_next_gen_of_not_two_mul_lt_witness` (proved next-generation corollary of the same non-beyond-boundary adapter)
+  - `must_observe_required_next_gen_of_not_two_mul_add_two_lt_witness` (proved direct next-generation adapter: witness obligations in explicit boundary form `¬(2n+2 < i)` discharge the same bridge goal without rewriting through `2*(n+1)`)
   - `requiredAt_of_le_n` (proved: every `i ≤ n` lies in required interval under current proxy)
   - `requiredAt_iff_le_two_mul` (proved: required interval is exactly `0 ≤ i ≤ 2n`)
   - `requiredAt_of_le_two_mul` / `not_requiredAt_of_two_mul_lt` (proved: both inclusion and strict-outside exclusion at cone endpoint)
@@ -57,6 +58,8 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `work_ge_requiredCells_implies_requiredAt_next_gen_le_work`
   - `required_observed_and_bounded_of_exact_and_accounting`
   - `required_observed_and_bounded_next_gen_of_exact_and_accounting`
+  - `left_endpoint_observed_and_bounded_of_exact_and_accounting` (proved: under the same scaffold hypotheses, exactness+accounting force observation and work-bound at left endpoint `i = 0`)
+  - `left_endpoint_next_gen_observed_and_bounded_of_exact_and_accounting` (proved: under the same scaffold hypotheses, exactness+accounting force observation and work-bound at left endpoint `i = 0` in generation `n+1`)
   - `endpoint_observed_and_bounded_of_exact_and_accounting` (proved: under the same scaffold hypotheses, exactness+accounting force observation and work-bound at endpoint `i = 2n`)
   - `endpoint_next_gen_observed_and_bounded_of_exact_and_accounting` (proved: under the same scaffold hypotheses, exactness+accounting force observation and work-bound at next-generation endpoint `i = 2n+2`)
   - `near_endpoint_next_gen_observed_and_bounded_of_exact_and_accounting` (proved: under the same scaffold hypotheses, exactness+accounting force observation and work-bound at near-endpoint `i = 2n+1` in generation `n+1`)

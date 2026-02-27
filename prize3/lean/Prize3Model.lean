@@ -355,6 +355,33 @@ theorem must_observe_required_next_gen_of_not_two_mul_lt_witness
   exact must_observe_required_of_not_two_mul_lt_witness
     (cell := cell) A target h_obs_det h_exact h_witness_not_two_mul_lt (n + 1) i hReq
 
+-- Next-generation boundary-complement adapter with a direct n+1 arithmetic shape:
+-- witness obligations are stated as ¬(2n+2 < i), avoiding rewrites through 2*(n+1).
+theorem must_observe_required_next_gen_of_not_two_mul_add_two_lt_witness
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness_not_two_mul_add_two_lt :
+      forall n i,
+        ¬ (2 * n + 2 < i) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          agreesOnObserved cell A (n + 1) s1 s2 /\ target (n + 1) s1 ≠ target (n + 1) s2) :
+    forall n i, requiredAt (n + 1) i -> A.observes (n + 1) i := by
+  intro n i hReq
+  by_cases hObs : A.observes (n + 1) i
+  · exact hObs
+  · rcases h_witness_not_two_mul_add_two_lt n i
+      ((requiredAt_iff_not_two_mul_add_two_lt_next_gen n i).1 hReq) hObs with
+      ⟨s1, s2, hAgree, hTargetNe⟩
+    have hRunEq : A.run (n + 1) s1 = A.run (n + 1) s2 := h_obs_det (n + 1) s1 s2 hAgree
+    have hTargetEq : target (n + 1) s1 = target (n + 1) s2 := by
+      rw [← h_exact (n + 1) s1, ← h_exact (n + 1) s2]
+      exact hRunEq
+    exact False.elim (hTargetNe hTargetEq)
+
 -- Every index either lies in the required interval or is strictly beyond it.
 theorem requiredAt_or_two_mul_lt (n i : Nat) : requiredAt n i ∨ 2 * n < i := by
   by_cases hReq : requiredAt n i
@@ -1006,6 +1033,46 @@ theorem near_endpoint_next_gen_observed_and_bounded_of_exact_and_accounting
   exact required_observed_and_bounded_next_gen_of_exact_and_accounting
     (cell := cell) A target work h_obs_det h_exact h_witness h_account n (2 * n + 1)
     (requiredAt_of_le_two_mul_add_one_next_gen n (2 * n + 1) (Nat.le_refl (2 * n + 1)))
+
+-- Left-endpoint specialization at generation n: index 0 is observed and work-bounded.
+theorem left_endpoint_observed_and_bounded_of_exact_and_accounting
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, (A.observes n 0 /\ 0 <= work n) := by
+  intro n
+  exact required_observed_and_bounded_of_exact_and_accounting
+    (cell := cell) A target work h_obs_det h_exact h_witness h_account n 0 (requiredAt_zero n)
+
+-- Left-endpoint specialization at generation n+1: index 0 is observed and work-bounded.
+theorem left_endpoint_next_gen_observed_and_bounded_of_exact_and_accounting
+    (A : Algorithm State)
+    (target : Nat -> State -> Bool)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A target)
+    (h_witness :
+      forall n i,
+        requiredAt n i ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          agreesOnObserved cell A n s1 s2 /\ target n s1 ≠ target n s2)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n, (A.observes (n + 1) 0 /\ 0 <= work (n + 1)) := by
+  intro n
+  exact required_observed_and_bounded_next_gen_of_exact_and_accounting
+    (cell := cell) A target work h_obs_det h_exact h_witness h_account n 0 (requiredAt_zero (n + 1))
 
 -- Existence packaging at generation n: at least one index is required, observed,
 -- and bounded by work under the same conditional hypotheses.

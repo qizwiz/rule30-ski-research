@@ -8,7 +8,7 @@ This note is for funding/outreach context only. It does not claim theorem comple
 - Proved (in-repo):
   - Frozen model + statement (`prize3/model.md`, `prize3/statement.md`)
   - Foundational cone/proxy lemmas in Lean (`prize3/lean/Prize3Model.lean`)
-  - Conditional no-skip scaffold (`must_observe_required`) plus boundary-witness adapter lemmas (`must_observe_required_of_le_two_mul_witness`, `must_observe_required_next_gen_of_le_two_mul_witness`, `must_observe_required_of_not_two_mul_lt_witness`, `must_observe_required_next_gen_of_not_two_mul_lt_witness`) and support lemmas including `observes_self_of_exact` and `observes_two_mul_of_exact`
+  - Conditional no-skip scaffold (`must_observe_required`) plus boundary-witness adapter lemmas (`must_observe_required_of_le_two_mul_witness`, `must_observe_required_next_gen_of_le_two_mul_witness`, `must_observe_required_of_not_two_mul_lt_witness`, `must_observe_required_next_gen_of_not_two_mul_lt_witness`, `must_observe_required_next_gen_of_not_two_mul_add_two_lt_witness`) and support lemmas including `observes_self_of_exact` and `observes_two_mul_of_exact`
   - Next-generation observation corollaries under the same explicit hypotheses (`observes_required_next_gen_of_exact`, `observes_prefix_next_gen_of_exact`)
   - Next-generation boundary support/corollaries (`requiredAt_next_gen_iff_le_two_mul_add_two`, `requiredAt_of_le_two_mul_add_one_next_gen`, `observes_two_mul_add_one_next_gen_of_exact`, `observes_two_mul_add_two_next_gen_of_exact`)
   - Next-generation requiredness decomposition support (`requiredAt_next_gen_iff_lt_two_mul_add_two_or_eq_two_mul_add_two`) for explicit strict-prefix/endpoint witness-case splits at boundary `2n+2`
@@ -25,7 +25,7 @@ This note is for funding/outreach context only. It does not claim theorem comple
   - Existence corollaries (`exists_observed_required_of_exact`, `exists_observed_required_next_gen_of_exact`) under the same explicit hypotheses
   - Conditional cost-transfer scaffold (explicit accounting hypothesis), including per-index bounds `work_ge_requiredCells_implies_requiredAt_le_work`, `work_ge_requiredCells_implies_requiredAt_next_gen_le_work` and next-generation endpoint/near-endpoint bounds `work_ge_requiredCells_implies_two_mul_add_two_next_gen`, `work_ge_requiredCells_implies_two_mul_add_one_next_gen`
   - Conditional composition scaffold joining exactness+witness+accounting hypotheses (`required_observed_and_bounded_of_exact_and_accounting`, `required_observed_and_bounded_next_gen_of_exact_and_accounting`)
-  - Endpoint-specialized conditional composition corollaries (`endpoint_observed_and_bounded_of_exact_and_accounting`, `endpoint_next_gen_observed_and_bounded_of_exact_and_accounting`, `near_endpoint_next_gen_observed_and_bounded_of_exact_and_accounting`)
+  - Endpoint-specialized conditional composition corollaries (`left_endpoint_observed_and_bounded_of_exact_and_accounting`, `left_endpoint_next_gen_observed_and_bounded_of_exact_and_accounting`, `endpoint_observed_and_bounded_of_exact_and_accounting`, `endpoint_next_gen_observed_and_bounded_of_exact_and_accounting`, `near_endpoint_next_gen_observed_and_bounded_of_exact_and_accounting`)
   - Existence-form conditional composition corollaries (`exists_observed_required_and_bounded_of_exact_and_accounting`, `exists_observed_required_and_bounded_next_gen_of_exact_and_accounting`)
   - Phase 3 obligation matrix with explicit open/closed status (`prize3/phase3_obligation_matrix.md`)
 - Empirical (not proof):
