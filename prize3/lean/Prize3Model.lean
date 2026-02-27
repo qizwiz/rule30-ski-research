@@ -147,6 +147,25 @@ theorem witness_le_two_mul_of_pointwise_diff
     apply hNotObs
     simpa [hji] using hObs)
 
+-- Center-target specialization of the bounded concrete witness adapter.
+theorem witness_rule30_center_le_two_mul_of_pointwise_diff
+    (A : Algorithm Rule30State)
+    (hConcreteCenter :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 n ≠ rule30Cell s2 n) :
+    forall n i,
+      i <= 2 * n ->
+      ¬ (A.observes n i) ->
+      exists s1 s2,
+        agreesOnObserved rule30Cell A n s1 s2 /\ rule30Cell s1 n ≠ rule30Cell s2 n := by
+  intro n i hLe hNotObs
+  exact witness_le_two_mul_of_pointwise_diff
+    A (fun k s => rule30Cell s k) hConcreteCenter n i hLe hNotObs
+
 end Rule30WitnessScaffold
 
 -- If an algorithm only depends on observed units, and exactness can be broken
@@ -197,6 +216,44 @@ theorem requiredAt_iff_le_two_mul (n i : Nat) : requiredAt n i ↔ i <= 2 * n :=
   unfold requiredAt requiredCells coneWidth
   have h : i < Nat.succ (2 * n) ↔ i <= 2 * n := Nat.lt_succ_iff
   simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
+
+-- Center-target witness in direct requiredAt form (h_witness shape).
+theorem witness_rule30_center_requiredAt_of_pointwise_diff
+    (A : Algorithm Rule30State)
+    (hConcreteCenter :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 n ≠ rule30Cell s2 n) :
+    forall n i,
+      requiredAt n i ->
+      ¬ (A.observes n i) ->
+      exists s1 s2,
+        agreesOnObserved rule30Cell A n s1 s2 /\ rule30Cell s1 n ≠ rule30Cell s2 n := by
+  intro n i hReq hNotObs
+  exact witness_rule30_center_le_two_mul_of_pointwise_diff A hConcreteCenter n i
+    ((requiredAt_iff_le_two_mul n i).1 hReq) hNotObs
+
+-- Center-target witness in direct next-generation requiredAt form.
+theorem witness_rule30_center_requiredAt_next_gen_of_pointwise_diff
+    (A : Algorithm Rule30State)
+    (hConcreteCenter :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 n ≠ rule30Cell s2 n) :
+    forall n i,
+      requiredAt (n + 1) i ->
+      ¬ (A.observes (n + 1) i) ->
+      exists s1 s2,
+        agreesOnObserved rule30Cell A (n + 1) s1 s2 /\ rule30Cell s1 (n + 1) ≠ rule30Cell s2 (n + 1) := by
+  intro n i hReq hNotObs
+  exact witness_rule30_center_requiredAt_of_pointwise_diff
+    A hConcreteCenter (n + 1) i hReq hNotObs
 
 -- Requiredness at generation n can be split into strict-prefix-or-endpoint form.
 theorem requiredAt_iff_lt_two_mul_or_eq_two_mul (n i : Nat) :
@@ -291,6 +348,24 @@ theorem must_observe_required_next_gen_rule30_of_pointwise_diff_witness
   exact must_observe_required_of_le_two_mul_witness
     (cell := rule30Cell) A target h_obs_det h_exact
     (witness_le_two_mul_of_pointwise_diff A target hConcrete) (n + 1) i hReq
+
+-- Concrete center-slice specialization at generation n+1.
+theorem must_observe_required_next_gen_rule30_center_of_pointwise_diff_witness
+    (A : Algorithm Rule30State)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A (fun n s => rule30Cell s n))
+    (hConcrete :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 n ≠ rule30Cell s2 n) :
+    forall n i, requiredAt (n + 1) i -> A.observes (n + 1) i := by
+  intro n i hReq
+  exact must_observe_required_next_gen_rule30_of_pointwise_diff_witness
+    A (fun n s => rule30Cell s n) h_obs_det h_exact hConcrete n i hReq
 
 -- Rule30 no-skip adapter in non-beyond-boundary form at generation n.
 theorem must_observe_of_not_two_mul_lt_rule30_of_pointwise_diff_witness
@@ -1247,6 +1322,28 @@ theorem observed_and_bounded_of_le_two_mul_of_exact_and_accounting
   exact required_observed_and_bounded_of_exact_and_accounting
     (cell := cell) A target work h_obs_det h_exact h_witness h_account n i
     (requiredAt_of_le_two_mul n i hLe)
+
+-- Concrete Rule30 center-target specialization of the n-generation boundary form:
+-- if i <= 2n, exactness+witness+accounting force observation and work bound.
+theorem observed_and_bounded_rule30_center_of_le_two_mul_of_pointwise_diff_witness_and_accounting
+    (A : Algorithm Rule30State)
+    (work : Nat -> Nat)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact : exactFor A (fun n s => rule30Cell s n))
+    (hConcrete :
+      forall n i,
+        i <= 2 * n ->
+        ¬ (A.observes n i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 n ≠ rule30Cell s2 n)
+    (h_account : forall n, requiredCells n <= work n) :
+    forall n i, i <= 2 * n -> (A.observes n i /\ i <= work n) := by
+  intro n i hLe
+  exact observed_and_bounded_of_le_two_mul_of_exact_and_accounting
+    (cell := rule30Cell) A (fun k s => rule30Cell s k) work h_obs_det h_exact
+    (witness_rule30_center_requiredAt_of_pointwise_diff A hConcrete) h_account n i hLe
 
 -- Boundary-form adapter at generation n+1: i <= 2n+2 gives observation and work bound.
 theorem observed_and_bounded_next_gen_of_le_two_mul_add_two_of_exact_and_accounting

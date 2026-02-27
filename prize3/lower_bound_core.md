@@ -18,7 +18,12 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `must_observe_required_of_le_two_mul_witness` (proved adapter: boundary-form witness obligations `i ≤ 2n` discharge the same bridge goal)
   - `must_observe_required_next_gen_of_le_two_mul_witness` (proved next-generation corollary of the same boundary-form adapter)
   - `must_observe_required_rule30_of_pointwise_diff_witness` (proved concrete Rule 30 composition: pointwise-difference witnesses at `i ≤ 2n` discharge the abstract bridge)
+  - `witness_rule30_center_le_two_mul_of_pointwise_diff` (proved center-target witness adapter: bounded pointwise-difference witness obligations `i ≤ 2n` are mapped into `agreesOnObserved` bridge form)
+  - `witness_rule30_center_requiredAt_of_pointwise_diff` (proved center-target witness adapter in direct `requiredAt n i` form)
+  - `witness_rule30_center_requiredAt_next_gen_of_pointwise_diff` (proved center-target witness adapter in direct `requiredAt (n+1) i` form)
+  - `must_observe_required_rule30_center_of_pointwise_diff_witness` (proved center-target specialization at generation `n` under the same bounded pointwise-difference witness interface)
   - `must_observe_required_next_gen_rule30_of_pointwise_diff_witness` (proved next-generation Rule 30 composition under the same pointwise-difference witness interface)
+  - `must_observe_required_next_gen_rule30_center_of_pointwise_diff_witness` (proved center-target specialization at generation `n+1` under the same bounded pointwise-difference witness interface)
   - `must_observe_of_not_two_mul_lt_rule30_of_pointwise_diff_witness` (proved Rule 30 non-beyond-boundary adapter: `¬(2n < i)` implies observation under the same concrete witness interface)
   - `must_observe_next_gen_of_not_two_mul_add_two_lt_rule30_of_pointwise_diff_witness` (proved next-generation Rule 30 non-beyond-boundary adapter: `¬(2n+2 < i)` implies observation under the same concrete witness interface)
   - `must_observe_required_of_not_two_mul_lt_witness` (proved adapter: equivalent non-beyond-boundary witness obligations `¬(2n < i)` discharge the same bridge goal)
@@ -67,6 +72,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `left_endpoint_observed_and_bounded_of_exact_and_accounting` (proved: under the same scaffold hypotheses, exactness+accounting force observation and work-bound at left endpoint `i = 0`)
   - `left_endpoint_next_gen_observed_and_bounded_of_exact_and_accounting` (proved: under the same scaffold hypotheses, exactness+accounting force observation and work-bound at left endpoint `i = 0` in generation `n+1`)
   - `observed_and_bounded_of_le_two_mul_of_exact_and_accounting` (proved adapter: under the same scaffold hypotheses, boundary form `i ≤ 2n` gives observation+work-bound directly at generation `n`)
+  - `observed_and_bounded_rule30_center_of_le_two_mul_of_pointwise_diff_witness_and_accounting` (proved Rule 30 center-target specialization: under explicit center-target witness and accounting hypotheses, boundary form `i ≤ 2n` gives observation+work-bound directly at generation `n`)
   - `observed_and_bounded_next_gen_of_le_two_mul_add_two_of_exact_and_accounting` (proved adapter: under the same scaffold hypotheses, explicit next-generation boundary form `i ≤ 2n+2` gives observation+work-bound directly at generation `n+1`)
   - `observed_and_bounded_of_le_n_of_exact_and_accounting` (proved adapter: under the same scaffold hypotheses, prefix form `i ≤ n` gives observation+work-bound directly at generation `n`)
   - `observed_and_bounded_next_gen_of_le_n_add_one_of_exact_and_accounting` (proved adapter: under the same scaffold hypotheses, prefix form `i ≤ n+1` gives observation+work-bound directly at generation `n+1`)
@@ -115,7 +121,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
 - This is a scaffold result only. It does **not** discharge the Rule 30-specific witness/accounting obligations by itself.
 
 ## Current blocker
-- Step 3 is only partially formalized: abstract bridge logic is proved, but Rule 30-specific indistinguishability witness lemmas are still missing.
+- Step 3 is only partially formalized: abstract bridge logic and Rule 30 witness adapters are proved, but concrete Rule 30 witness-construction lemmas (that discharge those adapter hypotheses without extra assumptions) are still missing.
 
 ## Immediate next steps
 1. Instantiate the abstract bridge scaffold with a concrete Rule 30 state/output model.
