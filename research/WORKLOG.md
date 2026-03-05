@@ -403,3 +403,193 @@
 - 2026-02-27 06:55:12 CST Empirical: compile logs are reproducibility evidence only and not proof of final Prize3 theorem.
 - 2026-02-27 06:55:12 CST Conjectural: concrete next-generation Rule 30 witness-construction closure and final exactness-to-work instantiation remain open; Prize3 lower-bound theorem is not yet proved in-repo.
 - 2026-02-27 06:55:12 CST No blocker this cycle; advanced highest-value unblocked Priority-1/2/3/4 artifacts.
+- 2026-02-27 06:55:53 CST Supervisor: refreshed required logs/reports, updated supervisor_status, and enqueued alpha-20260227-065553.prompt plus beta-20260227-065553.prompt after empty-queue checks.
+- 2026-02-27 06:56:20 CST Autopilot cycle completed successfully.
+- 2026-02-27 06:58:38 CST Supervisor: refreshed required logs/reports, updated research/agent_reports/supervisor_status.md, enqueued alpha-20260227-065838.prompt and beta-20260227-065838.prompt after confirming empty alpha/beta queues.
+- 2026-02-27 07:00:29 CST Autopilot cycle start.
+- 2026-02-27 07:00:30 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772199030). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-070021.log
+- 2026-02-27 07:30:39 CST Autopilot cycle start.
+- 2026-02-27 07:30:41 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772200841). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-073030.log
+- 2026-02-27 08:00:48 CST Autopilot cycle start.
+- 2026-02-27 08:00:49 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772202649). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-080041.log
+- 2026-02-27 08:31:04 CST Autopilot cycle start.
+- 2026-02-27 08:31:05 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772204465). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-083050.log
+- 2026-02-27 09:01:12 CST Autopilot cycle start.
+- 2026-02-27 09:01:13 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772206273). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-090105.log
+- 2026-02-27 09:31:19 CST Autopilot cycle start.
+- 2026-02-27 09:31:20 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772208080). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-093113.log
+- 2026-02-27 10:01:27 CST Autopilot cycle start.
+- 2026-02-27 10:01:27 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772209887). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-100120.log
+- 2026-02-27 10:31:34 CST Autopilot cycle start.
+- 2026-02-27 10:31:36 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772211696). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-103127.log
+- 2026-02-27 11:01:45 CST Autopilot cycle start.
+- 2026-02-27 11:01:46 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772213506). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-110136.log
+- 2026-02-27 11:31:53 CST Autopilot cycle start.
+- 2026-02-27 11:31:54 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772215314). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-113147.log
+- 2026-02-27 12:02:01 CST Autopilot cycle start.
+- 2026-02-27 12:02:02 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772217122). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-120154.log
+- 2026-02-27 12:32:12 CST Autopilot cycle start.
+- 2026-02-27 12:32:13 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772218933). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-123203.log
+- 2026-02-27 13:02:22 CST Autopilot cycle start.
+- 2026-02-27 13:02:24 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772220744). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-130213.log
+- 2026-02-27 13:32:32 CST Autopilot cycle start.
+- 2026-02-27 13:32:33 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772222553). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-133225.log
+- 2026-02-27 14:02:39 CST Autopilot cycle start.
+- 2026-02-27 14:02:39 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772224359). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-140233.log
+- 2026-02-27 14:32:48 CST Autopilot cycle start.
+- 2026-02-27 14:32:49 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772226169). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-143239.log
+- 2026-02-27 15:02:56 CST Autopilot cycle start.
+- 2026-02-27 15:02:57 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772227977). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-150249.log
+- 2026-02-27 15:33:04 CST Autopilot cycle start.
+- 2026-02-27 15:33:05 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772229785). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-153258.log
+- 2026-02-27 16:03:10 CST Autopilot cycle start.
+- 2026-02-27 16:03:10 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772231590). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-160306.log
+- 2026-02-27 16:33:16 CST Autopilot cycle start.
+- 2026-02-27 16:33:16 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772233396). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-163310.log
+- 2026-02-27 17:03:22 CST Autopilot cycle start.
+- 2026-02-27 17:03:23 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772235203). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-170316.log
+- 2026-02-27 17:33:28 CST Autopilot cycle start.
+- 2026-02-27 17:33:28 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772237008). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-173323.log
+- 2026-02-27 18:03:33 CST Autopilot cycle start.
+- 2026-02-27 18:03:34 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772238814). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-180329.log
+- 2026-02-27 18:33:39 CST Autopilot cycle start.
+- 2026-02-27 18:33:40 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772240620). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-183334.log
+- 2026-02-27 19:03:46 CST Autopilot cycle start.
+- 2026-02-27 19:03:47 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772242427). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-190341.log
+- 2026-02-27 19:33:52 CST Autopilot cycle start.
+- 2026-02-27 19:33:53 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772244233). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-193347.log
+- 2026-02-27 20:03:59 CST Autopilot cycle start.
+- 2026-02-27 20:03:59 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772246039). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-200353.log
+- 2026-02-27 20:34:04 CST Autopilot cycle start.
+- 2026-02-27 20:34:05 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772247845). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-203359.log
+- 2026-02-27 21:04:10 CST Autopilot cycle start.
+- 2026-02-27 21:04:11 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772249651). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-210405.log
+- 2026-02-27 21:34:16 CST Autopilot cycle start.
+- 2026-02-27 21:34:17 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772251457). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-213411.log
+- 2026-02-27 22:04:22 CST Autopilot cycle start.
+- 2026-02-27 22:04:23 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772253263). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-220417.log
+- 2026-02-27 22:34:29 CST Autopilot cycle start.
+- 2026-02-27 22:34:29 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772255069). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-223423.log
+- 2026-02-27 23:04:37 CST Autopilot cycle start.
+- 2026-02-27 23:04:38 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772256878). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-230430.log
+- 2026-02-27 23:34:46 CST Autopilot cycle start.
+- 2026-02-27 23:34:47 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772258687). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260227-233438.log
+- 2026-02-28 00:04:54 CST Autopilot cycle start.
+- 2026-02-28 00:04:55 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772260495). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-000448.log
+- 2026-02-28 00:35:02 CST Autopilot cycle start.
+- 2026-02-28 00:35:03 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772262303). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-003456.log
+- 2026-02-28 01:05:09 CST Autopilot cycle start.
+- 2026-02-28 01:05:10 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772264110). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-010503.log
+- 2026-02-28 01:35:14 CST Autopilot cycle start.
+- 2026-02-28 01:35:16 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772265916). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-013510.log
+- 2026-02-28 02:05:23 CST Autopilot cycle start.
+- 2026-02-28 02:05:23 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772267723). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-020517.log
+- 2026-02-28 02:35:29 CST Autopilot cycle start.
+- 2026-02-28 02:35:30 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772269530). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-023524.log
+- 2026-02-28 03:05:35 CST Autopilot cycle start.
+- 2026-02-28 03:05:35 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772271335). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-030530.log
+- 2026-02-28 03:35:41 CST Autopilot cycle start.
+- 2026-02-28 03:35:42 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772273142). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-033535.log
+- 2026-02-28 04:06:14 CST Autopilot cycle start.
+- 2026-02-28 04:06:16 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772274975). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-040543.log
+- 2026-02-28 04:40:54 CST Autopilot cycle start.
+- 2026-02-28 04:41:11 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772277070). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-043616.log
+- 2026-02-28 05:15:53 CST Autopilot cycle start.
+- 2026-02-28 05:16:14 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772279172). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-051113.log
+- 2026-02-28 05:50:52 CST Autopilot cycle start.
+- 2026-02-28 05:51:12 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772281272). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-054614.log
+- 2026-02-28 06:22:48 CST Autopilot cycle start.
+- 2026-02-28 06:22:55 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772283175). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-062115.log
+- 2026-02-28 06:53:04 CST Autopilot cycle start.
+- 2026-02-28 06:53:05 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772284985). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-065255.log
+- 2026-02-28 07:23:33 CST Autopilot cycle start.
+- 2026-02-28 07:23:36 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772286816). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-072306.log
+- 2026-02-28 07:54:15 CST Autopilot cycle start.
+- 2026-02-28 07:54:17 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772288657). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-075336.log
+- 2026-02-28 08:34:31 CST Autopilot cycle start.
+- 2026-02-28 08:35:01 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772291100). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-082423.log
+- 2026-02-28 09:11:43 CST Autopilot cycle start.
+- 2026-02-28 09:11:47 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772293307). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-091022.log
+- 2026-02-28 09:41:57 CST Autopilot cycle start.
+- 2026-02-28 09:41:57 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772295117). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-094148.log
+- 2026-02-28 10:12:06 CST Autopilot cycle start.
+- 2026-02-28 10:12:07 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772296927). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-101157.log
+- 2026-02-28 10:42:21 CST Autopilot cycle start.
+- 2026-02-28 10:42:23 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772298743). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-104207.log
+- 2026-02-28 11:12:31 CST Autopilot cycle start.
+- 2026-02-28 11:12:32 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772300552). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-111224.log
+- 2026-02-28 11:42:41 CST Autopilot cycle start.
+- 2026-02-28 11:42:41 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772302361). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-114232.log
+- 2026-02-28 12:12:50 CST Autopilot cycle start.
+- 2026-02-28 12:12:52 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772304172). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-121242.log
+- 2026-02-28 12:42:58 CST Autopilot cycle start.
+- 2026-02-28 12:42:59 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772305979). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-124252.log
+- 2026-02-28 13:13:38 CST Autopilot cycle start.
+- 2026-02-28 13:13:39 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772307819). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-131300.log
+- 2026-02-28 13:43:47 CST Autopilot cycle start.
+- 2026-02-28 13:43:48 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772309628). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-134339.log
+- 2026-02-28 14:16:48 CST Autopilot cycle start.
+- 2026-02-28 14:17:06 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772311625). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-141349.log
+- 2026-02-28 15:03:08 CST Autopilot cycle start.
+- 2026-02-28 15:03:28 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772314407). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-144725.log
+- 2026-02-28 15:43:21 CST Autopilot cycle start.
+- 2026-02-28 15:43:39 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772316819). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-153334.log
+- 2026-02-28 16:22:59 CST Autopilot cycle start.
+- 2026-02-28 16:23:40 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772319220). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-161342.log
+- 2026-02-28 16:57:23 CST Autopilot cycle start.
+- 2026-02-28 16:57:39 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772321257). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-165344.log
+- 2026-02-28 17:27:43 CST Autopilot cycle start.
+- 2026-02-28 17:27:44 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772323064). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-172737.log
+- 2026-02-28 17:57:50 CST Autopilot cycle start.
+- 2026-02-28 17:57:50 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772324870). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-175744.log
+- 2026-02-28 18:27:57 CST Autopilot cycle start.
+- 2026-02-28 18:27:57 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772326677). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-182751.log
+- 2026-02-28 18:58:04 CST Autopilot cycle start.
+- 2026-02-28 18:58:04 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772328484). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-185758.log
+- 2026-02-28 19:28:10 CST Autopilot cycle start.
+- 2026-02-28 19:28:11 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772330291). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-192804.log
+- 2026-02-28 19:58:19 CST Autopilot cycle start.
+- 2026-02-28 19:58:20 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772332100). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-195812.log
+- 2026-02-28 20:28:26 CST Autopilot cycle start.
+- 2026-02-28 20:28:27 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772333907). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-202820.log
+- 2026-02-28 20:58:32 CST Autopilot cycle start.
+- 2026-02-28 20:58:33 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772335713). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-205827.log
+- 2026-02-28 21:28:39 CST Autopilot cycle start.
+- 2026-02-28 21:28:40 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772337520). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-212833.log
+- 2026-02-28 21:58:48 CST Autopilot cycle start.
+- 2026-02-28 21:58:48 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772339328). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-215841.log
+- 2026-02-28 22:29:07 CST Autopilot cycle start.
+- 2026-02-28 22:29:07 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772341147). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-222848.log
+- 2026-02-28 22:59:14 CST Autopilot cycle start.
+- 2026-02-28 22:59:15 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772342955). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-225907.log
+- 2026-02-28 23:29:22 CST Autopilot cycle start.
+- 2026-02-28 23:29:23 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772344763). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-232915.log
+- 2026-03-01 00:05:32 CST Autopilot cycle start.
+- 2026-03-01 00:05:50 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772346949). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260228-235924.log
+- 2026-03-01 00:37:28 CST Autopilot cycle start.
+- 2026-03-01 00:37:37 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772348857). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260301-003550.log
+- 2026-03-01 01:08:05 CST Autopilot cycle start.
+- 2026-03-01 01:08:13 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772350692). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260301-010737.log
+- 2026-03-01 01:39:23 CST Autopilot cycle start.
+- 2026-03-01 01:39:31 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772352570). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260301-013812.log
+- 2026-03-01 02:09:48 CST Autopilot cycle start.
+- 2026-03-01 02:09:49 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772354389). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260301-020930.log
+- 2026-03-01 02:39:57 CST Autopilot cycle start.
+- 2026-03-01 02:39:58 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772356198). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260301-023949.log
+- 2026-03-01 03:10:29 CST Autopilot cycle start.
+- 2026-03-01 03:10:30 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772358030). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260301-030958.log
+- 2026-03-01 03:40:37 CST Autopilot cycle start.
+- 2026-03-01 03:40:38 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772359838). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260301-034030.log
+- 2026-03-01 04:10:46 CST Autopilot cycle start.
+- 2026-03-01 04:10:47 CST Autopilot cycle degraded: usage limit detected (backoff=1800s, until_epoch=1772361647). See /Users/jonathanhill/src/rule30-ski-research/logs/autopilot/cycle-20260301-041039.log
+- 2026-03-05 10:22:11 CST Empirical: ran multi-lens attack through n<=6 (`scripts/lens_attack_suite.py`), wrote `research/lens_attack/results_n6.json` + `research/lens_attack/summary_n6.md`.
+- 2026-03-05 10:22:11 CST Empirical: generated explicit coordinate-wise sensitivity witness catalog through n<=7 via `scripts/lens_witness_catalog.py`; outputs in `research/lens_attack/witness_catalog_n7.json` and `research/lens_attack/witness_catalog_n7.md`.
+- 2026-03-05 10:22:11 CST Conjectural: O2/O3 remain open; cataloged witnesses are finite-horizon empirical artifacts and do not close Prize3 theorem obligations.
+- 2026-03-05 10:26:37 CST Autopilot cycle start.
+- 2026-03-05 10:28:31 CST Autopilot cycle start.
+- 2026-03-05 10:28:31 CST Repro checks: `lean prize3/lean/Prize3Model.lean` PASS, `python3 true_irreducibility_test.py` PASS.
+- 2026-03-05 10:28:31 CST Wrote reproducibility log: /Users/jonathanhill/src/rule30-ski-research/logs/repro/cycle-20260305-102814.md
+- 2026-03-05 10:28:31 CST Proved: synced new Lean support artifacts `rule30CenterWitnessAt_next_gen_rule30CenterRec_of_pointwise_diff`, `rule30CenterWitnessAt_next_gen_rule30_center_of_pointwise_diff_not_two_mul_add_two_lt`, `essentialByWitness_iff_diffCheck_true`, and `rule30WitnessCertValid_sound` into Prize3/funding readiness docs.
+- 2026-03-05 10:28:31 CST Empirical: compile/runtime command outputs are reproducibility evidence only and not proof of final Prize3 theorem.
+- 2026-03-05 10:28:31 CST Conjectural: concrete Rule 30 witness-construction closure and full exactness-to-work instantiation remain open; Prize3 lower-bound theorem is not yet proved in-repo.
+- 2026-03-05 10:28:31 CST No blocker this cycle; advanced highest-value unblocked Priority-1/2/3/4 documentation and reproducibility artifacts.

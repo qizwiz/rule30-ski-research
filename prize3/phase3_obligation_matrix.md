@@ -39,6 +39,10 @@ Purpose: track the exactness-bridge obligations needed before any lower-bound th
     - `rule30CenterWitnessAt_of_small_horizon_le_four_and_step`
     - `rule30CenterWitnessAt_all_of_small_horizon_le_four_and_pointwise_next`
     - `rule30CenterRec_witness_all_of_small_horizon_and_pointwise_next`
+    - `rule30CenterWitnessAt_next_gen_rule30CenterRec_of_pointwise_diff`
+    - `rule30CenterWitnessAt_next_gen_rule30_center_of_pointwise_diff_not_two_mul_add_two_lt`
+    - `essentialByWitness_iff_diffCheck_true`
+    - `rule30WitnessCertValid_sound`
   - Required-interval arithmetic support:
     - `requiredAt_iff_le_two_mul`
     - `requiredAt_iff_lt_two_mul_or_eq_two_mul`
@@ -78,6 +82,12 @@ Purpose: track the exactness-bridge obligations needed before any lower-bound th
     - `exists_observed_and_bounded_rule30_center_pair_of_not_two_mul_lt_and_not_two_mul_add_two_lt`
 - Empirical (not proof):
   - Repro logs and runtime checks only.
+  - Multi-lens finite-horizon artifacts:
+    - `research/lens_attack/results_n6.json`
+    - `research/lens_attack/summary_n6.md`
+    - `research/lens_attack/witness_catalog_n7.json`
+    - `research/lens_attack/witness_catalog_n7.md`
+    - `research/lens_attack/adversarial_findings_n6.md`
 - Conjectural / pending:
   - Rule 30 witness-construction lemmas that instantiate `h_witness`.
   - Concrete accounting bridge from observed required units to `work` (combined conditional composition lemmas now exist, but concrete Rule 30 instantiation remains open).

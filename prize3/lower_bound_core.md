@@ -48,6 +48,8 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `observes_required_next_gen_of_exact` / `observes_prefix_next_gen_of_exact` (proved: under same scaffold hypotheses, required/prefix indices at generation `n` are forced observed at generation `n+1`)
   - `rule30CenterWitnessAt_of_small_horizon_le_four_and_step` / `rule30CenterWitnessAt_all_of_small_horizon_le_four_and_pointwise_next` (proved: generic witness-family induction scaffold and constructor upgraded to an explicit `n <= 4` base horizon)
   - `rule30CenterRec_witness_all_of_small_horizon_and_pointwise_next` (proved: recursive-center witness-family constructor now composes from explicit `n <= 4` rec-target base plus next-generation pointwise witnesses)
+  - `rule30CenterWitnessAt_next_gen_rule30CenterRec_of_pointwise_diff` (proved rec-target packaging: next-generation pointwise-difference obligations are packaged directly as `Rule30CenterWitnessAt A rule30CenterRec (n+1)` families)
+  - `rule30CenterWitnessAt_next_gen_rule30_center_of_pointwise_diff_not_two_mul_add_two_lt` (proved center-target packaging: explicit non-beyond-boundary obligations `¬(2n+2 < i)` are packaged directly as `Rule30CenterWitnessAt A (fun k s => rule30Cell s k) (n+1)` families)
   - `requiredAt_next_gen_iff_le_two_mul_add_two` / `requiredAt_of_le_two_mul_add_one_next_gen` (proved: explicit `n+1` boundary characterization and inclusion up to `2n+1`)
   - `requiredAt_next_gen_iff_lt_two_mul_add_two_or_eq_two_mul_add_two` (proved: requiredness at generation `n+1` decomposes into strict-prefix or endpoint case at boundary `2n+2`)
   - `requiredAt_of_le_two_mul_add_two_next_gen` / `requiredAt_two_mul_add_two_next_gen` / `not_requiredAt_two_mul_add_three_next_gen` (proved: explicit `n+1` endpoint inclusion and first-outside exclusion)
@@ -93,6 +95,7 @@ This note isolates the lower-bound core argument in a claim-hygienic way.
   - `exists_observed_required_and_bounded_of_exact_and_accounting` / `exists_observed_required_and_bounded_next_gen_of_exact_and_accounting` (proved existence packagings: under the same scaffold hypotheses, there exists at least one required index that is both observed and bounded by work at `n` and `n+1`)
   - `exists_observed_required_and_bounded_next_gen_rule30_center_of_not_two_mul_add_two_lt_of_pointwise_diff_witness_and_accounting` (proved Rule 30 center-target next-generation existence packaging under explicit non-beyond-boundary witness obligations `¬(2n+2 < i)` plus accounting)
   - `exists_observed_and_bounded_rule30_center_pair_of_not_two_mul_lt_and_not_two_mul_add_two_lt` (proved paired Rule 30 center-target existence packaging: under the same explicit non-beyond-boundary witness/accounting hypotheses, both generations `n` and `n+1` admit observed indices bounded by work)
+  - `essentialByWitness_iff_diffCheck_true` / `rule30WitnessCertValid_sound` (proved witness-certificate soundness bridge: Boolean derivative checks can be recorded as finite certificates and soundly interpreted as concrete center-value disagreement witnesses)
 
 ## Empirical (not proof)
 - No Prize3 lower-bound empirical estimate is treated as proof in this track.
