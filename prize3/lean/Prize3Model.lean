@@ -246,6 +246,14 @@ theorem rule30WitnessCertValid_sound
   · exact hDiff
   · simp [hDiff] at hCheck
 
+theorem essentialByWitness_of_rule30WitnessCertValid_true
+    (c : Rule30WitnessCert)
+    (hValid : rule30WitnessCertValid c)
+    (hCheck : c.check = true) :
+    essentialByWitness (rule30CenterRec c.n) c.i := by
+  refine ⟨c.x, ?_⟩
+  exact rule30WitnessCertValid_sound c hValid hCheck
+
 theorem rule30CenterRec_eq_small_0 (s : Rule30State) :
     rule30CenterRec 0 s = rule30CenterSmall 0 s := by
   rfl
@@ -1610,6 +1618,34 @@ theorem rule30CenterRec_tail_pointwise_diff_witness_of_tail_essentialByWitness
     (rule30CenterRec (n + 1)) i
     (hTailEssential n i hGt hLe hNotObs)
 
+-- Tail adapter from certificate checks to pointwise-difference witnesses.
+theorem rule30CenterRec_tail_pointwise_diff_witness_of_tail_cert
+    (A : Algorithm Rule30State)
+    (hTailCert :
+      forall n i,
+        3 < n ->
+        i <= 2 * (n + 1) ->
+        ¬ (A.observes (n + 1) i) ->
+        ∃ c : Rule30WitnessCert,
+          c.n = n + 1 /\
+          c.i = i /\
+          rule30WitnessCertValid c /\
+          c.check = true) :
+    forall n i,
+      3 < n ->
+      i <= 2 * (n + 1) ->
+      ¬ (A.observes (n + 1) i) ->
+      exists s1 s2,
+        (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+        rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2 := by
+  intro n i hGt hLe hNotObs
+  rcases hTailCert n i hGt hLe hNotObs with ⟨c, hCn, hCi, hValid, hCheck⟩
+  have hEss : essentialByWitness (rule30CenterRec (n + 1)) i := by
+    rw [← hCn, ← hCi]
+    exact essentialByWitness_of_rule30WitnessCertValid_true c hValid hCheck
+  exact pointwise_diff_witness_of_essentialByWitness
+    (rule30CenterRec (n + 1)) i hEss
+
 -- Recursive-target full no-skip closure from:
 -- deterministic observed semantics + exactness to `rule30CenterRec`
 -- + rec-target next-generation pointwise witnesses.
@@ -1691,6 +1727,27 @@ theorem observes_required_of_rule30CenterRec_base_and_tail_essentialByWitness
     A h_obs_det h_exact_rec
     (rule30CenterRec_tail_pointwise_diff_witness_of_tail_essentialByWitness
       A hTailEssential)
+
+-- Recursive-target no-skip closure adapter for certificate-checked tail hypotheses.
+theorem observes_required_of_rule30CenterRec_base_and_tail_cert
+    (A : Algorithm Rule30State)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact_rec : exactFor A rule30CenterRec)
+    (hTailCert :
+      forall n i,
+        3 < n ->
+        i <= 2 * (n + 1) ->
+        ¬ (A.observes (n + 1) i) ->
+        ∃ c : Rule30WitnessCert,
+          c.n = n + 1 /\
+          c.i = i /\
+          rule30WitnessCertValid c /\
+          c.check = true) :
+    forall n i, requiredAt n i -> A.observes n i := by
+  exact observes_required_of_rule30CenterRec_base_and_tail_pointwise_next
+    A h_obs_det h_exact_rec
+    (rule30CenterRec_tail_pointwise_diff_witness_of_tail_cert A hTailCert)
 
 -- Concrete n=2 bridge closure: the two-step witness seed forces observation
 -- of every required index at generation 2 under local exactness/determinism.
