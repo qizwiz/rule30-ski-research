@@ -1646,6 +1646,29 @@ theorem rule30CenterRec_tail_pointwise_diff_witness_of_tail_cert
   exact pointwise_diff_witness_of_essentialByWitness
     (rule30CenterRec (n + 1)) i hEss
 
+-- Full next-generation pointwise-difference witness family from:
+-- bounded concrete construction (`n <= 3`) + certificate-checked tails (`3 < n`).
+theorem rule30CenterRec_next_gen_pointwise_diff_witness_of_le_three_or_tail_cert
+    (A : Algorithm Rule30State)
+    (hTailCert :
+      forall n i,
+        3 < n ->
+        i <= 2 * (n + 1) ->
+        ¬ (A.observes (n + 1) i) ->
+        ∃ c : Rule30WitnessCert,
+          c.n = n + 1 /\
+          c.i = i /\
+          rule30WitnessCertValid c /\
+          c.check = true) :
+    forall n i,
+      i <= 2 * (n + 1) ->
+      ¬ (A.observes (n + 1) i) ->
+      exists s1 s2,
+        (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+        rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2 := by
+  exact rule30CenterRec_next_gen_pointwise_diff_witness_of_le_three_or_gt_three
+    A (rule30CenterRec_tail_pointwise_diff_witness_of_tail_cert A hTailCert)
+
 -- Recursive-target full no-skip closure from:
 -- deterministic observed semantics + exactness to `rule30CenterRec`
 -- + rec-target next-generation pointwise witnesses.
@@ -1745,9 +1768,9 @@ theorem observes_required_of_rule30CenterRec_base_and_tail_cert
           rule30WitnessCertValid c /\
           c.check = true) :
     forall n i, requiredAt n i -> A.observes n i := by
-  exact observes_required_of_rule30CenterRec_base_and_tail_pointwise_next
+  exact observes_required_of_rule30CenterRec_base_and_pointwise_next
     A h_obs_det h_exact_rec
-    (rule30CenterRec_tail_pointwise_diff_witness_of_tail_cert A hTailCert)
+    (rule30CenterRec_next_gen_pointwise_diff_witness_of_le_three_or_tail_cert A hTailCert)
 
 -- Concrete n=2 bridge closure: the two-step witness seed forces observation
 -- of every required index at generation 2 under local exactness/determinism.
