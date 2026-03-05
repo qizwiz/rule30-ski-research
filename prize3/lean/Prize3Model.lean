@@ -1344,6 +1344,22 @@ theorem rule30CenterRec_next_gen_pointwise_diff_witness_of_le_three
           have hNotGe : ¬ (Nat.succ (Nat.succ (Nat.succ (Nat.succ n))) <= 3) := by simp
           exact False.elim (hNotGe hN)
 
+-- Bounded recursive-target next-generation pointwise-difference witnesses
+-- in explicit non-beyond-boundary form (`¬(2n+2 < i)`), for `n <= 3`.
+theorem rule30CenterRec_next_gen_pointwise_diff_witness_not_two_mul_add_two_lt_of_le_three
+    (A : Algorithm Rule30State) :
+    forall n i,
+      n <= 3 ->
+      ¬ (2 * n + 2 < i) ->
+      ¬ (A.observes (n + 1) i) ->
+      exists s1 s2,
+        (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+        rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2 := by
+  intro n i hN hNotLt hNotObs
+  have hLe' : i <= 2 * n + 2 := Nat.le_of_not_gt hNotLt
+  have hLe : i <= 2 * (n + 1) := by simpa [Nat.mul_add, Nat.add_comm, Nat.add_left_comm] using hLe'
+  exact rule30CenterRec_next_gen_pointwise_diff_witness_of_le_three A n i hN hLe hNotObs
+
 -- Package the bounded concrete recursive-target next-generation witness
 -- constructor as a witness-family instance at generation `n+1` (`n <= 3`).
 theorem rule30CenterWitnessAt_next_gen_rule30CenterRec_of_pointwise_diff_le_three
@@ -1377,6 +1393,33 @@ theorem observes_required_next_gen_rule30CenterRec_of_pointwise_diff_le_three
   · exact hObs
   · rcases rule30CenterWitnessAt_next_gen_rule30CenterRec_of_pointwise_diff_le_three A n hN i hReq hObs with
       ⟨s1, s2, hAgree, hTargetNe⟩
+    have hRunEq : A.run (n + 1) s1 = A.run (n + 1) s2 := h_obs_det (n + 1) s1 s2 hAgree
+    have hTargetEq : rule30CenterRec (n + 1) s1 = rule30CenterRec (n + 1) s2 := by
+      rw [← h_exact_rec (n + 1) s1, ← h_exact_rec (n + 1) s2]
+      exact hRunEq
+    exact False.elim (hTargetNe hTargetEq)
+
+-- Bounded next-generation no-skip closure (`n <= 3`) in explicit
+-- non-beyond-boundary form: `¬(2n+2 < i)` implies observation at `n+1`.
+theorem observes_next_gen_of_not_two_mul_add_two_lt_rule30CenterRec_of_pointwise_diff_le_three
+    (A : Algorithm Rule30State)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact_rec : exactFor A rule30CenterRec) :
+    forall n,
+      n <= 3 ->
+      forall i, ¬ (2 * n + 2 < i) -> A.observes (n + 1) i := by
+  intro n hN i hNotLt
+  by_cases hObs : A.observes (n + 1) i
+  · exact hObs
+  · rcases rule30CenterRec_next_gen_pointwise_diff_witness_not_two_mul_add_two_lt_of_le_three
+      A n i hN hNotLt hObs with ⟨s1, s2, hEqExcept, hTargetNe⟩
+    have hAgree : agreesOnObserved rule30Cell A (n + 1) s1 s2 := by
+      intro j hObsJ
+      exact hEqExcept j (by
+        intro hji
+        apply hObs
+        simpa [hji] using hObsJ)
     have hRunEq : A.run (n + 1) s1 = A.run (n + 1) s2 := h_obs_det (n + 1) s1 s2 hAgree
     have hTargetEq : rule30CenterRec (n + 1) s1 = rule30CenterRec (n + 1) s2 := by
       rw [← h_exact_rec (n + 1) s1, ← h_exact_rec (n + 1) s2]
