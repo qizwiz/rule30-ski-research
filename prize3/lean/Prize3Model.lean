@@ -179,6 +179,57 @@ def rule30CenterRec : Nat -> Rule30State -> Bool
         (rule30CenterRec k (fun j => s (j + 1)))
         (rule30CenterRec k (fun j => s (j + 2)))
 
+-- Pointwise bit flip on a full Rule30State.
+def flipAtState (s : Rule30State) (i : Nat) : Rule30State :=
+  fun j => if j = i then !(s j) else s j
+
+-- Boolean-difference check for a fixed target function.
+def diffCheck (f : Rule30State -> Bool) (i : Nat) (s : Rule30State) : Bool :=
+  decide (f s ≠ f (flipAtState s i))
+
+-- Essentiality via Boolean derivative witness.
+def essentialByWitness (f : Rule30State -> Bool) (i : Nat) : Prop :=
+  ∃ s, f s ≠ f (flipAtState s i)
+
+theorem essentialByWitness_iff_diffCheck_true
+    (f : Rule30State -> Bool) (i : Nat) :
+    essentialByWitness f i ↔ ∃ s, diffCheck f i s = true := by
+  constructor
+  · intro h
+    rcases h with ⟨s, hs⟩
+    refine ⟨s, ?_⟩
+    unfold diffCheck
+    simpa [hs] using (show decide (f s ≠ f (flipAtState s i)) = true from by simp [hs])
+  · intro h
+    rcases h with ⟨s, hs⟩
+    refine ⟨s, ?_⟩
+    unfold diffCheck at hs
+    by_cases hDiff : f s ≠ f (flipAtState s i)
+    · exact hDiff
+    · simp [hDiff] at hs
+
+-- 4D witness certificate: (n, i, x, check).
+structure Rule30WitnessCert where
+  n : Nat
+  i : Nat
+  x : Rule30State
+  check : Bool
+
+def rule30WitnessCertValid (c : Rule30WitnessCert) : Prop :=
+  c.check = diffCheck (rule30CenterRec c.n) c.i c.x
+
+theorem rule30WitnessCertValid_sound
+    (c : Rule30WitnessCert)
+    (hValid : rule30WitnessCertValid c)
+    (hCheck : c.check = true) :
+    rule30CenterRec c.n c.x ≠ rule30CenterRec c.n (flipAtState c.x c.i) := by
+  unfold rule30WitnessCertValid at hValid
+  rw [hValid] at hCheck
+  unfold diffCheck at hCheck
+  by_cases hDiff : rule30CenterRec c.n c.x ≠ rule30CenterRec c.n (flipAtState c.x c.i)
+  · exact hDiff
+  · simp [hDiff] at hCheck
+
 theorem rule30CenterRec_eq_small_0 (s : Rule30State) :
     rule30CenterRec 0 s = rule30CenterSmall 0 s := by
   rfl
@@ -1236,6 +1287,102 @@ theorem rule30CenterRec_witness_all_of_small_horizon_and_pointwise_next
         exact small_horizon_center_h_witness_seed_rec_le_four A n i hN hReq hNotObs)
     hConcreteNextRec
 
+-- Recursive-target next-generation witness-family packaging from concrete
+-- pointwise-difference witnesses at generation `n+1`.
+theorem rule30CenterWitnessAt_next_gen_rule30CenterRec_of_pointwise_diff
+    (A : Algorithm Rule30State)
+    (hConcreteNextRec :
+      forall n i,
+        i <= 2 * (n + 1) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2) :
+    forall n, Rule30CenterWitnessAt A rule30CenterRec (n + 1) := by
+  exact rule30CenterWitnessAt_next_gen_of_pointwise_diff A rule30CenterRec hConcreteNextRec
+
+-- Concrete recursive-target next-generation pointwise-difference witnesses
+-- for bounded horizons (`n <= 3`), using explicit finite witness families.
+theorem rule30CenterRec_next_gen_pointwise_diff_witness_of_le_three
+    (A : Algorithm Rule30State) :
+    forall n i,
+      n <= 3 ->
+      i <= 2 * (n + 1) ->
+      ¬ (A.observes (n + 1) i) ->
+      exists s1 s2,
+        (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+        rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2 := by
+  intro n i hN hLe _hNotObs
+  cases n with
+  | zero =>
+    have hLe2 : i <= 2 := by simpa using hLe
+    rcases one_step_center_witness_of_le_two i hLe2 with ⟨s1, s2, hEqExcept, hNe⟩
+    refine ⟨s1, s2, hEqExcept, ?_⟩
+    simpa [rule30CenterRec_eq_small_1, rule30CenterSmall] using hNe
+  | succ n =>
+    cases n with
+    | zero =>
+      have hLe4 : i <= 4 := by simpa using hLe
+      rcases two_step_center_witness_of_le_four i hLe4 with ⟨s1, s2, hEqExcept, hNe⟩
+      refine ⟨s1, s2, hEqExcept, ?_⟩
+      simpa [rule30CenterRec_eq_small_2, rule30CenterSmall] using hNe
+    | succ n =>
+      cases n with
+      | zero =>
+        have hLe6 : i <= 6 := by simpa using hLe
+        rcases three_step_center_witness_of_le_six i hLe6 with ⟨s1, s2, hEqExcept, hNe⟩
+        refine ⟨s1, s2, hEqExcept, ?_⟩
+        simpa [rule30CenterRec_eq_small_3, rule30CenterSmall] using hNe
+      | succ n =>
+        cases n with
+        | zero =>
+          have hLe8 : i <= 8 := by simpa using hLe
+          rcases four_step_center_witness_of_le_eight i hLe8 with ⟨s1, s2, hEqExcept, hNe⟩
+          refine ⟨s1, s2, hEqExcept, ?_⟩
+          simpa [rule30CenterRec_eq_small_4, rule30CenterSmall] using hNe
+        | succ n =>
+          have hNotGe : ¬ (Nat.succ (Nat.succ (Nat.succ (Nat.succ n))) <= 3) := by simp
+          exact False.elim (hNotGe hN)
+
+-- Package the bounded concrete recursive-target next-generation witness
+-- constructor as a witness-family instance at generation `n+1` (`n <= 3`).
+theorem rule30CenterWitnessAt_next_gen_rule30CenterRec_of_pointwise_diff_le_three
+    (A : Algorithm Rule30State) :
+    forall n,
+      n <= 3 ->
+      Rule30CenterWitnessAt A rule30CenterRec (n + 1) := by
+  intro n hN i hReq hNotObs
+  have hLe : i <= 2 * (n + 1) := (requiredAt_iff_le_two_mul (n + 1) i).1 hReq
+  rcases rule30CenterRec_next_gen_pointwise_diff_witness_of_le_three A n i hN hLe hNotObs with
+      ⟨s1, s2, hEqExcept, hNe⟩
+  refine ⟨s1, s2, ?_, hNe⟩
+  intro j hObs
+  exact hEqExcept j (by
+    intro hji
+    apply hNotObs
+    simpa [hji] using hObs)
+
+-- Bounded next-generation no-skip closure (`n <= 3`) from the concrete
+-- recursive-target witness constructor.
+theorem observes_required_next_gen_rule30CenterRec_of_pointwise_diff_le_three
+    (A : Algorithm Rule30State)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact_rec : exactFor A rule30CenterRec) :
+    forall n,
+      n <= 3 ->
+      forall i, requiredAt (n + 1) i -> A.observes (n + 1) i := by
+  intro n hN i hReq
+  by_cases hObs : A.observes (n + 1) i
+  · exact hObs
+  · rcases rule30CenterWitnessAt_next_gen_rule30CenterRec_of_pointwise_diff_le_three A n hN i hReq hObs with
+      ⟨s1, s2, hAgree, hTargetNe⟩
+    have hRunEq : A.run (n + 1) s1 = A.run (n + 1) s2 := h_obs_det (n + 1) s1 s2 hAgree
+    have hTargetEq : rule30CenterRec (n + 1) s1 = rule30CenterRec (n + 1) s2 := by
+      rw [← h_exact_rec (n + 1) s1, ← h_exact_rec (n + 1) s2]
+      exact hRunEq
+    exact False.elim (hTargetNe hTargetEq)
+
 -- Recursive-target full no-skip closure from:
 -- deterministic observed semantics + exactness to `rule30CenterRec`
 -- + rec-target next-generation pointwise witnesses.
@@ -1709,6 +1856,22 @@ theorem witness_rule30_center_requiredAt_next_gen_of_pointwise_diff_not_two_mul_
     intro hji
     apply hNotObs
     simpa [hji] using hObs)
+
+-- Package the next-generation non-beyond-boundary requiredAt witness adapter
+-- as a per-generation witness family at index generation `n+1`.
+theorem rule30CenterWitnessAt_next_gen_rule30_center_of_pointwise_diff_not_two_mul_add_two_lt
+    (A : Algorithm Rule30State)
+    (hConcreteCenterNotTwoMulAddTwoLt :
+      forall n i,
+        ¬ (2 * n + 2 < i) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30Cell s1 (n + 1) ≠ rule30Cell s2 (n + 1)) :
+    forall n, Rule30CenterWitnessAt A (fun k s => rule30Cell s k) (n + 1) := by
+  intro n i hReq hNotObs
+  exact witness_rule30_center_requiredAt_next_gen_of_pointwise_diff_not_two_mul_add_two_lt
+    A hConcreteCenterNotTwoMulAddTwoLt n i hReq hNotObs
 
 -- In particular, index n is always required.
 theorem requiredAt_self (n : Nat) : requiredAt n n := by

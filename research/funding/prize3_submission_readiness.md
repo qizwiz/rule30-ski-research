@@ -1,6 +1,6 @@
 # Prize3 Submission Readiness (M4 Track)
 
-Date: 2026-02-27
+Date: 2026-03-05
 
 This note is for funding/outreach context only. It does not claim theorem completion.
 
@@ -13,6 +13,7 @@ This note is for funding/outreach context only. It does not claim theorem comple
   - Rule 30 center-target witness adapters (`witness_rule30_center_le_two_mul_of_pointwise_diff`, `witness_rule30_center_requiredAt_of_pointwise_diff`, `witness_rule30_center_requiredAt_of_pointwise_diff_not_two_mul_lt`, `witness_rule30_center_requiredAt_next_gen_of_pointwise_diff`, `witness_rule30_center_requiredAt_next_gen_of_pointwise_diff_not_two_mul_add_two_lt`) and center-target no-skip specializations (`must_observe_required_rule30_center_of_pointwise_diff_witness`, `must_observe_required_rule30_center_of_pointwise_diff_witness_not_two_mul_lt`, `must_observe_required_next_gen_rule30_center_of_pointwise_diff_witness`, `must_observe_required_next_gen_rule30_center_of_pointwise_diff_witness_not_two_mul_add_two_lt`)
   - Witness-family induction scaffolds with explicit small-horizon base through `n <= 4` (`rule30CenterWitnessAt_of_small_horizon_le_four_and_step`, `rule30CenterWitnessAt_all_of_small_horizon_le_four_and_pointwise_next`, `rule30CenterRec_witness_all_of_small_horizon_and_pointwise_next`), still conditional on next-generation concrete witness construction.
   - Witness-family packaging adapters (`rule30CenterWitnessAt_next_gen_rule30CenterRec_of_pointwise_diff`, `rule30CenterWitnessAt_next_gen_rule30_center_of_pointwise_diff_not_two_mul_add_two_lt`) and finite-certificate soundness bridges (`essentialByWitness_iff_diffCheck_true`, `rule30WitnessCertValid_sound`) are formalized support artifacts for witness bookkeeping.
+  - Bounded recursive-target next-generation witness/no-skip closure is formalized for `n <= 3` (`rule30CenterRec_next_gen_pointwise_diff_witness_of_le_three`, `rule30CenterWitnessAt_next_gen_rule30CenterRec_of_pointwise_diff_le_three`, `observes_required_next_gen_rule30CenterRec_of_pointwise_diff_le_three`).
   - Next-generation observation corollaries under the same explicit hypotheses (`observes_required_next_gen_of_exact`, `observes_prefix_next_gen_of_exact`)
   - Next-generation boundary support/corollaries (`requiredAt_next_gen_iff_le_two_mul_add_two`, `requiredAt_of_le_two_mul_add_one_next_gen`, `observes_two_mul_add_one_next_gen_of_exact`, `observes_two_mul_add_two_next_gen_of_exact`)
   - Next-generation requiredness decomposition support (`requiredAt_next_gen_iff_lt_two_mul_add_two_or_eq_two_mul_add_two`) for explicit strict-prefix/endpoint witness-case splits at boundary `2n+2`
@@ -41,7 +42,7 @@ This note is for funding/outreach context only. It does not claim theorem comple
 - Empirical (not proof):
   - Repro/runtime checks only; no empirical estimate is used as a Prize3 proof step.
 - Conjectural / open:
-  - Rule 30-specific witness construction for indistinguishability obligations
+  - Unbounded (all-`n`) Rule 30-specific next-generation witness construction for indistinguishability obligations
   - Full exactness-to-work bridge instantiation for `Work_A(n) = Omega(n)`
 
 ## Readiness Gates
