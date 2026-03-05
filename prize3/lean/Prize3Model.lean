@@ -1441,6 +1441,89 @@ theorem observes_next_gen_of_not_two_mul_add_two_lt_rule30CenterRec_of_pointwise
       exact hRunEq
     exact False.elim (hTargetNe hTargetEq)
 
+-- Bridge adapter in explicit non-beyond-boundary form:
+-- combine the bounded concrete witness constructor (`n <= 3`) with a tail
+-- constructor (`3 < n`) to obtain a full next-generation witness family
+-- stated as `¬(2n+2 < i)`.
+theorem rule30CenterRec_next_gen_pointwise_diff_witness_not_two_mul_add_two_lt_of_le_three_or_gt_three
+    (A : Algorithm Rule30State)
+    (hTailNotTwoMulAddTwoLt :
+      forall n i,
+        3 < n ->
+        ¬ (2 * n + 2 < i) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2) :
+    forall n i,
+      ¬ (2 * n + 2 < i) ->
+      ¬ (A.observes (n + 1) i) ->
+      exists s1 s2,
+        (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+        rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2 := by
+  intro n i hNotLt hNotObs
+  by_cases hN : n <= 3
+  · exact rule30CenterRec_next_gen_pointwise_diff_witness_not_two_mul_add_two_lt_of_le_three
+      A n i hN hNotLt hNotObs
+  · exact hTailNotTwoMulAddTwoLt n i (Nat.lt_of_not_ge hN) hNotLt hNotObs
+
+-- Tail-aware next-generation no-skip closure in explicit non-beyond-boundary
+-- form: if `i` is not beyond `2n+2`, observation at generation `n+1` follows.
+theorem observes_next_gen_of_not_two_mul_add_two_lt_rule30CenterRec_of_pointwise_diff_le_three_or_gt_three
+    (A : Algorithm Rule30State)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact_rec : exactFor A rule30CenterRec)
+    (hTailNotTwoMulAddTwoLt :
+      forall n i,
+        3 < n ->
+        ¬ (2 * n + 2 < i) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2) :
+    forall n i, ¬ (2 * n + 2 < i) -> A.observes (n + 1) i := by
+  intro n i hNotLt
+  by_cases hObs : A.observes (n + 1) i
+  · exact hObs
+  · rcases rule30CenterRec_next_gen_pointwise_diff_witness_not_two_mul_add_two_lt_of_le_three_or_gt_three
+      A hTailNotTwoMulAddTwoLt n i hNotLt hObs with
+      ⟨s1, s2, hEqExcept, hTargetNe⟩
+    have hAgree : agreesOnObserved rule30Cell A (n + 1) s1 s2 := by
+      intro j hObsJ
+      exact hEqExcept j (by
+        intro hji
+        apply hObs
+        simpa [hji] using hObsJ)
+    have hRunEq : A.run (n + 1) s1 = A.run (n + 1) s2 := h_obs_det (n + 1) s1 s2 hAgree
+    have hTargetEq : rule30CenterRec (n + 1) s1 = rule30CenterRec (n + 1) s2 := by
+      rw [← h_exact_rec (n + 1) s1, ← h_exact_rec (n + 1) s2]
+      exact hRunEq
+    exact False.elim (hTargetNe hTargetEq)
+
+-- Tail-aware next-generation no-skip closure in requiredAt form.
+theorem observes_required_next_gen_rule30CenterRec_of_pointwise_diff_le_three_or_gt_three
+    (A : Algorithm Rule30State)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact_rec : exactFor A rule30CenterRec)
+    (hTailNotTwoMulAddTwoLt :
+      forall n i,
+        3 < n ->
+        ¬ (2 * n + 2 < i) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2) :
+    forall n i, requiredAt (n + 1) i -> A.observes (n + 1) i := by
+  intro n i hReq
+  have hLe : i ≤ 2 * n + 2 := by
+    simpa [Nat.mul_add, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
+      using ((requiredAt_iff_le_two_mul (n + 1) i).1 hReq)
+  exact observes_next_gen_of_not_two_mul_add_two_lt_rule30CenterRec_of_pointwise_diff_le_three_or_gt_three
+    A h_obs_det h_exact_rec hTailNotTwoMulAddTwoLt n i
+    (Nat.not_lt_of_ge hLe)
+
 -- Bridge adapter: combine the explicit bounded witness constructor (`n <= 3`)
 -- with an abstract tail constructor (`3 < n`) to obtain a full next-generation
 -- pointwise-difference witness family.
