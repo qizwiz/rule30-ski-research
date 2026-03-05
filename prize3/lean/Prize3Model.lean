@@ -1548,6 +1548,31 @@ theorem rule30CenterRec_next_gen_pointwise_diff_witness_of_le_three_or_gt_three
   · exact rule30CenterRec_next_gen_pointwise_diff_witness_of_le_three A n i hN hLe hNotObs
   · exact hTail n i (Nat.lt_of_not_ge hN) hLe hNotObs
 
+-- Tail-shape adapter:
+-- convert explicit non-beyond-boundary tail witnesses (`¬(2n+2 < i)`) into
+-- boundary-form tail witnesses (`i <= 2*(n+1)`).
+theorem rule30CenterRec_tail_pointwise_diff_witness_of_tail_not_two_mul_add_two_lt
+    (A : Algorithm Rule30State)
+    (hTailNotTwoMulAddTwoLt :
+      forall n i,
+        3 < n ->
+        ¬ (2 * n + 2 < i) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2) :
+    forall n i,
+      3 < n ->
+      i <= 2 * (n + 1) ->
+      ¬ (A.observes (n + 1) i) ->
+      exists s1 s2,
+        (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+        rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2 := by
+  intro n i hGt hLe hNotObs
+  have hLe' : i <= 2 * n + 2 := by
+    simpa [Nat.mul_add, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hLe
+  exact hTailNotTwoMulAddTwoLt n i hGt (Nat.not_lt_of_ge hLe') hNotObs
+
 -- Recursive-target full no-skip closure from:
 -- deterministic observed semantics + exactness to `rule30CenterRec`
 -- + rec-target next-generation pointwise witnesses.
@@ -1590,6 +1615,27 @@ theorem observes_required_of_rule30CenterRec_base_and_tail_pointwise_next
   exact observes_required_of_rule30CenterRec_base_and_pointwise_next
     A h_obs_det h_exact_rec
     (rule30CenterRec_next_gen_pointwise_diff_witness_of_le_three_or_gt_three A hTail)
+
+-- Recursive-target full no-skip closure adapter for explicit non-beyond-boundary
+-- tail hypotheses (`¬(2n+2 < i)`).
+theorem observes_required_of_rule30CenterRec_base_and_tail_not_two_mul_add_two_lt
+    (A : Algorithm Rule30State)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact_rec : exactFor A rule30CenterRec)
+    (hTailNotTwoMulAddTwoLt :
+      forall n i,
+        3 < n ->
+        ¬ (2 * n + 2 < i) ->
+        ¬ (A.observes (n + 1) i) ->
+        exists s1 s2,
+          (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+          rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2) :
+    forall n i, requiredAt n i -> A.observes n i := by
+  exact observes_required_of_rule30CenterRec_base_and_tail_pointwise_next
+    A h_obs_det h_exact_rec
+    (rule30CenterRec_tail_pointwise_diff_witness_of_tail_not_two_mul_add_two_lt
+      A hTailNotTwoMulAddTwoLt)
 
 -- Concrete n=2 bridge closure: the two-step witness seed forces observation
 -- of every required index at generation 2 under local exactness/determinism.
