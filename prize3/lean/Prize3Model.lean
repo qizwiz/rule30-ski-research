@@ -1360,6 +1360,21 @@ theorem rule30CenterRec_next_gen_pointwise_diff_witness_not_two_mul_add_two_lt_o
   have hLe : i <= 2 * (n + 1) := by simpa [Nat.mul_add, Nat.add_comm, Nat.add_left_comm] using hLe'
   exact rule30CenterRec_next_gen_pointwise_diff_witness_of_le_three A n i hN hLe hNotObs
 
+-- Bounded recursive-target next-generation pointwise-difference witnesses
+-- in required-interval form (`requiredAt (n+1) i`), for `n <= 3`.
+theorem rule30CenterRec_next_gen_pointwise_diff_witness_requiredAt_of_le_three
+    (A : Algorithm Rule30State) :
+    forall n i,
+      n <= 3 ->
+      requiredAt (n + 1) i ->
+      ¬ (A.observes (n + 1) i) ->
+      exists s1 s2,
+        (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+        rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2 := by
+  intro n i hN hReq hNotObs
+  have hLe : i <= 2 * (n + 1) := (requiredAt_iff_le_two_mul (n + 1) i).1 hReq
+  exact rule30CenterRec_next_gen_pointwise_diff_witness_of_le_three A n i hN hLe hNotObs
+
 -- Package the bounded concrete recursive-target next-generation witness
 -- constructor as a witness-family instance at generation `n+1` (`n <= 3`).
 theorem rule30CenterWitnessAt_next_gen_rule30CenterRec_of_pointwise_diff_le_three
@@ -1368,8 +1383,8 @@ theorem rule30CenterWitnessAt_next_gen_rule30CenterRec_of_pointwise_diff_le_thre
       n <= 3 ->
       Rule30CenterWitnessAt A rule30CenterRec (n + 1) := by
   intro n hN i hReq hNotObs
-  have hLe : i <= 2 * (n + 1) := (requiredAt_iff_le_two_mul (n + 1) i).1 hReq
-  rcases rule30CenterRec_next_gen_pointwise_diff_witness_of_le_three A n i hN hLe hNotObs with
+  rcases rule30CenterRec_next_gen_pointwise_diff_witness_requiredAt_of_le_three
+      A n i hN hReq hNotObs with
       ⟨s1, s2, hEqExcept, hNe⟩
   refine ⟨s1, s2, ?_, hNe⟩
   intro j hObs
