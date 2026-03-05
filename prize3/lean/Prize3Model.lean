@@ -191,6 +191,22 @@ def diffCheck (f : Rule30State -> Bool) (i : Nat) (s : Rule30State) : Bool :=
 def essentialByWitness (f : Rule30State -> Bool) (i : Nat) : Prop :=
   ∃ s, f s ≠ f (flipAtState s i)
 
+theorem flipAtState_agree_except
+    (s : Rule30State) (i j : Nat) (hj : j ≠ i) :
+    rule30Cell s j = rule30Cell (flipAtState s i) j := by
+  simp [rule30Cell, flipAtState, hj]
+
+theorem pointwise_diff_witness_of_essentialByWitness
+    (f : Rule30State -> Bool) (i : Nat)
+    (hEss : essentialByWitness f i) :
+    exists s1 s2,
+      (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+      f s1 ≠ f s2 := by
+  rcases hEss with ⟨s, hNe⟩
+  refine ⟨s, flipAtState s i, ?_, hNe⟩
+  intro j hj
+  exact flipAtState_agree_except s i j hj
+
 theorem essentialByWitness_iff_diffCheck_true
     (f : Rule30State -> Bool) (i : Nat) :
     essentialByWitness f i ↔ ∃ s, diffCheck f i s = true := by
@@ -1573,6 +1589,27 @@ theorem rule30CenterRec_tail_pointwise_diff_witness_of_tail_not_two_mul_add_two_
     simpa [Nat.mul_add, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hLe
   exact hTailNotTwoMulAddTwoLt n i hGt (Nat.not_lt_of_ge hLe') hNotObs
 
+-- Tail adapter from essentiality witnesses to pointwise-difference witnesses.
+theorem rule30CenterRec_tail_pointwise_diff_witness_of_tail_essentialByWitness
+    (A : Algorithm Rule30State)
+    (hTailEssential :
+      forall n i,
+        3 < n ->
+        i <= 2 * (n + 1) ->
+        ¬ (A.observes (n + 1) i) ->
+        essentialByWitness (rule30CenterRec (n + 1)) i) :
+    forall n i,
+      3 < n ->
+      i <= 2 * (n + 1) ->
+      ¬ (A.observes (n + 1) i) ->
+      exists s1 s2,
+        (forall j, j ≠ i -> rule30Cell s1 j = rule30Cell s2 j) /\
+        rule30CenterRec (n + 1) s1 ≠ rule30CenterRec (n + 1) s2 := by
+  intro n i hGt hLe hNotObs
+  exact pointwise_diff_witness_of_essentialByWitness
+    (rule30CenterRec (n + 1)) i
+    (hTailEssential n i hGt hLe hNotObs)
+
 -- Recursive-target full no-skip closure from:
 -- deterministic observed semantics + exactness to `rule30CenterRec`
 -- + rec-target next-generation pointwise witnesses.
@@ -1636,6 +1673,24 @@ theorem observes_required_of_rule30CenterRec_base_and_tail_not_two_mul_add_two_l
     A h_obs_det h_exact_rec
     (rule30CenterRec_tail_pointwise_diff_witness_of_tail_not_two_mul_add_two_lt
       A hTailNotTwoMulAddTwoLt)
+
+-- Recursive-target no-skip closure adapter for tail essentiality hypotheses.
+theorem observes_required_of_rule30CenterRec_base_and_tail_essentialByWitness
+    (A : Algorithm Rule30State)
+    (h_obs_det :
+      forall n s1 s2, agreesOnObserved rule30Cell A n s1 s2 -> A.run n s1 = A.run n s2)
+    (h_exact_rec : exactFor A rule30CenterRec)
+    (hTailEssential :
+      forall n i,
+        3 < n ->
+        i <= 2 * (n + 1) ->
+        ¬ (A.observes (n + 1) i) ->
+        essentialByWitness (rule30CenterRec (n + 1)) i) :
+    forall n i, requiredAt n i -> A.observes n i := by
+  exact observes_required_of_rule30CenterRec_base_and_tail_pointwise_next
+    A h_obs_det h_exact_rec
+    (rule30CenterRec_tail_pointwise_diff_witness_of_tail_essentialByWitness
+      A hTailEssential)
 
 -- Concrete n=2 bridge closure: the two-step witness seed forces observation
 -- of every required index at generation 2 under local exactness/determinism.
