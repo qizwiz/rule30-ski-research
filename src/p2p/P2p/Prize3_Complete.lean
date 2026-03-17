@@ -136,27 +136,168 @@ theorem base_case_n0 (k : Fin 1) : Essential 0 k := by
   exact ⟨fun _ => false, by native_decide⟩
 
 /-- Base case n=1: All 3 cells are essential -/
-axiom base_case_n1 (k : Fin 3) : Essential 1 k
-  -- Z3-verified: all 3 cells essential for n=1
-  -- Witness: all-zeros configuration works for all cells
+theorem base_case_n1 (k : Fin 3) : Essential 1 k := by
+  -- Witness: all-zeros configuration works for all 3 cells
+  let c : Config 1 := fun _ => false
+  use c
+  revert k
+  decide
+
+/-- Helper lemmas for base_case_n2 -/
+private theorem base_case_n2_k0 : Essential 2 ⟨0, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n2_k1 : Essential 2 ⟨1, by omega⟩ :=
+  ⟨fun i => decide (i.val = 3), by decide⟩
+
+private theorem base_case_n2_k2 : Essential 2 ⟨2, by omega⟩ :=
+  ⟨fun i => decide (i.val = 3), by decide⟩
+
+private theorem base_case_n2_k3 : Essential 2 ⟨3, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n2_k4 : Essential 2 ⟨4, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
 
 /-- Base case n=2: All 5 cells are essential -/
-axiom base_case_n2 (k : Fin 5) : Essential 2 k
-  -- Z3-verified: all 5 cells essential for n=2
-  -- Witness configurations exist for each cell
+theorem base_case_n2 (k : Fin 5) : Essential 2 k := by
+  have : k.val < 5 := k.is_lt
+  have hk : k.val = 0 ∨ k.val = 1 ∨ k.val = 2 ∨ k.val = 3 ∨ k.val = 4 := by omega
+  rcases hk with h0 | h1 | h2 | h3 | h4
+  · convert base_case_n2_k0 using 1; ext; exact h0
+  · convert base_case_n2_k1 using 1; ext; exact h1
+  · convert base_case_n2_k2 using 1; ext; exact h2
+  · convert base_case_n2_k3 using 1; ext; exact h3
+  · convert base_case_n2_k4 using 1; ext; exact h4
+
+/-- Helper lemmas for base_case_n3 -/
+private theorem base_case_n3_k0 : Essential 3 ⟨0, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n3_k1 : Essential 3 ⟨1, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n3_k2 : Essential 3 ⟨2, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n3_k3 : Essential 3 ⟨3, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n3_k4 : Essential 3 ⟨4, by omega⟩ :=
+  ⟨fun i => decide (i.val = 1), by decide⟩
+
+private theorem base_case_n3_k5 : Essential 3 ⟨5, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n3_k6 : Essential 3 ⟨6, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
 
 /-- Base case n=3: All 7 cells are essential -/
-axiom base_case_n3 (k : Fin 7) : Essential 3 k
-  -- Z3-verified: all 7 cells essential for n=3
-  -- Witness configurations exist for each cell
+theorem base_case_n3 (k : Fin 7) : Essential 3 k := by
+  have : k.val < 7 := k.is_lt
+  have hk : k.val = 0 ∨ k.val = 1 ∨ k.val = 2 ∨ k.val = 3 ∨ k.val = 4 ∨ k.val = 5 ∨ k.val = 6 := by omega
+  rcases hk with h0 | h1 | h2 | h3 | h4 | h5 | h6
+  · convert base_case_n3_k0 using 1; ext; exact h0
+  · convert base_case_n3_k1 using 1; ext; exact h1
+  · convert base_case_n3_k2 using 1; ext; exact h2
+  · convert base_case_n3_k3 using 1; ext; exact h3
+  · convert base_case_n3_k4 using 1; ext; exact h4
+  · convert base_case_n3_k5 using 1; ext; exact h5
+  · convert base_case_n3_k6 using 1; ext; exact h6
+
+/-- Helper lemmas for base_case_n4 -/
+private theorem base_case_n4_k0 : Essential 4 ⟨0, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n4_k1 : Essential 4 ⟨1, by omega⟩ :=
+  ⟨fun i => decide (i.val = 6), by decide⟩
+
+private theorem base_case_n4_k2 : Essential 4 ⟨2, by omega⟩ :=
+  ⟨fun i => decide (i.val = 4), by decide⟩
+
+private theorem base_case_n4_k3 : Essential 4 ⟨3, by omega⟩ :=
+  ⟨fun i => decide (i.val = 4), by decide⟩
+
+private theorem base_case_n4_k4 : Essential 4 ⟨4, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n4_k5 : Essential 4 ⟨5, by omega⟩ :=
+  ⟨fun i => decide (i.val = 7), by decide⟩
+
+private theorem base_case_n4_k6 : Essential 4 ⟨6, by omega⟩ :=
+  ⟨fun i => decide (i.val = 1), by decide⟩
+
+private theorem base_case_n4_k7 : Essential 4 ⟨7, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n4_k8 : Essential 4 ⟨8, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
 
 /-- Base case n=4: All 9 cells are essential -/
-axiom base_case_n4 (k : Fin 9) : Essential 4 k
-  -- Z3-verified: all 9 cells essential for n=4
+theorem base_case_n4 (k : Fin 9) : Essential 4 k := by
+  have : k.val < 9 := k.is_lt
+  have hk : k.val = 0 ∨ k.val = 1 ∨ k.val = 2 ∨ k.val = 3 ∨ k.val = 4 ∨ k.val = 5 ∨ k.val = 6 ∨ k.val = 7 ∨ k.val = 8 := by omega
+  rcases hk with h0 | h1 | h2 | h3 | h4 | h5 | h6 | h7 | h8
+  · convert base_case_n4_k0 using 1; ext; exact h0
+  · convert base_case_n4_k1 using 1; ext; exact h1
+  · convert base_case_n4_k2 using 1; ext; exact h2
+  · convert base_case_n4_k3 using 1; ext; exact h3
+  · convert base_case_n4_k4 using 1; ext; exact h4
+  · convert base_case_n4_k5 using 1; ext; exact h5
+  · convert base_case_n4_k6 using 1; ext; exact h6
+  · convert base_case_n4_k7 using 1; ext; exact h7
+  · convert base_case_n4_k8 using 1; ext; exact h8
+
+/-- Helper lemmas for base_case_n5 -/
+private theorem base_case_n5_k0 : Essential 5 ⟨0, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n5_k1 : Essential 5 ⟨1, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n5_k2 : Essential 5 ⟨2, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n5_k3 : Essential 5 ⟨3, by omega⟩ :=
+  ⟨fun i => decide (i.val = 4), by decide⟩
+
+private theorem base_case_n5_k4 : Essential 5 ⟨4, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n5_k5 : Essential 5 ⟨5, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n5_k6 : Essential 5 ⟨6, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n5_k7 : Essential 5 ⟨7, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n5_k8 : Essential 5 ⟨8, by omega⟩ :=
+  ⟨fun i => decide (i.val = 1), by decide⟩
+
+private theorem base_case_n5_k9 : Essential 5 ⟨9, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
+
+private theorem base_case_n5_k10 : Essential 5 ⟨10, by omega⟩ :=
+  ⟨fun i => decide (i.val = 0), by decide⟩
 
 /-- Base case n=5: All 11 cells are essential -/
-axiom base_case_n5 (k : Fin 11) : Essential 5 k
-  -- Z3-verified: all 11 cells essential for n=5
+theorem base_case_n5 (k : Fin 11) : Essential 5 k := by
+  have : k.val < 11 := k.is_lt
+  have hk : k.val = 0 ∨ k.val = 1 ∨ k.val = 2 ∨ k.val = 3 ∨ k.val = 4 ∨ k.val = 5 ∨ k.val = 6 ∨ k.val = 7 ∨ k.val = 8 ∨ k.val = 9 ∨ k.val = 10 := by omega
+  rcases hk with h0 | h1 | h2 | h3 | h4 | h5 | h6 | h7 | h8 | h9 | h10
+  · convert base_case_n5_k0 using 1; ext; exact h0
+  · convert base_case_n5_k1 using 1; ext; exact h1
+  · convert base_case_n5_k2 using 1; ext; exact h2
+  · convert base_case_n5_k3 using 1; ext; exact h3
+  · convert base_case_n5_k4 using 1; ext; exact h4
+  · convert base_case_n5_k5 using 1; ext; exact h5
+  · convert base_case_n5_k6 using 1; ext; exact h6
+  · convert base_case_n5_k7 using 1; ext; exact h7
+  · convert base_case_n5_k8 using 1; ext; exact h8
+  · convert base_case_n5_k9 using 1; ext; exact h9
+  · convert base_case_n5_k10 using 1; ext; exact h10
 
 /-
 ================================================================================
