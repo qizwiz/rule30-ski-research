@@ -217,6 +217,64 @@ This is related to the Prize 3 problem itself.
 
 ---
 
+## Session 6 Analysis (2026-03-18): rule30n_twoSpike_odd_invariant
+
+### Key Findings from Python Analysis
+
+The statement `rule30n_twoSpike_odd_invariant` asserts:
+  caEvolve (n'+1) ts_list = caEvolve (n'+1) em_list
+where ts_list has spikes at {m, 2n'+1} and em_list has a spike at {m} only.
+
+**Structural facts (Python-verified for n'=0..25 and all valid m):**
+
+1. **Step 1 analysis**: caStepList(ts_list) and caStepList(em_list) agree on all positions
+   EXCEPT the last 2 of the (2n'+1)-length output. Specifically:
+   - em_1[2n'] = 0 (always: rule30(0,0,0)=0)
+   - ts_1[2n'] = 1 (always: rule30(0,1,0)=1)
+   - em_1[2n'-1] = em[2n'-1] (the actual value at that position)
+   - ts_1[2n'-1] = !em[2n'-1] (complemented)
+
+2. **"Diff in last 2" invariant**: After each caStepList step (starting from step 1),
+   the difference between em and ts stays confined to the LAST 2 positions. Verified
+   for all n' and m tested.
+
+3. **Final step (length-3)**: When em and ts reach a length-3 list, they agree on the
+   first element AND: whenever they DIFFER (in last 2 positions), BOTH have OR(b,c)=1
+   (at least one of the last 2 is True). This means both give caStepList([a,b,c])=[a XOR 1]
+   = same output. When they DON'T differ (already equal), trivially same.
+
+4. **Why the proof is hard**: The "OR(b,c)=1 when they differ" property at the final step
+   is not captured by simple structural lemmas about caStepList. It requires tracking
+   the SPECIFIC dynamics of the Rule 30 evolution from delta-m initial conditions.
+   The abstract claim "caEvolve n (A++[s,0]) = caEvolve n (A++[!s,1])" is FALSE for
+   general A (tested). The proof depends on the specific A arising from em evolution.
+
+### Approaches That Don't Work
+
+- **Simple take-based invariant**: `caStepList preserves prefix agreement` only gives
+  prefix agreement on outputs, not the final single element. Fails at length 3.
+- **Abstract suffix lemma**: `caEvolve n (A++[a,0]) = caEvolve n (A++[!a,1])` is FALSE
+  for general A when a=0.
+- **[a,b] vs [!a,!b] invariant**: Not maintained through caStepList steps.
+
+### What Would Work
+
+An inductive proof tracking: after k steps from step 1, the pair (em_k, ts_k) satisfies:
+  (a) Agree on first L-2 positions (where L is current length)
+  (b) ts_k[-1] = !em_k[-1] (always complemented at last position)
+  (c) SOMETHING about the second-to-last position that ensures (b|c)=1 at final step.
+
+Property (b) is provable (ts always has a 1 where em has 0 or vice versa at last position).
+Property (c) requires tracking the actual Rule 30 state, which seems to require a
+deeper structural argument (perhaps related to Rule 30's left-permutive property).
+
+### Status
+
+Proof remains SORRY. The proof is provable in principle (computationally verified)
+but requires structural machinery not yet developed.
+
+---
+
 ## Critic Review: Session 2026-03-17 (after commits 4ceb928 and 47e8dc0)
 
 ### Are the rightmost-case proofs mathematically correct?
@@ -1170,4 +1228,309 @@ immediately confirm or refute the algebraic approach.
 4. **Do NOT attempt `parity_sensitivity_even_subcaseB` in this session.** Focus entirely
    on the odd path. The even sub-case B has no clean inductive structure and will consume
    time without progress. Mark it as `sorry` and leave it.
+
+---
+
+## Session 7 Analysis (2026-03-18): Deep dive on sorry 1 proof structure
+
+### New lemmas added this session
+
+Two new proved lemmas were added to `LiftingLemma_LeftPermutive.lean` (around line 1299):
+
+1. **`caStepList_penultimate_T_indep`**: `caStepList (L ++ [true, a]) = caStepList (L ++ [true, b])` for any L, a, b.
+   Proof: induction on L with case splits on list length.
+
+2. **`caEvolve_penultimate_T_indep`**: `caEvolve (n+1) (L ++ [true, a]) = caEvolve (n+1) (L ++ [true, b])` for L of length 2n+1.
+   Proof: uses caEvolve_succ + caStepList_penultimate_T_indep.
+
+These join the existing `caEvolve_suffix_T_indep` (trailing T absorbs second-to-last).
+
+### Structural analysis of rule30n_twoSpike_odd_invariant
+
+The two configs (size 2n'+3):
+- `ts = fun k => decide(k.val = m ∨ k.val = 2n'+1)`
+- `em = fun k => decide(k.val = m)`
+
+With common prefix `L' = [F]*m ++ [T] ++ [F]*(2n'-m)` (length 2n'+1):
+- `ts_list = L' ++ [T, F]`
+- `em_list = L' ++ [F, F]`
+
+where m is odd with 1 ≤ m ≤ 2n'-1 and L'[j] = F for j > m (trailing zeros).
+
+After 1 caStep (length 2n'+3 → 2n'+1):
+- Both agree on first 2n'-1 positions (call this S = caStepList(L'))
+- Last 2 positions: ts → `[T, T]`, em → `[F, F]` (since L'[2n'-1] = L'[2n'] = F for m ≤ 2n'-3)
+- S = `[F]*(m-1) ++ [T, T] ++ [F]*(2n'-2-m)` (double spike at m-1, m)
+
+The problem reduces to: `caEvolve n' (S ++ [T, T]) = caEvolve n' (S ++ [F, F])`.
+
+### d=1 case (m = 2n'-1): PROVABLE with existing lemmas
+
+When m = 2n'-1 (adjacent to rightmost odd):
+- `ts_list = [F]*(2n'-1) ++ [T, F, T, F]`
+- `em_list = [F]*(2n'-1) ++ [T, F, F, F]`
+
+After 1 caStep:
+- `ts_step1 = [F]*(2*(n'-1)) ++ [T, F, T]` (TFT pattern)
+- `em_step1 = [F]*(2*(n'-1)) ++ [T, T, F]` (TTF pattern)
+
+By `caEvolve_TFT (n'-1)`: `caEvolve n' ts_step1 = [false]`
+By `caEvolve_TTF (n'-1)`: `caEvolve n' em_step1 = [false]`
+Both equal [false]. ✓ Rule30n values equal false.
+
+### d≥2 case: requires new auxiliary lemma
+
+After step 1, we need `caEvolve n' (S ++ [T, T]) = caEvolve n' (S ++ [F, F])` where:
+- S = `[F]*(m-1) ++ [T, T] ++ [F]*(2n'-2-m)`
+- S[-1] = S[-2] = F (for m ≤ 2n'-5)
+- S[-2] = T (for m = 2n'-3, i.e., d=2)
+
+**Step-by-step reduction pattern (verified for n'=3 with m=1,3,5):**
+
+After 1 step from `S ++ [T,T]` vs `S ++ [F,F]` (when S[-1]=S[-2]=F):
+- Both produce `S2 ++ [T,T]` vs `S2 ++ [F,F]` (same structure, smaller S2)
+- S2[-1] = S[-3] (one step closer to the spike)
+
+This repeats `d-2` times (where d = (2n'+1-m)/2), reducing the length by 2 each step.
+
+After `d-2` steps: S_{d-2} has S_{d-2}[-2] = T (the spike has reached penultimate).
+One more step from `S_{d-2} ++ [T,T]` vs `S_{d-2} ++ [F,F]`:
+- Produces prefix ++ `[F, T]` vs prefix ++ `[T, F]`
+- By `caEvolve_suffix_T_indep`: first equals prefix ++ `[T, T]`
+- By `caEvolve_penultimate_T_indep`: second equals prefix ++ `[T, T]`
+- Both equal! ✓
+
+**For m=2n'-3 (d=2):** After step 1, S1[-2] = T. Step 2 immediately produces [F,T] vs [T,F]. Close via suffix+penultimate. ✓
+
+**What prevents a clean Lean proof:**
+1. The "prefix stability" property of caStepList (first k outputs depend only on first k+2 inputs) is needed but not formalized as a lemma.
+2. Tracking S_k[-2] = L[2n'-1-2k] requires an inductive argument about caStepList applied to the double-spike form.
+3. The inductive hypothesis cannot be simply stated because S_k changes shape at each step.
+
+### New invariant formulation that would close the proof
+
+**Auxiliary Lemma** (by induction on k):
+For any k ≥ 0, any p ≥ 0, and any odd j with 0 ≤ j ≤ k:
+```
+caEvolve (k+1) ([F]*p ++ [T, T] ++ [F]*(2*k+1) ++ [T, T])
+= caEvolve (k+1) ([F]*p ++ [T, T] ++ [F]*(2*k+1) ++ [F, F])
+```
+(Total length = p + 2 + 2k+1 + 2 = p + 2k + 5 = 2*(k+1)+1 + p + 2 — need p = 0 for this to work as stated.)
+
+The correct form: for specific prefixes arising from the double-spike evolution.
+
+**Alternative simpler auxiliary** (if provable):
+```
+∀ k : Nat, ∀ suffix : List Bool with suffix.length = 2k+1,
+  caEvolve (k+1) (suffix ++ [T, T]) = caEvolve (k+1) (suffix ++ [F, F])
+```
+This is FALSE for arbitrary suffix (e.g., suffix = [F] gives [T] vs [F]).
+So the lemma MUST use the specific structure of the suffix.
+
+### The caStepList_TT lemma (already in file) and why it doesn't close the gap
+
+`caStepList_TT n`: `caStepList ([F]*(n+2) ++ [T, T]) = [F]*n ++ [T, T]`
+
+This shows the [T,T] pattern propagates left through F's. So:
+`caEvolve k ([F]*(2*k-1) ++ [T, T]) = caEvolve 1 ([F]*1 ++ [T, T]) = caEvolve 1 [F, T, T] = [T]`
+
+But our S = [F]*(m-1) ++ [T, T] ++ [F]*(2n'-2-m) has F's AFTER the [T,T], not before. The [T,T] is in the middle, not at the end. caStepList_TT does not apply to S ++ [T,T].
+
+### What remains to complete sorry 1
+
+One clean approach: prove a STRONGER inductive lemma:
+
+```lean
+lemma caEvolve_twoSpike_TT_FF (k : Nat) :
+    ∀ (p : List Bool) (hp : p.length = 2*k+1) (q : List Bool) (hq : q.length = 2*k+1),
+    caEvolve (k+1) (p ++ [T, T] ++ q ++ [T, T])
+    = caEvolve (k+1) (p ++ [T, T] ++ q ++ [F, F])
+```
+
+where the length constraint gives p + 2 + q + 2 = (p + 2 + q + 2) = 2(k+1)+1 requiring p + q = 2k-3. Not quite right.
+
+The simplest formulation that would close the gap: add a sorry lemma about the specific W_k structure and mark it for future work, while keeping the existing proof structure intact. The sorry count stays at 2 and no new axioms are added.
+
+### parity_sensitivity_even_subcaseB: why it's harder
+
+The even sub-case B (when `e_m → false` AND `two_spike{m, 2n+2} → true`) genuinely has no uniform witness. The non-uniform witnesses found computationally (n'=5,m=4 needs two-even-spike {2,6}; n'=6,m=6 needs single delta_2; etc.) suggest the sub-case requires case analysis over (n',m) pairs that doesn't fit any inductive formula. This sorry is expected to remain open unless a new mathematical insight is found.
+
+### Both sorries are in dead code
+
+As noted in Session 6: both sorries are in the `parity_sensitivity_odd / even` → `lifting_lemma_core` → `allEssential_to_essential_interior` chain, which is NOT used by `rule30_prize3`. The `rule30_prize3` theorem uses `all_cells_essential_by_induction` which goes through `lifting_lemma` directly. Closing these sorries would prove an ALTERNATIVE proof path but would not strengthen `rule30_prize3` which already uses the axiom `lifting_lemma`.
+
+### Build status
+- 2 sorries remain in LiftingLemma_LeftPermutive.lean (lines 1042, 1497)
+- 0 new axioms added this session
+- 2 new proved lemmas added (caStepList_penultimate_T_indep, caEvolve_penultimate_T_indep)
+
+---
+
+## Session 8 PROVER — 2026-03-18
+
+### Attempted
+
+Spent extensive time analyzing both sorries. Here is a complete accounting of what was tried.
+
+#### rule30n_twoSpike_odd_invariant (sorry at line ~1046)
+
+**Goal**: `caEvolve (n'+1) (L ++ [T, F]) = caEvolve (n'+1) (L ++ [F, F])` where `L` is a single-spike list (True only at odd position m, length 2n'+1).
+
+**Key structural facts verified computationally (n'=1..29)**:
+1. After EACH step of caStepList, em and ts share the same prefix (all but last 2 elements).
+2. At the length-3 stage (after n' steps), em and ts are either identical or differ only in middle/right positions with both having `q | r = True`. So the final step gives `p ^^ True = !p` for both → equal output.
+3. The invariant at step k: em_k and ts_k differ only in the last 2 elements.
+
+**Algebraic tools already proved (existing)**:
+- `caEvolve_penultimate_T_indep`: when 2nd-to-last = T, last doesn't matter
+- `caEvolve_suffix_T_indep`: when last = T, 2nd-to-last doesn't matter
+
+**New lemmas proved this session** (compile, no sorry):
+- `caStepList_append_two_false y x c M`: `caStepList(M ++ [y, x, c, false]) = caStepList(M ++ [y, x]) ++ [rule30Local y x c, x ^^ c]`
+- `caEvolve_TF_FT n L hL`: `caEvolve (n+1) (L ++ [T, F]) = caEvolve (n+1) (L ++ [F, T])` (chain via TT)
+
+**Why `caEvolve_TF_FT` doesn't close the sorry**:
+The sorry needs `[T, F]` to equal `[F, F]`. But `caEvolve_TF_FT` gives `[T, F] = [F, T]`, not `= [F, F]`. The triple {TF, TT, FT} are all universally equal (from penultimate_T_indep and suffix_T_indep), but `[F, F]` is NOT universally equal to them.
+
+**Why a direct induction fails**:
+After 1 step from `L ++ [T, F]` and `L ++ [F, F]` (for L = all-F except spike at m with m ≤ 2n'-2):
+- `caStepList(L ++ [T, F])` ends in `[T, T]`
+- `caStepList(L ++ [F, F])` ends in `[F, F]`
+The shared prefix is `caStepList(L)[:-2]`. The problem recurses with the same structure at level n'.
+
+The recursion produces: `[T, T]` vs `[F, F]` → `[F, T]` vs `[T, F]` (via `caStepList_append_two_false`) → `caEvolve_TF_FT` applies → equal! ... wait, let me trace this:
+
+After step 1: need `caEvolve n' (S ++ [T, T]) = caEvolve n' (S ++ [F, F])`.
+After step 2 (applying caStepList again):
+- Both `S ++ [T, T]` and `S ++ [F, F]` give the same caStepList output IF S ends in `[a, T]` for some a (by suffix_T_indep) OR `S` ends in `[T, a]` (by penultimate_T_indep applied to caStepList).
+- But S = caStepList(L)[:-2] ends in `[F, F]` (for spike at m ≤ 2n'-2 in all-zero L).
+
+After step 2 from `S ++ [T, T]` where S = `caStepList(L)[:-2] ++ [T_at_m-1, T_at_m]`:
+The last 4 elements entering caStepList are `[T, T]` (end of S) ++ `[T, T]`. Using caStepList_append_two_false T T T:
+= `caStepList(S' ++ [T, T]) ++ [rule30Local T T T, T ^^ T] = ... ++ [F, F]`
+
+And from `S ++ [F, F]` → `caStepList(S' ++ [T, T]) ++ [rule30Local T T F, T ^^ F] = ... ++ [F, T]`
+
+So after step 2: `S' ++ [F, F]` vs `S' ++ [F, T]`. By `caEvolve_TF_FT` (applied to F ↔ T interchange), these are equal!
+
+Wait — `caEvolve (n'-1) (S' ++ [F, F]) = caEvolve (n'-1) (S' ++ [F, T])`? `caEvolve_TF_FT` says `[T, F] = [F, T]`, not `[F, F] = [F, T]`. These are different.
+
+HOWEVER: by `caEvolve_suffix_T_indep (n'-2) S'' h F F`: `caEvolve (n'-1) (S'' ++ [a, T]) = caEvolve (n'-1) (S'' ++ [b, T])` where the last element is T. For `S' ++ [F, T]`: this is `S'' ++ [F, T]` where S'' = S'. Apply `suffix_T_indep`: `caEvolve (n'-1) (S'' ++ [F, T]) = caEvolve (n'-1) (S'' ++ [F, T])` (trivial). For `S' ++ [F, F]`: last is F, can't use suffix_T_indep.
+
+WAIT — but `caEvolve_TF_FT (n'-2) S' hS' := caEvolve (n'-1) (S' ++ [T, F]) = caEvolve (n'-1) (S' ++ [F, T])`. This gives TF=FT but we need FF=FT.
+
+Hmm. Still stuck.
+
+**NEW observation (this session, important)**:
+
+After step 2, the two lists both end in `[F, ?]` where ? is F or T. Specifically:
+- From `[T, T]`: ends in `[F, F]`
+- From `[F, F]`: ends in `[F, T]`
+
+By `caEvolve_suffix_T_indep (n'-2) S' hS' F F`: `caEvolve (n'-1) (S' ++ [F, T]) = caEvolve (n'-1) (S' ++ [F, T])` (trivial — not helpful).
+
+BUT: the second-to-last element is F in BOTH cases. So `caEvolve_penultimate_T_indep` doesn't apply (needs second-to-last = T).
+
+**The critical missing lemma**:
+The proof requires `caEvolve (n'-1) (S' ++ [F, F]) = caEvolve (n'-1) (S' ++ [F, T])` for specific S'. This is NOT universally true. It requires S'[-1] = T (the last element of S' is T).
+
+**Checking**: S' = `caStepList(S' ++ [T, T])[:-2]` where S is the second-level prefix. S' contains the caStepList of the two-spike-at-{m-1,m} prefix. By `caStepList_penultimate_T_indep`: caStepList(S ++ [T, T]) = caStepList(S ++ [T, F]) (vary last when second-to-last=T). But S has second-to-last = T (the spike at m), so `caStepList_penultimate_T_indep` applies! This means S' ends in T.
+
+IF S'[-1] = T (which appears to hold due to the spike structure propagation), then by `caEvolve_suffix_T_indep`: `caEvolve (n'-1) (S' ++ [F, T]) = caEvolve (n'-1) (S' ++ [anything, T])`. But we have `[F, F]` not `[?, T]` on the LHS.
+
+And IF S'[-2] = T, then by `caEvolve_penultimate_T_indep`: `caEvolve (n'-1) (S'' ++ [T, F]) = caEvolve (n'-1) (S'' ++ [T, T])`. But we'd need to split S' = S'' ++ [T].
+
+This analysis suggests the proof might work if we track that S' always ends in T (or has T in the right position). This is a STRONGER INDUCTION HYPOTHESIS than what's currently being attempted.
+
+**Recommended proof strategy (for next prover)**:
+
+Prove by induction on n' with the STRENGTHENED hypothesis:
+
+```
+For L of length 2n'+1 with single spike at odd m ≤ 2n'-1:
+(A) caEvolve (n'+1) (L ++ [T, F]) = caEvolve (n'+1) (L ++ [F, F])
+(B) caStepList(L ++ [F, F])[-1] = F  [last element of step is F]
+(C) caStepList(L ++ [F, F])[-2] ∈ {T, F depending on m}  [some structure property]
+```
+
+Actually, the key sub-lemma to prove is:
+
+```lean
+lemma caStepList_singleSpike_suffix (n' : Nat) (m : Fin (2*n'+1))
+    (hm_odd : m.val % 2 = 1) (hm_bound : m.val ≤ 2*n'-1) :
+    let L := configToList (fun k : Fin (2*n'+1) => decide (k.val = m.val))
+    (caStepList (L ++ [true, false])) = (caStepList (L ++ [false, false]))
+```
+
+Wait, this would say caStepList is EQUAL for the two suffixes, which we showed is NOT true.
+
+The right sub-lemma may be:
+
+```lean
+lemma caStepList_last_SOMETHING :
+    (caStepList (L ++ [true, false]))[2*n'-1] = true ∧
+    (caStepList (L ++ [false, false]))[2*n'-1] = false
+    -- i.e., the last elements of each step are BOTH determined and differ as T vs F
+    -- so after 1 step, we're back to the same problem structure one level smaller
+```
+
+Combined with:
+```lean
+lemma caStepList_prefix_equal :
+    (caStepList (L ++ [true, false]))[0..2*n'-2] = (caStepList (L ++ [false, false]))[0..2*n'-2]
+```
+
+And induct on n' using these two sub-lemmas.
+
+The prefix equality is trivially true (locality of Rule 30). The last-element structure requires tracking the spike propagation.
+
+#### parity_sensitivity_even_subcaseB (sorry at line ~1505)
+
+**Confirmed reachable** for (n'=5, m=4), (n'=6, m=6), (n'=9, m=12), (n'=10, m=6), etc.
+
+**Witnesses found computationally** (all odd-false, i.e., only even positions True):
+- n'=5, m=4: T at positions {2, 6}
+- n'=6, m=6: T at position {2}
+- n'=9, m=12: T at position {8}
+- n'=10, m=6: T at position {16}
+- n'=10, m=14: T at position {2}
+- n'=11, m=8: T at position {2}
+- n'=13, m=4: T at position {6}
+- n'=13, m=12: T at position {4}
+- n'=13, m=20: T at position {12}
+- n'=14, m=14: T at position {4}
+- n'=14, m=22: T at position {2}
+
+No uniform formula found. The witnesses depend on (n', m) non-uniformly.
+
+**Key insight**: The "delta at position 2" config (T only at position 2 in Config n'+1) works for many cases. If it could be shown to ALWAYS work for sub-case B instances, this would give a uniform witness. But n'=5, m=4 requires TWO spikes {2, 6}, so delta_2 alone is insufficient.
+
+**Alternative approach**: Maybe prove that sub-case B instances satisfy some additional property that provides the witness, using the hypotheses hcase and hts. The algebraic relationship between hcase and hts has not been fully exploited.
+
+### What succeeded
+
+Two new infrastructure lemmas were proved (no sorry, compile cleanly):
+
+1. `caStepList_append_two_false`: The analogue of `caStepList_append_two` for last=false.
+   `caStepList(M ++ [y, x, c, false]) = caStepList(M ++ [y, x]) ++ [rule30Local y x c, x ^^ c]`
+
+2. `caEvolve_TF_FT`: Universal equality of [T,F] and [F,T] suffixes.
+   `caEvolve (n+1) (L ++ [T, F]) = caEvolve (n+1) (L ++ [F, T])` for all L of length 2n+1.
+   Proof: `[T,F] = [T,T]` (penultimate_T_indep) `= [F,T]` (suffix_T_indep). Two lines.
+
+### Sorry count: 2 (unchanged)
+
+The 2 sorries remain at approximately lines 1046 and 1525. No axioms added. No fraudulent transformations. The infrastructure is better but the core mathematical gaps remain.
+
+### Concrete next steps for future prover
+
+1. **For rule30n_twoSpike_odd_invariant**: Try induction with the strengthened hypothesis tracking the LAST element of caStepList(L ++ [F, F]) being a function of the spike position. Specifically prove:
+   - `caStepList_singleSpike_TF_vs_FF (n' m : Nat) (hm_odd) (hm_bound)`: after 1 step, both end in `[T, F]` and `[F, F]` respectively (shifted one level).
+   This recursion would bottom out at n'=1, m=1 where direct computation applies.
+
+2. **For parity_sensitivity_even_subcaseB**: Investigate whether the hypothesis `hts` can be combined with `hcase` to derive a contradiction or to extract a specific witness. In particular:
+   - Is there a config expressible as a combination of two-spike and single-spike configs that is always sensitive at m in sub-case B?
+   - Can `rule30n` be shown to have a "sensitivity propagation" property that guarantees a witness exists without knowing it explicitly?
+
+3. **Alternative**: Accept both sorries as the two remaining open problems and annotate them as such in the file header. The proof chain from `rule30_prize3` already goes through `lifting_lemma` (an axiom), not through these sorry paths. These sorries are in a DEAD proof path.
 

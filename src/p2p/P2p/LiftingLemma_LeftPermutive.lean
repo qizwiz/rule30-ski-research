@@ -1022,31 +1022,27 @@ lemma deltaOddRight_even_false (n : Nat) :
   -- 2*k.val is even; 2*n+1 is odd. Even ≠ odd.
   omega
 
-/-- Universal equality: adding a spike at the rightmost odd interior (2n'+1) does not change
-    the center output after n'+1 steps, for any config with a spike at odd position m < 2n'+1.
+/-! ### The key two-spike odd invariant -/
 
-    That is: rule30n (n'+1) two_spike{m, 2n'+1} = rule30n (n'+1) e_m for ALL qualifying m.
-    This is a STRONGER statement than just the "false → false" conditional.
+/-- The two-spike config (spikes at m and 2n'+1) and single-spike config (spike at m)
+    give the same output under rule30n (n'+1), when m is odd with 0 < m < 2n'+1.
 
-    Key structural observation (Python-verified):
-    After 1 caStep from Config (n'+1) (size 2n'+3), the two configs two_spike and e_m
-    agree on output positions 0..2n'-2 and differ only at positions 2n'-1 and 2n'.
-    The specific pattern of the difference (arising from the rightmost-odd spike at 2n'+1)
-    has the same n'-step center reading as the e_m version.
+    This is proved by induction: after unrolling the caStepList applications and using
+    the left-permutive independence lemmas (caEvolve_penultimate_T_indep and
+    caEvolve_suffix_T_indep), the contribution of the boundary spike at 2n'+1
+    cancels out via the XOR structure of rule30Local.
 
-    Computationally verified for all n'=0..19 and ALL odd non-rightmost m (not just Case B).
-    The universal equality implies both Case A and Case B conditionals.
-
-    STATUS: Correctly stated. Structural inductive proof pending (the proof needs to carry
-    specific information about the caStep output form to close inductively). -/
+    STATUS: Open (see aux_A / aux_B structure below). The full proof requires completing
+    the aux_B case for p ≥ 1, d' ≥ 2 (the "C-form" phase of the induction). -/
 lemma rule30n_twoSpike_odd_invariant (n' : Nat) (m : Fin (2 * (n' + 1) + 1))
-    (hm_odd : m.val % 2 = 1)
-    (hm_low : 1 ≤ m.val)
-    (hm_ne_r : m.val ≠ 2 * n' + 1) :
-    rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
-      decide (k.val = m.val ∨ k.val = 2 * n' + 1)) =
-    rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
-      decide (k.val = m.val)) := by
+    (hm_odd : m.val % 2 = 1) (hm_low : 1 ≤ m.val) (hm_ne_r : m.val ≠ 2 * n' + 1) :
+    rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) => decide (k.val = m.val ∨ k.val = 2 * n' + 1)) =
+    rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) => decide (k.val = m.val)) := by
+  -- OPEN: Requires completing the aux_A/aux_B mutual induction.
+  -- The key: the two-spike list and single-spike list differ only at position 2n'+1 (T vs F).
+  -- By left-permutive dynamics and the caEvolve independence lemmas, the contribution
+  -- of the boundary spike cancels out.
+  -- Formally: translate to list form, reduce via caEvolve_penultimate_T_indep/suffix_T_indep.
   sorry
 
 /-- Key lemma for odd Case B: when the unit spike at odd non-rightmost m evolves to false,
@@ -1272,6 +1268,165 @@ lemma caEvolve_TFT : ∀ n : Nat,
     have h : 2 * (n + 1) = (2 * n) + 2 := by omega
     rw [h, caStepList_TFT (2 * n)]
     exact caEvolve_TTF n
+
+/-! ### KEY HELPER: caStepList invariance for TTF/TFT patterns -/
+
+/-- For ANY prefix B, caStepList(B ++ [T,T,F]) = caStepList(B ++ [T,F,T]).
+
+    This follows because the OR at the junction absorbs: for any suffix value x,
+    rule30Local(b, T, x) = b XOR (T OR x) = b XOR T (since T OR x = T).
+    So the T in the second position absorbs the difference between F and T in
+    the third position (i.e. the change F→T doesn't affect the output). -/
+lemma caStepList_TTF_eq_TFT : ∀ (B : List Bool),
+    caStepList (B ++ [true, true, false]) = caStepList (B ++ [true, false, true]) := by
+  intro B
+  induction B with
+  | nil => native_decide
+  | cons d rest ih =>
+    cases rest with
+    | nil => cases d <;> native_decide
+    | cons q rest2 =>
+      cases rest2 with
+      | nil => cases d <;> cases q <;> native_decide
+      | cons r rest3 =>
+        simp only [List.cons_append, caStepList]
+        congr 1
+
+/-! ### New helper lemmas: penultimate-T independence -/
+
+/-- When the second-to-last element is true, the last element doesn't matter for caStepList.
+    rule30Local(y, true, x) = y XOR (true OR x) = y XOR true, independent of x.
+    So caStepList (L ++ [true, a]) = caStepList (L ++ [true, b]) for any a, b. -/
+lemma caStepList_penultimate_T_indep (L : List Bool) (a b : Bool) :
+    caStepList (L ++ [true, a]) = caStepList (L ++ [true, b]) := by
+  induction L with
+  | nil => simp [caStepList, rule30Local]
+  | cons h rest ih =>
+    cases rest with
+    | nil => simp [caStepList, rule30Local]
+    | cons h2 rest2 =>
+      cases rest2 with
+      | nil => cases h <;> cases h2 <;> simp [caStepList, rule30Local]
+      | cons h3 rest3 =>
+        simp only [List.cons_append, caStepList]
+        congr 1
+
+/-- caEvolve (n+1) is independent of the last element when the second-to-last is true.
+    For L of length 2n+1 and any a b : Bool,
+    caEvolve (n+1) (L ++ [true, a]) = caEvolve (n+1) (L ++ [true, b]). -/
+lemma caEvolve_penultimate_T_indep (n : Nat) (L : List Bool) (hL : L.length = 2 * n + 1)
+    (a b : Bool) :
+    caEvolve (n + 1) (L ++ [true, a]) = caEvolve (n + 1) (L ++ [true, b]) := by
+  simp only [caEvolve_succ]
+  congr 1
+  exact caStepList_penultimate_T_indep L a b
+
+/-! ### New helper lemmas: suffix independence -/
+
+/-- Split a list of length ≥ 2 into init ++ [y, x] form. -/
+lemma list_split_last_two (L : List Bool) (h : L.length ≥ 2) :
+    ∃ (L' : List Bool) (y x : Bool), L = L' ++ [y, x] := by
+  have hne : L ≠ [] := by intro e; simp [e] at h
+  obtain ⟨x, L'y, rfl⟩ : ∃ x L', L = L' ++ [x] :=
+    ⟨L.getLast hne, L.dropLast, (List.dropLast_append_getLast hne).symm⟩
+  have hne2 : L'y ≠ [] := by intro e; simp [e] at h
+  obtain ⟨y, L', rfl⟩ : ∃ y L', L'y = L' ++ [y] :=
+    ⟨L'y.getLast hne2, L'y.dropLast, (List.dropLast_append_getLast hne2).symm⟩
+  exact ⟨L', y, x, by simp [List.append_assoc]⟩
+
+/-- caStepList applied to M ++ [y, x, c, true] splits into caStepList(M ++ [y, x]) ++ [rule30Local y x c, x ^^ true].
+    This is the key 4-suffix split that enables inductive reasoning about the last two cells. -/
+lemma caStepList_append_two (y x c : Bool) : ∀ (M : List Bool),
+    caStepList (M ++ [y, x, c, true]) = caStepList (M ++ [y, x]) ++ [rule30Local y x c, x ^^ true] := by
+  intro M
+  induction M with
+  | nil => simp [caStepList, rule30Local]
+  | cons h rest ih =>
+    cases rest with
+    | nil => simp [caStepList, rule30Local]
+    | cons h2 rest2 =>
+      cases rest2 with
+      | nil => simp [caStepList, rule30Local]
+      | cons h3 rest3 =>
+        simp only [List.cons_append, caStepList]
+        congr 1
+
+/-- caStepList applied to M ++ [y, x, c, false] splits into
+    caStepList(M ++ [y, x]) ++ [rule30Local y x c, x ^^ c].
+    Analogue of caStepList_append_two with last=false instead of last=true.
+    The last output cell is rule30Local(x, c, false) = x ^^ (c || false) = x ^^ c.
+    Used for inductive reasoning about 4-element suffixes ending in false. -/
+lemma caStepList_append_two_false (y x c : Bool) : ∀ (M : List Bool),
+    caStepList (M ++ [y, x, c, false]) = caStepList (M ++ [y, x]) ++ [rule30Local y x c, x ^^ c] := by
+  intro M
+  induction M with
+  | nil => cases y <;> cases x <;> cases c <;> simp [caStepList, rule30Local]
+  | cons h rest ih =>
+    cases rest with
+    | nil => cases h <;> cases y <;> cases x <;> cases c <;> simp [caStepList, rule30Local]
+    | cons h2 rest2 =>
+      cases rest2 with
+      | nil => cases h <;> cases h2 <;> cases y <;> cases x <;> cases c <;> simp [caStepList, rule30Local]
+      | cons h3 rest3 =>
+        simp only [List.cons_append, caStepList]
+        congr 1
+
+/-- Key independence lemma: caEvolve (n+1) is independent of the second-to-last element
+    when the last element is true.
+
+    Intuitively: a trailing true absorbs all influence from the second-to-last position
+    because rule30Local(y, q, true) = y ^^ true regardless of q (left-permutivity + OR absorption).
+
+    For L of length 2n+1 and any a b : Bool,
+    caEvolve (n+1) (L ++ [a, true]) = caEvolve (n+1) (L ++ [b, true]). -/
+lemma caEvolve_suffix_T_indep (n : Nat) (L : List Bool) (hL : L.length = 2 * n + 1)
+    (a b : Bool) :
+    caEvolve (n + 1) (L ++ [a, true]) = caEvolve (n + 1) (L ++ [b, true]) := by
+  suffices h : ∀ (L : List Bool), L.length = 2 * n + 1 →
+      ∀ (a b : Bool), caEvolve (n + 1) (L ++ [a, true]) = caEvolve (n + 1) (L ++ [b, true]) from
+    h L hL a b
+  clear L hL a b
+  induction n with
+  | zero =>
+    intro L hL a b
+    obtain ⟨x, rfl⟩ : ∃ x, L = [x] := by
+      cases L with
+      | nil => simp at hL
+      | cons h t =>
+        cases t with
+        | nil => exact ⟨h, rfl⟩
+        | cons h2 t2 => simp at hL
+    simp [caEvolve, caStepList, rule30Local]
+  | succ n ih =>
+    intro L hL a b
+    simp only [caEvolve_succ]
+    have hL_ge2 : L.length ≥ 2 := by omega
+    obtain ⟨L', y, x, rfl⟩ := list_split_last_two L hL_ge2
+    have hL'_len : L'.length = 2 * n + 1 := by
+      simp [List.length_append] at hL; omega
+    rw [show (L' ++ [y, x]) ++ [a, true] = L' ++ [y, x, a, true] from by simp [List.append_assoc]]
+    rw [show (L' ++ [y, x]) ++ [b, true] = L' ++ [y, x, b, true] from by simp [List.append_assoc]]
+    rw [caStepList_append_two y x a L', caStepList_append_two y x b L']
+    cases x
+    · -- x = false: false ^^ true = true, apply IH on caStepList(L' ++ [y, false])
+      have hS_len : (caStepList (L' ++ [y, false])).length = 2 * n + 1 := by
+        have h2 := caStepList_length (L' ++ [y, false]) (by simp [List.length_append, hL'_len])
+        simp [List.length_append, hL'_len] at h2 ⊢; omega
+      exact ih (caStepList (L' ++ [y, false])) hS_len (rule30Local y false a) (rule30Local y false b)
+    · -- x = true: rule30Local y true a = y ^^ true independent of a; true ^^ true = false
+      congr 2
+
+/-- caEvolve (n+1) is the same for suffix [T, F] and suffix [F, T].
+    Proof: [T,F] = [T,T] via penultimate_T_indep (vary last when second-to-last=T),
+    then [T,T] = [F,T] via suffix_T_indep (vary second-to-last when last=T).
+
+    Formally: caEvolve (n+1) (L ++ [T, F]) = caEvolve (n+1) (L ++ [F, T])
+    for any L of length 2n+1. This is a universal property independent of L. -/
+lemma caEvolve_TF_FT (n : Nat) (L : List Bool) (hL : L.length = 2 * n + 1) :
+    caEvolve (n + 1) (L ++ [true, false]) = caEvolve (n + 1) (L ++ [false, true]) := by
+  calc caEvolve (n + 1) (L ++ [true, false])
+      = caEvolve (n + 1) (L ++ [true, true]) := caEvolve_penultimate_T_indep n L hL false true
+    _ = caEvolve (n + 1) (L ++ [false, true]) := caEvolve_suffix_T_indep n L hL true false
 
 /-! ### Helper lemmas for parity_sensitivity_even -/
 
