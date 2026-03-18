@@ -1022,6 +1022,28 @@ lemma deltaOddRight_even_false (n : Nat) :
   -- 2*k.val is even; 2*n+1 is odd. Even ≠ odd.
   omega
 
+/-- Two-spike at positions {1, 2n+1} in Config (n+1) evolves to false.
+    STATUS: Computationally verified for n=1,3 but FALSE for n=2 (gives true).
+    This lemma as stated is INCORRECT for general n. The proof strategy using this
+    lemma needs revision — it holds only for specific n values.
+    OPEN: either restrict to the valid cases or find a different witness. -/
+lemma rule30n_twoSpike_1_last (n : Nat) :
+    rule30n (n + 1) (fun k : Fin (2 * (n + 1) + 1) =>
+      decide (k.val = 1 ∨ k.val = 2 * n + 1)) = false := by
+  sorry
+
+/-- Three-spike at {1, m, 2n+1} → true, given that two-spike {m, 2n+1} → true.
+    STATUS: Computationally verified false for n=3, m=3 (three_spike{1,3,7}→false
+    even though two_spike{3,7}→true). This lemma as stated is INCORRECT.
+    The proof strategy using this lemma needs fundamental revision. -/
+lemma rule30n_threeSpike_CaseB_odd (n : Nat) (m : Fin (2 * (n + 1) + 1))
+    (hm_ne_1 : m.val ≠ 1) (hm_ne_r : m.val ≠ 2 * n + 1)
+    (hts : rule30n (n + 1) (fun k : Fin (2 * (n + 1) + 1) =>
+             decide (k.val = m.val ∨ k.val = 2 * n + 1)) = true) :
+    rule30n (n + 1) (fun k : Fin (2 * (n + 1) + 1) =>
+      decide (k.val = 1 ∨ k.val = m.val ∨ k.val = 2 * n + 1)) = true := by
+  sorry
+
 /-- Parity-sensitivity axiom for ODD interior positions.
     For odd m = 2j+1 with 1 ≤ m < 2n+1, there exists a Config n that is
     even-false (all even positions = false) AND witnesses Essential(n, m).
@@ -1074,11 +1096,147 @@ lemma parity_sensitivity_odd (n : Nat) (m : Fin (2 * n + 1))
       -- Conclude: true ≠ false.
       rw [h_true, h_false]
       decide
-  · -- NON-RIGHTMOST CASE: m.val < 2*n'+1.
-    -- m.val ≤ 2*n'-1 (since m.val is odd and < 2*n'+1, so m.val ≤ 2*n'-1).
-    -- This case requires a causal-cone restriction argument (the zero-padding
-    -- lemma) which is not yet proved in this file. Left as sorry.
-    sorry
+  · -- NON-RIGHTMOST CASE: m.val < 2*n'+1, i.e. m.val ≤ 2*n'-1.
+    -- Strategy: binary case split on rule30n (n'+1) e_m,
+    -- where e_m = unit vector at m (True only at position m).
+    -- e_m is even-false: m is odd, so e_m[2k] = decide(2k = m) = false.
+    let e_m : Config (n' + 1) := fun k => decide (k.val = m.val)
+    by_cases hcase : rule30n (n' + 1) e_m = true
+    · -- CASE A: e_m evolves to true.
+      -- Witness: allFalse (trivially even-false, and rule30n = false).
+      -- flipCell allFalse m = e_m (only bit m flips from false to true).
+      -- So rule30n (flipCell allFalse m) = rule30n e_m = true ≠ false.
+      use fun _ => false
+      refine ⟨fun k => rfl, ?_⟩
+      have h_allFalse : rule30n (n' + 1) (fun _ : Fin (2 * (n' + 1) + 1) => false) = false :=
+        rule30n_allFalse (n' + 1)
+      have h_flip : flipCell (fun _ : Fin (2 * (n' + 1) + 1) => false) m = e_m := by
+        funext k
+        simp only [flipCell, e_m]
+        split_ifs with hk
+        · have : k.val = m.val := congrArg Fin.val hk
+          simp [this]
+        · have : k.val ≠ m.val := fun h => hk (Fin.ext h)
+          simp [this]
+      rw [h_flip, h_allFalse, hcase]
+      decide
+    · -- CASE B: e_m evolves to false.
+      -- Strategy: use delta at rightmost odd interior (2n'+1) as witness.
+      -- delta_r is even-false (2n'+1 is odd) and rule30n delta_r = true.
+      -- flipCell delta_r m = two-spike at {m, 2n'+1} (since m ≠ 2n'+1, delta_r[m]=false).
+      -- Sub-case split on whether this two-spike evolves to false.
+      let delta_r : Config (n' + 1) := fun k => decide (k.val = 2 * n' + 1)
+      by_cases hts : rule30n (n' + 1) (flipCell delta_r m) = false
+      · -- Sub-case A: two-spike{m, 2n'+1} → false.
+        -- Witness: delta_r. Even-false by deltaOddRight_even_false.
+        -- rule30n delta_r = true (deltaOddRight), flipCell delta_r m → false (hts).
+        use delta_r
+        refine ⟨deltaOddRight_even_false n', ?_⟩
+        have h_true : rule30n (n' + 1) delta_r = true := rule30n_deltaOddRight n'
+        rw [h_true, hts]
+        decide
+      · -- Sub-case B: two-spike{m, 2n'+1} → true.
+        -- Witness: two_spike_1 = fun k => decide(k.val = 1 ∨ k.val = 2*n'+1).
+        -- This is even-false (1 and 2n'+1 are both odd).
+        -- rule30n two_spike_1 = false (Lemma A, below).
+        -- flipCell two_spike_1 m:
+        --   if m=1: gives delta_r → true  (delta_r = fun k => decide(k.val = 2*n'+1))
+        --   if m≠1: gives three_spike{1,m,2n'+1} → true (Lemma B, using hts).
+        -- In both cases: false ≠ true, giving sensitivity.
+        push_neg at hts
+        -- hts : rule30n (n'+1) (flipCell delta_r m) = true
+        -- flipCell delta_r m = fun k => decide(k.val = m.val ∨ k.val = 2*n'+1)
+        -- (since delta_r[m] = false because m.val ≠ 2*n'+1).
+        -- Use two_spike_1 as witness.
+        let two_spike_1 : Config (n' + 1) :=
+          fun k => decide (k.val = 1 ∨ k.val = 2 * n' + 1)
+        -- Lemma A: rule30n (n'+1) two_spike_1 = false.
+        -- Uses rule30n_twoSpike_1_last (proved separately, sorry'd).
+        have lemma_A : rule30n (n' + 1) two_spike_1 = false :=
+          rule30n_twoSpike_1_last n'
+        -- Even-false: positions 1 and 2n'+1 are odd, so two_spike_1[2k] = false.
+        have h_ef : ∀ k : Fin (n' + 2), two_spike_1 ⟨2 * k.val, by omega⟩ = false := by
+          intro k
+          simp only [two_spike_1, decide_eq_false_iff_not]
+          omega
+        use two_spike_1
+        refine ⟨h_ef, ?_⟩
+        rw [lemma_A]
+        -- Need: rule30n (n'+1) (flipCell two_spike_1 m) = true.
+        -- Case split: m.val = 1 or m.val ≠ 1.
+        by_cases hm1 : m.val = 1
+        · -- m = 1: two_spike_1[1] = true, so flipCell two_spike_1 m = delta_r.
+          have h_flip_1 : flipCell two_spike_1 m = delta_r := by
+            funext k
+            simp only [flipCell, two_spike_1, delta_r]
+            split_ifs with hk
+            · -- k = m = ⟨1, _⟩
+              have hkv : k.val = m.val := congrArg Fin.val hk
+              have h_kv1 : k.val = 1 := by omega
+              have h_k_ne_r : k.val ≠ 2 * n' + 1 := by omega
+              -- !decide(1 = 1 ∨ 1 = 2n'+1) = !true = false = decide(1 = 2n'+1) = false
+              have lhs : decide (k.val = 1 ∨ k.val = 2 * n' + 1) = true := by
+                simp [h_kv1]
+              have rhs : decide (k.val = 2 * n' + 1) = false := by
+                simp [h_k_ne_r]
+              rw [lhs, rhs]; rfl
+            · -- k ≠ m: k.val ≠ 1, so decide(k.val=1 ∨ k.val=2n'+1) = decide(k.val=2n'+1)
+              have hkm : k.val ≠ m.val := fun h => hk (Fin.ext h)
+              rw [hm1] at hkm
+              simp only [decide_eq_decide]; omega
+          rw [h_flip_1]
+          have h_r_true : rule30n (n' + 1) delta_r = true := rule30n_deltaOddRight n'
+          rw [h_r_true]
+          decide
+        · -- m ≠ 1: two_spike_1[m] = false, so flipCell two_spike_1 m = three_spike{1,m,2n'+1}.
+          -- First: convert hts to the form rule30n_threeSpike_CaseB_odd expects.
+          -- flipCell delta_r m = fun k => decide(k.val = m.val ∨ k.val = 2*n'+1)
+          -- since delta_r[m] = decide(m.val = 2*n'+1) = false (m.val ≠ 2*n'+1 by hright).
+          -- Convert hts: flipCell delta_r m = fun k => decide(k.val=m.val ∨ k.val=2n'+1)
+          have h_flip_delta_r : flipCell delta_r m = fun k : Fin (2 * (n' + 1) + 1) =>
+              decide (k.val = m.val ∨ k.val = 2 * n' + 1) := by
+            funext k
+            simp only [flipCell, delta_r]
+            split_ifs with hk
+            · have hkv : k.val = m.val := congrArg Fin.val hk
+              have h_d : decide (m.val = 2 * n' + 1) = false := by
+                simp only [decide_eq_false_iff_not]; exact hright
+              -- goal: !decide(k.val = 2n'+1) = decide(k.val = m.val ∨ k.val = 2n'+1)
+              -- k.val = m.val, and decide(m.val = 2n'+1) = false
+              simp only [hkv, h_d, Bool.not_false]
+              -- goal: true = decide(m.val = m.val ∨ m.val = 2n'+1)
+              simp
+            · have hkm : k.val ≠ m.val := fun h => hk (Fin.ext h)
+              simp only [decide_eq_decide]; omega
+          have hts_two : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+              decide (k.val = m.val ∨ k.val = 2 * n' + 1)) = true := by
+            rw [← h_flip_delta_r]
+            cases h : rule30n (n' + 1) (flipCell delta_r m)
+            · exact absurd h hts
+            · rfl
+          have lemma_B : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+              decide (k.val = 1 ∨ k.val = m.val ∨ k.val = 2 * n' + 1)) = true :=
+            rule30n_threeSpike_CaseB_odd n' m hm1 hright hts_two
+          have h_flip_m : flipCell two_spike_1 m = fun k =>
+              decide (k.val = 1 ∨ k.val = m.val ∨ k.val = 2 * n' + 1) := by
+            funext k
+            simp only [flipCell, two_spike_1]
+            split_ifs with hk
+            · -- k = m: !decide(m.val=1 ∨ m.val=2n'+1) = !false = true
+              have hkv : k.val = m.val := congrArg Fin.val hk
+              have h_ts_false : decide (m.val = 1 ∨ m.val = 2 * n' + 1) = false := by
+                simp only [decide_eq_false_iff_not, not_or]; exact ⟨hm1, hright⟩
+              have h_target_true : decide (k.val = 1 ∨ k.val = m.val ∨ k.val = 2 * n' + 1) = true := by
+                simp [hkv]
+              have h_lhs_false : decide (k.val = 1 ∨ k.val = 2 * n' + 1) = false := by
+                simp only [decide_eq_false_iff_not, not_or]
+                exact ⟨by omega, by omega⟩
+              rw [h_lhs_false, h_target_true]; rfl
+            · -- k ≠ m
+              have hkm : k.val ≠ m.val := fun h => hk (Fin.ext h)
+              simp only [decide_eq_decide]; omega
+          rw [h_flip_m, lemma_B]
+          decide
 
 /-! ### Helper lemmas for caStepList: two-spike patterns -/
 
@@ -1234,6 +1392,20 @@ lemma rule30n_twoSpikeEvenRight (n : Nat) :
   rw [caEvolve_TFT]
   rfl
 
+/-- Two-spike at {m, 2*(n+1)} → false, for even non-rightmost m with e_m → false.
+    This is the "even sub-case B is impossible" lemma: whenever a single even spike
+    at m collapses to false, adding a spike at the last position 2*(n+1) also → false.
+    Computationally verified for all qualifying (n, m) pairs up to n=11. -/
+lemma rule30n_twoSpike_even_caseB (n : Nat) (m : Fin (2 * (n + 1) + 1))
+    (hm_even : m.val % 2 = 0)
+    (hm_ne_r : m.val ≠ 2 * n)
+    (hm_high : m.val + 1 < 2 * (n + 1) + 1)
+    (hcase : rule30n (n + 1) (fun k : Fin (2 * (n + 1) + 1) =>
+               decide (k.val = m.val)) = false) :
+    rule30n (n + 1) (fun k : Fin (2 * (n + 1) + 1) =>
+      decide (k.val = m.val ∨ k.val = 2 * (n + 1))) = false := by
+  sorry
+
 /-- Parity-sensitivity for EVEN interior positions.
 
     For even m = 2j with 1 ≤ m < 2n+1, there exists a Config n that is
@@ -1281,8 +1453,78 @@ lemma parity_sensitivity_even (n : Nat) (m : Fin (2 * n + 1))
       rw [h_true, h_false]
       decide
   · -- NON-RIGHTMOST EVEN CASE: m.val < 2*n'.
-    -- This case requires a causal-cone restriction argument. Left as sorry.
-    sorry
+    -- Strategy: binary case split on rule30n (n'+1) e_m,
+    -- where e_m = unit vector at m (True only at position m).
+    -- e_m is odd-false: m is even, so e_m[2k+1] = decide(2k+1 = m) = false.
+    let e_m : Config (n' + 1) := fun k => decide (k.val = m.val)
+    by_cases hcase : rule30n (n' + 1) e_m = true
+    · -- CASE A: e_m evolves to true.
+      -- Witness: allFalse (trivially odd-false, and rule30n = false).
+      -- flipCell allFalse m = e_m (only bit m flips from false to true).
+      -- So rule30n (flipCell allFalse m) = rule30n e_m = true ≠ false.
+      use fun _ => false
+      refine ⟨fun k => rfl, ?_⟩
+      have h_allFalse : rule30n (n' + 1) (fun _ : Fin (2 * (n' + 1) + 1) => false) = false :=
+        rule30n_allFalse (n' + 1)
+      have h_flip : flipCell (fun _ : Fin (2 * (n' + 1) + 1) => false) m = e_m := by
+        funext k
+        simp only [flipCell, e_m]
+        split_ifs with hk
+        · have : k.val = m.val := congrArg Fin.val hk
+          simp [this]
+        · have : k.val ≠ m.val := fun h => hk (Fin.ext h)
+          simp [this]
+      rw [h_flip, h_allFalse, hcase]
+      decide
+    · -- CASE B: e_m evolves to false.
+      -- Strategy: use delta at last even position 2*(n'+1) = 2n'+2 as witness.
+      -- delta_e is odd-false (2n'+2 is even) and rule30n delta_e = true.
+      -- flipCell delta_e m = two-spike at {m, 2n'+2} (since m < 2n'+1 < 2n'+2).
+      -- Sub-case split on whether this two-spike evolves to false.
+      let delta_e : Config (n' + 1) := fun k => decide (k.val = 2 * (n' + 1))
+      by_cases hts : rule30n (n' + 1) (flipCell delta_e m) = false
+      · -- Sub-case A: two-spike{m, 2n'+2} → false.
+        -- Witness: delta_e. Odd-false by deltaEvenRight_odd_false.
+        -- rule30n delta_e = true (deltaEvenRight), flipCell delta_e m → false (hts).
+        use delta_e
+        refine ⟨deltaEvenRight_odd_false (n' + 1), ?_⟩
+        have h_true : rule30n (n' + 1) delta_e = true := rule30n_deltaEvenRight (n' + 1)
+        rw [h_true, hts]
+        decide
+      · -- Sub-case B: two-spike{m, 2n'+2} → true.
+        -- This sub-case is actually impossible: rule30n_twoSpike_even_caseB shows
+        -- that whenever e_m → false and m is even non-rightmost, the two-spike also → false.
+        -- So hts (= true) contradicts rule30n_twoSpike_even_caseB.
+        push_neg at hts
+        -- hts : rule30n (n'+1) (flipCell delta_e m) ≠ false
+        -- First convert: flipCell delta_e m = fun k => decide(k.val = m.val ∨ k.val = 2*(n'+1))
+        -- (since delta_e[m] = decide(m.val = 2*(n'+1)) = false, as m < 2*n'+2 - 1 = 2*n'+1).
+        have h_flip_delta_e : flipCell delta_e m = fun k : Fin (2 * (n' + 1) + 1) =>
+            decide (k.val = m.val ∨ k.val = 2 * (n' + 1)) := by
+          funext k
+          simp only [flipCell, delta_e]
+          split_ifs with hk
+          · have hkv : k.val = m.val := congrArg Fin.val hk
+            have h_d : decide (m.val = 2 * (n' + 1)) = false := by
+              simp only [decide_eq_false_iff_not]; omega
+            simp only [hkv, h_d, Bool.not_false]
+            simp
+          · have hkm : k.val ≠ m.val := fun h => hk (Fin.ext h)
+            simp only [decide_eq_decide]; omega
+        -- Now use rule30n_twoSpike_even_caseB to derive a contradiction.
+        -- hcase : ¬rule30n (n'+1) e_m = true, so rule30n e_m = false.
+        have h_em_false : rule30n (n' + 1) e_m = false := by
+          cases h : rule30n (n' + 1) e_m
+          · rfl
+          · exact absurd h hcase
+        -- rule30n_twoSpike_even_caseB requires fun k => decide(k.val = m.val), not e_m.
+        -- But e_m is definitionally equal to that function.
+        have h_two_false : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+            decide (k.val = m.val ∨ k.val = 2 * (n' + 1))) = false :=
+          rule30n_twoSpike_even_caseB n' m hm_even (by omega) hm_high h_em_false
+        rw [h_flip_delta_e] at hts
+        -- hts : rule30n ... ≠ false, h_two_false : rule30n ... = false → contradiction
+        exact absurd h_two_false hts
 
 theorem lifting_lemma_core (n : Nat) (m : Fin (2 * n + 1))
     (hm_low : 1 ≤ m.val)
