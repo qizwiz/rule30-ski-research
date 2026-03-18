@@ -1080,6 +1080,84 @@ lemma parity_sensitivity_odd (n : Nat) (m : Fin (2 * n + 1))
     -- lemma) which is not yet proved in this file. Left as sorry.
     sorry
 
+/-! ### Helper lemmas for caStepList: two-spike patterns -/
+
+/-- caStepList of [F]*(n+2) ++ [T,T,F] = [F]*n ++ [T,T,F].
+    The [T,T,F] tail is preserved under caStep (strips two leading falses). -/
+lemma caStepList_TTF : ∀ n : Nat,
+    caStepList (List.replicate (n + 2) false ++ [true, true, false]) =
+    List.replicate n false ++ [true, true, false] := by
+  intro n
+  induction n with
+  | zero =>
+    -- caStepList [F, F, T, T, F] = [T, T, F]
+    native_decide
+  | succ n ih =>
+    have h : n + 1 + 2 = n + 2 + 1 := by omega
+    calc caStepList (List.replicate (n + 1 + 2) false ++ [true, true, false])
+        = caStepList (List.replicate (n + 2 + 1) false ++ [true, true, false]) := by rw [h]
+      _ = caStepList (false :: List.replicate (n + 2) false ++ [true, true, false]) := rfl
+      _ = caStepList (false :: false :: false :: List.replicate n false ++ [true, true, false]) := rfl
+      _ = rule30Local false false false ::
+            caStepList (false :: false :: List.replicate n false ++ [true, true, false]) := rfl
+      _ = false :: caStepList (List.replicate (n + 2) false ++ [true, true, false]) := by
+            simp [rule30Local]; rfl
+      _ = false :: (List.replicate n false ++ [true, true, false]) := by rw [ih]
+      _ = List.replicate (n + 1) false ++ [true, true, false] := rfl
+
+/-- caEvolve (n+1) of [F]*(2n) ++ [T,T,F] = [false].
+    The [T,T,F] pattern collapses to false after n+1 steps. -/
+lemma caEvolve_TTF : ∀ n : Nat,
+    caEvolve (n + 1) (List.replicate (2 * n) false ++ [true, true, false]) = [false] := by
+  intro n
+  induction n with
+  | zero =>
+    -- caEvolve 1 [T, T, F] = [F]
+    native_decide
+  | succ n ih =>
+    rw [caEvolve_succ]
+    have h : 2 * (n + 1) = (2 * n) + 2 := by omega
+    rw [h, caStepList_TTF (2 * n)]
+    exact ih
+
+/-- caStepList of [F]*(n+2) ++ [T,F,T] = [F]*n ++ [T,T,F].
+    The penultimate-last even spike pattern steps to [T,T,F] tail. -/
+lemma caStepList_TFT : ∀ n : Nat,
+    caStepList (List.replicate (n + 2) false ++ [true, false, true]) =
+    List.replicate n false ++ [true, true, false] := by
+  intro n
+  induction n with
+  | zero =>
+    -- caStepList [F, F, T, F, T] = [T, T, F]
+    native_decide
+  | succ n ih =>
+    have h : n + 1 + 2 = n + 2 + 1 := by omega
+    calc caStepList (List.replicate (n + 1 + 2) false ++ [true, false, true])
+        = caStepList (List.replicate (n + 2 + 1) false ++ [true, false, true]) := by rw [h]
+      _ = caStepList (false :: List.replicate (n + 2) false ++ [true, false, true]) := rfl
+      _ = caStepList (false :: false :: false :: List.replicate n false ++ [true, false, true]) := rfl
+      _ = rule30Local false false false ::
+            caStepList (false :: false :: List.replicate n false ++ [true, false, true]) := rfl
+      _ = false :: caStepList (List.replicate (n + 2) false ++ [true, false, true]) := by
+            simp [rule30Local]; rfl
+      _ = false :: (List.replicate n false ++ [true, true, false]) := by rw [ih]
+      _ = List.replicate (n + 1) false ++ [true, true, false] := rfl
+
+/-- caEvolve (n+1) of [F]*(2n) ++ [T,F,T] = [false].
+    Two-spike at positions {2n, 2n+2} (even spike before last) collapses to false. -/
+lemma caEvolve_TFT : ∀ n : Nat,
+    caEvolve (n + 1) (List.replicate (2 * n) false ++ [true, false, true]) = [false] := by
+  intro n
+  induction n with
+  | zero =>
+    -- caEvolve 1 [T, F, T] = [F]
+    native_decide
+  | succ n ih =>
+    rw [caEvolve_succ]
+    have h : 2 * (n + 1) = (2 * n) + 2 := by omega
+    rw [h, caStepList_TFT (2 * n)]
+    exact caEvolve_TTF n
+
 /-! ### Helper lemmas for parity_sensitivity_even -/
 
 /-- configToList of delta at position 2n (last position) in Config n
@@ -1105,29 +1183,106 @@ lemma rule30n_deltaEvenRight (n : Nat) :
   rw [configToList_deltaEvenRight, caEvolve_false_then_true]
   rfl
 
-/-- Parity-sensitivity axiom for EVEN interior positions.
-    For even m = 2j with 1 ≤ m < 2n+1 (so m ≥ 2), there exists a Config n
-    that is odd-false (all odd positions = false) AND witnesses Essential(n, m).
+/-- configToList of two-spike at {2n-2, 2n} in Config (n+1).
+    True at positions 2n (second-to-last even interior) and 2n+2 (last position). -/
+lemma configToList_twoSpikeEvenRight (n : Nat) :
+    configToList (fun k : Fin (2 * (n + 1) + 1) => decide (k.val = 2 * n ∨ k.val = 2 * n + 2)) =
+    List.replicate (2 * n) false ++ [true, false, true] := by
+  simp only [configToList]
+  apply List.ext_getElem
+  · simp [List.length_ofFn, List.length_append, List.length_replicate]
+  · intro i h1 h2
+    simp only [List.getElem_ofFn]
+    simp only [List.getElem_append, List.length_replicate]
+    split_ifs with hi
+    · -- i < 2*n: decide (i = 2n ∨ i = 2n+2) = false since i < 2n
+      simp [List.getElem_replicate]
+      omega
+    · -- i ≥ 2*n: i is 2n, 2n+1, or 2n+2
+      push_neg at hi
+      have hlt : i < 2 * (n + 1) + 1 := by simp [List.length_ofFn] at h1; exact h1
+      have hi_cases : i = 2 * n ∨ i = 2 * n + 1 ∨ i = 2 * n + 2 := by omega
+      rcases hi_cases with rfl | rfl | rfl
+      · simp [List.getElem_append, show ¬ (2 * n < 2 * n) from Nat.lt_irrefl _]
+      · simp [List.getElem_append, show ¬ (2 * n + 1 < 2 * n) from by omega]
+      · simp [List.getElem_append, show ¬ (2 * n + 2 < 2 * n) from by omega]
 
-    Computationally verified for n=1..12 via verify_parity.py.
+/-- flipCell of delta-at-last-even at penultimate even interior gives two-spike. -/
+lemma flipCell_deltaEvenRight_penultimate (n : Nat) :
+    flipCell (fun k : Fin (2 * (n + 1) + 1) => decide (k.val = 2 * n + 2))
+             ⟨2 * n, by omega⟩ =
+    fun k => decide (k.val = 2 * n ∨ k.val = 2 * n + 2) := by
+  funext k
+  simp only [flipCell]
+  split_ifs with h
+  · -- k = ⟨2*n, _⟩: !decide(2*n = 2*n+2) = !false = true = decide(2*n = 2*n ∨ 2*n = 2*n+2)
+    have : k.val = 2 * n := by have := congrArg Fin.val h; simp at this; exact this
+    simp [this]
+  · -- k ≠ ⟨2*n, _⟩: decide(k.val = 2*n+2) = decide(k.val = 2*n ∨ k.val = 2*n+2) ?
+    have hne : k.val ≠ 2 * n := fun heq => h (Fin.ext heq)
+    simp only [decide_eq_decide]
+    omega
 
-    Proof sketch: For m=2 (j=1), the witness is delta at 2n (odd-false), and
-    the flipped config (two-spike at {2, 2n}) evolves to false by a two-spike
-    evolution lemma (provable by 2-step induction). For general even m=2j,
-    different witnesses are required depending on (n,j), all computationally
-    verifiable but without a single uniform construction.
+/-- rule30n (n+1) of two-spike at {2n, 2n+2} = false. -/
+lemma rule30n_twoSpikeEvenRight (n : Nat) :
+    rule30n (n + 1) (fun k : Fin (2 * (n + 1) + 1) => decide (k.val = 2 * n ∨ k.val = 2 * n + 2)) =
+    false := by
+  simp only [rule30n]
+  rw [configToList_twoSpikeEvenRight]
+  -- [F]*(2n) ++ [T,F,T] for n+1 steps
+  -- caEvolve_TFT n: caEvolve (n+1) ([F]*(2n) ++ [T,F,T]) = [false]
+  rw [caEvolve_TFT]
+  rfl
 
-    The full Lean proof requires a general "two-spike at {2j,2n} evolves to
-    false" lemma, which in turn requires causal-cone restriction and/or a
-    parity argument about Rule 30 center-value sensitivity.
-    This structural lemma is deferred as an axiom. -/
+/-- Parity-sensitivity for EVEN interior positions.
+
+    For even m = 2j with 1 ≤ m < 2n+1, there exists a Config n that is
+    odd-false (all odd positions = false) AND witnesses Essential(n, m).
+
+    PROVED: rightmost even interior case (m = 2n-2, i.e. m.val = 2*(n-1)).
+    SORRY: non-rightmost case (m.val < 2*(n-1)) — requires causal-cone restriction.
+
+    Computationally verified for n=1..12 via verify_parity.py. -/
 lemma parity_sensitivity_even (n : Nat) (m : Fin (2 * n + 1))
     (hm_low : 1 ≤ m.val) (hm_high : m.val + 1 < 2 * n + 1)
     (hm_even : m.val % 2 = 0) :
     ∃ c_n : Config n,
       (∀ k : Fin n, c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
       rule30n n c_n ≠ rule30n n (flipCell c_n m) := by
-  sorry
+  -- n ≥ 1 from hm_low ≥ 1 and hm_high: m.val + 1 < 2*n+1.
+  -- m.val ≥ 2 (since m.val is even and ≥ 1, so m.val ≥ 2).
+  -- So 2*n+1 > m.val+1 ≥ 3, giving n ≥ 1.
+  have hn_pos : 1 ≤ n := by omega
+  obtain ⟨n', rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega : n ≠ 0)
+  -- Now n = n' + 1. Rightmost even interior at level n'+1 is m.val = 2*n'.
+  by_cases hright : m.val = 2 * n'
+  · -- RIGHTMOST EVEN CASE: m.val = 2*n' = 2*(n'+1) - 2.
+    -- Witness: delta at last position 2*(n'+1) = 2*n'+2 in Config (n'+1).
+    let c_n : Config (n' + 1) := fun k => decide (k.val = 2 * n' + 2)
+    use c_n
+    refine ⟨?_, ?_⟩
+    · -- Odd-false: for k : Fin (n'+1), c_n[2*k+1] = false.
+      -- 2*k+1 is odd; 2*n'+2 is even. Odd ≠ even.
+      exact deltaEvenRight_odd_false (n' + 1)
+    · -- Sensitivity: rule30n (n'+1) c_n ≠ rule30n (n'+1) (flipCell c_n m).
+      -- rule30n (n'+1) c_n = true, by rule30n_deltaEvenRight.
+      have h_true : rule30n (n' + 1) c_n = true := rule30n_deltaEvenRight (n' + 1)
+      -- flipCell c_n m = two-spike at {2n', 2n'+2}, since m = ⟨2*n', _⟩.
+      have hm_eq : m = (⟨2 * n', by omega⟩ : Fin (2 * (n' + 1) + 1)) := by
+        ext; exact hright
+      have h_flip : flipCell c_n m = fun k => decide (k.val = 2 * n' ∨ k.val = 2 * n' + 2) := by
+        rw [hm_eq]
+        exact flipCell_deltaEvenRight_penultimate n'
+      -- rule30n (n'+1) (flipCell c_n m) = false, by rule30n_twoSpikeEvenRight.
+      have h_false : rule30n (n' + 1) (flipCell c_n m) = false := by
+        rw [h_flip]
+        exact rule30n_twoSpikeEvenRight n'
+      -- Conclude: true ≠ false.
+      rw [h_true, h_false]
+      decide
+  · -- NON-RIGHTMOST EVEN CASE: m.val < 2*n'.
+    -- This case requires a causal-cone restriction argument. Left as sorry.
+    sorry
 
 theorem lifting_lemma_core (n : Nat) (m : Fin (2 * n + 1))
     (hm_low : 1 ≤ m.val)
