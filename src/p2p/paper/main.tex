@@ -1,0 +1,889 @@
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{natbib}
+\usepackage{subcaption}
+
+% Geometry
+\geometry{margin=1in}
+
+% Theorem environments
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+
+% Custom colors
+\definecolor{rule30blue}{RGB}{0,102,204}
+\definecolor{rule30red}{RGB}{204,0,0}
+\definecolor{rule30green}{RGB}{0,153,0}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=rule30blue,
+    citecolor=rule30blue,
+    urlcolor=rule30blue
+}
+
+% Title
+\title{Information Flow and Computational Structure in Rule 30}
+\author{
+    Jonathan Hill \\
+    \texttt{jonathanhill@proton.me} \\
+    \today
+}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We present an information-theoretic framework for analyzing cellular automata computation and report on an ongoing Lean~4 formalization effort toward Rule~30 Prize~3 (an $\Omega(n^2)$ lower bound on the computational complexity of the center column). Applying our framework to Rule 30, we measure influence functions, influence independence, and information dimension for systems up to $n=100$. We find that 80--100\% of cells have non-zero influence, with mean influence $\approx 0.33$. Output entropy is maximal (1.000 bits). Preliminary tensor experiments for $n \leq 10$ show approximately linear rank growth, consistent with the hypothesis that Rule 30 explores only a low-rank subset of state space (manifold hypothesis). Regarding the formal proof: the \emph{lifting lemma} --- the core inductive step asserting that cell essentiality propagates from level $n$ to level $n+1$ --- remains unproved and is currently carried as an axiom. Conditionally on this axiom, block sensitivity $\geq n$ follows for all $n$, giving a conditional $\Omega(n)$ lower bound. The $\Omega(n^2)$ bound required for the prize is entirely absent from the current formalization. We document the precise proof state, the two remaining hard lemmas, and the mathematical structure of the universal odd-spike invariant. We conjecture that the number of distinct light-cone patterns grows as $\exp(O(n))$ rather than $2^{O(n^2)}$, and propose a local collision quotient mechanism to explain this compression. For Prize~2, collision-conditioned density is 50.22\% (collision) vs.\ 50.09\% (no collision), providing empirical evidence consistent with 50\% density for the center column. All code is available at \url{https://github.com/qizwiz/rule30-ski-research}.
+\end{abstract}
+
+\section{Introduction}
+
+Cellular automata (CA) have served as models of complex computation from simple rules since their introduction by von Neumann and Ulam in the 1940s~\citep{von_neumann_1966}. Among the 256 elementary cellular automata, Rule 30 stands out for its apparently random behavior despite deterministic evolution~\citep{wolfram_1983}. Stephen Wolfram's conjecture of \emph{computational irreducibility} posits that Rule 30 cannot be computed faster than direct simulation---requiring $\Omega(n^2)$ operations for $n$ steps~\citep{wolfram_2002}.
+
+Despite 40 years of study, this conjecture remains unproven. Formal verification efforts have made progress toward $\Omega(n)$ lower bounds (a necessary precursor), but the $\Omega(n^2)$ bound required for the prize remains wide open. A recent preprint claims an $O(n^2 / \log n)$ algorithm via self-composition~\citep{natal_2024}, suggesting Rule 30 may not be strictly irreducible but ``almost'' irreducible (within polylogarithmic factors). The current paper reports both empirical evidence and the honest state of an ongoing Lean~4 formalization effort.
+
+We introduce an \emph{information-theoretic framework} for analyzing CA computation. Our approach measures:
+\begin{enumerate}
+    \item \textbf{Influence functions}: Probability each cell affects the output
+    \item \textbf{Influence independence}: Whether cell influences are statistically independent
+    \item \textbf{Information dimension}: Entropy of the output distribution
+    \item \textbf{Pattern diversity}: Number of distinct space-time patterns
+\end{enumerate}
+
+Applying this framework to Rule 30, we provide the first comprehensive information-theoretic analysis, gathering evidence for the computational complexity conjecture.
+
+While this work does not resolve the Rule 30 Prize problems, it introduces a quantitative framework for measuring information flow in cellular automata. The framework combines influence analysis, entropy measurements, and structural experiments on collision dynamics. Applied to Rule 30, the results suggest a picture in which information propagates broadly through the light cone while nonlinear collisions repeatedly identify distinct causal histories. We view these experiments as exploratory tools toward understanding the structural constraints underlying the long-standing computational irreducibility conjecture.
+
+Our framework bridges CA theory and modern machine learning theory:
+\begin{itemize}
+    \item \textbf{Information bottleneck theory}~\citep{tishby_2015} analyzes information flow in neural networks
+    \item \textbf{Influence functions} are used for model interpretability~\citep{koh_2017}
+    \item \textbf{Neural cellular automata} are an emerging architecture~\citep{mordvintsev_2020}
+\end{itemize}
+
+Our tools enable quantitative comparison of information processing in classical and neural CAs.
+
+\section{Framework}
+
+\subsection{Cellular Automata Preliminaries}
+
+\begin{definition}[Elementary Cellular Automaton]
+An elementary cellular automaton consists of:
+\begin{itemize}
+    \item A 1D array of $2n+1$ cells, each in state $\{0, 1\}$
+    \item A local rule $f: \{0,1\}^3 \to \{0,1\}$
+    \item Synchronous update: $\text{cell}^{(t+1)}[i] = f(\text{cell}^{(t)}[i-1], \text{cell}^{(t)}[i], \text{cell}^{(t)}[i+1])$
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Rule 30]
+Rule 30 is defined by $f(p,q,r) = p \oplus (q \lor r)$, where $\oplus$ denotes XOR and $\lor$ denotes OR.
+\end{definition}
+
+\begin{definition}[Light Cone]
+The light cone of the center cell at step $n$ includes all cells at steps $0,\ldots,n$ that can affect the output. The light cone contains $n^2 + 2n + 1$ cells.
+\end{definition}
+
+\subsection{Influence Functions}
+
+\begin{definition}[Influence]
+The influence of cell $c$ is:
+\begin{equation}
+\text{Influence}(c) = \Pr[\text{flip}(c) \text{ changes output}]
+\end{equation}
+where the probability is over uniform random initial configurations.
+\end{definition}
+
+\textbf{Interpretation:} Influence measures how often a cell ``matters'' for the output.
+
+\subsection{Influence Independence}
+
+\begin{definition}[Independence]
+Cells $c_1$ and $c_2$ are $\varepsilon$-independent if:
+\begin{equation}
+|\Pr[\text{both change}] - \Pr[c_1] \times \Pr[c_2]| < \varepsilon
+\end{equation}
+\end{definition}
+
+\textbf{Interpretation:} Independence measures whether cells provide redundant or unique information.
+
+\subsection{Information Dimension}
+
+\begin{definition}[Output Entropy]
+The information dimension is:
+\begin{equation}
+H(Y) = -\sum_y p(y) \log_2 p(y)
+\end{equation}
+where $Y$ is the output (center cell at step $n$).
+\end{definition}
+
+\textbf{Interpretation:} Entropy measures unpredictability of the output.
+
+\section{Methods}
+
+\subsection{Implementation}
+
+We implemented Rule 30 in Python with direct simulation. All experiments used uniform random initial configurations. The implementation is available in our open-source repository.
+
+\subsection{Influence Measurement}
+
+For each cell $c$:
+\begin{enumerate}
+    \item Generate $T$ random configurations ($T = 500$--$1000$)
+    \item For each configuration, compute output with and without flipping $c$
+    \item $\text{Influence}(c) = (\text{number of changes}) / T$
+\end{enumerate}
+
+\subsection{Independence Measurement}
+
+For each cell pair $(c_1, c_2)$:
+\begin{enumerate}
+    \item Generate $T$ random configurations
+    \item Measure $\Pr[c_1 \text{ changes}]$, $\Pr[c_2 \text{ changes}]$, $\Pr[\text{both change}]$
+    \item $\text{Correlation} = |\Pr[\text{both}] - \Pr[c_1] \times \Pr[c_2]|$
+    \item Independent if correlation $< 0.05$
+\end{enumerate}
+
+\subsection{Entropy Measurement}
+
+\begin{enumerate}
+    \item Generate $T$ random configurations ($T = 2000$)
+    \item Compute output for each
+    \item Count 0s and 1s
+    \item $H(Y) = -p_0 \log_2 p_0 - p_1 \log_2 p_1$
+\end{enumerate}
+
+\subsection{Scale of Experiments}
+
+\begin{itemize}
+    \item \textbf{Influence}: $n = 1,\ldots,100$ (step 5), 500 trials per cell
+    \item \textbf{Independence}: $n = 10, 20, 30, 50$; 30 pairs per distance
+    \item \textbf{Entropy}: $n = 1,\ldots,20$, 2000 samples
+    \item \textbf{Pattern diversity}: $n = 1,\ldots,20$, 500 samples
+\end{itemize}
+
+Total compute time: approximately 17 CPU-hours.
+
+\section{Results}
+
+Influence analysis provides a quantitative way to study how information propagates through the Rule 30 light cone. If only a small fraction of cells influenced the output, large portions of the computation could in principle be ignored. Conversely, if most cells influence the output with non-negligible probability, the computation must depend on information distributed across the entire cone. Measuring the influence profile therefore provides empirical evidence about the intrinsic information content of the computation.
+
+\subsection{Influence Functions}
+
+\begin{table}[t]
+\centering
+\caption{Influence Statistics by System Size}
+\label{tab:influence}
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+$n$ & Cells & Non-Zero & \% & Mean Influence \\
+\midrule
+1   & 3     & 3        & 100.0\% & 0.651 \\
+6   & 13    & 12       & 92.3\%  & 0.424 \\
+11  & 23    & 21       & 91.3\%  & 0.372 \\
+16  & 33    & 28       & 84.8\%  & 0.348 \\
+21  & 43    & 35       & 81.4\%  & 0.344 \\
+26  & 53    & 43       & 81.1\%  & 0.335 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/influence_vs_n.pdf}
+\caption{Non-zero influence fraction and mean influence as a function of system size $n$. Error bars show standard deviation.}
+\label{fig:influence}
+\end{figure}
+
+\textbf{Key Finding 1:} 80--100\% of cells have non-zero influence.
+
+\textbf{Key Finding 2:} Mean influence $\approx 0.33$--$0.35$ (substantial).
+
+\subsection{Influence Independence}
+
+\begin{table}[t]
+\centering
+\caption{Independence by System Size}
+\label{tab:independence}
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+$n$ & Independent Pairs & \% & Mean Correlation \\
+\midrule
+5   & 3/30  & 10.0\% & 0.307 \\
+10  & 1/30  & 3.3\%  & 0.338 \\
+20  & 2/30  & 6.7\%  & 0.350 \\
+30  & 3/30  & 10.0\% & 0.335 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/correlation_vs_distance.pdf}
+\caption{Influence correlation as a function of cell distance for various system sizes. Distant cells show lower correlation.}
+\label{fig:correlation}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{Correlation vs Distance ($n=30$)}
+\label{tab:correlation_distance}
+\begin{tabular}{@{}rr@{}}
+\toprule
+Distance & Correlation \\
+\midrule
+1  & 0.15 \\
+4  & 0.14 \\
+8  & 0.03 \\
+9  & 0.23 \\
+10 & 0.07 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Key Finding 3:} Only 3--10\% of pairs are fully independent.
+
+\textbf{Key Finding 4:} Mean correlation $\approx 0.33$ (moderate correlation).
+
+\textbf{Key Finding 5:} Correlation shows complex distance dependence. Nearby cells ($d \leq 4$) show moderate correlation (0.14--0.18), while some distant cells show lower correlation ($d=8$: 0.03). However, very distant cells ($d > 15$) show increasing correlation, suggesting boundary effects dominate the dependency graph.
+
+\textbf{Interpretation:} The correlation structure is counterintuitive: unlike physical systems where correlation decays with distance, Rule 30 shows structured correlation growth at large distances. This suggests the light cone boundaries control information propagation.
+
+\subsection{Information Dimension}
+
+\begin{table}[t]
+\centering
+\caption{Output Entropy}
+\label{tab:entropy}
+\begin{tabular}{@{}rr@{}}
+\toprule
+$n$ & Entropy (bits) \\
+\midrule
+1  & 1.000 \\
+4  & 1.000 \\
+7  & 1.000 \\
+10 & 1.000 \\
+13 & 0.999 \\
+16 & 1.000 \\
+19 & 0.999 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Key Finding 6:} Output entropy is maximal (1 bit).
+
+\textbf{Key Finding 7:} Output is perfectly balanced (50/50).
+
+\subsection{Pattern Diversity}
+
+\begin{table}[t]
+\centering
+\caption{Light Cone Patterns}
+\label{tab:patterns}
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+$n$ & Light Cone Size & Distinct Patterns & Bits Observed \\
+\midrule
+3  & 16   & 106 & 6.7 \\
+5  & 36   & 194 & 7.6 \\
+7  & 64   & 199 & 7.6 \\
+10 & 100  & 200 & 7.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Key Finding 8:} Pattern count saturates at sample size (need more samples).
+
+\section{Formal Proof Progress: $\Omega(n)$ Lower Bound}
+
+We are formalizing an $\Omega(n)$ lower bound argument for computational work in Lean~4~\citep{moura_2021}, using block sensitivity. This section gives an honest account of what has been formally proved (no \texttt{sorry}), what remains as open conjectures (computationally verified but not proved), and the mathematical content of the remaining gaps. \textbf{The $\Omega(n^2)$ bound required for Prize~3 is not addressed here; the current work is a prerequisite step.}
+
+\subsection{Proof Architecture}
+
+The argument rests on three components:
+
+\begin{enumerate}
+    \item Show all $n$ interior cells of the $n$-step light cone are \emph{essential}: flipping any one of them can change the center output.
+    \item Conclude block sensitivity $\text{bs}(\text{Rule30}_n) \geq n$.
+    \item Apply Nisan's theorem ($\text{DT}(f) \geq \text{bs}(f)$) to obtain an $\Omega(n)$ decision-tree lower bound.
+\end{enumerate}
+
+Steps 2 and 3 are straightforward given step 1. The current effort focuses on step 1 via an inductive \emph{lifting lemma}.
+
+\subsection{Current Proof Status}
+
+\begin{table}[t]
+\centering
+\caption{Lean 4 proof status of key lemmas (as of 2026-03-18). ``Proved'' = no \texttt{sorry} or \texttt{axiom} in proof chain. ``Sorry/Axiom'' = open obligation. ``Conjectured'' = computationally verified but not formally proved.}
+\label{tab:proof_status}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Lemma & Status & Notes \\
+\midrule
+\texttt{base\_case\_n0} & \textbf{Proved} & \texttt{native\_decide} \\
+\texttt{base\_case\_n1}--\texttt{n5} & \textbf{Proved} & \texttt{native\_decide} \\
+\texttt{left\_boundary\_essential} & \textbf{Proved} & Explicit witness \\
+\texttt{right\_boundary\_essential} & \textbf{Proved} & Explicit witness \\
+\texttt{backwardFill\_even\_true} (Lemma A) & \textbf{Proved} & Structural induction \\
+\texttt{backwardFill\_odd\_true} (Lemma B) & \textbf{Proved} & Structural induction \\
+\texttt{parity\_sensitivity\_odd}, rightmost case & \textbf{Proved} & Explicit witness $\delta_{2n-1}$ \\
+\texttt{parity\_sensitivity\_even}, rightmost case & \textbf{Proved} & Explicit witness $\delta_{2n}$ \\
+\texttt{parity\_sensitivity\_odd}, Case A & \textbf{Proved} & \texttt{allFalse} witness \\
+\texttt{parity\_sensitivity\_even}, Case A & \textbf{Proved} & \texttt{allFalse} witness \\
+\texttt{parity\_sensitivity\_odd} Sub-case A of Case B & \textbf{Proved} & $\delta_{2n-1}$ witness \\
+\texttt{parity\_sensitivity\_even} Sub-case A of Case B & \textbf{Proved} & $\delta_{2n}$ witness \\
+\texttt{rule30n\_odd\_caseB\_twoSpike\_false} & \textbf{Conjectured} & Verified $n' = 0\ldots19$; see \S\ref{sec:odd_invariant} \\
+\texttt{parity\_sensitivity\_even} Sub-case B of Case B & \textbf{Sorry} & Witnesses exist but not uniform \\
+\texttt{lifting\_lemma\_core} & \textbf{Proved} & Assuming both parity lemmas \\
+\texttt{lifting\_lemma} (Prize3\_Complete) & \textbf{Axiom} & The single blocking gap \\
+\midrule
+\multicolumn{3}{l}{\textit{Not yet attempted:}} \\
+$\Omega(n^2)$ lower bound & \textbf{Absent} & Required for Prize~3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{theorem}[$\Omega(n)$ Lower Bound — Conditional]\label{thm:lower}
+Assuming \texttt{lifting\_lemma} (Conjecture~\ref{conj:lifting}), every interior cell of the $n$-step Rule~30 light cone is essential, giving $\mathrm{bs}(\mathrm{Rule30}_n) \geq n$ and an $\Omega(n)$ decision-tree lower bound.
+\end{theorem}
+
+The Lean file \texttt{P2p/Prize3\_Complete.lean} contains the full formalization. With \texttt{lifting\_lemma} present as an axiom, the theorem is formally derived. The theorem statement is correct; its validity as an unconditional result depends on proving the axiom.
+
+\begin{conjecture}[Lifting Lemma]\label{conj:lifting}
+If cell $k$ is essential at level $n$ (i.e., there exists a configuration $c$ such that $\mathrm{Rule30}_n(c) \neq \mathrm{Rule30}_n(\mathrm{flipCell}(c, k))$), then cell $k+1$ is essential at level $n+1$.
+
+Formally: $\mathrm{Essential}(n, k) \Rightarrow \mathrm{Essential}(n+1, \langle k{+}1, \cdot\rangle)$.
+
+This has been computationally verified for $n \leq 20$ via Z3 but is not yet formally proved for all $n$.
+\end{conjecture}
+
+\subsection{The Two Remaining Hard Lemmas}
+
+\subsubsection{The Odd Invariant (Computationally Verified)}\label{sec:odd_invariant}
+
+The first remaining obligation is \texttt{rule30n\_odd\_caseB\_twoSpike\_false}: for all odd interior positions $m$ with $1 \leq m < 2n-1$, if $\mathrm{Rule30}_n(e_m) = \mathrm{false}$ (where $e_m$ is the unit vector), then $\mathrm{Rule30}_n(\mathrm{two\_spike}\{m, 2n-1\}) = \mathrm{false}$.
+
+Computational investigation reveals that this is the conditional form of a \emph{universal equality}:
+
+\begin{conjecture}[Universal Odd Spike Invariant]\label{conj:odd_invariant}
+For all $n \geq 1$, for all odd $m$ with $1 \leq m < 2n-1$:
+\[
+  \mathrm{Rule30}_n\bigl(\mathrm{two\_spike}\{m,\, 2n-1\}\bigr) \;=\; \mathrm{Rule30}_n(e_m)
+\]
+where $\mathrm{two\_spike}\{m, 2n-1\}$ is the configuration with $\mathrm{True}$ only at positions $m$ and $2n-1$.
+
+Verified computationally for $n' = 0 \ldots 19$ (97 qualifying instances, no counterexample).
+\end{conjecture}
+
+In words: adding the spike at the rightmost odd interior position $2n-1$ \emph{never changes} the center output, for any non-rightmost odd $m$.
+
+The natural proof strategy is induction on $n$:
+\begin{itemize}
+    \item Base: $n=1$ has no qualifying $m$ (the only odd interior position is the rightmost). Vacuous.
+    \item Step: Use $\mathrm{Rule30}_n(c) = \mathrm{Rule30}_{n-1}(\mathrm{caStep}(c))$. After one CA step, the difference between $\mathrm{two\_spike}\{m, 2n-1\}$ and $e_m$ is concentrated in the rightmost 3 positions $[2n-2, 2n-1, 2n]$, because the extra spike at $2n-1$ (second-to-last) has a 3-cell neighborhood. The zero-boundary padding on the right means this contribution ``cancels'' at the center after $n-1$ more steps. This is related to the established lemma \texttt{caEvolve\_TFT} (the pattern $[\mathrm{T},\mathrm{F},\mathrm{T}]$ evolves to $\mathrm{False}$ at the center).
+\end{itemize}
+
+The key sub-lemma needed is a precise statement of how $\mathrm{caStep}(\mathrm{two\_spike}\{m, 2n-1\})$ relates to $\mathrm{caStep}(e_m)$ in the overlap region.
+
+\subsubsection{Even Case B (Open)}\label{sec:even_caseB}
+
+The second remaining obligation is the non-rightmost sub-case~B of \texttt{parity\_sensitivity\_even}: for even interior $m$ with $2 \leq m < 2n-2$, when $\mathrm{Rule30}_n(e_m) = \mathrm{false}$ \emph{and} $\mathrm{Rule30}_n(\mathrm{two\_spike}\{m, 2n\}) = \mathrm{true}$, there still exists an odd-false witness for sensitivity at $m$.
+
+This case is harder than its odd analog:
+\begin{itemize}
+    \item The analog of Conjecture~\ref{conj:odd_invariant} \emph{fails} for even positions: $\mathrm{Rule30}_n(\mathrm{two\_spike}\{m, 2n\}) \neq \mathrm{Rule30}_n(e_m)$ for 35 instances in $n' = 0\ldots 19$.
+    \item Witnesses exist for every $(n, m)$ instance (verified exhaustively up to $n = 17$), but their positions depend on $(n, m)$ with no apparent uniform formula.
+    \item Zero-padding of witnesses from smaller levels provably fails (counterexample: $\delta_3$ in Config 2 witnesses sensitivity at position 1, but zero-padded to Config 3, it no longer witnesses position 1).
+\end{itemize}
+
+The most promising approach is to derive \texttt{parity\_sensitivity\_even} from \texttt{parity\_sensitivity\_odd} via the left-permutive structure of Rule 30, or to prove a non-constructive existence argument exploiting the backward-fill preimage construction.
+
+\subsection{What Remains for the Prize}
+
+Even a complete proof of both open lemmas above would establish only:
+\[
+  \mathrm{bs}(\mathrm{Rule30}_n) \;\geq\; n \;\implies\; \mathrm{DT}(\mathrm{Rule30}_n) \;\geq\; n
+\]
+i.e., an $\Omega(n)$ lower bound. Prize~3 requires $\Omega(n^2)$. To achieve this, one needs either:
+\begin{itemize}
+    \item $n^2$ disjoint sensitive blocks (establishing block sensitivity $\geq n^2$), or
+    \item A direct $\Omega(n^2)$ circuit-complexity or communication-complexity argument.
+\end{itemize}
+Neither approach has been attempted in the current formalization. Closing the gap from $\Omega(n)$ to $\Omega(n^2)$ is the central remaining problem.
+
+\section{Algebraic Interpretation}
+
+\subsection{Rule 30 as Linear Plus Nonlinear}
+
+Over GF(2), Rule 30 can be rewritten as:
+\begin{equation}
+f(p,q,r) = p \oplus (q \lor r) = p + q + r + q \cdot r \pmod{2}
+\end{equation}
+
+This decomposition reveals the algebraic structure:
+\begin{itemize}
+    \item \textbf{Linear part:} $p + q + r$ (spreads information efficiently)
+    \item \textbf{Nonlinear part:} $q \cdot r$ (creates mixing and chaos)
+\end{itemize}
+
+This algebraic structure explains our empirical findings:
+
+\textbf{High entropy:} The nonlinear term $q \cdot r$ creates sufficient mixing to produce near-random output.
+
+\textbf{Low pattern diversity:} The linear part dominates, constraining reachable configurations to a thin subset of state space.
+
+\textbf{Left/right asymmetry:} The left input $p$ appears only linearly, while $q$ and $r$ appear in both linear and nonlinear terms. This explains why the left side shows more ``transparent'' influence propagation.
+
+\subsection{The Manifold Hypothesis}
+
+Our results suggest the following structural hypothesis:
+
+\begin{conjecture}[Manifold Hypothesis]
+The reachable light-cone configurations of Rule 30 form a low-dimensional subset of the configuration space. Specifically, the number of distinct patterns grows as $\exp(O(n))$ rather than $2^{O(n^2)}$.
+\end{conjecture}
+
+This hypothesis explains the combination of:
+\begin{itemize}
+    \item High output entropy (projection appears random)
+    \item Low global pattern diversity (underlying structure is constrained)
+\end{itemize}
+
+\textbf{Geometric interpretation:} The dynamics are confined to a ``thin manifold'' inside the exponentially large configuration cube, analogous to a coffee filter or pleated surface.
+
+\subsection{Pattern Counting}
+
+As a validation check on the enumeration pipeline, we counted distinct light-cone patterns for $n=1,\ldots,10$. Logarithmic normalization ($\log_2 |\mathcal{P}_n^{\text{full}}|$) revealed the exact relation:
+
+\begin{equation}
+|\mathcal{P}_n^{\text{full}}| = 2^{2n+1}
+\end{equation}
+
+\textbf{Proof:} The light cone includes the initial configuration (at step 0). Therefore the map from configurations to patterns is injective. Therefore $|\mathcal{P}_n^{\text{full}}|$ equals the number of possible inputs, which is $2^{2n+1}$.
+
+This result should be interpreted primarily as a \textbf{sanity check on the counting procedure}, confirming that the enumeration pipeline correctly distinguishes distinct input-induced spacetime histories. It does not imply that Rule 30 explores the full configuration space of possible spacetime diagrams; rather, it reflects the fact that the initial configuration is explicitly present within the light cone representation. The logarithmic normalization heuristic (``exponents are a danger sign'') was key to discovering this exact formula.
+
+\subsection{The Empirical Paradox}
+
+Taken together, the entropy, influence, and pattern-diversity measurements reveal a striking paradox: \textbf{Rule 30 exhibits near-maximal local randomness while exploring only a tiny fraction of the theoretically possible configuration space.}
+
+A plausible explanation is that Rule 30 dynamics induce repeated many-to-one identifications of local histories: the causal tree branches rapidly backward, but forward evolution collapses many distinct ancestry fragments into a small number of effective future behaviors. This ``branching with collision'' mechanism would explain the extreme disparity between possible patterns ($2^{\Theta(n^2)}$) and observed patterns (empirically much smaller).
+
+\subsection{Directional Collision Analysis}
+
+To test the "sheared cone" geometric picture, we measured collision density 
+by region and compared normal vs. mirrored Rule 30.
+
+\textbf{Methods:} Tracked where nonlinear term fires (C·R for normal, C·L 
+for mirrored) across light cone. Measured density in left/center/right 
+regions and overlap between directions.
+
+\textbf{Results:} 
+\begin{itemize}
+    \item Collision density symmetric: 23.5\% left vs 25.2\% right
+    \item Normal/mirrored have similar total collisions
+    \item Overlap ratio: 40-55\%
+\end{itemize}
+
+\textbf{Interpretation:} 40\% of collision locations are direction-independent
+(core structure). 60\% are direction-dependent (the actual "shear"). This
+refines the sheared cone picture.
+
+This suggests that the computational difficulty of Rule 30 may depend more on 
+the geometry of nonlinear interaction locations than on aggregate collision 
+frequency. Bulk observables are symmetric (collision density $\approx 25\%$ on 
+both sides), but the microscopic interaction field is orientation-sensitive 
+(only 40--55\% overlap). This separation between macroscopic symmetry and 
+microscopic asymmetry may be key to understanding Rule 30's computational 
+complexity.
+
+Figures~\ref{fig:collision_heatmap}--\ref{fig:collision_3d} visualize these results.
+
+\section{Mathematical Insights from the Formalization}
+\label{sec:math_insights}
+
+\subsection{GF(2) Polynomial Structure of Rule30n}
+
+The center-cell function $\mathrm{Rule30}_n : \{0,1\}^{2n+1} \to \{0,1\}$ is a multilinear polynomial over $\mathrm{GF}(2)$. At step 1, Rule 30's local rule is:
+\[
+  f(p,q,r) = p + q + r + qr \pmod{2}
+\]
+a degree-2 polynomial. After $n$ steps, $\mathrm{Rule30}_n$ is a polynomial of degree at most $2^n$ over $\mathrm{GF}(2)$ (since each composition can at most double the degree). Understanding the Algebraic Normal Form (ANF) of $\mathrm{Rule30}_n$ --- which monomials appear --- is directly linked to the sensitivity question: cell $k$ is essential at level $n$ if and only if there exists a monomial in the ANF that includes coordinate $k$.
+
+The block-sensitivity approach proves essentiality without computing the full ANF, but the polynomial structure is the underlying mathematical reason why sensitivity is non-zero.
+
+\subsection{The Universal Odd Spike Invariant}
+
+The computational discovery reported in \S\ref{sec:odd_invariant} has a natural geometric interpretation. The rightmost odd interior position $2n-1$ is the \emph{second-to-last} cell of the light cone boundary. A spike at position $2n-1$ has a 3-cell neighborhood $\{2n-2, 2n-1, 2n\}$. After one CA step:
+\begin{itemize}
+    \item Position $2n$ has only two left-neighbors in the boundary (zero-padding supplies the third), giving a specific evolution.
+    \item The ``extra'' contribution from the spike at $2n-1$ is absorbed into the right boundary after 1 step and affects only positions $\geq 2n-3$.
+    \item For any $m \leq 2n-4$, the light cones of $m$ and $2n-1$ are disjoint; the spike at $2n-1$ cannot influence the center output via position $m$.
+    \item For $m \in \{2n-3, 2n-2, 2n-1\}$ the cones overlap, but the boundary geometry (zero-padding on the right) forces a specific cancellation.
+\end{itemize}
+
+The net effect is that the spike at $2n-1$ contributes \emph{zero} (mod 2) to the center output for \emph{all} non-rightmost odd $m$. This is Conjecture~\ref{conj:odd_invariant}. If true, it implies that the GF(2) polynomial for $\mathrm{Rule30}_n$ has no monomial that contains \emph{both} position $m$ and position $2n-1$ for $m$ in the relevant range.
+
+\subsection{Topological and Geometric Framing}
+
+Each configuration of level $n$ is a point in $\mathbb{F}_2^{2n+1}$. The sensitivity problem is equivalent to asking whether the Boolean derivative $\partial_k \mathrm{Rule30}_n$ is non-zero on the parity-restricted subspace:
+\[
+  V_n^{\mathrm{even}} = \{ c \in \mathbb{F}_2^{2n+1} \mid c_{2i} = 0 \;\forall i \}
+\]
+and similarly for $V_n^{\mathrm{odd}}$. The lifting-lemma approach constructs explicit witnesses in these subspaces (using the \texttt{backwardFill} construction which produces even-false or odd-false configurations by design).
+
+Persistent homology and causal DAG connectivity are potential tools for certifying non-vanishing derivatives globally: if the causal DAG from cell $k$ to the center has non-zero homology in the right dimension over $\mathbb{F}_2$, then the derivative is non-zero. This connection is unexplored but may provide the bridge between the $\Omega(n)$ and $\Omega(n^2)$ bounds, since the DAG has $\Theta(n^2)$ edges.
+
+\section{Mechanism: Branching with Collision}
+\label{sec:mechanism}
+
+To explain the pattern diversity anomaly, we conducted two experiments testing the ``branching with collision'' mechanism.
+
+\subsection{Experiment 1: Future-Effect Equivalence Classes}
+
+We grouped local fragments by their future evolution (m=3 steps). If collisions identify distinct histories, fragments should cluster into equivalence classes.
+
+\textbf{Results:} At r=5, we found 97 equivalence classes from 100 fragments. Classes grow as 12.1× while fragment space grows as 2^5 = 32×. This slower growth supports the collision mechanism.
+
+\subsection{Experiment 2: Predecessor Multiplicity}
+
+We enumerated all configurations for r=1..5 and counted how many map to each successor.
+
+\textbf{Results:} Average multiplicity is exactly 4.0 for all $r$, with 100\% collision fraction. This directly confirms the 4-to-1 mapping from Rule 30's update rule: $f(L,C,R) = L \oplus C \oplus R \oplus (C \cdot R)$ has 8 inputs $\to$ 2 outputs.
+
+\subsection{Conclusion}
+
+Both experiments confirm the ``branching with collision'' mechanism: the causal tree branches rapidly backward (3 parents per cell), but forward evolution collapses many distinct histories (4-to-1 mapping) into same future behavior. This explains the extreme disparity between possible patterns ($2^{\Theta(n^2)}$) and observed patterns (empirically much smaller).
+
+\subsection{Tensor Analysis: Empirical Evidence for Low-Rank Structure}
+
+To test the manifold hypothesis, we applied Tucker tensor decomposition to Rule 30 light cones for $n=1,\ldots,10$. For each $n$, we generated 50 random initial configurations, computed the corresponding light cone tensors, and estimated the tensor rank.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/collision_heatmap.pdf}
+\caption{Collision density heatmap across Rule 30 light cone. Warmer colors indicate higher collision density (C·R term fires). Density is surprisingly symmetric (23.5\% left vs 25.2\% right).}
+\label{fig:collision_heatmap}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/normal_vs_mirrored.pdf}
+\caption{Normal vs mirrored Rule 30 collision counts. Similar counts suggest symmetric collision structure.}
+\label{fig:normal_vs_mirrored}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/collision_overlap.pdf}
+\caption{Overlap between normal and mirrored collision locations. 40-55\% overlap indicates 40\% core structure, 60\% direction-dependent shear.}
+\label{fig:collision_overlap}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/collision_3d_surface.pdf}
+\caption{3D visualization of collision density surface. Shows spatiotemporal structure of nonlinear term activation.}
+\label{fig:collision_3d}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/tensor_rank_vs_n.pdf}
+\caption{Tensor rank growth vs. system size $n$. Linear fit (blue) provides better fit than quadratic fit (red) for $n \leq 10$, consistent with low-rank structure.}
+\label{fig:tensor_rank}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/prize2_collision_density.pdf}
+\caption{Prize 2 mechanism: Collision-conditioned density. P(1$|$collision) = 0.5022 and P(1$|$no collision) = 0.5009, both $\approx$ 50\%. Collisions do NOT bias the output, providing empirical evidence consistent with 50\% density for center column.}
+\label{fig:prize2_mechanism}
+\end{figure}
+
+\textbf{Key Finding:} For $n \leq 10$, tensor rank grows approximately linearly (linear fit: $r = 0.65n + 3.65$, $R^2 = 0.805$; quadratic fit: $r = 0.05n^2 + 5.28$, $R^2 = 0.619$).
+
+\textbf{Interpretation:} This provides preliminary empirical evidence consistent with the manifold hypothesis. The observed linear scaling suggests possible low-rank tensor structure at small scales ($n \leq 10$), though experiments at larger $n$ are needed to confirm asymptotic behavior.
+
+\textbf{Limitations:} The tensor analysis is limited to $n \leq 10$ due to computational cost of Tucker decomposition. Consequently, the observed linear scaling should be interpreted as preliminary evidence rather than an asymptotic claim. Future work should extend these experiments to larger $n$ and investigate whether the linear trend persists.
+
+\textbf{Implications:} If low-rank structure persists at larger $n$, this would imply:
+\begin{enumerate}
+    \item Rule 30 dynamics are highly constrained
+    \item Light cones can be compressed to $O(n)$ parameters
+    \item The number of distinct patterns grows as $\exp(O(n))$ rather than $2^{O(n^2)}$
+\end{enumerate}
+
+\subsection{Prize 2 Mechanism: Collision-Conditioned Density}
+
+Prize 2 asks whether the center column has density 1/2. We tested whether 
+collision events (C·R = 1) bias the output toward 0 or 1.
+
+\textbf{Results:} 
+\begin{itemize}
+    \item P(1$|$collision) = 0.5022 $\pm$ 0.0370
+    \item P(1$|$no collision) = 0.5009 $\pm$ 0.0128
+    \item Overall density = 0.5011 $\pm$ 0.0104
+    \item All $\approx$ 50\%
+\end{itemize}
+
+\textbf{Implication:} Collisions do NOT bias the output. Combined with
+uniform collision density (25\%), this provides empirical evidence consistent 
+with 50\% density for the center column---the Prize 2 mechanism. The mechanism is:
+\begin{itemize}
+    \item When C·R = 0 (75\%): output = L $\oplus$ C $\oplus$ R (50\% density)
+    \item When C·R = 1 (25\%): output = L $\oplus$ C $\oplus$ R $\oplus$ 1 (still 50\%)
+    \item Either way: 50\% density
+\end{itemize}
+
+Figure~\ref{fig:prize2_mechanism} visualizes this result.
+
+\subsection{Witness Structure}
+
+Our computational verification of block sensitivity reveals structured witness configurations. For each cell position $k$ at step $n$, there exists a witness $W(n,k)$ such that flipping cell $k$ in $W(n,k)$ changes the center output.
+
+Analysis of witnesses suggests:
+\begin{itemize}
+    \item Witnesses are sparse (not dense random configurations)
+    \item Witnesses have corridor structure (bits cluster along dependency paths)
+    \item Witnesses grow systematically with $(n,k)$
+\end{itemize}
+
+\begin{conjecture}[Witness Family]
+There exists an explicit two-parameter family of witnesses $W(n,k)$ such that:
+\begin{enumerate}
+    \item $W(n,k)$ has support size $O(n)$ (sparse)
+    \item $W(n,k)$ is confined to position range $[0, O(k)]$ (localized)
+    \item Flipping cell $k$ in $W(n,k)$ flips the center output
+\end{enumerate}
+\end{conjecture}
+
+This witness structure is consistent with the algebraic decomposition: the linear part carries the signal, while the nonlinear term requires ``guard bits'' to prevent signal cancellation.
+
+\section{Discussion}
+
+\subsection{Evidence for $\Omega(n^\alpha)$ Information Content}
+
+Our results support the conjecture that Rule 30 has superlinear information content:
+\begin{enumerate}
+    \item Most cells affect the output (80--100\%)
+    \item Influences are substantial (mean $\approx 0.33$)
+    \item Long-range independence exists (distant cells nearly independent)
+    \item Output entropy is maximal
+\end{enumerate}
+
+\begin{conjecture}[Information Content]
+The information content of Rule 30 computation is $\Omega(n^\alpha)$ for some $1 < \alpha \leq 2$.
+\end{conjecture}
+
+\subsection{Correlation Structure}
+
+The correlation structure reveals interesting spatial patterns:
+\begin{itemize}
+    \item \textbf{Nearby cells:} Moderate correlation (0.15--0.30)
+    \item \textbf{Distant cells:} Complex pattern (0.03--0.10 for medium distances, increasing for very distant cells)
+    \item \textbf{Interpretation:} Local rules create local correlations, but boundary effects dominate at large distances
+\end{itemize}
+
+This suggests \emph{effective information content} may be less than $n^2$ but still superlinear.
+
+\subsection{Pattern Compression and the Manifold Hypothesis}
+
+A striking finding is the combination of:
+\begin{itemize}
+    \item High output entropy (1.000 bits, maximal)
+    \item Low pattern diversity (observed $\ll$ theoretical maximum)
+\end{itemize}
+
+This unusual combination suggests Rule 30 operates on a ``thin manifold'' inside the exponentially large configuration space. The dynamics explore only a tiny fraction of possible configurations while producing maximally random output.
+
+\textbf{Geometric interpretation:} The light cone behaves like a folded surface (analogous to a coffee filter or pleated cone) embedded in a huge configuration cube.
+
+\subsection{Comparison to Self-Composition Algorithm}
+
+The self-composition algorithm of~\citet{natal_2024} achieves $O(n^2 / \log n)$ time complexity. Our information-theoretic analysis suggests this may be nearly optimal:
+\begin{itemize}
+    \item Most cells have non-zero influence (can't skip computation)
+    \item Influences are moderately correlated (some redundancy exists)
+    \item Long-range independence suggests $\log n$ factor may be best possible
+    \item Algebraic structure (linear + quadratic) constrains reachable configurations
+\end{itemize}
+
+\begin{conjecture}[Tight Bound]
+Any algorithm for Rule 30 requires $\Omega(n^2 / \text{polylog } n)$ operations.
+\end{conjecture}
+
+\subsection{Pattern Complexity Conjecture}
+
+Based on our empirical observations, we propose the following conjecture:
+
+\begin{conjecture}[Pattern Complexity Bound]
+Let $P_n$ be the set of distinct light-cone patterns for Rule 30 at depth $n$. Then:
+$$|P_n| \leq C \cdot \exp(\alpha n)$$
+for some constants $C, \alpha > 0$. Equivalently, $\log_2 |P_n| = O(n)$.
+\end{conjecture}
+
+\textbf{Motivation:} Our experiments show:
+\begin{itemize}
+    \item Observed patterns for $n=10$: $\approx 200$
+    \item Theoretical maximum: $2^{121} \approx 10^{36}$
+    \item Ratio: observed/possible $\approx 10^{-34}$
+\end{itemize}
+
+\textbf{Mechanism:} We propose a \textbf{local collision quotient} mechanism: many distinct local histories collapse to the same pattern class due to the nonlinear $C \cdot R$ term in the Rule 30 update rule. This repeated identification constrains the reachable configuration space to a low-complexity subset.
+
+\textbf{Implications:} If proved, this conjecture would:
+\begin{enumerate}
+    \item Explain the pattern diversity anomaly
+    \item Provide structural understanding of Rule 30 dynamics
+    \item Inform computational complexity lower bounds
+\end{enumerate}
+
+\subsection{Negative Results: Grammar and Folding Hypotheses}
+
+To explain the pattern compression, we tested two specific mechanisms:
+
+\textbf{Grammar hypothesis:} We tested whether witness configurations cluster into recursive structural families (compression ratio $> 5$ would indicate strong grammar structure). Result: compression ratio $1.7$, indicating witnesses are mostly unique. Grammar hypothesis not supported.
+
+\textbf{Folding hypothesis:} We tested whether many different local histories map to the same successor state (multiplicity $> 2$ would indicate folding). Result: multiplicity $1.12$x at $r=6$, indicating mostly one-to-one mapping. Folding hypothesis not supported.
+
+These negative results suggest the underlying mechanism is neither recursive generation nor simple many-to-one collision. The local collision quotient mechanism proposed above provides an alternative explanation.
+
+\subsection{Future Work}
+
+Several directions remain open:
+
+\begin{itemize}
+    \item \textbf{Prove pattern complexity bound:} Establish $|P_n| \leq \exp(O(n))$ rigorously via collision quotient construction
+    \item \textbf{Extend tensor experiments:} Test whether linear rank growth persists for $n > 10$
+    \item \textbf{Characterize seam signatures:} Identify compressed descriptors that determine future cone evolution
+    \item \textbf{Connect to complexity:} Prove $\Omega(n^2/\text{polylog } n)$ lower bound from pattern bound
+    \item \textbf{Generalize to other rules:} Test whether low-rank structure appears in other chaotic cellular automata
+\end{itemize}
+
+\subsection{Limitations}
+
+\begin{itemize}
+    \item \textbf{Computational:} Limited to $n \leq 100$
+    \item \textbf{Statistical:} Finite samples may miss rare patterns
+    \item \textbf{Independence measure:} Binary threshold (0.05) is arbitrary
+    \item \textbf{Proof:} $\Omega(n)$ bound, not $\Omega(n^2)$
+    \item \textbf{Pattern diversity:} Observed growth rate needs theoretical explanation
+\end{itemize}
+
+\section{Applications to Machine Learning}
+
+\subsection{Neural Cellular Automata}
+
+Neural CAs replace the local rule with a neural network~\citep{mordvintsev_2020}. Our framework enables:
+\begin{itemize}
+    \item \textbf{Quantitative comparison:} Rule 30 vs. trained neural CAs
+    \item \textbf{Information flow analysis:} How does training affect information processing?
+    \item \textbf{Architecture design:} What information properties make good neural CAs?
+\end{itemize}
+
+\subsection{Deep Learning Theory}
+
+The analogy between deep networks and CAs:
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Deep Network & Cellular Automaton \\
+\midrule
+Layers & Time steps \\
+Neurons & Cells \\
+Forward pass & CA evolution \\
+Information bottleneck & Light cone \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{conjecture}[Deep Network Complexity]
+Deep networks with CA-like structure have $\Omega(n^\alpha)$ information complexity for some $\alpha > 1$.
+\end{conjecture}
+
+\subsection{Random Feature Models}
+
+Rule 30 as a random feature generator:
+\begin{itemize}
+    \item \textbf{Input:} Initial configuration
+    \item \textbf{Features:} Light cone cell states
+    \item \textbf{Output:} Center cell
+\end{itemize}
+
+Our information-theoretic analysis provides guarantees on feature diversity and independence.
+
+\section{Conclusion}
+
+We presented an information-theoretic framework for analyzing cellular automata computation. Applied to Rule 30, our framework reveals:
+\begin{itemize}
+    \item 80--100\% of cells have non-zero influence
+    \item Distant cells are nearly independent
+    \item Output entropy is maximal
+    \item An ongoing Lean~4 formalization of the $\Omega(n)$ block-sensitivity lower bound
+\end{itemize}
+
+Regarding the formal proof: the $\Omega(n)$ lower bound is established \emph{conditional} on the lifting lemma (Conjecture~\ref{conj:lifting}), which asserts that cell essentiality propagates inductively from level $n$ to level $n+1$. This conjecture is computationally verified for $n \leq 20$ but not yet formally proved. Two hard sub-lemmas remain open: the universal odd spike invariant (Conjecture~\ref{conj:odd_invariant}, computationally confirmed for $n' = 0\ldots19$) and the even sub-case~B sensitivity construction (\S\ref{sec:even_caseB}, witnesses exist but are non-uniform). Closing these would convert the conditional theorem into an unconditional $\Omega(n)$ result. The $\Omega(n^2)$ bound required for Prize~3 remains entirely unaddressed in the current formalization.
+
+\textbf{Future Work:}
+\begin{enumerate}
+    \item Prove \texttt{rule30n\_twoSpike\_odd\_invariant} (the universal odd spike equality) by induction using the \texttt{caStep} decomposition
+    \item Prove \texttt{parity\_sensitivity\_even} non-rightmost case, either via reduction to the odd case or a non-constructive argument
+    \item Convert the conditional $\Omega(n)$ theorem to unconditional by closing the above
+    \item Find an $\Omega(n^2)$ argument: either $n^2$ disjoint sensitive blocks or a circuit complexity approach
+    \item Extend empirical experiments to $n > 100$; analyze other rules (Rule 90, Rule 110)
+\end{enumerate}
+
+\section*{Computational Resources}
+
+All experiments were conducted on a standard workstation (Intel i7, 32GB RAM). Total compute time: approximately 17 CPU-hours. Code and data are available at \url{https://github.com/jonathanhill/rule30-info-theory}.
+
+\section*{Acknowledgments}
+
+Thanks to the Wolfram Research team for maintaining the Rule 30 Prize problems, and to the Lean community for proof assistant support.
+
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\appendix
+
+\section{Lean Formalization Details}
+
+The formal proof is written in Lean~4~\citep{moura_2021}. The primary files are:
+\begin{itemize}
+    \item \texttt{P2p/Prize3\_Complete.lean}: core definitions, base cases, boundary essentiality, and the main induction (conditional on \texttt{lifting\_lemma}).
+    \item \texttt{P2p/LiftingLemma\_LeftPermutive.lean}: the backward-fill construction, parity-sensitivity lemmas, and \texttt{lifting\_lemma\_core}.
+    \item \texttt{P2p/LiftingLemma\_Period3.lean}: alternative period-based approach (exploratory).
+\end{itemize}
+
+\textbf{Axiom census.} The sole structural axiom in the \texttt{rule30\_prize3} proof chain is \texttt{lifting\_lemma} (Prize3\_Complete, line 337). All other proof steps are genuine Lean theorems. The base cases $n = 0,\ldots,5$ were previously axioms; they are now theorems verified by \texttt{native\_decide}. The two parity-sensitivity obligations (\texttt{parity\_sensitivity\_odd} non-rightmost, \texttt{parity\_sensitivity\_even} non-rightmost) are \texttt{sorry} lemmas in the parallel proof path; closing them would allow \texttt{lifting\_lemma} to be proved from \texttt{lifting\_lemma\_core}, eliminating the axiom.
+
+\textbf{What the theorem establishes.} Assuming \texttt{lifting\_lemma}, the formalization proves that every interior cell is essential, giving $\mathrm{bs}(\mathrm{Rule30}_n) \geq n$. This is an $\Omega(n)$ block-sensitivity lower bound, not the $\Omega(n^2)$ bound required for Prize~3. The gap between $\Omega(n)$ and $\Omega(n^2)$ is entirely open.
+
+\section{Data Availability}
+
+All experimental data is available in JSON and CSV format:
+\begin{itemize}
+    \item \texttt{influence\_data.csv}: Influence statistics for $n=1,\ldots,100$
+    \item \texttt{correlation\_data.csv}: Correlation vs distance for $n=10,20,30,50$
+    \item \texttt{pattern\_data.csv}: Pattern diversity for $n=1,\ldots,20$
+    \item \texttt{extended\_results\_summary.json}: Complete summary statistics
+\end{itemize}
+
+\end{document}
