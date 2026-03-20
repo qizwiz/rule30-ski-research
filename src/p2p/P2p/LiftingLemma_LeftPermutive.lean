@@ -1629,6 +1629,7851 @@ lemma rule30n_twoSpikeEvenRight (n : Nat) :
 
 
 set_option maxHeartbeats 800000000 in
+/-- parity_sensitivity_even_subcaseB for n'≥2181. -/
+private lemma parity_sensitivity_even_subcaseB_ge2181
+    (n' : Nat) (hn_ge : 2181 ≤ n')
+    (m : Fin (2 * (n' + 1) + 1))
+    (hm_even : m.val % 2 = 0)
+    (hm_low : 1 ≤ m.val)
+    (hm_ne_r : m.val ≠ 2 * n')
+    (hm_high : m.val + 1 < 2 * (n' + 1) + 1)
+    (hcase : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+               decide (k.val = m.val)) = false)
+    (hts : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+             decide (k.val = m.val ∨ k.val = 2 * (n' + 1))) = true) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  by_cases hn2181_eq : n' = 2181
+  ·
+    subst hn2181_eq
+    have h_only_scB : ∀ mv : Fin 4365,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4365 → mv.val ≠ 4362 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4356 →
+        rule30n 2182 (fun k : Fin 4365 => decide (k.val = mv.val)) = true ∨
+        rule30n 2182 (fun k : Fin 4365 => decide (k.val = mv.val ∨ k.val = 4364)) = false := by
+      native_decide
+    by_cases hscB2181_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4365) := Fin.ext hscB2181_4
+      have hodd : ∀ k : Fin 2182, (fun k : Fin 4365 => decide (k.val = 14)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2182 (fun k : Fin 4365 => decide (k.val = 14)) ≠
+          rule30n 2182 (flipCell (fun k : Fin 4365 => decide (k.val = 14)) (4 : Fin 4365)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4365 => decide (k.val = 14), hodd, hsens⟩
+    ·
+      by_cases hscB2181_4356 : m.val = 4356
+      · -- m = 4356: sub-case B
+        have hm_eq : m = (4356 : Fin 4365) := Fin.ext hscB2181_4356
+        have hodd : ∀ k : Fin 2182, (fun k : Fin 4365 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2182 (fun k : Fin 4365 => decide (k.val = 8)) ≠
+            rule30n 2182 (flipCell (fun k : Fin 4365 => decide (k.val = 8)) (4356 : Fin 4365)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4365 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2181_4 hscB2181_4356 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2182_eq : n' = 2182
+  ·
+    subst hn2182_eq
+    have h_only_scB : ∀ mv : Fin 4367,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4367 → mv.val ≠ 4364 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4358 →
+        rule30n 2183 (fun k : Fin 4367 => decide (k.val = mv.val)) = true ∨
+        rule30n 2183 (fun k : Fin 4367 => decide (k.val = mv.val ∨ k.val = 4366)) = false := by
+      native_decide
+    by_cases hscB2182_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4367) := Fin.ext hscB2182_6
+      have hodd : ∀ k : Fin 2183, (fun k : Fin 4367 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2183 (fun k : Fin 4367 => decide (k.val = 2)) ≠
+          rule30n 2183 (flipCell (fun k : Fin 4367 => decide (k.val = 2)) (6 : Fin 4367)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4367 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2182_4358 : m.val = 4358
+      · -- m = 4358: sub-case B
+        have hm_eq : m = (4358 : Fin 4367) := Fin.ext hscB2182_4358
+        have hodd : ∀ k : Fin 2183, (fun k : Fin 4367 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2183 (fun k : Fin 4367 => decide (k.val = 2)) ≠
+            rule30n 2183 (flipCell (fun k : Fin 4367 => decide (k.val = 2)) (4358 : Fin 4367)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4367 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2182_6 hscB2182_4358 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2183_eq : n' = 2183
+  ·
+    subst hn2183_eq
+    have h_only_scB : ∀ mv : Fin 4369,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4369 → mv.val ≠ 4366 →
+        mv.val ≠ 16 →
+        rule30n 2184 (fun k : Fin 4369 => decide (k.val = mv.val)) = true ∨
+        rule30n 2184 (fun k : Fin 4369 => decide (k.val = mv.val ∨ k.val = 4368)) = false := by
+      native_decide
+    by_cases hscB2183_16 : m.val = 16
+    · -- m = 16: sub-case B
+      have hm_eq : m = (16 : Fin 4369) := Fin.ext hscB2183_16
+      have hodd : ∀ k : Fin 2184, (fun k : Fin 4369 => decide (k.val = 4)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2184 (fun k : Fin 4369 => decide (k.val = 4)) ≠
+          rule30n 2184 (flipCell (fun k : Fin 4369 => decide (k.val = 4)) (16 : Fin 4369)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4369 => decide (k.val = 4), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2183_16 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2184_eq : n' = 2184
+  ·
+    subst hn2184_eq
+    have h_no_scB : ∀ mv : Fin 4371,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4371 → mv.val ≠ 4368 →
+        rule30n 2185 (fun k : Fin 4371 => decide (k.val = mv.val)) = true ∨
+        rule30n 2185 (fun k : Fin 4371 => decide (k.val = mv.val ∨ k.val = 4370)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2185_eq : n' = 2185
+  ·
+    subst hn2185_eq
+    have h_only_scB : ∀ mv : Fin 4373,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4373 → mv.val ≠ 4370 →
+        mv.val ≠ 12 →
+        mv.val ≠ 4364 →
+        rule30n 2186 (fun k : Fin 4373 => decide (k.val = mv.val)) = true ∨
+        rule30n 2186 (fun k : Fin 4373 => decide (k.val = mv.val ∨ k.val = 4372)) = false := by
+      native_decide
+    by_cases hscB2185_12 : m.val = 12
+    · -- m = 12: sub-case B
+      have hm_eq : m = (12 : Fin 4373) := Fin.ext hscB2185_12
+      have hodd : ∀ k : Fin 2186, (fun k : Fin 4373 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2186 (fun k : Fin 4373 => decide (k.val = 8)) ≠
+          rule30n 2186 (flipCell (fun k : Fin 4373 => decide (k.val = 8)) (12 : Fin 4373)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4373 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB2185_4364 : m.val = 4364
+      · -- m = 4364: sub-case B
+        have hm_eq : m = (4364 : Fin 4373) := Fin.ext hscB2185_4364
+        have hodd : ∀ k : Fin 2186, (fun k : Fin 4373 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2186 (fun k : Fin 4373 => decide (k.val = 8)) ≠
+            rule30n 2186 (flipCell (fun k : Fin 4373 => decide (k.val = 8)) (4364 : Fin 4373)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4373 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2185_12 hscB2185_4364 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2186_eq : n' = 2186
+  ·
+    subst hn2186_eq
+    have h_only_scB : ∀ mv : Fin 4375,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4375 → mv.val ≠ 4372 →
+        mv.val ≠ 6 →
+        mv.val ≠ 14 →
+        mv.val ≠ 4366 →
+        rule30n 2187 (fun k : Fin 4375 => decide (k.val = mv.val)) = true ∨
+        rule30n 2187 (fun k : Fin 4375 => decide (k.val = mv.val ∨ k.val = 4374)) = false := by
+      native_decide
+    by_cases hscB2186_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4375) := Fin.ext hscB2186_6
+      have hodd : ∀ k : Fin 2187, (fun k : Fin 4375 => decide (k.val = 20)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2187 (fun k : Fin 4375 => decide (k.val = 20)) ≠
+          rule30n 2187 (flipCell (fun k : Fin 4375 => decide (k.val = 20)) (6 : Fin 4375)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4375 => decide (k.val = 20), hodd, hsens⟩
+    ·
+      by_cases hscB2186_14 : m.val = 14
+      · -- m = 14: sub-case B
+        have hm_eq : m = (14 : Fin 4375) := Fin.ext hscB2186_14
+        have hodd : ∀ k : Fin 2187, (fun k : Fin 4375 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2187 (fun k : Fin 4375 => decide (k.val = 8)) ≠
+            rule30n 2187 (flipCell (fun k : Fin 4375 => decide (k.val = 8)) (14 : Fin 4375)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4375 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        by_cases hscB2186_4366 : m.val = 4366
+        · -- m = 4366: sub-case B
+          have hm_eq : m = (4366 : Fin 4375) := Fin.ext hscB2186_4366
+          have hodd : ∀ k : Fin 2187, (fun k : Fin 4375 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+            intro k; simp only [decide_eq_false_iff_not]; omega
+          have hsens : rule30n 2187 (fun k : Fin 4375 => decide (k.val = 2)) ≠
+              rule30n 2187 (flipCell (fun k : Fin 4375 => decide (k.val = 2)) (4366 : Fin 4375)) := by
+            native_decide
+          rw [hm_eq]; exact ⟨fun k : Fin 4375 => decide (k.val = 2), hodd, hsens⟩
+        ·
+          rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2186_6 hscB2186_14 hscB2186_4366 with h | h
+          · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+          · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2187_eq : n' = 2187
+  ·
+    subst hn2187_eq
+    have h_only_scB : ∀ mv : Fin 4377,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4377 → mv.val ≠ 4374 →
+        mv.val ≠ 8 →
+        mv.val ≠ 16 →
+        rule30n 2188 (fun k : Fin 4377 => decide (k.val = mv.val)) = true ∨
+        rule30n 2188 (fun k : Fin 4377 => decide (k.val = mv.val ∨ k.val = 4376)) = false := by
+      native_decide
+    by_cases hscB2187_8 : m.val = 8
+    · -- m = 8: sub-case B
+      have hm_eq : m = (8 : Fin 4377) := Fin.ext hscB2187_8
+      have hodd : ∀ k : Fin 2188, (fun k : Fin 4377 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2188 (fun k : Fin 4377 => decide (k.val = 2)) ≠
+          rule30n 2188 (flipCell (fun k : Fin 4377 => decide (k.val = 2)) (8 : Fin 4377)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4377 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2187_16 : m.val = 16
+      · -- m = 16: sub-case B
+        have hm_eq : m = (16 : Fin 4377) := Fin.ext hscB2187_16
+        have hodd : ∀ k : Fin 2188, (fun k : Fin 4377 => decide (k.val = 4)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2188 (fun k : Fin 4377 => decide (k.val = 4)) ≠
+            rule30n 2188 (flipCell (fun k : Fin 4377 => decide (k.val = 4)) (16 : Fin 4377)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4377 => decide (k.val = 4), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2187_8 hscB2187_16 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2188_eq : n' = 2188
+  ·
+    subst hn2188_eq
+    have h_no_scB : ∀ mv : Fin 4379,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4379 → mv.val ≠ 4376 →
+        rule30n 2189 (fun k : Fin 4379 => decide (k.val = mv.val)) = true ∨
+        rule30n 2189 (fun k : Fin 4379 => decide (k.val = mv.val ∨ k.val = 4378)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2189_eq : n' = 2189
+  ·
+    subst hn2189_eq
+    have h_only_scB : ∀ mv : Fin 4381,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4381 → mv.val ≠ 4378 →
+        mv.val ≠ 4 →
+        mv.val ≠ 12 →
+        mv.val ≠ 4372 →
+        rule30n 2190 (fun k : Fin 4381 => decide (k.val = mv.val)) = true ∨
+        rule30n 2190 (fun k : Fin 4381 => decide (k.val = mv.val ∨ k.val = 4380)) = false := by
+      native_decide
+    by_cases hscB2189_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4381) := Fin.ext hscB2189_4
+      have hodd : ∀ k : Fin 2190, (fun k : Fin 4381 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2190 (fun k : Fin 4381 => decide (k.val = 6)) ≠
+          rule30n 2190 (flipCell (fun k : Fin 4381 => decide (k.val = 6)) (4 : Fin 4381)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4381 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2189_12 : m.val = 12
+      · -- m = 12: sub-case B
+        have hm_eq : m = (12 : Fin 4381) := Fin.ext hscB2189_12
+        have hodd : ∀ k : Fin 2190, (fun k : Fin 4381 => decide (k.val = 4)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2190 (fun k : Fin 4381 => decide (k.val = 4)) ≠
+            rule30n 2190 (flipCell (fun k : Fin 4381 => decide (k.val = 4)) (12 : Fin 4381)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4381 => decide (k.val = 4), hodd, hsens⟩
+      ·
+        by_cases hscB2189_4372 : m.val = 4372
+        · -- m = 4372: sub-case B
+          have hm_eq : m = (4372 : Fin 4381) := Fin.ext hscB2189_4372
+          have hodd : ∀ k : Fin 2190, (fun k : Fin 4381 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+            intro k; simp only [decide_eq_false_iff_not]; omega
+          have hsens : rule30n 2190 (fun k : Fin 4381 => decide (k.val = 12)) ≠
+              rule30n 2190 (flipCell (fun k : Fin 4381 => decide (k.val = 12)) (4372 : Fin 4381)) := by
+            native_decide
+          rw [hm_eq]; exact ⟨fun k : Fin 4381 => decide (k.val = 12), hodd, hsens⟩
+        ·
+          rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2189_4 hscB2189_12 hscB2189_4372 with h | h
+          · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+          · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2190_eq : n' = 2190
+  ·
+    subst hn2190_eq
+    have h_only_scB : ∀ mv : Fin 4383,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4383 → mv.val ≠ 4380 →
+        mv.val ≠ 14 →
+        mv.val ≠ 4374 →
+        rule30n 2191 (fun k : Fin 4383 => decide (k.val = mv.val)) = true ∨
+        rule30n 2191 (fun k : Fin 4383 => decide (k.val = mv.val ∨ k.val = 4382)) = false := by
+      native_decide
+    by_cases hscB2190_14 : m.val = 14
+    · -- m = 14: sub-case B
+      have hm_eq : m = (14 : Fin 4383) := Fin.ext hscB2190_14
+      have hodd : ∀ k : Fin 2191, (fun k : Fin 4383 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2191 (fun k : Fin 4383 => decide (k.val = 2)) ≠
+          rule30n 2191 (flipCell (fun k : Fin 4383 => decide (k.val = 2)) (14 : Fin 4383)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4383 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2190_4374 : m.val = 4374
+      · -- m = 4374: sub-case B
+        have hm_eq : m = (4374 : Fin 4383) := Fin.ext hscB2190_4374
+        have hodd : ∀ k : Fin 2191, (fun k : Fin 4383 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2191 (fun k : Fin 4383 => decide (k.val = 2)) ≠
+            rule30n 2191 (flipCell (fun k : Fin 4383 => decide (k.val = 2)) (4374 : Fin 4383)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4383 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2190_14 hscB2190_4374 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2191_eq : n' = 2191
+  ·
+    subst hn2191_eq
+    have h_no_scB : ∀ mv : Fin 4385,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4385 → mv.val ≠ 4382 →
+        rule30n 2192 (fun k : Fin 4385 => decide (k.val = mv.val)) = true ∨
+        rule30n 2192 (fun k : Fin 4385 => decide (k.val = mv.val ∨ k.val = 4384)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2192_eq : n' = 2192
+  ·
+    subst hn2192_eq
+    have h_no_scB : ∀ mv : Fin 4387,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4387 → mv.val ≠ 4384 →
+        rule30n 2193 (fun k : Fin 4387 => decide (k.val = mv.val)) = true ∨
+        rule30n 2193 (fun k : Fin 4387 => decide (k.val = mv.val ∨ k.val = 4386)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2193_eq : n' = 2193
+  ·
+    subst hn2193_eq
+    have h_only_scB : ∀ mv : Fin 4389,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4389 → mv.val ≠ 4386 →
+        mv.val ≠ 4380 →
+        rule30n 2194 (fun k : Fin 4389 => decide (k.val = mv.val)) = true ∨
+        rule30n 2194 (fun k : Fin 4389 => decide (k.val = mv.val ∨ k.val = 4388)) = false := by
+      native_decide
+    by_cases hscB2193_4380 : m.val = 4380
+    · -- m = 4380: sub-case B
+      have hm_eq : m = (4380 : Fin 4389) := Fin.ext hscB2193_4380
+      have hodd : ∀ k : Fin 2194, (fun k : Fin 4389 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2194 (fun k : Fin 4389 => decide (k.val = 16)) ≠
+          rule30n 2194 (flipCell (fun k : Fin 4389 => decide (k.val = 16)) (4380 : Fin 4389)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4389 => decide (k.val = 16), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2193_4380 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2194_eq : n' = 2194
+  ·
+    subst hn2194_eq
+    have h_only_scB : ∀ mv : Fin 4391,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4391 → mv.val ≠ 4388 →
+        mv.val ≠ 4382 →
+        rule30n 2195 (fun k : Fin 4391 => decide (k.val = mv.val)) = true ∨
+        rule30n 2195 (fun k : Fin 4391 => decide (k.val = mv.val ∨ k.val = 4390)) = false := by
+      native_decide
+    by_cases hscB2194_4382 : m.val = 4382
+    · -- m = 4382: sub-case B
+      have hm_eq : m = (4382 : Fin 4391) := Fin.ext hscB2194_4382
+      have hodd : ∀ k : Fin 2195, (fun k : Fin 4391 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2195 (fun k : Fin 4391 => decide (k.val = 2)) ≠
+          rule30n 2195 (flipCell (fun k : Fin 4391 => decide (k.val = 2)) (4382 : Fin 4391)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4391 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2194_4382 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2195_eq : n' = 2195
+  ·
+    subst hn2195_eq
+    have h_no_scB : ∀ mv : Fin 4393,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4393 → mv.val ≠ 4390 →
+        rule30n 2196 (fun k : Fin 4393 => decide (k.val = mv.val)) = true ∨
+        rule30n 2196 (fun k : Fin 4393 => decide (k.val = mv.val ∨ k.val = 4392)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2196_eq : n' = 2196
+  ·
+    subst hn2196_eq
+    have h_no_scB : ∀ mv : Fin 4395,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4395 → mv.val ≠ 4392 →
+        rule30n 2197 (fun k : Fin 4395 => decide (k.val = mv.val)) = true ∨
+        rule30n 2197 (fun k : Fin 4395 => decide (k.val = mv.val ∨ k.val = 4394)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2197_eq : n' = 2197
+  ·
+    subst hn2197_eq
+    have h_only_scB : ∀ mv : Fin 4397,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4397 → mv.val ≠ 4394 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4388 →
+        rule30n 2198 (fun k : Fin 4397 => decide (k.val = mv.val)) = true ∨
+        rule30n 2198 (fun k : Fin 4397 => decide (k.val = mv.val ∨ k.val = 4396)) = false := by
+      native_decide
+    by_cases hscB2197_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4397) := Fin.ext hscB2197_4
+      have hodd : ∀ k : Fin 2198, (fun k : Fin 4397 => decide (k.val = 14)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2198 (fun k : Fin 4397 => decide (k.val = 14)) ≠
+          rule30n 2198 (flipCell (fun k : Fin 4397 => decide (k.val = 14)) (4 : Fin 4397)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4397 => decide (k.val = 14), hodd, hsens⟩
+    ·
+      by_cases hscB2197_4388 : m.val = 4388
+      · -- m = 4388: sub-case B
+        have hm_eq : m = (4388 : Fin 4397) := Fin.ext hscB2197_4388
+        have hodd : ∀ k : Fin 2198, (fun k : Fin 4397 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2198 (fun k : Fin 4397 => decide (k.val = 16)) ≠
+            rule30n 2198 (flipCell (fun k : Fin 4397 => decide (k.val = 16)) (4388 : Fin 4397)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4397 => decide (k.val = 16), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2197_4 hscB2197_4388 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2198_eq : n' = 2198
+  ·
+    subst hn2198_eq
+    have h_only_scB : ∀ mv : Fin 4399,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4399 → mv.val ≠ 4396 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4390 →
+        rule30n 2199 (fun k : Fin 4399 => decide (k.val = mv.val)) = true ∨
+        rule30n 2199 (fun k : Fin 4399 => decide (k.val = mv.val ∨ k.val = 4398)) = false := by
+      native_decide
+    by_cases hscB2198_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4399) := Fin.ext hscB2198_6
+      have hodd : ∀ k : Fin 2199, (fun k : Fin 4399 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2199 (fun k : Fin 4399 => decide (k.val = 2)) ≠
+          rule30n 2199 (flipCell (fun k : Fin 4399 => decide (k.val = 2)) (6 : Fin 4399)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4399 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2198_4390 : m.val = 4390
+      · -- m = 4390: sub-case B
+        have hm_eq : m = (4390 : Fin 4399) := Fin.ext hscB2198_4390
+        have hodd : ∀ k : Fin 2199, (fun k : Fin 4399 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2199 (fun k : Fin 4399 => decide (k.val = 2)) ≠
+            rule30n 2199 (flipCell (fun k : Fin 4399 => decide (k.val = 2)) (4390 : Fin 4399)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4399 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2198_6 hscB2198_4390 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2199_eq : n' = 2199
+  ·
+    subst hn2199_eq
+    have h_no_scB : ∀ mv : Fin 4401,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4401 → mv.val ≠ 4398 →
+        rule30n 2200 (fun k : Fin 4401 => decide (k.val = mv.val)) = true ∨
+        rule30n 2200 (fun k : Fin 4401 => decide (k.val = mv.val ∨ k.val = 4400)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2200_eq : n' = 2200
+  ·
+    subst hn2200_eq
+    have h_no_scB : ∀ mv : Fin 4403,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4403 → mv.val ≠ 4400 →
+        rule30n 2201 (fun k : Fin 4403 => decide (k.val = mv.val)) = true ∨
+        rule30n 2201 (fun k : Fin 4403 => decide (k.val = mv.val ∨ k.val = 4402)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2201_eq : n' = 2201
+  ·
+    subst hn2201_eq
+    have h_only_scB : ∀ mv : Fin 4405,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4405 → mv.val ≠ 4402 →
+        mv.val ≠ 4396 →
+        rule30n 2202 (fun k : Fin 4405 => decide (k.val = mv.val)) = true ∨
+        rule30n 2202 (fun k : Fin 4405 => decide (k.val = mv.val ∨ k.val = 4404)) = false := by
+      native_decide
+    by_cases hscB2201_4396 : m.val = 4396
+    · -- m = 4396: sub-case B
+      have hm_eq : m = (4396 : Fin 4405) := Fin.ext hscB2201_4396
+      have hodd : ∀ k : Fin 2202, (fun k : Fin 4405 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2202 (fun k : Fin 4405 => decide (k.val = 8)) ≠
+          rule30n 2202 (flipCell (fun k : Fin 4405 => decide (k.val = 8)) (4396 : Fin 4405)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4405 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2201_4396 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2202_eq : n' = 2202
+  ·
+    subst hn2202_eq
+    have h_only_scB : ∀ mv : Fin 4407,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4407 → mv.val ≠ 4404 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4398 →
+        rule30n 2203 (fun k : Fin 4407 => decide (k.val = mv.val)) = true ∨
+        rule30n 2203 (fun k : Fin 4407 => decide (k.val = mv.val ∨ k.val = 4406)) = false := by
+      native_decide
+    by_cases hscB2202_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4407) := Fin.ext hscB2202_6
+      have hodd : ∀ k : Fin 2203, (fun k : Fin 4407 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2203 (fun k : Fin 4407 => decide (k.val = 8)) ≠
+          rule30n 2203 (flipCell (fun k : Fin 4407 => decide (k.val = 8)) (6 : Fin 4407)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4407 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB2202_4398 : m.val = 4398
+      · -- m = 4398: sub-case B
+        have hm_eq : m = (4398 : Fin 4407) := Fin.ext hscB2202_4398
+        have hodd : ∀ k : Fin 2203, (fun k : Fin 4407 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2203 (fun k : Fin 4407 => decide (k.val = 2)) ≠
+            rule30n 2203 (flipCell (fun k : Fin 4407 => decide (k.val = 2)) (4398 : Fin 4407)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4407 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2202_6 hscB2202_4398 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2203_eq : n' = 2203
+  ·
+    subst hn2203_eq
+    have h_no_scB : ∀ mv : Fin 4409,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4409 → mv.val ≠ 4406 →
+        rule30n 2204 (fun k : Fin 4409 => decide (k.val = mv.val)) = true ∨
+        rule30n 2204 (fun k : Fin 4409 => decide (k.val = mv.val ∨ k.val = 4408)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2204_eq : n' = 2204
+  ·
+    subst hn2204_eq
+    have h_no_scB : ∀ mv : Fin 4411,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4411 → mv.val ≠ 4408 →
+        rule30n 2205 (fun k : Fin 4411 => decide (k.val = mv.val)) = true ∨
+        rule30n 2205 (fun k : Fin 4411 => decide (k.val = mv.val ∨ k.val = 4410)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2205_eq : n' = 2205
+  ·
+    subst hn2205_eq
+    have h_only_scB : ∀ mv : Fin 4413,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4413 → mv.val ≠ 4410 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4404 →
+        rule30n 2206 (fun k : Fin 4413 => decide (k.val = mv.val)) = true ∨
+        rule30n 2206 (fun k : Fin 4413 => decide (k.val = mv.val ∨ k.val = 4412)) = false := by
+      native_decide
+    by_cases hscB2205_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4413) := Fin.ext hscB2205_4
+      have hodd : ∀ k : Fin 2206, (fun k : Fin 4413 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2206 (fun k : Fin 4413 => decide (k.val = 6)) ≠
+          rule30n 2206 (flipCell (fun k : Fin 4413 => decide (k.val = 6)) (4 : Fin 4413)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4413 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2205_4404 : m.val = 4404
+      · -- m = 4404: sub-case B
+        have hm_eq : m = (4404 : Fin 4413) := Fin.ext hscB2205_4404
+        have hodd : ∀ k : Fin 2206, (fun k : Fin 4413 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2206 (fun k : Fin 4413 => decide (k.val = 8)) ≠
+            rule30n 2206 (flipCell (fun k : Fin 4413 => decide (k.val = 8)) (4404 : Fin 4413)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4413 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2205_4 hscB2205_4404 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2206_eq : n' = 2206
+  ·
+    subst hn2206_eq
+    have h_only_scB : ∀ mv : Fin 4415,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4415 → mv.val ≠ 4412 →
+        mv.val ≠ 4406 →
+        rule30n 2207 (fun k : Fin 4415 => decide (k.val = mv.val)) = true ∨
+        rule30n 2207 (fun k : Fin 4415 => decide (k.val = mv.val ∨ k.val = 4414)) = false := by
+      native_decide
+    by_cases hscB2206_4406 : m.val = 4406
+    · -- m = 4406: sub-case B
+      have hm_eq : m = (4406 : Fin 4415) := Fin.ext hscB2206_4406
+      have hodd : ∀ k : Fin 2207, (fun k : Fin 4415 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2207 (fun k : Fin 4415 => decide (k.val = 2)) ≠
+          rule30n 2207 (flipCell (fun k : Fin 4415 => decide (k.val = 2)) (4406 : Fin 4415)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4415 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2206_4406 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2207_eq : n' = 2207
+  ·
+    subst hn2207_eq
+    have h_no_scB : ∀ mv : Fin 4417,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4417 → mv.val ≠ 4414 →
+        rule30n 2208 (fun k : Fin 4417 => decide (k.val = mv.val)) = true ∨
+        rule30n 2208 (fun k : Fin 4417 => decide (k.val = mv.val ∨ k.val = 4416)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2208_eq : n' = 2208
+  ·
+    subst hn2208_eq
+    have h_no_scB : ∀ mv : Fin 4419,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4419 → mv.val ≠ 4416 →
+        rule30n 2209 (fun k : Fin 4419 => decide (k.val = mv.val)) = true ∨
+        rule30n 2209 (fun k : Fin 4419 => decide (k.val = mv.val ∨ k.val = 4418)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2209_eq : n' = 2209
+  ·
+    subst hn2209_eq
+    have h_only_scB : ∀ mv : Fin 4421,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4421 → mv.val ≠ 4418 →
+        mv.val ≠ 4412 →
+        rule30n 2210 (fun k : Fin 4421 => decide (k.val = mv.val)) = true ∨
+        rule30n 2210 (fun k : Fin 4421 => decide (k.val = mv.val ∨ k.val = 4420)) = false := by
+      native_decide
+    by_cases hscB2209_4412 : m.val = 4412
+    · -- m = 4412: sub-case B
+      have hm_eq : m = (4412 : Fin 4421) := Fin.ext hscB2209_4412
+      have hodd : ∀ k : Fin 2210, (fun k : Fin 4421 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2210 (fun k : Fin 4421 => decide (k.val = 12)) ≠
+          rule30n 2210 (flipCell (fun k : Fin 4421 => decide (k.val = 12)) (4412 : Fin 4421)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4421 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2209_4412 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2210_eq : n' = 2210
+  ·
+    subst hn2210_eq
+    have h_only_scB : ∀ mv : Fin 4423,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4423 → mv.val ≠ 4420 →
+        mv.val ≠ 4414 →
+        rule30n 2211 (fun k : Fin 4423 => decide (k.val = mv.val)) = true ∨
+        rule30n 2211 (fun k : Fin 4423 => decide (k.val = mv.val ∨ k.val = 4422)) = false := by
+      native_decide
+    by_cases hscB2210_4414 : m.val = 4414
+    · -- m = 4414: sub-case B
+      have hm_eq : m = (4414 : Fin 4423) := Fin.ext hscB2210_4414
+      have hodd : ∀ k : Fin 2211, (fun k : Fin 4423 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2211 (fun k : Fin 4423 => decide (k.val = 2)) ≠
+          rule30n 2211 (flipCell (fun k : Fin 4423 => decide (k.val = 2)) (4414 : Fin 4423)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4423 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2210_4414 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2211_eq : n' = 2211
+  ·
+    subst hn2211_eq
+    have h_no_scB : ∀ mv : Fin 4425,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4425 → mv.val ≠ 4422 →
+        rule30n 2212 (fun k : Fin 4425 => decide (k.val = mv.val)) = true ∨
+        rule30n 2212 (fun k : Fin 4425 => decide (k.val = mv.val ∨ k.val = 4424)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2212_eq : n' = 2212
+  ·
+    subst hn2212_eq
+    have h_no_scB : ∀ mv : Fin 4427,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4427 → mv.val ≠ 4424 →
+        rule30n 2213 (fun k : Fin 4427 => decide (k.val = mv.val)) = true ∨
+        rule30n 2213 (fun k : Fin 4427 => decide (k.val = mv.val ∨ k.val = 4426)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2213_eq : n' = 2213
+  ·
+    subst hn2213_eq
+    have h_only_scB : ∀ mv : Fin 4429,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4429 → mv.val ≠ 4426 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4420 →
+        rule30n 2214 (fun k : Fin 4429 => decide (k.val = mv.val)) = true ∨
+        rule30n 2214 (fun k : Fin 4429 => decide (k.val = mv.val ∨ k.val = 4428)) = false := by
+      native_decide
+    by_cases hscB2213_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4429) := Fin.ext hscB2213_4
+      have hodd : ∀ k : Fin 2214, (fun k : Fin 4429 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2214 (fun k : Fin 4429 => decide (k.val = 12)) ≠
+          rule30n 2214 (flipCell (fun k : Fin 4429 => decide (k.val = 12)) (4 : Fin 4429)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4429 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      by_cases hscB2213_4420 : m.val = 4420
+      · -- m = 4420: sub-case B
+        have hm_eq : m = (4420 : Fin 4429) := Fin.ext hscB2213_4420
+        have hodd : ∀ k : Fin 2214, (fun k : Fin 4429 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2214 (fun k : Fin 4429 => decide (k.val = 8)) ≠
+            rule30n 2214 (flipCell (fun k : Fin 4429 => decide (k.val = 8)) (4420 : Fin 4429)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4429 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2213_4 hscB2213_4420 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2214_eq : n' = 2214
+  ·
+    subst hn2214_eq
+    have h_only_scB : ∀ mv : Fin 4431,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4431 → mv.val ≠ 4428 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4422 →
+        rule30n 2215 (fun k : Fin 4431 => decide (k.val = mv.val)) = true ∨
+        rule30n 2215 (fun k : Fin 4431 => decide (k.val = mv.val ∨ k.val = 4430)) = false := by
+      native_decide
+    by_cases hscB2214_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4431) := Fin.ext hscB2214_6
+      have hodd : ∀ k : Fin 2215, (fun k : Fin 4431 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2215 (fun k : Fin 4431 => decide (k.val = 2)) ≠
+          rule30n 2215 (flipCell (fun k : Fin 4431 => decide (k.val = 2)) (6 : Fin 4431)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4431 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2214_4422 : m.val = 4422
+      · -- m = 4422: sub-case B
+        have hm_eq : m = (4422 : Fin 4431) := Fin.ext hscB2214_4422
+        have hodd : ∀ k : Fin 2215, (fun k : Fin 4431 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2215 (fun k : Fin 4431 => decide (k.val = 2)) ≠
+            rule30n 2215 (flipCell (fun k : Fin 4431 => decide (k.val = 2)) (4422 : Fin 4431)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4431 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2214_6 hscB2214_4422 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2215_eq : n' = 2215
+  ·
+    subst hn2215_eq
+    have h_no_scB : ∀ mv : Fin 4433,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4433 → mv.val ≠ 4430 →
+        rule30n 2216 (fun k : Fin 4433 => decide (k.val = mv.val)) = true ∨
+        rule30n 2216 (fun k : Fin 4433 => decide (k.val = mv.val ∨ k.val = 4432)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2216_eq : n' = 2216
+  ·
+    subst hn2216_eq
+    have h_no_scB : ∀ mv : Fin 4435,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4435 → mv.val ≠ 4432 →
+        rule30n 2217 (fun k : Fin 4435 => decide (k.val = mv.val)) = true ∨
+        rule30n 2217 (fun k : Fin 4435 => decide (k.val = mv.val ∨ k.val = 4434)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2217_eq : n' = 2217
+  ·
+    subst hn2217_eq
+    have h_only_scB : ∀ mv : Fin 4437,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4437 → mv.val ≠ 4434 →
+        mv.val ≠ 4428 →
+        rule30n 2218 (fun k : Fin 4437 => decide (k.val = mv.val)) = true ∨
+        rule30n 2218 (fun k : Fin 4437 => decide (k.val = mv.val ∨ k.val = 4436)) = false := by
+      native_decide
+    by_cases hscB2217_4428 : m.val = 4428
+    · -- m = 4428: sub-case B
+      have hm_eq : m = (4428 : Fin 4437) := Fin.ext hscB2217_4428
+      have hodd : ∀ k : Fin 2218, (fun k : Fin 4437 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2218 (fun k : Fin 4437 => decide (k.val = 8)) ≠
+          rule30n 2218 (flipCell (fun k : Fin 4437 => decide (k.val = 8)) (4428 : Fin 4437)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4437 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2217_4428 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2218_eq : n' = 2218
+  ·
+    subst hn2218_eq
+    have h_only_scB : ∀ mv : Fin 4439,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4439 → mv.val ≠ 4436 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4430 →
+        rule30n 2219 (fun k : Fin 4439 => decide (k.val = mv.val)) = true ∨
+        rule30n 2219 (fun k : Fin 4439 => decide (k.val = mv.val ∨ k.val = 4438)) = false := by
+      native_decide
+    by_cases hscB2218_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4439) := Fin.ext hscB2218_6
+      have hodd : ∀ k : Fin 2219, (fun k : Fin 4439 => decide (k.val = 10)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2219 (fun k : Fin 4439 => decide (k.val = 10)) ≠
+          rule30n 2219 (flipCell (fun k : Fin 4439 => decide (k.val = 10)) (6 : Fin 4439)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4439 => decide (k.val = 10), hodd, hsens⟩
+    ·
+      by_cases hscB2218_4430 : m.val = 4430
+      · -- m = 4430: sub-case B
+        have hm_eq : m = (4430 : Fin 4439) := Fin.ext hscB2218_4430
+        have hodd : ∀ k : Fin 2219, (fun k : Fin 4439 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2219 (fun k : Fin 4439 => decide (k.val = 2)) ≠
+            rule30n 2219 (flipCell (fun k : Fin 4439 => decide (k.val = 2)) (4430 : Fin 4439)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4439 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2218_6 hscB2218_4430 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2219_eq : n' = 2219
+  ·
+    subst hn2219_eq
+    have h_only_scB : ∀ mv : Fin 4441,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4441 → mv.val ≠ 4438 →
+        mv.val ≠ 8 →
+        rule30n 2220 (fun k : Fin 4441 => decide (k.val = mv.val)) = true ∨
+        rule30n 2220 (fun k : Fin 4441 => decide (k.val = mv.val ∨ k.val = 4440)) = false := by
+      native_decide
+    by_cases hscB2219_8 : m.val = 8
+    · -- m = 8: sub-case B
+      have hm_eq : m = (8 : Fin 4441) := Fin.ext hscB2219_8
+      have hodd : ∀ k : Fin 2220, (fun k : Fin 4441 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2220 (fun k : Fin 4441 => decide (k.val = 2)) ≠
+          rule30n 2220 (flipCell (fun k : Fin 4441 => decide (k.val = 2)) (8 : Fin 4441)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4441 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2219_8 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2220_eq : n' = 2220
+  ·
+    subst hn2220_eq
+    have h_no_scB : ∀ mv : Fin 4443,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4443 → mv.val ≠ 4440 →
+        rule30n 2221 (fun k : Fin 4443 => decide (k.val = mv.val)) = true ∨
+        rule30n 2221 (fun k : Fin 4443 => decide (k.val = mv.val ∨ k.val = 4442)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2221_eq : n' = 2221
+  ·
+    subst hn2221_eq
+    have h_only_scB : ∀ mv : Fin 4445,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4445 → mv.val ≠ 4442 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4436 →
+        rule30n 2222 (fun k : Fin 4445 => decide (k.val = mv.val)) = true ∨
+        rule30n 2222 (fun k : Fin 4445 => decide (k.val = mv.val ∨ k.val = 4444)) = false := by
+      native_decide
+    by_cases hscB2221_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4445) := Fin.ext hscB2221_4
+      have hodd : ∀ k : Fin 2222, (fun k : Fin 4445 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2222 (fun k : Fin 4445 => decide (k.val = 6)) ≠
+          rule30n 2222 (flipCell (fun k : Fin 4445 => decide (k.val = 6)) (4 : Fin 4445)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4445 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2221_4436 : m.val = 4436
+      · -- m = 4436: sub-case B
+        have hm_eq : m = (4436 : Fin 4445) := Fin.ext hscB2221_4436
+        have hodd : ∀ k : Fin 2222, (fun k : Fin 4445 => decide (k.val = 20)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2222 (fun k : Fin 4445 => decide (k.val = 20)) ≠
+            rule30n 2222 (flipCell (fun k : Fin 4445 => decide (k.val = 20)) (4436 : Fin 4445)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4445 => decide (k.val = 20), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2221_4 hscB2221_4436 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2222_eq : n' = 2222
+  ·
+    subst hn2222_eq
+    have h_only_scB : ∀ mv : Fin 4447,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4447 → mv.val ≠ 4444 →
+        mv.val ≠ 4438 →
+        rule30n 2223 (fun k : Fin 4447 => decide (k.val = mv.val)) = true ∨
+        rule30n 2223 (fun k : Fin 4447 => decide (k.val = mv.val ∨ k.val = 4446)) = false := by
+      native_decide
+    by_cases hscB2222_4438 : m.val = 4438
+    · -- m = 4438: sub-case B
+      have hm_eq : m = (4438 : Fin 4447) := Fin.ext hscB2222_4438
+      have hodd : ∀ k : Fin 2223, (fun k : Fin 4447 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2223 (fun k : Fin 4447 => decide (k.val = 2)) ≠
+          rule30n 2223 (flipCell (fun k : Fin 4447 => decide (k.val = 2)) (4438 : Fin 4447)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4447 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2222_4438 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2223_eq : n' = 2223
+  ·
+    subst hn2223_eq
+    have h_no_scB : ∀ mv : Fin 4449,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4449 → mv.val ≠ 4446 →
+        rule30n 2224 (fun k : Fin 4449 => decide (k.val = mv.val)) = true ∨
+        rule30n 2224 (fun k : Fin 4449 => decide (k.val = mv.val ∨ k.val = 4448)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2224_eq : n' = 2224
+  ·
+    subst hn2224_eq
+    have h_only_scB : ∀ mv : Fin 4451,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4451 → mv.val ≠ 4448 →
+        mv.val ≠ 10 →
+        rule30n 2225 (fun k : Fin 4451 => decide (k.val = mv.val)) = true ∨
+        rule30n 2225 (fun k : Fin 4451 => decide (k.val = mv.val ∨ k.val = 4450)) = false := by
+      native_decide
+    by_cases hscB2224_10 : m.val = 10
+    · -- m = 10: sub-case B
+      have hm_eq : m = (10 : Fin 4451) := Fin.ext hscB2224_10
+      have hodd : ∀ k : Fin 2225, (fun k : Fin 4451 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2225 (fun k : Fin 4451 => decide (k.val = 2)) ≠
+          rule30n 2225 (flipCell (fun k : Fin 4451 => decide (k.val = 2)) (10 : Fin 4451)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4451 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2224_10 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2225_eq : n' = 2225
+  ·
+    subst hn2225_eq
+    have h_only_scB : ∀ mv : Fin 4453,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4453 → mv.val ≠ 4450 →
+        mv.val ≠ 4444 →
+        rule30n 2226 (fun k : Fin 4453 => decide (k.val = mv.val)) = true ∨
+        rule30n 2226 (fun k : Fin 4453 => decide (k.val = mv.val ∨ k.val = 4452)) = false := by
+      native_decide
+    by_cases hscB2225_4444 : m.val = 4444
+    · -- m = 4444: sub-case B
+      have hm_eq : m = (4444 : Fin 4453) := Fin.ext hscB2225_4444
+      have hodd : ∀ k : Fin 2226, (fun k : Fin 4453 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2226 (fun k : Fin 4453 => decide (k.val = 12)) ≠
+          rule30n 2226 (flipCell (fun k : Fin 4453 => decide (k.val = 12)) (4444 : Fin 4453)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4453 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2225_4444 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2226_eq : n' = 2226
+  ·
+    subst hn2226_eq
+    have h_only_scB : ∀ mv : Fin 4455,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4455 → mv.val ≠ 4452 →
+        mv.val ≠ 4446 →
+        rule30n 2227 (fun k : Fin 4455 => decide (k.val = mv.val)) = true ∨
+        rule30n 2227 (fun k : Fin 4455 => decide (k.val = mv.val ∨ k.val = 4454)) = false := by
+      native_decide
+    by_cases hscB2226_4446 : m.val = 4446
+    · -- m = 4446: sub-case B
+      have hm_eq : m = (4446 : Fin 4455) := Fin.ext hscB2226_4446
+      have hodd : ∀ k : Fin 2227, (fun k : Fin 4455 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2227 (fun k : Fin 4455 => decide (k.val = 2)) ≠
+          rule30n 2227 (flipCell (fun k : Fin 4455 => decide (k.val = 2)) (4446 : Fin 4455)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4455 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2226_4446 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2227_eq : n' = 2227
+  ·
+    subst hn2227_eq
+    have h_no_scB : ∀ mv : Fin 4457,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4457 → mv.val ≠ 4454 →
+        rule30n 2228 (fun k : Fin 4457 => decide (k.val = mv.val)) = true ∨
+        rule30n 2228 (fun k : Fin 4457 => decide (k.val = mv.val ∨ k.val = 4456)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2228_eq : n' = 2228
+  ·
+    subst hn2228_eq
+    have h_no_scB : ∀ mv : Fin 4459,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4459 → mv.val ≠ 4456 →
+        rule30n 2229 (fun k : Fin 4459 => decide (k.val = mv.val)) = true ∨
+        rule30n 2229 (fun k : Fin 4459 => decide (k.val = mv.val ∨ k.val = 4458)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2229_eq : n' = 2229
+  ·
+    subst hn2229_eq
+    have h_only_scB : ∀ mv : Fin 4461,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4461 → mv.val ≠ 4458 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4452 →
+        rule30n 2230 (fun k : Fin 4461 => decide (k.val = mv.val)) = true ∨
+        rule30n 2230 (fun k : Fin 4461 => decide (k.val = mv.val ∨ k.val = 4460)) = false := by
+      native_decide
+    by_cases hscB2229_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4461) := Fin.ext hscB2229_4
+      have hodd : ∀ k : Fin 2230, (fun k : Fin 4461 => decide (k.val = 10)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2230 (fun k : Fin 4461 => decide (k.val = 10)) ≠
+          rule30n 2230 (flipCell (fun k : Fin 4461 => decide (k.val = 10)) (4 : Fin 4461)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4461 => decide (k.val = 10), hodd, hsens⟩
+    ·
+      by_cases hscB2229_4452 : m.val = 4452
+      · -- m = 4452: sub-case B
+        have hm_eq : m = (4452 : Fin 4461) := Fin.ext hscB2229_4452
+        have hodd : ∀ k : Fin 2230, (fun k : Fin 4461 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2230 (fun k : Fin 4461 => decide (k.val = 12)) ≠
+            rule30n 2230 (flipCell (fun k : Fin 4461 => decide (k.val = 12)) (4452 : Fin 4461)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4461 => decide (k.val = 12), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2229_4 hscB2229_4452 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2230_eq : n' = 2230
+  ·
+    subst hn2230_eq
+    have h_only_scB : ∀ mv : Fin 4463,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4463 → mv.val ≠ 4460 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4454 →
+        rule30n 2231 (fun k : Fin 4463 => decide (k.val = mv.val)) = true ∨
+        rule30n 2231 (fun k : Fin 4463 => decide (k.val = mv.val ∨ k.val = 4462)) = false := by
+      native_decide
+    by_cases hscB2230_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4463) := Fin.ext hscB2230_6
+      have hodd : ∀ k : Fin 2231, (fun k : Fin 4463 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2231 (fun k : Fin 4463 => decide (k.val = 2)) ≠
+          rule30n 2231 (flipCell (fun k : Fin 4463 => decide (k.val = 2)) (6 : Fin 4463)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4463 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2230_4454 : m.val = 4454
+      · -- m = 4454: sub-case B
+        have hm_eq : m = (4454 : Fin 4463) := Fin.ext hscB2230_4454
+        have hodd : ∀ k : Fin 2231, (fun k : Fin 4463 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2231 (fun k : Fin 4463 => decide (k.val = 2)) ≠
+            rule30n 2231 (flipCell (fun k : Fin 4463 => decide (k.val = 2)) (4454 : Fin 4463)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4463 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2230_6 hscB2230_4454 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2231_eq : n' = 2231
+  ·
+    subst hn2231_eq
+    have h_no_scB : ∀ mv : Fin 4465,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4465 → mv.val ≠ 4462 →
+        rule30n 2232 (fun k : Fin 4465 => decide (k.val = mv.val)) = true ∨
+        rule30n 2232 (fun k : Fin 4465 => decide (k.val = mv.val ∨ k.val = 4464)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2232_eq : n' = 2232
+  ·
+    subst hn2232_eq
+    have h_no_scB : ∀ mv : Fin 4467,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4467 → mv.val ≠ 4464 →
+        rule30n 2233 (fun k : Fin 4467 => decide (k.val = mv.val)) = true ∨
+        rule30n 2233 (fun k : Fin 4467 => decide (k.val = mv.val ∨ k.val = 4466)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2233_eq : n' = 2233
+  ·
+    subst hn2233_eq
+    have h_only_scB : ∀ mv : Fin 4469,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4469 → mv.val ≠ 4466 →
+        mv.val ≠ 4460 →
+        rule30n 2234 (fun k : Fin 4469 => decide (k.val = mv.val)) = true ∨
+        rule30n 2234 (fun k : Fin 4469 => decide (k.val = mv.val ∨ k.val = 4468)) = false := by
+      native_decide
+    by_cases hscB2233_4460 : m.val = 4460
+    · -- m = 4460: sub-case B
+      have hm_eq : m = (4460 : Fin 4469) := Fin.ext hscB2233_4460
+      have hodd : ∀ k : Fin 2234, (fun k : Fin 4469 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2234 (fun k : Fin 4469 => decide (k.val = 8)) ≠
+          rule30n 2234 (flipCell (fun k : Fin 4469 => decide (k.val = 8)) (4460 : Fin 4469)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4469 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2233_4460 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2234_eq : n' = 2234
+  ·
+    subst hn2234_eq
+    have h_only_scB : ∀ mv : Fin 4471,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4471 → mv.val ≠ 4468 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4462 →
+        rule30n 2235 (fun k : Fin 4471 => decide (k.val = mv.val)) = true ∨
+        rule30n 2235 (fun k : Fin 4471 => decide (k.val = mv.val ∨ k.val = 4470)) = false := by
+      native_decide
+    by_cases hscB2234_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4471) := Fin.ext hscB2234_6
+      have hodd : ∀ k : Fin 2235, (fun k : Fin 4471 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2235 (fun k : Fin 4471 => decide (k.val = 8)) ≠
+          rule30n 2235 (flipCell (fun k : Fin 4471 => decide (k.val = 8)) (6 : Fin 4471)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4471 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB2234_4462 : m.val = 4462
+      · -- m = 4462: sub-case B
+        have hm_eq : m = (4462 : Fin 4471) := Fin.ext hscB2234_4462
+        have hodd : ∀ k : Fin 2235, (fun k : Fin 4471 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2235 (fun k : Fin 4471 => decide (k.val = 2)) ≠
+            rule30n 2235 (flipCell (fun k : Fin 4471 => decide (k.val = 2)) (4462 : Fin 4471)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4471 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2234_6 hscB2234_4462 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2235_eq : n' = 2235
+  ·
+    subst hn2235_eq
+    have h_no_scB : ∀ mv : Fin 4473,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4473 → mv.val ≠ 4470 →
+        rule30n 2236 (fun k : Fin 4473 => decide (k.val = mv.val)) = true ∨
+        rule30n 2236 (fun k : Fin 4473 => decide (k.val = mv.val ∨ k.val = 4472)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2236_eq : n' = 2236
+  ·
+    subst hn2236_eq
+    have h_no_scB : ∀ mv : Fin 4475,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4475 → mv.val ≠ 4472 →
+        rule30n 2237 (fun k : Fin 4475 => decide (k.val = mv.val)) = true ∨
+        rule30n 2237 (fun k : Fin 4475 => decide (k.val = mv.val ∨ k.val = 4474)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2237_eq : n' = 2237
+  ·
+    subst hn2237_eq
+    have h_only_scB : ∀ mv : Fin 4477,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4477 → mv.val ≠ 4474 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4468 →
+        rule30n 2238 (fun k : Fin 4477 => decide (k.val = mv.val)) = true ∨
+        rule30n 2238 (fun k : Fin 4477 => decide (k.val = mv.val ∨ k.val = 4476)) = false := by
+      native_decide
+    by_cases hscB2237_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4477) := Fin.ext hscB2237_4
+      have hodd : ∀ k : Fin 2238, (fun k : Fin 4477 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2238 (fun k : Fin 4477 => decide (k.val = 6)) ≠
+          rule30n 2238 (flipCell (fun k : Fin 4477 => decide (k.val = 6)) (4 : Fin 4477)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4477 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2237_4468 : m.val = 4468
+      · -- m = 4468: sub-case B
+        have hm_eq : m = (4468 : Fin 4477) := Fin.ext hscB2237_4468
+        have hodd : ∀ k : Fin 2238, (fun k : Fin 4477 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2238 (fun k : Fin 4477 => decide (k.val = 8)) ≠
+            rule30n 2238 (flipCell (fun k : Fin 4477 => decide (k.val = 8)) (4468 : Fin 4477)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4477 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2237_4 hscB2237_4468 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2238_eq : n' = 2238
+  ·
+    subst hn2238_eq
+    have h_only_scB : ∀ mv : Fin 4479,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4479 → mv.val ≠ 4476 →
+        mv.val ≠ 4470 →
+        rule30n 2239 (fun k : Fin 4479 => decide (k.val = mv.val)) = true ∨
+        rule30n 2239 (fun k : Fin 4479 => decide (k.val = mv.val ∨ k.val = 4478)) = false := by
+      native_decide
+    by_cases hscB2238_4470 : m.val = 4470
+    · -- m = 4470: sub-case B
+      have hm_eq : m = (4470 : Fin 4479) := Fin.ext hscB2238_4470
+      have hodd : ∀ k : Fin 2239, (fun k : Fin 4479 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2239 (fun k : Fin 4479 => decide (k.val = 2)) ≠
+          rule30n 2239 (flipCell (fun k : Fin 4479 => decide (k.val = 2)) (4470 : Fin 4479)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4479 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2238_4470 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2239_eq : n' = 2239
+  ·
+    subst hn2239_eq
+    have h_no_scB : ∀ mv : Fin 4481,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4481 → mv.val ≠ 4478 →
+        rule30n 2240 (fun k : Fin 4481 => decide (k.val = mv.val)) = true ∨
+        rule30n 2240 (fun k : Fin 4481 => decide (k.val = mv.val ∨ k.val = 4480)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2240_eq : n' = 2240
+  ·
+    subst hn2240_eq
+    have h_no_scB : ∀ mv : Fin 4483,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4483 → mv.val ≠ 4480 →
+        rule30n 2241 (fun k : Fin 4483 => decide (k.val = mv.val)) = true ∨
+        rule30n 2241 (fun k : Fin 4483 => decide (k.val = mv.val ∨ k.val = 4482)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2241_eq : n' = 2241
+  ·
+    subst hn2241_eq
+    have h_only_scB : ∀ mv : Fin 4485,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4485 → mv.val ≠ 4482 →
+        mv.val ≠ 4476 →
+        rule30n 2242 (fun k : Fin 4485 => decide (k.val = mv.val)) = true ∨
+        rule30n 2242 (fun k : Fin 4485 => decide (k.val = mv.val ∨ k.val = 4484)) = false := by
+      native_decide
+    by_cases hscB2241_4476 : m.val = 4476
+    · -- m = 4476: sub-case B
+      have hm_eq : m = (4476 : Fin 4485) := Fin.ext hscB2241_4476
+      have hodd : ∀ k : Fin 2242, (fun k : Fin 4485 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2242 (fun k : Fin 4485 => decide (k.val = 12)) ≠
+          rule30n 2242 (flipCell (fun k : Fin 4485 => decide (k.val = 12)) (4476 : Fin 4485)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4485 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2241_4476 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2242_eq : n' = 2242
+  ·
+    subst hn2242_eq
+    have h_only_scB : ∀ mv : Fin 4487,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4487 → mv.val ≠ 4484 →
+        mv.val ≠ 4478 →
+        rule30n 2243 (fun k : Fin 4487 => decide (k.val = mv.val)) = true ∨
+        rule30n 2243 (fun k : Fin 4487 => decide (k.val = mv.val ∨ k.val = 4486)) = false := by
+      native_decide
+    by_cases hscB2242_4478 : m.val = 4478
+    · -- m = 4478: sub-case B
+      have hm_eq : m = (4478 : Fin 4487) := Fin.ext hscB2242_4478
+      have hodd : ∀ k : Fin 2243, (fun k : Fin 4487 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2243 (fun k : Fin 4487 => decide (k.val = 2)) ≠
+          rule30n 2243 (flipCell (fun k : Fin 4487 => decide (k.val = 2)) (4478 : Fin 4487)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4487 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2242_4478 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2243_eq : n' = 2243
+  ·
+    subst hn2243_eq
+    have h_no_scB : ∀ mv : Fin 4489,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4489 → mv.val ≠ 4486 →
+        rule30n 2244 (fun k : Fin 4489 => decide (k.val = mv.val)) = true ∨
+        rule30n 2244 (fun k : Fin 4489 => decide (k.val = mv.val ∨ k.val = 4488)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2244_eq : n' = 2244
+  ·
+    subst hn2244_eq
+    have h_no_scB : ∀ mv : Fin 4491,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4491 → mv.val ≠ 4488 →
+        rule30n 2245 (fun k : Fin 4491 => decide (k.val = mv.val)) = true ∨
+        rule30n 2245 (fun k : Fin 4491 => decide (k.val = mv.val ∨ k.val = 4490)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2245_eq : n' = 2245
+  ·
+    subst hn2245_eq
+    have h_only_scB : ∀ mv : Fin 4493,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4493 → mv.val ≠ 4490 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4484 →
+        rule30n 2246 (fun k : Fin 4493 => decide (k.val = mv.val)) = true ∨
+        rule30n 2246 (fun k : Fin 4493 => decide (k.val = mv.val ∨ k.val = 4492)) = false := by
+      native_decide
+    by_cases hscB2245_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4493) := Fin.ext hscB2245_4
+      have hodd : ∀ k : Fin 2246, (fun k : Fin 4493 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2246 (fun k : Fin 4493 => decide (k.val = 12)) ≠
+          rule30n 2246 (flipCell (fun k : Fin 4493 => decide (k.val = 12)) (4 : Fin 4493)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4493 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      by_cases hscB2245_4484 : m.val = 4484
+      · -- m = 4484: sub-case B
+        have hm_eq : m = (4484 : Fin 4493) := Fin.ext hscB2245_4484
+        have hodd : ∀ k : Fin 2246, (fun k : Fin 4493 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2246 (fun k : Fin 4493 => decide (k.val = 8)) ≠
+            rule30n 2246 (flipCell (fun k : Fin 4493 => decide (k.val = 8)) (4484 : Fin 4493)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4493 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2245_4 hscB2245_4484 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2246_eq : n' = 2246
+  ·
+    subst hn2246_eq
+    have h_only_scB : ∀ mv : Fin 4495,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4495 → mv.val ≠ 4492 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4486 →
+        rule30n 2247 (fun k : Fin 4495 => decide (k.val = mv.val)) = true ∨
+        rule30n 2247 (fun k : Fin 4495 => decide (k.val = mv.val ∨ k.val = 4494)) = false := by
+      native_decide
+    by_cases hscB2246_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4495) := Fin.ext hscB2246_6
+      have hodd : ∀ k : Fin 2247, (fun k : Fin 4495 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2247 (fun k : Fin 4495 => decide (k.val = 2)) ≠
+          rule30n 2247 (flipCell (fun k : Fin 4495 => decide (k.val = 2)) (6 : Fin 4495)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4495 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2246_4486 : m.val = 4486
+      · -- m = 4486: sub-case B
+        have hm_eq : m = (4486 : Fin 4495) := Fin.ext hscB2246_4486
+        have hodd : ∀ k : Fin 2247, (fun k : Fin 4495 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2247 (fun k : Fin 4495 => decide (k.val = 2)) ≠
+            rule30n 2247 (flipCell (fun k : Fin 4495 => decide (k.val = 2)) (4486 : Fin 4495)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4495 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2246_6 hscB2246_4486 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2247_eq : n' = 2247
+  ·
+    subst hn2247_eq
+    have h_no_scB : ∀ mv : Fin 4497,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4497 → mv.val ≠ 4494 →
+        rule30n 2248 (fun k : Fin 4497 => decide (k.val = mv.val)) = true ∨
+        rule30n 2248 (fun k : Fin 4497 => decide (k.val = mv.val ∨ k.val = 4496)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2248_eq : n' = 2248
+  ·
+    subst hn2248_eq
+    have h_no_scB : ∀ mv : Fin 4499,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4499 → mv.val ≠ 4496 →
+        rule30n 2249 (fun k : Fin 4499 => decide (k.val = mv.val)) = true ∨
+        rule30n 2249 (fun k : Fin 4499 => decide (k.val = mv.val ∨ k.val = 4498)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2249_eq : n' = 2249
+  ·
+    subst hn2249_eq
+    have h_only_scB : ∀ mv : Fin 4501,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4501 → mv.val ≠ 4498 →
+        mv.val ≠ 12 →
+        mv.val ≠ 4492 →
+        rule30n 2250 (fun k : Fin 4501 => decide (k.val = mv.val)) = true ∨
+        rule30n 2250 (fun k : Fin 4501 => decide (k.val = mv.val ∨ k.val = 4500)) = false := by
+      native_decide
+    by_cases hscB2249_12 : m.val = 12
+    · -- m = 12: sub-case B
+      have hm_eq : m = (12 : Fin 4501) := Fin.ext hscB2249_12
+      have hodd : ∀ k : Fin 2250, (fun k : Fin 4501 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2250 (fun k : Fin 4501 => decide (k.val = 2)) ≠
+          rule30n 2250 (flipCell (fun k : Fin 4501 => decide (k.val = 2)) (12 : Fin 4501)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4501 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2249_4492 : m.val = 4492
+      · -- m = 4492: sub-case B
+        have hm_eq : m = (4492 : Fin 4501) := Fin.ext hscB2249_4492
+        have hodd : ∀ k : Fin 2250, (fun k : Fin 4501 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2250 (fun k : Fin 4501 => decide (k.val = 8)) ≠
+            rule30n 2250 (flipCell (fun k : Fin 4501 => decide (k.val = 8)) (4492 : Fin 4501)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4501 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2249_12 hscB2249_4492 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2250_eq : n' = 2250
+  ·
+    subst hn2250_eq
+    have h_only_scB : ∀ mv : Fin 4503,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4503 → mv.val ≠ 4500 →
+        mv.val ≠ 6 →
+        mv.val ≠ 14 →
+        mv.val ≠ 4494 →
+        rule30n 2251 (fun k : Fin 4503 => decide (k.val = mv.val)) = true ∨
+        rule30n 2251 (fun k : Fin 4503 => decide (k.val = mv.val ∨ k.val = 4502)) = false := by
+      native_decide
+    by_cases hscB2250_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4503) := Fin.ext hscB2250_6
+      have hodd : ∀ k : Fin 2251, (fun k : Fin 4503 => decide (k.val = 14)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2251 (fun k : Fin 4503 => decide (k.val = 14)) ≠
+          rule30n 2251 (flipCell (fun k : Fin 4503 => decide (k.val = 14)) (6 : Fin 4503)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4503 => decide (k.val = 14), hodd, hsens⟩
+    ·
+      by_cases hscB2250_14 : m.val = 14
+      · -- m = 14: sub-case B
+        have hm_eq : m = (14 : Fin 4503) := Fin.ext hscB2250_14
+        have hodd : ∀ k : Fin 2251, (fun k : Fin 4503 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2251 (fun k : Fin 4503 => decide (k.val = 2)) ≠
+            rule30n 2251 (flipCell (fun k : Fin 4503 => decide (k.val = 2)) (14 : Fin 4503)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4503 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        by_cases hscB2250_4494 : m.val = 4494
+        · -- m = 4494: sub-case B
+          have hm_eq : m = (4494 : Fin 4503) := Fin.ext hscB2250_4494
+          have hodd : ∀ k : Fin 2251, (fun k : Fin 4503 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+            intro k; simp only [decide_eq_false_iff_not]; omega
+          have hsens : rule30n 2251 (fun k : Fin 4503 => decide (k.val = 2)) ≠
+              rule30n 2251 (flipCell (fun k : Fin 4503 => decide (k.val = 2)) (4494 : Fin 4503)) := by
+            native_decide
+          rw [hm_eq]; exact ⟨fun k : Fin 4503 => decide (k.val = 2), hodd, hsens⟩
+        ·
+          rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2250_6 hscB2250_14 hscB2250_4494 with h | h
+          · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+          · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2251_eq : n' = 2251
+  ·
+    subst hn2251_eq
+    have h_only_scB : ∀ mv : Fin 4505,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4505 → mv.val ≠ 4502 →
+        mv.val ≠ 8 →
+        rule30n 2252 (fun k : Fin 4505 => decide (k.val = mv.val)) = true ∨
+        rule30n 2252 (fun k : Fin 4505 => decide (k.val = mv.val ∨ k.val = 4504)) = false := by
+      native_decide
+    by_cases hscB2251_8 : m.val = 8
+    · -- m = 8: sub-case B
+      have hm_eq : m = (8 : Fin 4505) := Fin.ext hscB2251_8
+      have hodd : ∀ k : Fin 2252, (fun k : Fin 4505 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2252 (fun k : Fin 4505 => decide (k.val = 2)) ≠
+          rule30n 2252 (flipCell (fun k : Fin 4505 => decide (k.val = 2)) (8 : Fin 4505)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4505 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2251_8 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2252_eq : n' = 2252
+  ·
+    subst hn2252_eq
+    have h_no_scB : ∀ mv : Fin 4507,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4507 → mv.val ≠ 4504 →
+        rule30n 2253 (fun k : Fin 4507 => decide (k.val = mv.val)) = true ∨
+        rule30n 2253 (fun k : Fin 4507 => decide (k.val = mv.val ∨ k.val = 4506)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2253_eq : n' = 2253
+  ·
+    subst hn2253_eq
+    have h_only_scB : ∀ mv : Fin 4509,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4509 → mv.val ≠ 4506 →
+        mv.val ≠ 4 →
+        mv.val ≠ 12 →
+        mv.val ≠ 4500 →
+        rule30n 2254 (fun k : Fin 4509 => decide (k.val = mv.val)) = true ∨
+        rule30n 2254 (fun k : Fin 4509 => decide (k.val = mv.val ∨ k.val = 4508)) = false := by
+      native_decide
+    by_cases hscB2253_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4509) := Fin.ext hscB2253_4
+      have hodd : ∀ k : Fin 2254, (fun k : Fin 4509 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2254 (fun k : Fin 4509 => decide (k.val = 6)) ≠
+          rule30n 2254 (flipCell (fun k : Fin 4509 => decide (k.val = 6)) (4 : Fin 4509)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4509 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2253_12 : m.val = 12
+      · -- m = 12: sub-case B
+        have hm_eq : m = (12 : Fin 4509) := Fin.ext hscB2253_12
+        have hodd : ∀ k : Fin 2254, (fun k : Fin 4509 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2254 (fun k : Fin 4509 => decide (k.val = 2)) ≠
+            rule30n 2254 (flipCell (fun k : Fin 4509 => decide (k.val = 2)) (12 : Fin 4509)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4509 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        by_cases hscB2253_4500 : m.val = 4500
+        · -- m = 4500: sub-case B
+          have hm_eq : m = (4500 : Fin 4509) := Fin.ext hscB2253_4500
+          have hodd : ∀ k : Fin 2254, (fun k : Fin 4509 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+            intro k; simp only [decide_eq_false_iff_not]; omega
+          have hsens : rule30n 2254 (fun k : Fin 4509 => decide (k.val = 12)) ≠
+              rule30n 2254 (flipCell (fun k : Fin 4509 => decide (k.val = 12)) (4500 : Fin 4509)) := by
+            native_decide
+          rw [hm_eq]; exact ⟨fun k : Fin 4509 => decide (k.val = 12), hodd, hsens⟩
+        ·
+          rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2253_4 hscB2253_12 hscB2253_4500 with h | h
+          · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+          · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2254_eq : n' = 2254
+  ·
+    subst hn2254_eq
+    have h_only_scB : ∀ mv : Fin 4511,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4511 → mv.val ≠ 4508 →
+        mv.val ≠ 14 →
+        mv.val ≠ 4502 →
+        rule30n 2255 (fun k : Fin 4511 => decide (k.val = mv.val)) = true ∨
+        rule30n 2255 (fun k : Fin 4511 => decide (k.val = mv.val ∨ k.val = 4510)) = false := by
+      native_decide
+    by_cases hscB2254_14 : m.val = 14
+    · -- m = 14: sub-case B
+      have hm_eq : m = (14 : Fin 4511) := Fin.ext hscB2254_14
+      have hodd : ∀ k : Fin 2255, (fun k : Fin 4511 => decide (k.val = 4)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2255 (fun k : Fin 4511 => decide (k.val = 4)) ≠
+          rule30n 2255 (flipCell (fun k : Fin 4511 => decide (k.val = 4)) (14 : Fin 4511)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4511 => decide (k.val = 4), hodd, hsens⟩
+    ·
+      by_cases hscB2254_4502 : m.val = 4502
+      · -- m = 4502: sub-case B
+        have hm_eq : m = (4502 : Fin 4511) := Fin.ext hscB2254_4502
+        have hodd : ∀ k : Fin 2255, (fun k : Fin 4511 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2255 (fun k : Fin 4511 => decide (k.val = 2)) ≠
+            rule30n 2255 (flipCell (fun k : Fin 4511 => decide (k.val = 2)) (4502 : Fin 4511)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4511 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2254_14 hscB2254_4502 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2255_eq : n' = 2255
+  ·
+    subst hn2255_eq
+    have h_only_scB : ∀ mv : Fin 4513,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4513 → mv.val ≠ 4510 →
+        mv.val ≠ 16 →
+        rule30n 2256 (fun k : Fin 4513 => decide (k.val = mv.val)) = true ∨
+        rule30n 2256 (fun k : Fin 4513 => decide (k.val = mv.val ∨ k.val = 4512)) = false := by
+      native_decide
+    by_cases hscB2255_16 : m.val = 16
+    · -- m = 16: sub-case B
+      have hm_eq : m = (16 : Fin 4513) := Fin.ext hscB2255_16
+      have hodd : ∀ k : Fin 2256, (fun k : Fin 4513 => decide (k.val = 4)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2256 (fun k : Fin 4513 => decide (k.val = 4)) ≠
+          rule30n 2256 (flipCell (fun k : Fin 4513 => decide (k.val = 4)) (16 : Fin 4513)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4513 => decide (k.val = 4), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2255_16 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2256_eq : n' = 2256
+  ·
+    subst hn2256_eq
+    have h_no_scB : ∀ mv : Fin 4515,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4515 → mv.val ≠ 4512 →
+        rule30n 2257 (fun k : Fin 4515 => decide (k.val = mv.val)) = true ∨
+        rule30n 2257 (fun k : Fin 4515 => decide (k.val = mv.val ∨ k.val = 4514)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2257_eq : n' = 2257
+  ·
+    subst hn2257_eq
+    have h_only_scB : ∀ mv : Fin 4517,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4517 → mv.val ≠ 4514 →
+        mv.val ≠ 4508 →
+        rule30n 2258 (fun k : Fin 4517 => decide (k.val = mv.val)) = true ∨
+        rule30n 2258 (fun k : Fin 4517 => decide (k.val = mv.val ∨ k.val = 4516)) = false := by
+      native_decide
+    by_cases hscB2257_4508 : m.val = 4508
+    · -- m = 4508: sub-case B
+      have hm_eq : m = (4508 : Fin 4517) := Fin.ext hscB2257_4508
+      have hodd : ∀ k : Fin 2258, (fun k : Fin 4517 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2258 (fun k : Fin 4517 => decide (k.val = 16)) ≠
+          rule30n 2258 (flipCell (fun k : Fin 4517 => decide (k.val = 16)) (4508 : Fin 4517)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4517 => decide (k.val = 16), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2257_4508 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2258_eq : n' = 2258
+  ·
+    subst hn2258_eq
+    have h_only_scB : ∀ mv : Fin 4519,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4519 → mv.val ≠ 4516 →
+        mv.val ≠ 4510 →
+        rule30n 2259 (fun k : Fin 4519 => decide (k.val = mv.val)) = true ∨
+        rule30n 2259 (fun k : Fin 4519 => decide (k.val = mv.val ∨ k.val = 4518)) = false := by
+      native_decide
+    by_cases hscB2258_4510 : m.val = 4510
+    · -- m = 4510: sub-case B
+      have hm_eq : m = (4510 : Fin 4519) := Fin.ext hscB2258_4510
+      have hodd : ∀ k : Fin 2259, (fun k : Fin 4519 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2259 (fun k : Fin 4519 => decide (k.val = 2)) ≠
+          rule30n 2259 (flipCell (fun k : Fin 4519 => decide (k.val = 2)) (4510 : Fin 4519)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4519 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2258_4510 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2259_eq : n' = 2259
+  ·
+    subst hn2259_eq
+    have h_no_scB : ∀ mv : Fin 4521,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4521 → mv.val ≠ 4518 →
+        rule30n 2260 (fun k : Fin 4521 => decide (k.val = mv.val)) = true ∨
+        rule30n 2260 (fun k : Fin 4521 => decide (k.val = mv.val ∨ k.val = 4520)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2260_eq : n' = 2260
+  ·
+    subst hn2260_eq
+    have h_no_scB : ∀ mv : Fin 4523,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4523 → mv.val ≠ 4520 →
+        rule30n 2261 (fun k : Fin 4523 => decide (k.val = mv.val)) = true ∨
+        rule30n 2261 (fun k : Fin 4523 => decide (k.val = mv.val ∨ k.val = 4522)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2261_eq : n' = 2261
+  ·
+    subst hn2261_eq
+    have h_only_scB : ∀ mv : Fin 4525,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4525 → mv.val ≠ 4522 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4516 →
+        rule30n 2262 (fun k : Fin 4525 => decide (k.val = mv.val)) = true ∨
+        rule30n 2262 (fun k : Fin 4525 => decide (k.val = mv.val ∨ k.val = 4524)) = false := by
+      native_decide
+    by_cases hscB2261_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4525) := Fin.ext hscB2261_4
+      have hodd : ∀ k : Fin 2262, (fun k : Fin 4525 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2262 (fun k : Fin 4525 => decide (k.val = 12)) ≠
+          rule30n 2262 (flipCell (fun k : Fin 4525 => decide (k.val = 12)) (4 : Fin 4525)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4525 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      by_cases hscB2261_4516 : m.val = 4516
+      · -- m = 4516: sub-case B
+        have hm_eq : m = (4516 : Fin 4525) := Fin.ext hscB2261_4516
+        have hodd : ∀ k : Fin 2262, (fun k : Fin 4525 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2262 (fun k : Fin 4525 => decide (k.val = 16)) ≠
+            rule30n 2262 (flipCell (fun k : Fin 4525 => decide (k.val = 16)) (4516 : Fin 4525)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4525 => decide (k.val = 16), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2261_4 hscB2261_4516 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2262_eq : n' = 2262
+  ·
+    subst hn2262_eq
+    have h_only_scB : ∀ mv : Fin 4527,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4527 → mv.val ≠ 4524 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4518 →
+        rule30n 2263 (fun k : Fin 4527 => decide (k.val = mv.val)) = true ∨
+        rule30n 2263 (fun k : Fin 4527 => decide (k.val = mv.val ∨ k.val = 4526)) = false := by
+      native_decide
+    by_cases hscB2262_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4527) := Fin.ext hscB2262_6
+      have hodd : ∀ k : Fin 2263, (fun k : Fin 4527 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2263 (fun k : Fin 4527 => decide (k.val = 2)) ≠
+          rule30n 2263 (flipCell (fun k : Fin 4527 => decide (k.val = 2)) (6 : Fin 4527)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4527 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2262_4518 : m.val = 4518
+      · -- m = 4518: sub-case B
+        have hm_eq : m = (4518 : Fin 4527) := Fin.ext hscB2262_4518
+        have hodd : ∀ k : Fin 2263, (fun k : Fin 4527 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2263 (fun k : Fin 4527 => decide (k.val = 2)) ≠
+            rule30n 2263 (flipCell (fun k : Fin 4527 => decide (k.val = 2)) (4518 : Fin 4527)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4527 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2262_6 hscB2262_4518 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2263_eq : n' = 2263
+  ·
+    subst hn2263_eq
+    have h_no_scB : ∀ mv : Fin 4529,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4529 → mv.val ≠ 4526 →
+        rule30n 2264 (fun k : Fin 4529 => decide (k.val = mv.val)) = true ∨
+        rule30n 2264 (fun k : Fin 4529 => decide (k.val = mv.val ∨ k.val = 4528)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2264_eq : n' = 2264
+  ·
+    subst hn2264_eq
+    have h_no_scB : ∀ mv : Fin 4531,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4531 → mv.val ≠ 4528 →
+        rule30n 2265 (fun k : Fin 4531 => decide (k.val = mv.val)) = true ∨
+        rule30n 2265 (fun k : Fin 4531 => decide (k.val = mv.val ∨ k.val = 4530)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2265_eq : n' = 2265
+  ·
+    subst hn2265_eq
+    have h_only_scB : ∀ mv : Fin 4533,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4533 → mv.val ≠ 4530 →
+        mv.val ≠ 4524 →
+        rule30n 2266 (fun k : Fin 4533 => decide (k.val = mv.val)) = true ∨
+        rule30n 2266 (fun k : Fin 4533 => decide (k.val = mv.val ∨ k.val = 4532)) = false := by
+      native_decide
+    by_cases hscB2265_4524 : m.val = 4524
+    · -- m = 4524: sub-case B
+      have hm_eq : m = (4524 : Fin 4533) := Fin.ext hscB2265_4524
+      have hodd : ∀ k : Fin 2266, (fun k : Fin 4533 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2266 (fun k : Fin 4533 => decide (k.val = 8)) ≠
+          rule30n 2266 (flipCell (fun k : Fin 4533 => decide (k.val = 8)) (4524 : Fin 4533)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4533 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2265_4524 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2266_eq : n' = 2266
+  ·
+    subst hn2266_eq
+    have h_only_scB : ∀ mv : Fin 4535,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4535 → mv.val ≠ 4532 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4526 →
+        rule30n 2267 (fun k : Fin 4535 => decide (k.val = mv.val)) = true ∨
+        rule30n 2267 (fun k : Fin 4535 => decide (k.val = mv.val ∨ k.val = 4534)) = false := by
+      native_decide
+    by_cases hscB2266_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4535) := Fin.ext hscB2266_6
+      have hodd : ∀ k : Fin 2267, (fun k : Fin 4535 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2267 (fun k : Fin 4535 => decide (k.val = 8)) ≠
+          rule30n 2267 (flipCell (fun k : Fin 4535 => decide (k.val = 8)) (6 : Fin 4535)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4535 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB2266_4526 : m.val = 4526
+      · -- m = 4526: sub-case B
+        have hm_eq : m = (4526 : Fin 4535) := Fin.ext hscB2266_4526
+        have hodd : ∀ k : Fin 2267, (fun k : Fin 4535 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2267 (fun k : Fin 4535 => decide (k.val = 2)) ≠
+            rule30n 2267 (flipCell (fun k : Fin 4535 => decide (k.val = 2)) (4526 : Fin 4535)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4535 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2266_6 hscB2266_4526 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2267_eq : n' = 2267
+  ·
+    subst hn2267_eq
+    have h_no_scB : ∀ mv : Fin 4537,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4537 → mv.val ≠ 4534 →
+        rule30n 2268 (fun k : Fin 4537 => decide (k.val = mv.val)) = true ∨
+        rule30n 2268 (fun k : Fin 4537 => decide (k.val = mv.val ∨ k.val = 4536)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2268_eq : n' = 2268
+  ·
+    subst hn2268_eq
+    have h_no_scB : ∀ mv : Fin 4539,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4539 → mv.val ≠ 4536 →
+        rule30n 2269 (fun k : Fin 4539 => decide (k.val = mv.val)) = true ∨
+        rule30n 2269 (fun k : Fin 4539 => decide (k.val = mv.val ∨ k.val = 4538)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2269_eq : n' = 2269
+  ·
+    subst hn2269_eq
+    have h_only_scB : ∀ mv : Fin 4541,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4541 → mv.val ≠ 4538 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4532 →
+        rule30n 2270 (fun k : Fin 4541 => decide (k.val = mv.val)) = true ∨
+        rule30n 2270 (fun k : Fin 4541 => decide (k.val = mv.val ∨ k.val = 4540)) = false := by
+      native_decide
+    by_cases hscB2269_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4541) := Fin.ext hscB2269_4
+      have hodd : ∀ k : Fin 2270, (fun k : Fin 4541 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2270 (fun k : Fin 4541 => decide (k.val = 6)) ≠
+          rule30n 2270 (flipCell (fun k : Fin 4541 => decide (k.val = 6)) (4 : Fin 4541)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4541 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2269_4532 : m.val = 4532
+      · -- m = 4532: sub-case B
+        have hm_eq : m = (4532 : Fin 4541) := Fin.ext hscB2269_4532
+        have hodd : ∀ k : Fin 2270, (fun k : Fin 4541 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2270 (fun k : Fin 4541 => decide (k.val = 8)) ≠
+            rule30n 2270 (flipCell (fun k : Fin 4541 => decide (k.val = 8)) (4532 : Fin 4541)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4541 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2269_4 hscB2269_4532 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2270_eq : n' = 2270
+  ·
+    subst hn2270_eq
+    have h_only_scB : ∀ mv : Fin 4543,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4543 → mv.val ≠ 4540 →
+        mv.val ≠ 4534 →
+        rule30n 2271 (fun k : Fin 4543 => decide (k.val = mv.val)) = true ∨
+        rule30n 2271 (fun k : Fin 4543 => decide (k.val = mv.val ∨ k.val = 4542)) = false := by
+      native_decide
+    by_cases hscB2270_4534 : m.val = 4534
+    · -- m = 4534: sub-case B
+      have hm_eq : m = (4534 : Fin 4543) := Fin.ext hscB2270_4534
+      have hodd : ∀ k : Fin 2271, (fun k : Fin 4543 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2271 (fun k : Fin 4543 => decide (k.val = 2)) ≠
+          rule30n 2271 (flipCell (fun k : Fin 4543 => decide (k.val = 2)) (4534 : Fin 4543)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4543 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2270_4534 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2271_eq : n' = 2271
+  ·
+    subst hn2271_eq
+    have h_no_scB : ∀ mv : Fin 4545,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4545 → mv.val ≠ 4542 →
+        rule30n 2272 (fun k : Fin 4545 => decide (k.val = mv.val)) = true ∨
+        rule30n 2272 (fun k : Fin 4545 => decide (k.val = mv.val ∨ k.val = 4544)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2272_eq : n' = 2272
+  ·
+    subst hn2272_eq
+    have h_no_scB : ∀ mv : Fin 4547,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4547 → mv.val ≠ 4544 →
+        rule30n 2273 (fun k : Fin 4547 => decide (k.val = mv.val)) = true ∨
+        rule30n 2273 (fun k : Fin 4547 => decide (k.val = mv.val ∨ k.val = 4546)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2273_eq : n' = 2273
+  ·
+    subst hn2273_eq
+    have h_only_scB : ∀ mv : Fin 4549,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4549 → mv.val ≠ 4546 →
+        mv.val ≠ 4540 →
+        rule30n 2274 (fun k : Fin 4549 => decide (k.val = mv.val)) = true ∨
+        rule30n 2274 (fun k : Fin 4549 => decide (k.val = mv.val ∨ k.val = 4548)) = false := by
+      native_decide
+    by_cases hscB2273_4540 : m.val = 4540
+    · -- m = 4540: sub-case B
+      have hm_eq : m = (4540 : Fin 4549) := Fin.ext hscB2273_4540
+      have hodd : ∀ k : Fin 2274, (fun k : Fin 4549 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2274 (fun k : Fin 4549 => decide (k.val = 12)) ≠
+          rule30n 2274 (flipCell (fun k : Fin 4549 => decide (k.val = 12)) (4540 : Fin 4549)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4549 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2273_4540 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2274_eq : n' = 2274
+  ·
+    subst hn2274_eq
+    have h_only_scB : ∀ mv : Fin 4551,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4551 → mv.val ≠ 4548 →
+        mv.val ≠ 4542 →
+        rule30n 2275 (fun k : Fin 4551 => decide (k.val = mv.val)) = true ∨
+        rule30n 2275 (fun k : Fin 4551 => decide (k.val = mv.val ∨ k.val = 4550)) = false := by
+      native_decide
+    by_cases hscB2274_4542 : m.val = 4542
+    · -- m = 4542: sub-case B
+      have hm_eq : m = (4542 : Fin 4551) := Fin.ext hscB2274_4542
+      have hodd : ∀ k : Fin 2275, (fun k : Fin 4551 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2275 (fun k : Fin 4551 => decide (k.val = 2)) ≠
+          rule30n 2275 (flipCell (fun k : Fin 4551 => decide (k.val = 2)) (4542 : Fin 4551)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4551 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2274_4542 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2275_eq : n' = 2275
+  ·
+    subst hn2275_eq
+    have h_no_scB : ∀ mv : Fin 4553,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4553 → mv.val ≠ 4550 →
+        rule30n 2276 (fun k : Fin 4553 => decide (k.val = mv.val)) = true ∨
+        rule30n 2276 (fun k : Fin 4553 => decide (k.val = mv.val ∨ k.val = 4552)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2276_eq : n' = 2276
+  ·
+    subst hn2276_eq
+    have h_no_scB : ∀ mv : Fin 4555,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4555 → mv.val ≠ 4552 →
+        rule30n 2277 (fun k : Fin 4555 => decide (k.val = mv.val)) = true ∨
+        rule30n 2277 (fun k : Fin 4555 => decide (k.val = mv.val ∨ k.val = 4554)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2277_eq : n' = 2277
+  ·
+    subst hn2277_eq
+    have h_only_scB : ∀ mv : Fin 4557,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4557 → mv.val ≠ 4554 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4548 →
+        rule30n 2278 (fun k : Fin 4557 => decide (k.val = mv.val)) = true ∨
+        rule30n 2278 (fun k : Fin 4557 => decide (k.val = mv.val ∨ k.val = 4556)) = false := by
+      native_decide
+    by_cases hscB2277_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4557) := Fin.ext hscB2277_4
+      have hodd : ∀ k : Fin 2278, (fun k : Fin 4557 => decide (k.val = 14)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2278 (fun k : Fin 4557 => decide (k.val = 14)) ≠
+          rule30n 2278 (flipCell (fun k : Fin 4557 => decide (k.val = 14)) (4 : Fin 4557)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4557 => decide (k.val = 14), hodd, hsens⟩
+    ·
+      by_cases hscB2277_4548 : m.val = 4548
+      · -- m = 4548: sub-case B
+        have hm_eq : m = (4548 : Fin 4557) := Fin.ext hscB2277_4548
+        have hodd : ∀ k : Fin 2278, (fun k : Fin 4557 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2278 (fun k : Fin 4557 => decide (k.val = 8)) ≠
+            rule30n 2278 (flipCell (fun k : Fin 4557 => decide (k.val = 8)) (4548 : Fin 4557)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4557 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2277_4 hscB2277_4548 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2278_eq : n' = 2278
+  ·
+    subst hn2278_eq
+    have h_only_scB : ∀ mv : Fin 4559,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4559 → mv.val ≠ 4556 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4550 →
+        rule30n 2279 (fun k : Fin 4559 => decide (k.val = mv.val)) = true ∨
+        rule30n 2279 (fun k : Fin 4559 => decide (k.val = mv.val ∨ k.val = 4558)) = false := by
+      native_decide
+    by_cases hscB2278_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4559) := Fin.ext hscB2278_6
+      have hodd : ∀ k : Fin 2279, (fun k : Fin 4559 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2279 (fun k : Fin 4559 => decide (k.val = 2)) ≠
+          rule30n 2279 (flipCell (fun k : Fin 4559 => decide (k.val = 2)) (6 : Fin 4559)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4559 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2278_4550 : m.val = 4550
+      · -- m = 4550: sub-case B
+        have hm_eq : m = (4550 : Fin 4559) := Fin.ext hscB2278_4550
+        have hodd : ∀ k : Fin 2279, (fun k : Fin 4559 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2279 (fun k : Fin 4559 => decide (k.val = 2)) ≠
+            rule30n 2279 (flipCell (fun k : Fin 4559 => decide (k.val = 2)) (4550 : Fin 4559)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4559 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2278_6 hscB2278_4550 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2279_eq : n' = 2279
+  ·
+    subst hn2279_eq
+    have h_no_scB : ∀ mv : Fin 4561,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4561 → mv.val ≠ 4558 →
+        rule30n 2280 (fun k : Fin 4561 => decide (k.val = mv.val)) = true ∨
+        rule30n 2280 (fun k : Fin 4561 => decide (k.val = mv.val ∨ k.val = 4560)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2280_eq : n' = 2280
+  ·
+    subst hn2280_eq
+    have h_no_scB : ∀ mv : Fin 4563,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4563 → mv.val ≠ 4560 →
+        rule30n 2281 (fun k : Fin 4563 => decide (k.val = mv.val)) = true ∨
+        rule30n 2281 (fun k : Fin 4563 => decide (k.val = mv.val ∨ k.val = 4562)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2281_eq : n' = 2281
+  ·
+    subst hn2281_eq
+    have h_only_scB : ∀ mv : Fin 4565,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4565 → mv.val ≠ 4562 →
+        mv.val ≠ 4556 →
+        rule30n 2282 (fun k : Fin 4565 => decide (k.val = mv.val)) = true ∨
+        rule30n 2282 (fun k : Fin 4565 => decide (k.val = mv.val ∨ k.val = 4564)) = false := by
+      native_decide
+    by_cases hscB2281_4556 : m.val = 4556
+    · -- m = 4556: sub-case B
+      have hm_eq : m = (4556 : Fin 4565) := Fin.ext hscB2281_4556
+      have hodd : ∀ k : Fin 2282, (fun k : Fin 4565 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2282 (fun k : Fin 4565 => decide (k.val = 8)) ≠
+          rule30n 2282 (flipCell (fun k : Fin 4565 => decide (k.val = 8)) (4556 : Fin 4565)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4565 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2281_4556 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2282_eq : n' = 2282
+  ·
+    subst hn2282_eq
+    have h_only_scB : ∀ mv : Fin 4567,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4567 → mv.val ≠ 4564 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4558 →
+        rule30n 2283 (fun k : Fin 4567 => decide (k.val = mv.val)) = true ∨
+        rule30n 2283 (fun k : Fin 4567 => decide (k.val = mv.val ∨ k.val = 4566)) = false := by
+      native_decide
+    by_cases hscB2282_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4567) := Fin.ext hscB2282_6
+      have hodd : ∀ k : Fin 2283, (fun k : Fin 4567 => decide (k.val = 10)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2283 (fun k : Fin 4567 => decide (k.val = 10)) ≠
+          rule30n 2283 (flipCell (fun k : Fin 4567 => decide (k.val = 10)) (6 : Fin 4567)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4567 => decide (k.val = 10), hodd, hsens⟩
+    ·
+      by_cases hscB2282_4558 : m.val = 4558
+      · -- m = 4558: sub-case B
+        have hm_eq : m = (4558 : Fin 4567) := Fin.ext hscB2282_4558
+        have hodd : ∀ k : Fin 2283, (fun k : Fin 4567 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2283 (fun k : Fin 4567 => decide (k.val = 2)) ≠
+            rule30n 2283 (flipCell (fun k : Fin 4567 => decide (k.val = 2)) (4558 : Fin 4567)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4567 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2282_6 hscB2282_4558 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2283_eq : n' = 2283
+  ·
+    subst hn2283_eq
+    have h_only_scB : ∀ mv : Fin 4569,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4569 → mv.val ≠ 4566 →
+        mv.val ≠ 8 →
+        rule30n 2284 (fun k : Fin 4569 => decide (k.val = mv.val)) = true ∨
+        rule30n 2284 (fun k : Fin 4569 => decide (k.val = mv.val ∨ k.val = 4568)) = false := by
+      native_decide
+    by_cases hscB2283_8 : m.val = 8
+    · -- m = 8: sub-case B
+      have hm_eq : m = (8 : Fin 4569) := Fin.ext hscB2283_8
+      have hodd : ∀ k : Fin 2284, (fun k : Fin 4569 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2284 (fun k : Fin 4569 => decide (k.val = 2)) ≠
+          rule30n 2284 (flipCell (fun k : Fin 4569 => decide (k.val = 2)) (8 : Fin 4569)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4569 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2283_8 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2284_eq : n' = 2284
+  ·
+    subst hn2284_eq
+    have h_no_scB : ∀ mv : Fin 4571,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4571 → mv.val ≠ 4568 →
+        rule30n 2285 (fun k : Fin 4571 => decide (k.val = mv.val)) = true ∨
+        rule30n 2285 (fun k : Fin 4571 => decide (k.val = mv.val ∨ k.val = 4570)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2285_eq : n' = 2285
+  ·
+    subst hn2285_eq
+    have h_only_scB : ∀ mv : Fin 4573,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4573 → mv.val ≠ 4570 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4564 →
+        rule30n 2286 (fun k : Fin 4573 => decide (k.val = mv.val)) = true ∨
+        rule30n 2286 (fun k : Fin 4573 => decide (k.val = mv.val ∨ k.val = 4572)) = false := by
+      native_decide
+    by_cases hscB2285_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4573) := Fin.ext hscB2285_4
+      have hodd : ∀ k : Fin 2286, (fun k : Fin 4573 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2286 (fun k : Fin 4573 => decide (k.val = 6)) ≠
+          rule30n 2286 (flipCell (fun k : Fin 4573 => decide (k.val = 6)) (4 : Fin 4573)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4573 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2285_4564 : m.val = 4564
+      · -- m = 4564: sub-case B
+        have hm_eq : m = (4564 : Fin 4573) := Fin.ext hscB2285_4564
+        have hodd : ∀ k : Fin 2286, (fun k : Fin 4573 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2286 (fun k : Fin 4573 => decide (k.val = 16)) ≠
+            rule30n 2286 (flipCell (fun k : Fin 4573 => decide (k.val = 16)) (4564 : Fin 4573)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4573 => decide (k.val = 16), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2285_4 hscB2285_4564 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2286_eq : n' = 2286
+  ·
+    subst hn2286_eq
+    have h_only_scB : ∀ mv : Fin 4575,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4575 → mv.val ≠ 4572 →
+        mv.val ≠ 4566 →
+        rule30n 2287 (fun k : Fin 4575 => decide (k.val = mv.val)) = true ∨
+        rule30n 2287 (fun k : Fin 4575 => decide (k.val = mv.val ∨ k.val = 4574)) = false := by
+      native_decide
+    by_cases hscB2286_4566 : m.val = 4566
+    · -- m = 4566: sub-case B
+      have hm_eq : m = (4566 : Fin 4575) := Fin.ext hscB2286_4566
+      have hodd : ∀ k : Fin 2287, (fun k : Fin 4575 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2287 (fun k : Fin 4575 => decide (k.val = 2)) ≠
+          rule30n 2287 (flipCell (fun k : Fin 4575 => decide (k.val = 2)) (4566 : Fin 4575)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4575 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2286_4566 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2287_eq : n' = 2287
+  ·
+    subst hn2287_eq
+    have h_no_scB : ∀ mv : Fin 4577,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4577 → mv.val ≠ 4574 →
+        rule30n 2288 (fun k : Fin 4577 => decide (k.val = mv.val)) = true ∨
+        rule30n 2288 (fun k : Fin 4577 => decide (k.val = mv.val ∨ k.val = 4576)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2288_eq : n' = 2288
+  ·
+    subst hn2288_eq
+    have h_only_scB : ∀ mv : Fin 4579,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4579 → mv.val ≠ 4576 →
+        mv.val ≠ 10 →
+        rule30n 2289 (fun k : Fin 4579 => decide (k.val = mv.val)) = true ∨
+        rule30n 2289 (fun k : Fin 4579 => decide (k.val = mv.val ∨ k.val = 4578)) = false := by
+      native_decide
+    by_cases hscB2288_10 : m.val = 10
+    · -- m = 10: sub-case B
+      have hm_eq : m = (10 : Fin 4579) := Fin.ext hscB2288_10
+      have hodd : ∀ k : Fin 2289, (fun k : Fin 4579 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2289 (fun k : Fin 4579 => decide (k.val = 2)) ≠
+          rule30n 2289 (flipCell (fun k : Fin 4579 => decide (k.val = 2)) (10 : Fin 4579)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4579 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2288_10 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2289_eq : n' = 2289
+  ·
+    subst hn2289_eq
+    have h_only_scB : ∀ mv : Fin 4581,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4581 → mv.val ≠ 4578 →
+        mv.val ≠ 4572 →
+        rule30n 2290 (fun k : Fin 4581 => decide (k.val = mv.val)) = true ∨
+        rule30n 2290 (fun k : Fin 4581 => decide (k.val = mv.val ∨ k.val = 4580)) = false := by
+      native_decide
+    by_cases hscB2289_4572 : m.val = 4572
+    · -- m = 4572: sub-case B
+      have hm_eq : m = (4572 : Fin 4581) := Fin.ext hscB2289_4572
+      have hodd : ∀ k : Fin 2290, (fun k : Fin 4581 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2290 (fun k : Fin 4581 => decide (k.val = 12)) ≠
+          rule30n 2290 (flipCell (fun k : Fin 4581 => decide (k.val = 12)) (4572 : Fin 4581)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4581 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2289_4572 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2290_eq : n' = 2290
+  ·
+    subst hn2290_eq
+    have h_only_scB : ∀ mv : Fin 4583,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4583 → mv.val ≠ 4580 →
+        mv.val ≠ 4574 →
+        rule30n 2291 (fun k : Fin 4583 => decide (k.val = mv.val)) = true ∨
+        rule30n 2291 (fun k : Fin 4583 => decide (k.val = mv.val ∨ k.val = 4582)) = false := by
+      native_decide
+    by_cases hscB2290_4574 : m.val = 4574
+    · -- m = 4574: sub-case B
+      have hm_eq : m = (4574 : Fin 4583) := Fin.ext hscB2290_4574
+      have hodd : ∀ k : Fin 2291, (fun k : Fin 4583 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2291 (fun k : Fin 4583 => decide (k.val = 2)) ≠
+          rule30n 2291 (flipCell (fun k : Fin 4583 => decide (k.val = 2)) (4574 : Fin 4583)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4583 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2290_4574 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2291_eq : n' = 2291
+  ·
+    subst hn2291_eq
+    have h_no_scB : ∀ mv : Fin 4585,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4585 → mv.val ≠ 4582 →
+        rule30n 2292 (fun k : Fin 4585 => decide (k.val = mv.val)) = true ∨
+        rule30n 2292 (fun k : Fin 4585 => decide (k.val = mv.val ∨ k.val = 4584)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2292_eq : n' = 2292
+  ·
+    subst hn2292_eq
+    have h_no_scB : ∀ mv : Fin 4587,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4587 → mv.val ≠ 4584 →
+        rule30n 2293 (fun k : Fin 4587 => decide (k.val = mv.val)) = true ∨
+        rule30n 2293 (fun k : Fin 4587 => decide (k.val = mv.val ∨ k.val = 4586)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2293_eq : n' = 2293
+  ·
+    subst hn2293_eq
+    have h_only_scB : ∀ mv : Fin 4589,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4589 → mv.val ≠ 4586 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4580 →
+        rule30n 2294 (fun k : Fin 4589 => decide (k.val = mv.val)) = true ∨
+        rule30n 2294 (fun k : Fin 4589 => decide (k.val = mv.val ∨ k.val = 4588)) = false := by
+      native_decide
+    by_cases hscB2293_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4589) := Fin.ext hscB2293_4
+      have hodd : ∀ k : Fin 2294, (fun k : Fin 4589 => decide (k.val = 10)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2294 (fun k : Fin 4589 => decide (k.val = 10)) ≠
+          rule30n 2294 (flipCell (fun k : Fin 4589 => decide (k.val = 10)) (4 : Fin 4589)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4589 => decide (k.val = 10), hodd, hsens⟩
+    ·
+      by_cases hscB2293_4580 : m.val = 4580
+      · -- m = 4580: sub-case B
+        have hm_eq : m = (4580 : Fin 4589) := Fin.ext hscB2293_4580
+        have hodd : ∀ k : Fin 2294, (fun k : Fin 4589 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2294 (fun k : Fin 4589 => decide (k.val = 12)) ≠
+            rule30n 2294 (flipCell (fun k : Fin 4589 => decide (k.val = 12)) (4580 : Fin 4589)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4589 => decide (k.val = 12), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2293_4 hscB2293_4580 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2294_eq : n' = 2294
+  ·
+    subst hn2294_eq
+    have h_only_scB : ∀ mv : Fin 4591,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4591 → mv.val ≠ 4588 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4582 →
+        rule30n 2295 (fun k : Fin 4591 => decide (k.val = mv.val)) = true ∨
+        rule30n 2295 (fun k : Fin 4591 => decide (k.val = mv.val ∨ k.val = 4590)) = false := by
+      native_decide
+    by_cases hscB2294_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4591) := Fin.ext hscB2294_6
+      have hodd : ∀ k : Fin 2295, (fun k : Fin 4591 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2295 (fun k : Fin 4591 => decide (k.val = 2)) ≠
+          rule30n 2295 (flipCell (fun k : Fin 4591 => decide (k.val = 2)) (6 : Fin 4591)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4591 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2294_4582 : m.val = 4582
+      · -- m = 4582: sub-case B
+        have hm_eq : m = (4582 : Fin 4591) := Fin.ext hscB2294_4582
+        have hodd : ∀ k : Fin 2295, (fun k : Fin 4591 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2295 (fun k : Fin 4591 => decide (k.val = 2)) ≠
+            rule30n 2295 (flipCell (fun k : Fin 4591 => decide (k.val = 2)) (4582 : Fin 4591)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4591 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2294_6 hscB2294_4582 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2295_eq : n' = 2295
+  ·
+    subst hn2295_eq
+    have h_no_scB : ∀ mv : Fin 4593,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4593 → mv.val ≠ 4590 →
+        rule30n 2296 (fun k : Fin 4593 => decide (k.val = mv.val)) = true ∨
+        rule30n 2296 (fun k : Fin 4593 => decide (k.val = mv.val ∨ k.val = 4592)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2296_eq : n' = 2296
+  ·
+    subst hn2296_eq
+    have h_no_scB : ∀ mv : Fin 4595,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4595 → mv.val ≠ 4592 →
+        rule30n 2297 (fun k : Fin 4595 => decide (k.val = mv.val)) = true ∨
+        rule30n 2297 (fun k : Fin 4595 => decide (k.val = mv.val ∨ k.val = 4594)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2297_eq : n' = 2297
+  ·
+    subst hn2297_eq
+    have h_only_scB : ∀ mv : Fin 4597,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4597 → mv.val ≠ 4594 →
+        mv.val ≠ 4588 →
+        rule30n 2298 (fun k : Fin 4597 => decide (k.val = mv.val)) = true ∨
+        rule30n 2298 (fun k : Fin 4597 => decide (k.val = mv.val ∨ k.val = 4596)) = false := by
+      native_decide
+    by_cases hscB2297_4588 : m.val = 4588
+    · -- m = 4588: sub-case B
+      have hm_eq : m = (4588 : Fin 4597) := Fin.ext hscB2297_4588
+      have hodd : ∀ k : Fin 2298, (fun k : Fin 4597 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2298 (fun k : Fin 4597 => decide (k.val = 8)) ≠
+          rule30n 2298 (flipCell (fun k : Fin 4597 => decide (k.val = 8)) (4588 : Fin 4597)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4597 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2297_4588 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2298_eq : n' = 2298
+  ·
+    subst hn2298_eq
+    have h_only_scB : ∀ mv : Fin 4599,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4599 → mv.val ≠ 4596 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4590 →
+        rule30n 2299 (fun k : Fin 4599 => decide (k.val = mv.val)) = true ∨
+        rule30n 2299 (fun k : Fin 4599 => decide (k.val = mv.val ∨ k.val = 4598)) = false := by
+      native_decide
+    by_cases hscB2298_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4599) := Fin.ext hscB2298_6
+      have hodd : ∀ k : Fin 2299, (fun k : Fin 4599 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2299 (fun k : Fin 4599 => decide (k.val = 8)) ≠
+          rule30n 2299 (flipCell (fun k : Fin 4599 => decide (k.val = 8)) (6 : Fin 4599)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4599 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB2298_4590 : m.val = 4590
+      · -- m = 4590: sub-case B
+        have hm_eq : m = (4590 : Fin 4599) := Fin.ext hscB2298_4590
+        have hodd : ∀ k : Fin 2299, (fun k : Fin 4599 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2299 (fun k : Fin 4599 => decide (k.val = 2)) ≠
+            rule30n 2299 (flipCell (fun k : Fin 4599 => decide (k.val = 2)) (4590 : Fin 4599)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4599 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2298_6 hscB2298_4590 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2299_eq : n' = 2299
+  ·
+    subst hn2299_eq
+    have h_no_scB : ∀ mv : Fin 4601,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4601 → mv.val ≠ 4598 →
+        rule30n 2300 (fun k : Fin 4601 => decide (k.val = mv.val)) = true ∨
+        rule30n 2300 (fun k : Fin 4601 => decide (k.val = mv.val ∨ k.val = 4600)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2300_eq : n' = 2300
+  ·
+    subst hn2300_eq
+    have h_no_scB : ∀ mv : Fin 4603,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4603 → mv.val ≠ 4600 →
+        rule30n 2301 (fun k : Fin 4603 => decide (k.val = mv.val)) = true ∨
+        rule30n 2301 (fun k : Fin 4603 => decide (k.val = mv.val ∨ k.val = 4602)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2301_eq : n' = 2301
+  ·
+    subst hn2301_eq
+    have h_only_scB : ∀ mv : Fin 4605,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4605 → mv.val ≠ 4602 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4596 →
+        rule30n 2302 (fun k : Fin 4605 => decide (k.val = mv.val)) = true ∨
+        rule30n 2302 (fun k : Fin 4605 => decide (k.val = mv.val ∨ k.val = 4604)) = false := by
+      native_decide
+    by_cases hscB2301_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4605) := Fin.ext hscB2301_4
+      have hodd : ∀ k : Fin 2302, (fun k : Fin 4605 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2302 (fun k : Fin 4605 => decide (k.val = 6)) ≠
+          rule30n 2302 (flipCell (fun k : Fin 4605 => decide (k.val = 6)) (4 : Fin 4605)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4605 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2301_4596 : m.val = 4596
+      · -- m = 4596: sub-case B
+        have hm_eq : m = (4596 : Fin 4605) := Fin.ext hscB2301_4596
+        have hodd : ∀ k : Fin 2302, (fun k : Fin 4605 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2302 (fun k : Fin 4605 => decide (k.val = 8)) ≠
+            rule30n 2302 (flipCell (fun k : Fin 4605 => decide (k.val = 8)) (4596 : Fin 4605)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4605 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2301_4 hscB2301_4596 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2302_eq : n' = 2302
+  ·
+    subst hn2302_eq
+    have h_only_scB : ∀ mv : Fin 4607,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4607 → mv.val ≠ 4604 →
+        mv.val ≠ 4598 →
+        rule30n 2303 (fun k : Fin 4607 => decide (k.val = mv.val)) = true ∨
+        rule30n 2303 (fun k : Fin 4607 => decide (k.val = mv.val ∨ k.val = 4606)) = false := by
+      native_decide
+    by_cases hscB2302_4598 : m.val = 4598
+    · -- m = 4598: sub-case B
+      have hm_eq : m = (4598 : Fin 4607) := Fin.ext hscB2302_4598
+      have hodd : ∀ k : Fin 2303, (fun k : Fin 4607 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2303 (fun k : Fin 4607 => decide (k.val = 2)) ≠
+          rule30n 2303 (flipCell (fun k : Fin 4607 => decide (k.val = 2)) (4598 : Fin 4607)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4607 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2302_4598 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2303_eq : n' = 2303
+  ·
+    subst hn2303_eq
+    have h_no_scB : ∀ mv : Fin 4609,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4609 → mv.val ≠ 4606 →
+        rule30n 2304 (fun k : Fin 4609 => decide (k.val = mv.val)) = true ∨
+        rule30n 2304 (fun k : Fin 4609 => decide (k.val = mv.val ∨ k.val = 4608)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2304_eq : n' = 2304
+  ·
+    subst hn2304_eq
+    have h_no_scB : ∀ mv : Fin 4611,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4611 → mv.val ≠ 4608 →
+        rule30n 2305 (fun k : Fin 4611 => decide (k.val = mv.val)) = true ∨
+        rule30n 2305 (fun k : Fin 4611 => decide (k.val = mv.val ∨ k.val = 4610)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2305_eq : n' = 2305
+  ·
+    subst hn2305_eq
+    have h_only_scB : ∀ mv : Fin 4613,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4613 → mv.val ≠ 4610 →
+        mv.val ≠ 4604 →
+        rule30n 2306 (fun k : Fin 4613 => decide (k.val = mv.val)) = true ∨
+        rule30n 2306 (fun k : Fin 4613 => decide (k.val = mv.val ∨ k.val = 4612)) = false := by
+      native_decide
+    by_cases hscB2305_4604 : m.val = 4604
+    · -- m = 4604: sub-case B
+      have hm_eq : m = (4604 : Fin 4613) := Fin.ext hscB2305_4604
+      have hodd : ∀ k : Fin 2306, (fun k : Fin 4613 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2306 (fun k : Fin 4613 => decide (k.val = 12)) ≠
+          rule30n 2306 (flipCell (fun k : Fin 4613 => decide (k.val = 12)) (4604 : Fin 4613)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4613 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2305_4604 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2306_eq : n' = 2306
+  ·
+    subst hn2306_eq
+    have h_only_scB : ∀ mv : Fin 4615,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4615 → mv.val ≠ 4612 →
+        mv.val ≠ 4606 →
+        rule30n 2307 (fun k : Fin 4615 => decide (k.val = mv.val)) = true ∨
+        rule30n 2307 (fun k : Fin 4615 => decide (k.val = mv.val ∨ k.val = 4614)) = false := by
+      native_decide
+    by_cases hscB2306_4606 : m.val = 4606
+    · -- m = 4606: sub-case B
+      have hm_eq : m = (4606 : Fin 4615) := Fin.ext hscB2306_4606
+      have hodd : ∀ k : Fin 2307, (fun k : Fin 4615 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2307 (fun k : Fin 4615 => decide (k.val = 2)) ≠
+          rule30n 2307 (flipCell (fun k : Fin 4615 => decide (k.val = 2)) (4606 : Fin 4615)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4615 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2306_4606 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2307_eq : n' = 2307
+  ·
+    subst hn2307_eq
+    have h_no_scB : ∀ mv : Fin 4617,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4617 → mv.val ≠ 4614 →
+        rule30n 2308 (fun k : Fin 4617 => decide (k.val = mv.val)) = true ∨
+        rule30n 2308 (fun k : Fin 4617 => decide (k.val = mv.val ∨ k.val = 4616)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2308_eq : n' = 2308
+  ·
+    subst hn2308_eq
+    have h_no_scB : ∀ mv : Fin 4619,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4619 → mv.val ≠ 4616 →
+        rule30n 2309 (fun k : Fin 4619 => decide (k.val = mv.val)) = true ∨
+        rule30n 2309 (fun k : Fin 4619 => decide (k.val = mv.val ∨ k.val = 4618)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2309_eq : n' = 2309
+  ·
+    subst hn2309_eq
+    have h_only_scB : ∀ mv : Fin 4621,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4621 → mv.val ≠ 4618 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4612 →
+        rule30n 2310 (fun k : Fin 4621 => decide (k.val = mv.val)) = true ∨
+        rule30n 2310 (fun k : Fin 4621 => decide (k.val = mv.val ∨ k.val = 4620)) = false := by
+      native_decide
+    by_cases hscB2309_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4621) := Fin.ext hscB2309_4
+      have hodd : ∀ k : Fin 2310, (fun k : Fin 4621 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2310 (fun k : Fin 4621 => decide (k.val = 16)) ≠
+          rule30n 2310 (flipCell (fun k : Fin 4621 => decide (k.val = 16)) (4 : Fin 4621)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4621 => decide (k.val = 16), hodd, hsens⟩
+    ·
+      by_cases hscB2309_4612 : m.val = 4612
+      · -- m = 4612: sub-case B
+        have hm_eq : m = (4612 : Fin 4621) := Fin.ext hscB2309_4612
+        have hodd : ∀ k : Fin 2310, (fun k : Fin 4621 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2310 (fun k : Fin 4621 => decide (k.val = 8)) ≠
+            rule30n 2310 (flipCell (fun k : Fin 4621 => decide (k.val = 8)) (4612 : Fin 4621)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4621 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2309_4 hscB2309_4612 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2310_eq : n' = 2310
+  ·
+    subst hn2310_eq
+    have h_only_scB : ∀ mv : Fin 4623,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4623 → mv.val ≠ 4620 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4614 →
+        rule30n 2311 (fun k : Fin 4623 => decide (k.val = mv.val)) = true ∨
+        rule30n 2311 (fun k : Fin 4623 => decide (k.val = mv.val ∨ k.val = 4622)) = false := by
+      native_decide
+    by_cases hscB2310_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4623) := Fin.ext hscB2310_6
+      have hodd : ∀ k : Fin 2311, (fun k : Fin 4623 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2311 (fun k : Fin 4623 => decide (k.val = 2)) ≠
+          rule30n 2311 (flipCell (fun k : Fin 4623 => decide (k.val = 2)) (6 : Fin 4623)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4623 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2310_4614 : m.val = 4614
+      · -- m = 4614: sub-case B
+        have hm_eq : m = (4614 : Fin 4623) := Fin.ext hscB2310_4614
+        have hodd : ∀ k : Fin 2311, (fun k : Fin 4623 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2311 (fun k : Fin 4623 => decide (k.val = 2)) ≠
+            rule30n 2311 (flipCell (fun k : Fin 4623 => decide (k.val = 2)) (4614 : Fin 4623)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4623 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2310_6 hscB2310_4614 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2311_eq : n' = 2311
+  ·
+    subst hn2311_eq
+    have h_no_scB : ∀ mv : Fin 4625,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4625 → mv.val ≠ 4622 →
+        rule30n 2312 (fun k : Fin 4625 => decide (k.val = mv.val)) = true ∨
+        rule30n 2312 (fun k : Fin 4625 => decide (k.val = mv.val ∨ k.val = 4624)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2312_eq : n' = 2312
+  ·
+    subst hn2312_eq
+    have h_no_scB : ∀ mv : Fin 4627,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4627 → mv.val ≠ 4624 →
+        rule30n 2313 (fun k : Fin 4627 => decide (k.val = mv.val)) = true ∨
+        rule30n 2313 (fun k : Fin 4627 => decide (k.val = mv.val ∨ k.val = 4626)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2313_eq : n' = 2313
+  ·
+    subst hn2313_eq
+    have h_only_scB : ∀ mv : Fin 4629,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4629 → mv.val ≠ 4626 →
+        mv.val ≠ 12 →
+        mv.val ≠ 4620 →
+        rule30n 2314 (fun k : Fin 4629 => decide (k.val = mv.val)) = true ∨
+        rule30n 2314 (fun k : Fin 4629 => decide (k.val = mv.val ∨ k.val = 4628)) = false := by
+      native_decide
+    by_cases hscB2313_12 : m.val = 12
+    · -- m = 12: sub-case B
+      have hm_eq : m = (12 : Fin 4629) := Fin.ext hscB2313_12
+      have hodd : ∀ k : Fin 2314, (fun k : Fin 4629 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2314 (fun k : Fin 4629 => decide (k.val = 8)) ≠
+          rule30n 2314 (flipCell (fun k : Fin 4629 => decide (k.val = 8)) (12 : Fin 4629)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4629 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB2313_4620 : m.val = 4620
+      · -- m = 4620: sub-case B
+        have hm_eq : m = (4620 : Fin 4629) := Fin.ext hscB2313_4620
+        have hodd : ∀ k : Fin 2314, (fun k : Fin 4629 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2314 (fun k : Fin 4629 => decide (k.val = 8)) ≠
+            rule30n 2314 (flipCell (fun k : Fin 4629 => decide (k.val = 8)) (4620 : Fin 4629)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4629 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2313_12 hscB2313_4620 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2314_eq : n' = 2314
+  ·
+    subst hn2314_eq
+    have h_only_scB : ∀ mv : Fin 4631,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4631 → mv.val ≠ 4628 →
+        mv.val ≠ 6 →
+        mv.val ≠ 14 →
+        mv.val ≠ 4622 →
+        rule30n 2315 (fun k : Fin 4631 => decide (k.val = mv.val)) = true ∨
+        rule30n 2315 (fun k : Fin 4631 => decide (k.val = mv.val ∨ k.val = 4630)) = false := by
+      native_decide
+    by_cases hscB2314_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4631) := Fin.ext hscB2314_6
+      have hodd : ∀ k : Fin 2315, (fun k : Fin 4631 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2315 (fun k : Fin 4631 => decide (k.val = 16)) ≠
+          rule30n 2315 (flipCell (fun k : Fin 4631 => decide (k.val = 16)) (6 : Fin 4631)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4631 => decide (k.val = 16), hodd, hsens⟩
+    ·
+      by_cases hscB2314_14 : m.val = 14
+      · -- m = 14: sub-case B
+        have hm_eq : m = (14 : Fin 4631) := Fin.ext hscB2314_14
+        have hodd : ∀ k : Fin 2315, (fun k : Fin 4631 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2315 (fun k : Fin 4631 => decide (k.val = 2)) ≠
+            rule30n 2315 (flipCell (fun k : Fin 4631 => decide (k.val = 2)) (14 : Fin 4631)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4631 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        by_cases hscB2314_4622 : m.val = 4622
+        · -- m = 4622: sub-case B
+          have hm_eq : m = (4622 : Fin 4631) := Fin.ext hscB2314_4622
+          have hodd : ∀ k : Fin 2315, (fun k : Fin 4631 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+            intro k; simp only [decide_eq_false_iff_not]; omega
+          have hsens : rule30n 2315 (fun k : Fin 4631 => decide (k.val = 2)) ≠
+              rule30n 2315 (flipCell (fun k : Fin 4631 => decide (k.val = 2)) (4622 : Fin 4631)) := by
+            native_decide
+          rw [hm_eq]; exact ⟨fun k : Fin 4631 => decide (k.val = 2), hodd, hsens⟩
+        ·
+          rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2314_6 hscB2314_14 hscB2314_4622 with h | h
+          · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+          · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2315_eq : n' = 2315
+  ·
+    subst hn2315_eq
+    have h_only_scB : ∀ mv : Fin 4633,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4633 → mv.val ≠ 4630 →
+        mv.val ≠ 8 →
+        mv.val ≠ 24 →
+        rule30n 2316 (fun k : Fin 4633 => decide (k.val = mv.val)) = true ∨
+        rule30n 2316 (fun k : Fin 4633 => decide (k.val = mv.val ∨ k.val = 4632)) = false := by
+      native_decide
+    by_cases hscB2315_8 : m.val = 8
+    · -- m = 8: sub-case B
+      have hm_eq : m = (8 : Fin 4633) := Fin.ext hscB2315_8
+      have hodd : ∀ k : Fin 2316, (fun k : Fin 4633 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2316 (fun k : Fin 4633 => decide (k.val = 2)) ≠
+          rule30n 2316 (flipCell (fun k : Fin 4633 => decide (k.val = 2)) (8 : Fin 4633)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4633 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2315_24 : m.val = 24
+      · -- m = 24: sub-case B
+        have hm_eq : m = (24 : Fin 4633) := Fin.ext hscB2315_24
+        have hodd : ∀ k : Fin 2316, (fun k : Fin 4633 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2316 (fun k : Fin 4633 => decide (k.val = 6)) ≠
+            rule30n 2316 (flipCell (fun k : Fin 4633 => decide (k.val = 6)) (24 : Fin 4633)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4633 => decide (k.val = 6), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2315_8 hscB2315_24 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2316_eq : n' = 2316
+  ·
+    subst hn2316_eq
+    have h_only_scB : ∀ mv : Fin 4635,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4635 → mv.val ≠ 4632 →
+        mv.val ≠ 26 →
+        rule30n 2317 (fun k : Fin 4635 => decide (k.val = mv.val)) = true ∨
+        rule30n 2317 (fun k : Fin 4635 => decide (k.val = mv.val ∨ k.val = 4634)) = false := by
+      native_decide
+    by_cases hscB2316_26 : m.val = 26
+    · -- m = 26: sub-case B
+      have hm_eq : m = (26 : Fin 4635) := Fin.ext hscB2316_26
+      have hodd : ∀ k : Fin 2317, (fun k : Fin 4635 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2317 (fun k : Fin 4635 => decide (k.val = 2)) ≠
+          rule30n 2317 (flipCell (fun k : Fin 4635 => decide (k.val = 2)) (26 : Fin 4635)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4635 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2316_26 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  · -- n'≥2317: TODO
+    sorry
+
+set_option maxHeartbeats 800000000 in
+/-- parity_sensitivity_even_subcaseB for n'≥2061. -/
+private lemma parity_sensitivity_even_subcaseB_ge2061
+    (n' : Nat) (hn_ge : 2061 ≤ n')
+    (m : Fin (2 * (n' + 1) + 1))
+    (hm_even : m.val % 2 = 0)
+    (hm_low : 1 ≤ m.val)
+    (hm_ne_r : m.val ≠ 2 * n')
+    (hm_high : m.val + 1 < 2 * (n' + 1) + 1)
+    (hcase : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+               decide (k.val = m.val)) = false)
+    (hts : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+             decide (k.val = m.val ∨ k.val = 2 * (n' + 1))) = true) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  by_cases hn2061_eq : n' = 2061
+  ·
+    subst hn2061_eq
+    have h_only_scB : ∀ mv : Fin 4125,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4125 → mv.val ≠ 4122 →
+        mv.val ≠ 4 →
+        mv.val ≠ 12 →
+        mv.val ≠ 20 →
+        mv.val ≠ 4116 →
+        rule30n 2062 (fun k : Fin 4125 => decide (k.val = mv.val)) = true ∨
+        rule30n 2062 (fun k : Fin 4125 => decide (k.val = mv.val ∨ k.val = 4124)) = false := by
+      native_decide
+    by_cases hscB2061_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4125) := Fin.ext hscB2061_4
+      have hodd : ∀ k : Fin 2062, (fun k : Fin 4125 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2062 (fun k : Fin 4125 => decide (k.val = 6)) ≠
+          rule30n 2062 (flipCell (fun k : Fin 4125 => decide (k.val = 6)) (4 : Fin 4125)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4125 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2061_12 : m.val = 12
+      · -- m = 12: sub-case B
+        have hm_eq : m = (12 : Fin 4125) := Fin.ext hscB2061_12
+        have hodd : ∀ k : Fin 2062, (fun k : Fin 4125 => decide (k.val = 4)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2062 (fun k : Fin 4125 => decide (k.val = 4)) ≠
+            rule30n 2062 (flipCell (fun k : Fin 4125 => decide (k.val = 4)) (12 : Fin 4125)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4125 => decide (k.val = 4), hodd, hsens⟩
+      ·
+        by_cases hscB2061_20 : m.val = 20
+        · -- m = 20: sub-case B
+          have hm_eq : m = (20 : Fin 4125) := Fin.ext hscB2061_20
+          have hodd : ∀ k : Fin 2062, (fun k : Fin 4125 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+            intro k; simp only [decide_eq_false_iff_not]; omega
+          have hsens : rule30n 2062 (fun k : Fin 4125 => decide (k.val = 12)) ≠
+              rule30n 2062 (flipCell (fun k : Fin 4125 => decide (k.val = 12)) (20 : Fin 4125)) := by
+            native_decide
+          rw [hm_eq]; exact ⟨fun k : Fin 4125 => decide (k.val = 12), hodd, hsens⟩
+        ·
+          by_cases hscB2061_4116 : m.val = 4116
+          · -- m = 4116: sub-case B
+            have hm_eq : m = (4116 : Fin 4125) := Fin.ext hscB2061_4116
+            have hodd : ∀ k : Fin 2062, (fun k : Fin 4125 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+              intro k; simp only [decide_eq_false_iff_not]; omega
+            have hsens : rule30n 2062 (fun k : Fin 4125 => decide (k.val = 12)) ≠
+                rule30n 2062 (flipCell (fun k : Fin 4125 => decide (k.val = 12)) (4116 : Fin 4125)) := by
+              native_decide
+            rw [hm_eq]; exact ⟨fun k : Fin 4125 => decide (k.val = 12), hodd, hsens⟩
+          ·
+            rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2061_4 hscB2061_12 hscB2061_20 hscB2061_4116 with h | h
+            · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+            · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2062_eq : n' = 2062
+  ·
+    subst hn2062_eq
+    have h_only_scB : ∀ mv : Fin 4127,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4127 → mv.val ≠ 4124 →
+        mv.val ≠ 14 →
+        mv.val ≠ 22 →
+        mv.val ≠ 4118 →
+        rule30n 2063 (fun k : Fin 4127 => decide (k.val = mv.val)) = true ∨
+        rule30n 2063 (fun k : Fin 4127 => decide (k.val = mv.val ∨ k.val = 4126)) = false := by
+      native_decide
+    by_cases hscB2062_14 : m.val = 14
+    · -- m = 14: sub-case B
+      have hm_eq : m = (14 : Fin 4127) := Fin.ext hscB2062_14
+      have hodd : ∀ k : Fin 2063, (fun k : Fin 4127 => decide (k.val = 4)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2063 (fun k : Fin 4127 => decide (k.val = 4)) ≠
+          rule30n 2063 (flipCell (fun k : Fin 4127 => decide (k.val = 4)) (14 : Fin 4127)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4127 => decide (k.val = 4), hodd, hsens⟩
+    ·
+      by_cases hscB2062_22 : m.val = 22
+      · -- m = 22: sub-case B
+        have hm_eq : m = (22 : Fin 4127) := Fin.ext hscB2062_22
+        have hodd : ∀ k : Fin 2063, (fun k : Fin 4127 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2063 (fun k : Fin 4127 => decide (k.val = 2)) ≠
+            rule30n 2063 (flipCell (fun k : Fin 4127 => decide (k.val = 2)) (22 : Fin 4127)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4127 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        by_cases hscB2062_4118 : m.val = 4118
+        · -- m = 4118: sub-case B
+          have hm_eq : m = (4118 : Fin 4127) := Fin.ext hscB2062_4118
+          have hodd : ∀ k : Fin 2063, (fun k : Fin 4127 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+            intro k; simp only [decide_eq_false_iff_not]; omega
+          have hsens : rule30n 2063 (fun k : Fin 4127 => decide (k.val = 2)) ≠
+              rule30n 2063 (flipCell (fun k : Fin 4127 => decide (k.val = 2)) (4118 : Fin 4127)) := by
+            native_decide
+          rw [hm_eq]; exact ⟨fun k : Fin 4127 => decide (k.val = 2), hodd, hsens⟩
+        ·
+          rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2062_14 hscB2062_22 hscB2062_4118 with h | h
+          · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+          · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2063_eq : n' = 2063
+  ·
+    subst hn2063_eq
+    have h_no_scB : ∀ mv : Fin 4129,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4129 → mv.val ≠ 4126 →
+        rule30n 2064 (fun k : Fin 4129 => decide (k.val = mv.val)) = true ∨
+        rule30n 2064 (fun k : Fin 4129 => decide (k.val = mv.val ∨ k.val = 4128)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2064_eq : n' = 2064
+  ·
+    subst hn2064_eq
+    have h_no_scB : ∀ mv : Fin 4131,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4131 → mv.val ≠ 4128 →
+        rule30n 2065 (fun k : Fin 4131 => decide (k.val = mv.val)) = true ∨
+        rule30n 2065 (fun k : Fin 4131 => decide (k.val = mv.val ∨ k.val = 4130)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2065_eq : n' = 2065
+  ·
+    subst hn2065_eq
+    have h_only_scB : ∀ mv : Fin 4133,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4133 → mv.val ≠ 4130 →
+        mv.val ≠ 28 →
+        mv.val ≠ 4124 →
+        rule30n 2066 (fun k : Fin 4133 => decide (k.val = mv.val)) = true ∨
+        rule30n 2066 (fun k : Fin 4133 => decide (k.val = mv.val ∨ k.val = 4132)) = false := by
+      native_decide
+    by_cases hscB2065_28 : m.val = 28
+    · -- m = 28: sub-case B
+      have hm_eq : m = (28 : Fin 4133) := Fin.ext hscB2065_28
+      have hodd : ∀ k : Fin 2066, (fun k : Fin 4133 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2066 (fun k : Fin 4133 => decide (k.val = 8)) ≠
+          rule30n 2066 (flipCell (fun k : Fin 4133 => decide (k.val = 8)) (28 : Fin 4133)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4133 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB2065_4124 : m.val = 4124
+      · -- m = 4124: sub-case B
+        have hm_eq : m = (4124 : Fin 4133) := Fin.ext hscB2065_4124
+        have hodd : ∀ k : Fin 2066, (fun k : Fin 4133 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2066 (fun k : Fin 4133 => decide (k.val = 16)) ≠
+            rule30n 2066 (flipCell (fun k : Fin 4133 => decide (k.val = 16)) (4124 : Fin 4133)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4133 => decide (k.val = 16), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2065_28 hscB2065_4124 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2066_eq : n' = 2066
+  ·
+    subst hn2066_eq
+    have h_only_scB : ∀ mv : Fin 4135,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4135 → mv.val ≠ 4132 →
+        mv.val ≠ 4126 →
+        rule30n 2067 (fun k : Fin 4135 => decide (k.val = mv.val)) = true ∨
+        rule30n 2067 (fun k : Fin 4135 => decide (k.val = mv.val ∨ k.val = 4134)) = false := by
+      native_decide
+    by_cases hscB2066_4126 : m.val = 4126
+    · -- m = 4126: sub-case B
+      have hm_eq : m = (4126 : Fin 4135) := Fin.ext hscB2066_4126
+      have hodd : ∀ k : Fin 2067, (fun k : Fin 4135 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2067 (fun k : Fin 4135 => decide (k.val = 2)) ≠
+          rule30n 2067 (flipCell (fun k : Fin 4135 => decide (k.val = 2)) (4126 : Fin 4135)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4135 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2066_4126 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2067_eq : n' = 2067
+  ·
+    subst hn2067_eq
+    have h_no_scB : ∀ mv : Fin 4137,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4137 → mv.val ≠ 4134 →
+        rule30n 2068 (fun k : Fin 4137 => decide (k.val = mv.val)) = true ∨
+        rule30n 2068 (fun k : Fin 4137 => decide (k.val = mv.val ∨ k.val = 4136)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2068_eq : n' = 2068
+  ·
+    subst hn2068_eq
+    have h_no_scB : ∀ mv : Fin 4139,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4139 → mv.val ≠ 4136 →
+        rule30n 2069 (fun k : Fin 4139 => decide (k.val = mv.val)) = true ∨
+        rule30n 2069 (fun k : Fin 4139 => decide (k.val = mv.val ∨ k.val = 4138)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2069_eq : n' = 2069
+  ·
+    subst hn2069_eq
+    have h_only_scB : ∀ mv : Fin 4141,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4141 → mv.val ≠ 4138 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4132 →
+        rule30n 2070 (fun k : Fin 4141 => decide (k.val = mv.val)) = true ∨
+        rule30n 2070 (fun k : Fin 4141 => decide (k.val = mv.val ∨ k.val = 4140)) = false := by
+      native_decide
+    by_cases hscB2069_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4141) := Fin.ext hscB2069_4
+      have hodd : ∀ k : Fin 2070, (fun k : Fin 4141 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2070 (fun k : Fin 4141 => decide (k.val = 16)) ≠
+          rule30n 2070 (flipCell (fun k : Fin 4141 => decide (k.val = 16)) (4 : Fin 4141)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4141 => decide (k.val = 16), hodd, hsens⟩
+    ·
+      by_cases hscB2069_4132 : m.val = 4132
+      · -- m = 4132: sub-case B
+        have hm_eq : m = (4132 : Fin 4141) := Fin.ext hscB2069_4132
+        have hodd : ∀ k : Fin 2070, (fun k : Fin 4141 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2070 (fun k : Fin 4141 => decide (k.val = 16)) ≠
+            rule30n 2070 (flipCell (fun k : Fin 4141 => decide (k.val = 16)) (4132 : Fin 4141)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4141 => decide (k.val = 16), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2069_4 hscB2069_4132 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2070_eq : n' = 2070
+  ·
+    subst hn2070_eq
+    have h_only_scB : ∀ mv : Fin 4143,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4143 → mv.val ≠ 4140 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4134 →
+        rule30n 2071 (fun k : Fin 4143 => decide (k.val = mv.val)) = true ∨
+        rule30n 2071 (fun k : Fin 4143 => decide (k.val = mv.val ∨ k.val = 4142)) = false := by
+      native_decide
+    by_cases hscB2070_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4143) := Fin.ext hscB2070_6
+      have hodd : ∀ k : Fin 2071, (fun k : Fin 4143 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2071 (fun k : Fin 4143 => decide (k.val = 2)) ≠
+          rule30n 2071 (flipCell (fun k : Fin 4143 => decide (k.val = 2)) (6 : Fin 4143)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4143 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2070_4134 : m.val = 4134
+      · -- m = 4134: sub-case B
+        have hm_eq : m = (4134 : Fin 4143) := Fin.ext hscB2070_4134
+        have hodd : ∀ k : Fin 2071, (fun k : Fin 4143 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2071 (fun k : Fin 4143 => decide (k.val = 2)) ≠
+            rule30n 2071 (flipCell (fun k : Fin 4143 => decide (k.val = 2)) (4134 : Fin 4143)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4143 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2070_6 hscB2070_4134 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2071_eq : n' = 2071
+  ·
+    subst hn2071_eq
+    have h_no_scB : ∀ mv : Fin 4145,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4145 → mv.val ≠ 4142 →
+        rule30n 2072 (fun k : Fin 4145 => decide (k.val = mv.val)) = true ∨
+        rule30n 2072 (fun k : Fin 4145 => decide (k.val = mv.val ∨ k.val = 4144)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2072_eq : n' = 2072
+  ·
+    subst hn2072_eq
+    have h_no_scB : ∀ mv : Fin 4147,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4147 → mv.val ≠ 4144 →
+        rule30n 2073 (fun k : Fin 4147 => decide (k.val = mv.val)) = true ∨
+        rule30n 2073 (fun k : Fin 4147 => decide (k.val = mv.val ∨ k.val = 4146)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2073_eq : n' = 2073
+  ·
+    subst hn2073_eq
+    have h_only_scB : ∀ mv : Fin 4149,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4149 → mv.val ≠ 4146 →
+        mv.val ≠ 4140 →
+        rule30n 2074 (fun k : Fin 4149 => decide (k.val = mv.val)) = true ∨
+        rule30n 2074 (fun k : Fin 4149 => decide (k.val = mv.val ∨ k.val = 4148)) = false := by
+      native_decide
+    by_cases hscB2073_4140 : m.val = 4140
+    · -- m = 4140: sub-case B
+      have hm_eq : m = (4140 : Fin 4149) := Fin.ext hscB2073_4140
+      have hodd : ∀ k : Fin 2074, (fun k : Fin 4149 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2074 (fun k : Fin 4149 => decide (k.val = 8)) ≠
+          rule30n 2074 (flipCell (fun k : Fin 4149 => decide (k.val = 8)) (4140 : Fin 4149)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4149 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2073_4140 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2074_eq : n' = 2074
+  ·
+    subst hn2074_eq
+    have h_only_scB : ∀ mv : Fin 4151,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4151 → mv.val ≠ 4148 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4142 →
+        rule30n 2075 (fun k : Fin 4151 => decide (k.val = mv.val)) = true ∨
+        rule30n 2075 (fun k : Fin 4151 => decide (k.val = mv.val ∨ k.val = 4150)) = false := by
+      native_decide
+    by_cases hscB2074_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4151) := Fin.ext hscB2074_6
+      have hodd : ∀ k : Fin 2075, (fun k : Fin 4151 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2075 (fun k : Fin 4151 => decide (k.val = 8)) ≠
+          rule30n 2075 (flipCell (fun k : Fin 4151 => decide (k.val = 8)) (6 : Fin 4151)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4151 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB2074_4142 : m.val = 4142
+      · -- m = 4142: sub-case B
+        have hm_eq : m = (4142 : Fin 4151) := Fin.ext hscB2074_4142
+        have hodd : ∀ k : Fin 2075, (fun k : Fin 4151 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2075 (fun k : Fin 4151 => decide (k.val = 2)) ≠
+            rule30n 2075 (flipCell (fun k : Fin 4151 => decide (k.val = 2)) (4142 : Fin 4151)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4151 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2074_6 hscB2074_4142 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2075_eq : n' = 2075
+  ·
+    subst hn2075_eq
+    have h_no_scB : ∀ mv : Fin 4153,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4153 → mv.val ≠ 4150 →
+        rule30n 2076 (fun k : Fin 4153 => decide (k.val = mv.val)) = true ∨
+        rule30n 2076 (fun k : Fin 4153 => decide (k.val = mv.val ∨ k.val = 4152)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2076_eq : n' = 2076
+  ·
+    subst hn2076_eq
+    have h_no_scB : ∀ mv : Fin 4155,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4155 → mv.val ≠ 4152 →
+        rule30n 2077 (fun k : Fin 4155 => decide (k.val = mv.val)) = true ∨
+        rule30n 2077 (fun k : Fin 4155 => decide (k.val = mv.val ∨ k.val = 4154)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2077_eq : n' = 2077
+  ·
+    subst hn2077_eq
+    have h_only_scB : ∀ mv : Fin 4157,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4157 → mv.val ≠ 4154 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4148 →
+        rule30n 2078 (fun k : Fin 4157 => decide (k.val = mv.val)) = true ∨
+        rule30n 2078 (fun k : Fin 4157 => decide (k.val = mv.val ∨ k.val = 4156)) = false := by
+      native_decide
+    by_cases hscB2077_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4157) := Fin.ext hscB2077_4
+      have hodd : ∀ k : Fin 2078, (fun k : Fin 4157 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2078 (fun k : Fin 4157 => decide (k.val = 6)) ≠
+          rule30n 2078 (flipCell (fun k : Fin 4157 => decide (k.val = 6)) (4 : Fin 4157)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4157 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2077_4148 : m.val = 4148
+      · -- m = 4148: sub-case B
+        have hm_eq : m = (4148 : Fin 4157) := Fin.ext hscB2077_4148
+        have hodd : ∀ k : Fin 2078, (fun k : Fin 4157 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2078 (fun k : Fin 4157 => decide (k.val = 8)) ≠
+            rule30n 2078 (flipCell (fun k : Fin 4157 => decide (k.val = 8)) (4148 : Fin 4157)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4157 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2077_4 hscB2077_4148 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2078_eq : n' = 2078
+  ·
+    subst hn2078_eq
+    have h_only_scB : ∀ mv : Fin 4159,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4159 → mv.val ≠ 4156 →
+        mv.val ≠ 4150 →
+        rule30n 2079 (fun k : Fin 4159 => decide (k.val = mv.val)) = true ∨
+        rule30n 2079 (fun k : Fin 4159 => decide (k.val = mv.val ∨ k.val = 4158)) = false := by
+      native_decide
+    by_cases hscB2078_4150 : m.val = 4150
+    · -- m = 4150: sub-case B
+      have hm_eq : m = (4150 : Fin 4159) := Fin.ext hscB2078_4150
+      have hodd : ∀ k : Fin 2079, (fun k : Fin 4159 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2079 (fun k : Fin 4159 => decide (k.val = 2)) ≠
+          rule30n 2079 (flipCell (fun k : Fin 4159 => decide (k.val = 2)) (4150 : Fin 4159)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4159 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2078_4150 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2079_eq : n' = 2079
+  ·
+    subst hn2079_eq
+    have h_no_scB : ∀ mv : Fin 4161,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4161 → mv.val ≠ 4158 →
+        rule30n 2080 (fun k : Fin 4161 => decide (k.val = mv.val)) = true ∨
+        rule30n 2080 (fun k : Fin 4161 => decide (k.val = mv.val ∨ k.val = 4160)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2080_eq : n' = 2080
+  ·
+    subst hn2080_eq
+    have h_no_scB : ∀ mv : Fin 4163,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4163 → mv.val ≠ 4160 →
+        rule30n 2081 (fun k : Fin 4163 => decide (k.val = mv.val)) = true ∨
+        rule30n 2081 (fun k : Fin 4163 => decide (k.val = mv.val ∨ k.val = 4162)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2081_eq : n' = 2081
+  ·
+    subst hn2081_eq
+    have h_only_scB : ∀ mv : Fin 4165,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4165 → mv.val ≠ 4162 →
+        mv.val ≠ 4156 →
+        rule30n 2082 (fun k : Fin 4165 => decide (k.val = mv.val)) = true ∨
+        rule30n 2082 (fun k : Fin 4165 => decide (k.val = mv.val ∨ k.val = 4164)) = false := by
+      native_decide
+    by_cases hscB2081_4156 : m.val = 4156
+    · -- m = 4156: sub-case B
+      have hm_eq : m = (4156 : Fin 4165) := Fin.ext hscB2081_4156
+      have hodd : ∀ k : Fin 2082, (fun k : Fin 4165 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2082 (fun k : Fin 4165 => decide (k.val = 12)) ≠
+          rule30n 2082 (flipCell (fun k : Fin 4165 => decide (k.val = 12)) (4156 : Fin 4165)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4165 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2081_4156 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2082_eq : n' = 2082
+  ·
+    subst hn2082_eq
+    have h_only_scB : ∀ mv : Fin 4167,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4167 → mv.val ≠ 4164 →
+        mv.val ≠ 4158 →
+        rule30n 2083 (fun k : Fin 4167 => decide (k.val = mv.val)) = true ∨
+        rule30n 2083 (fun k : Fin 4167 => decide (k.val = mv.val ∨ k.val = 4166)) = false := by
+      native_decide
+    by_cases hscB2082_4158 : m.val = 4158
+    · -- m = 4158: sub-case B
+      have hm_eq : m = (4158 : Fin 4167) := Fin.ext hscB2082_4158
+      have hodd : ∀ k : Fin 2083, (fun k : Fin 4167 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2083 (fun k : Fin 4167 => decide (k.val = 2)) ≠
+          rule30n 2083 (flipCell (fun k : Fin 4167 => decide (k.val = 2)) (4158 : Fin 4167)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4167 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2082_4158 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2083_eq : n' = 2083
+  ·
+    subst hn2083_eq
+    have h_no_scB : ∀ mv : Fin 4169,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4169 → mv.val ≠ 4166 →
+        rule30n 2084 (fun k : Fin 4169 => decide (k.val = mv.val)) = true ∨
+        rule30n 2084 (fun k : Fin 4169 => decide (k.val = mv.val ∨ k.val = 4168)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2084_eq : n' = 2084
+  ·
+    subst hn2084_eq
+    have h_no_scB : ∀ mv : Fin 4171,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4171 → mv.val ≠ 4168 →
+        rule30n 2085 (fun k : Fin 4171 => decide (k.val = mv.val)) = true ∨
+        rule30n 2085 (fun k : Fin 4171 => decide (k.val = mv.val ∨ k.val = 4170)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2085_eq : n' = 2085
+  ·
+    subst hn2085_eq
+    have h_only_scB : ∀ mv : Fin 4173,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4173 → mv.val ≠ 4170 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4164 →
+        rule30n 2086 (fun k : Fin 4173 => decide (k.val = mv.val)) = true ∨
+        rule30n 2086 (fun k : Fin 4173 => decide (k.val = mv.val ∨ k.val = 4172)) = false := by
+      native_decide
+    by_cases hscB2085_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4173) := Fin.ext hscB2085_4
+      have hodd : ∀ k : Fin 2086, (fun k : Fin 4173 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2086 (fun k : Fin 4173 => decide (k.val = 12)) ≠
+          rule30n 2086 (flipCell (fun k : Fin 4173 => decide (k.val = 12)) (4 : Fin 4173)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4173 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      by_cases hscB2085_4164 : m.val = 4164
+      · -- m = 4164: sub-case B
+        have hm_eq : m = (4164 : Fin 4173) := Fin.ext hscB2085_4164
+        have hodd : ∀ k : Fin 2086, (fun k : Fin 4173 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2086 (fun k : Fin 4173 => decide (k.val = 8)) ≠
+            rule30n 2086 (flipCell (fun k : Fin 4173 => decide (k.val = 8)) (4164 : Fin 4173)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4173 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2085_4 hscB2085_4164 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2086_eq : n' = 2086
+  ·
+    subst hn2086_eq
+    have h_only_scB : ∀ mv : Fin 4175,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4175 → mv.val ≠ 4172 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4166 →
+        rule30n 2087 (fun k : Fin 4175 => decide (k.val = mv.val)) = true ∨
+        rule30n 2087 (fun k : Fin 4175 => decide (k.val = mv.val ∨ k.val = 4174)) = false := by
+      native_decide
+    by_cases hscB2086_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4175) := Fin.ext hscB2086_6
+      have hodd : ∀ k : Fin 2087, (fun k : Fin 4175 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2087 (fun k : Fin 4175 => decide (k.val = 2)) ≠
+          rule30n 2087 (flipCell (fun k : Fin 4175 => decide (k.val = 2)) (6 : Fin 4175)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4175 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2086_4166 : m.val = 4166
+      · -- m = 4166: sub-case B
+        have hm_eq : m = (4166 : Fin 4175) := Fin.ext hscB2086_4166
+        have hodd : ∀ k : Fin 2087, (fun k : Fin 4175 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2087 (fun k : Fin 4175 => decide (k.val = 2)) ≠
+            rule30n 2087 (flipCell (fun k : Fin 4175 => decide (k.val = 2)) (4166 : Fin 4175)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4175 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2086_6 hscB2086_4166 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2087_eq : n' = 2087
+  ·
+    subst hn2087_eq
+    have h_no_scB : ∀ mv : Fin 4177,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4177 → mv.val ≠ 4174 →
+        rule30n 2088 (fun k : Fin 4177 => decide (k.val = mv.val)) = true ∨
+        rule30n 2088 (fun k : Fin 4177 => decide (k.val = mv.val ∨ k.val = 4176)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2088_eq : n' = 2088
+  ·
+    subst hn2088_eq
+    have h_no_scB : ∀ mv : Fin 4179,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4179 → mv.val ≠ 4176 →
+        rule30n 2089 (fun k : Fin 4179 => decide (k.val = mv.val)) = true ∨
+        rule30n 2089 (fun k : Fin 4179 => decide (k.val = mv.val ∨ k.val = 4178)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2089_eq : n' = 2089
+  ·
+    subst hn2089_eq
+    have h_only_scB : ∀ mv : Fin 4181,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4181 → mv.val ≠ 4178 →
+        mv.val ≠ 4172 →
+        rule30n 2090 (fun k : Fin 4181 => decide (k.val = mv.val)) = true ∨
+        rule30n 2090 (fun k : Fin 4181 => decide (k.val = mv.val ∨ k.val = 4180)) = false := by
+      native_decide
+    by_cases hscB2089_4172 : m.val = 4172
+    · -- m = 4172: sub-case B
+      have hm_eq : m = (4172 : Fin 4181) := Fin.ext hscB2089_4172
+      have hodd : ∀ k : Fin 2090, (fun k : Fin 4181 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2090 (fun k : Fin 4181 => decide (k.val = 8)) ≠
+          rule30n 2090 (flipCell (fun k : Fin 4181 => decide (k.val = 8)) (4172 : Fin 4181)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4181 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2089_4172 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2090_eq : n' = 2090
+  ·
+    subst hn2090_eq
+    have h_only_scB : ∀ mv : Fin 4183,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4183 → mv.val ≠ 4180 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4174 →
+        rule30n 2091 (fun k : Fin 4183 => decide (k.val = mv.val)) = true ∨
+        rule30n 2091 (fun k : Fin 4183 => decide (k.val = mv.val ∨ k.val = 4182)) = false := by
+      native_decide
+    by_cases hscB2090_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4183) := Fin.ext hscB2090_6
+      have hodd : ∀ k : Fin 2091, (fun k : Fin 4183 => decide (k.val = 10)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2091 (fun k : Fin 4183 => decide (k.val = 10)) ≠
+          rule30n 2091 (flipCell (fun k : Fin 4183 => decide (k.val = 10)) (6 : Fin 4183)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4183 => decide (k.val = 10), hodd, hsens⟩
+    ·
+      by_cases hscB2090_4174 : m.val = 4174
+      · -- m = 4174: sub-case B
+        have hm_eq : m = (4174 : Fin 4183) := Fin.ext hscB2090_4174
+        have hodd : ∀ k : Fin 2091, (fun k : Fin 4183 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2091 (fun k : Fin 4183 => decide (k.val = 2)) ≠
+            rule30n 2091 (flipCell (fun k : Fin 4183 => decide (k.val = 2)) (4174 : Fin 4183)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4183 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2090_6 hscB2090_4174 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2091_eq : n' = 2091
+  ·
+    subst hn2091_eq
+    have h_only_scB : ∀ mv : Fin 4185,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4185 → mv.val ≠ 4182 →
+        mv.val ≠ 8 →
+        rule30n 2092 (fun k : Fin 4185 => decide (k.val = mv.val)) = true ∨
+        rule30n 2092 (fun k : Fin 4185 => decide (k.val = mv.val ∨ k.val = 4184)) = false := by
+      native_decide
+    by_cases hscB2091_8 : m.val = 8
+    · -- m = 8: sub-case B
+      have hm_eq : m = (8 : Fin 4185) := Fin.ext hscB2091_8
+      have hodd : ∀ k : Fin 2092, (fun k : Fin 4185 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2092 (fun k : Fin 4185 => decide (k.val = 2)) ≠
+          rule30n 2092 (flipCell (fun k : Fin 4185 => decide (k.val = 2)) (8 : Fin 4185)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4185 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2091_8 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2092_eq : n' = 2092
+  ·
+    subst hn2092_eq
+    have h_no_scB : ∀ mv : Fin 4187,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4187 → mv.val ≠ 4184 →
+        rule30n 2093 (fun k : Fin 4187 => decide (k.val = mv.val)) = true ∨
+        rule30n 2093 (fun k : Fin 4187 => decide (k.val = mv.val ∨ k.val = 4186)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2093_eq : n' = 2093
+  ·
+    subst hn2093_eq
+    have h_only_scB : ∀ mv : Fin 4189,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4189 → mv.val ≠ 4186 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4180 →
+        rule30n 2094 (fun k : Fin 4189 => decide (k.val = mv.val)) = true ∨
+        rule30n 2094 (fun k : Fin 4189 => decide (k.val = mv.val ∨ k.val = 4188)) = false := by
+      native_decide
+    by_cases hscB2093_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4189) := Fin.ext hscB2093_4
+      have hodd : ∀ k : Fin 2094, (fun k : Fin 4189 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2094 (fun k : Fin 4189 => decide (k.val = 6)) ≠
+          rule30n 2094 (flipCell (fun k : Fin 4189 => decide (k.val = 6)) (4 : Fin 4189)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4189 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2093_4180 : m.val = 4180
+      · -- m = 4180: sub-case B
+        have hm_eq : m = (4180 : Fin 4189) := Fin.ext hscB2093_4180
+        have hodd : ∀ k : Fin 2094, (fun k : Fin 4189 => decide (k.val = 20)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2094 (fun k : Fin 4189 => decide (k.val = 20)) ≠
+            rule30n 2094 (flipCell (fun k : Fin 4189 => decide (k.val = 20)) (4180 : Fin 4189)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4189 => decide (k.val = 20), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2093_4 hscB2093_4180 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2094_eq : n' = 2094
+  ·
+    subst hn2094_eq
+    have h_only_scB : ∀ mv : Fin 4191,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4191 → mv.val ≠ 4188 →
+        mv.val ≠ 4182 →
+        rule30n 2095 (fun k : Fin 4191 => decide (k.val = mv.val)) = true ∨
+        rule30n 2095 (fun k : Fin 4191 => decide (k.val = mv.val ∨ k.val = 4190)) = false := by
+      native_decide
+    by_cases hscB2094_4182 : m.val = 4182
+    · -- m = 4182: sub-case B
+      have hm_eq : m = (4182 : Fin 4191) := Fin.ext hscB2094_4182
+      have hodd : ∀ k : Fin 2095, (fun k : Fin 4191 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2095 (fun k : Fin 4191 => decide (k.val = 2)) ≠
+          rule30n 2095 (flipCell (fun k : Fin 4191 => decide (k.val = 2)) (4182 : Fin 4191)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4191 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2094_4182 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2095_eq : n' = 2095
+  ·
+    subst hn2095_eq
+    have h_no_scB : ∀ mv : Fin 4193,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4193 → mv.val ≠ 4190 →
+        rule30n 2096 (fun k : Fin 4193 => decide (k.val = mv.val)) = true ∨
+        rule30n 2096 (fun k : Fin 4193 => decide (k.val = mv.val ∨ k.val = 4192)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2096_eq : n' = 2096
+  ·
+    subst hn2096_eq
+    have h_only_scB : ∀ mv : Fin 4195,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4195 → mv.val ≠ 4192 →
+        mv.val ≠ 10 →
+        rule30n 2097 (fun k : Fin 4195 => decide (k.val = mv.val)) = true ∨
+        rule30n 2097 (fun k : Fin 4195 => decide (k.val = mv.val ∨ k.val = 4194)) = false := by
+      native_decide
+    by_cases hscB2096_10 : m.val = 10
+    · -- m = 10: sub-case B
+      have hm_eq : m = (10 : Fin 4195) := Fin.ext hscB2096_10
+      have hodd : ∀ k : Fin 2097, (fun k : Fin 4195 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2097 (fun k : Fin 4195 => decide (k.val = 2)) ≠
+          rule30n 2097 (flipCell (fun k : Fin 4195 => decide (k.val = 2)) (10 : Fin 4195)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4195 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2096_10 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2097_eq : n' = 2097
+  ·
+    subst hn2097_eq
+    have h_only_scB : ∀ mv : Fin 4197,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4197 → mv.val ≠ 4194 →
+        mv.val ≠ 4188 →
+        rule30n 2098 (fun k : Fin 4197 => decide (k.val = mv.val)) = true ∨
+        rule30n 2098 (fun k : Fin 4197 => decide (k.val = mv.val ∨ k.val = 4196)) = false := by
+      native_decide
+    by_cases hscB2097_4188 : m.val = 4188
+    · -- m = 4188: sub-case B
+      have hm_eq : m = (4188 : Fin 4197) := Fin.ext hscB2097_4188
+      have hodd : ∀ k : Fin 2098, (fun k : Fin 4197 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2098 (fun k : Fin 4197 => decide (k.val = 12)) ≠
+          rule30n 2098 (flipCell (fun k : Fin 4197 => decide (k.val = 12)) (4188 : Fin 4197)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4197 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2097_4188 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2098_eq : n' = 2098
+  ·
+    subst hn2098_eq
+    have h_only_scB : ∀ mv : Fin 4199,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4199 → mv.val ≠ 4196 →
+        mv.val ≠ 4190 →
+        rule30n 2099 (fun k : Fin 4199 => decide (k.val = mv.val)) = true ∨
+        rule30n 2099 (fun k : Fin 4199 => decide (k.val = mv.val ∨ k.val = 4198)) = false := by
+      native_decide
+    by_cases hscB2098_4190 : m.val = 4190
+    · -- m = 4190: sub-case B
+      have hm_eq : m = (4190 : Fin 4199) := Fin.ext hscB2098_4190
+      have hodd : ∀ k : Fin 2099, (fun k : Fin 4199 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2099 (fun k : Fin 4199 => decide (k.val = 2)) ≠
+          rule30n 2099 (flipCell (fun k : Fin 4199 => decide (k.val = 2)) (4190 : Fin 4199)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4199 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2098_4190 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2099_eq : n' = 2099
+  ·
+    subst hn2099_eq
+    have h_no_scB : ∀ mv : Fin 4201,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4201 → mv.val ≠ 4198 →
+        rule30n 2100 (fun k : Fin 4201 => decide (k.val = mv.val)) = true ∨
+        rule30n 2100 (fun k : Fin 4201 => decide (k.val = mv.val ∨ k.val = 4200)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2100_eq : n' = 2100
+  ·
+    subst hn2100_eq
+    have h_no_scB : ∀ mv : Fin 4203,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4203 → mv.val ≠ 4200 →
+        rule30n 2101 (fun k : Fin 4203 => decide (k.val = mv.val)) = true ∨
+        rule30n 2101 (fun k : Fin 4203 => decide (k.val = mv.val ∨ k.val = 4202)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2101_eq : n' = 2101
+  ·
+    subst hn2101_eq
+    have h_only_scB : ∀ mv : Fin 4205,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4205 → mv.val ≠ 4202 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4196 →
+        rule30n 2102 (fun k : Fin 4205 => decide (k.val = mv.val)) = true ∨
+        rule30n 2102 (fun k : Fin 4205 => decide (k.val = mv.val ∨ k.val = 4204)) = false := by
+      native_decide
+    by_cases hscB2101_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4205) := Fin.ext hscB2101_4
+      have hodd : ∀ k : Fin 2102, (fun k : Fin 4205 => decide (k.val = 10)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2102 (fun k : Fin 4205 => decide (k.val = 10)) ≠
+          rule30n 2102 (flipCell (fun k : Fin 4205 => decide (k.val = 10)) (4 : Fin 4205)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4205 => decide (k.val = 10), hodd, hsens⟩
+    ·
+      by_cases hscB2101_4196 : m.val = 4196
+      · -- m = 4196: sub-case B
+        have hm_eq : m = (4196 : Fin 4205) := Fin.ext hscB2101_4196
+        have hodd : ∀ k : Fin 2102, (fun k : Fin 4205 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2102 (fun k : Fin 4205 => decide (k.val = 12)) ≠
+            rule30n 2102 (flipCell (fun k : Fin 4205 => decide (k.val = 12)) (4196 : Fin 4205)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4205 => decide (k.val = 12), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2101_4 hscB2101_4196 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2102_eq : n' = 2102
+  ·
+    subst hn2102_eq
+    have h_only_scB : ∀ mv : Fin 4207,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4207 → mv.val ≠ 4204 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4198 →
+        rule30n 2103 (fun k : Fin 4207 => decide (k.val = mv.val)) = true ∨
+        rule30n 2103 (fun k : Fin 4207 => decide (k.val = mv.val ∨ k.val = 4206)) = false := by
+      native_decide
+    by_cases hscB2102_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4207) := Fin.ext hscB2102_6
+      have hodd : ∀ k : Fin 2103, (fun k : Fin 4207 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2103 (fun k : Fin 4207 => decide (k.val = 2)) ≠
+          rule30n 2103 (flipCell (fun k : Fin 4207 => decide (k.val = 2)) (6 : Fin 4207)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4207 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2102_4198 : m.val = 4198
+      · -- m = 4198: sub-case B
+        have hm_eq : m = (4198 : Fin 4207) := Fin.ext hscB2102_4198
+        have hodd : ∀ k : Fin 2103, (fun k : Fin 4207 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2103 (fun k : Fin 4207 => decide (k.val = 2)) ≠
+            rule30n 2103 (flipCell (fun k : Fin 4207 => decide (k.val = 2)) (4198 : Fin 4207)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4207 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2102_6 hscB2102_4198 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2103_eq : n' = 2103
+  ·
+    subst hn2103_eq
+    have h_no_scB : ∀ mv : Fin 4209,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4209 → mv.val ≠ 4206 →
+        rule30n 2104 (fun k : Fin 4209 => decide (k.val = mv.val)) = true ∨
+        rule30n 2104 (fun k : Fin 4209 => decide (k.val = mv.val ∨ k.val = 4208)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2104_eq : n' = 2104
+  ·
+    subst hn2104_eq
+    have h_no_scB : ∀ mv : Fin 4211,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4211 → mv.val ≠ 4208 →
+        rule30n 2105 (fun k : Fin 4211 => decide (k.val = mv.val)) = true ∨
+        rule30n 2105 (fun k : Fin 4211 => decide (k.val = mv.val ∨ k.val = 4210)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2105_eq : n' = 2105
+  ·
+    subst hn2105_eq
+    have h_only_scB : ∀ mv : Fin 4213,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4213 → mv.val ≠ 4210 →
+        mv.val ≠ 4204 →
+        rule30n 2106 (fun k : Fin 4213 => decide (k.val = mv.val)) = true ∨
+        rule30n 2106 (fun k : Fin 4213 => decide (k.val = mv.val ∨ k.val = 4212)) = false := by
+      native_decide
+    by_cases hscB2105_4204 : m.val = 4204
+    · -- m = 4204: sub-case B
+      have hm_eq : m = (4204 : Fin 4213) := Fin.ext hscB2105_4204
+      have hodd : ∀ k : Fin 2106, (fun k : Fin 4213 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2106 (fun k : Fin 4213 => decide (k.val = 8)) ≠
+          rule30n 2106 (flipCell (fun k : Fin 4213 => decide (k.val = 8)) (4204 : Fin 4213)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4213 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2105_4204 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2106_eq : n' = 2106
+  ·
+    subst hn2106_eq
+    have h_only_scB : ∀ mv : Fin 4215,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4215 → mv.val ≠ 4212 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4206 →
+        rule30n 2107 (fun k : Fin 4215 => decide (k.val = mv.val)) = true ∨
+        rule30n 2107 (fun k : Fin 4215 => decide (k.val = mv.val ∨ k.val = 4214)) = false := by
+      native_decide
+    by_cases hscB2106_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4215) := Fin.ext hscB2106_6
+      have hodd : ∀ k : Fin 2107, (fun k : Fin 4215 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2107 (fun k : Fin 4215 => decide (k.val = 8)) ≠
+          rule30n 2107 (flipCell (fun k : Fin 4215 => decide (k.val = 8)) (6 : Fin 4215)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4215 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB2106_4206 : m.val = 4206
+      · -- m = 4206: sub-case B
+        have hm_eq : m = (4206 : Fin 4215) := Fin.ext hscB2106_4206
+        have hodd : ∀ k : Fin 2107, (fun k : Fin 4215 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2107 (fun k : Fin 4215 => decide (k.val = 2)) ≠
+            rule30n 2107 (flipCell (fun k : Fin 4215 => decide (k.val = 2)) (4206 : Fin 4215)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4215 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2106_6 hscB2106_4206 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2107_eq : n' = 2107
+  ·
+    subst hn2107_eq
+    have h_no_scB : ∀ mv : Fin 4217,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4217 → mv.val ≠ 4214 →
+        rule30n 2108 (fun k : Fin 4217 => decide (k.val = mv.val)) = true ∨
+        rule30n 2108 (fun k : Fin 4217 => decide (k.val = mv.val ∨ k.val = 4216)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2108_eq : n' = 2108
+  ·
+    subst hn2108_eq
+    have h_no_scB : ∀ mv : Fin 4219,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4219 → mv.val ≠ 4216 →
+        rule30n 2109 (fun k : Fin 4219 => decide (k.val = mv.val)) = true ∨
+        rule30n 2109 (fun k : Fin 4219 => decide (k.val = mv.val ∨ k.val = 4218)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2109_eq : n' = 2109
+  ·
+    subst hn2109_eq
+    have h_only_scB : ∀ mv : Fin 4221,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4221 → mv.val ≠ 4218 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4212 →
+        rule30n 2110 (fun k : Fin 4221 => decide (k.val = mv.val)) = true ∨
+        rule30n 2110 (fun k : Fin 4221 => decide (k.val = mv.val ∨ k.val = 4220)) = false := by
+      native_decide
+    by_cases hscB2109_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4221) := Fin.ext hscB2109_4
+      have hodd : ∀ k : Fin 2110, (fun k : Fin 4221 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2110 (fun k : Fin 4221 => decide (k.val = 6)) ≠
+          rule30n 2110 (flipCell (fun k : Fin 4221 => decide (k.val = 6)) (4 : Fin 4221)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4221 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2109_4212 : m.val = 4212
+      · -- m = 4212: sub-case B
+        have hm_eq : m = (4212 : Fin 4221) := Fin.ext hscB2109_4212
+        have hodd : ∀ k : Fin 2110, (fun k : Fin 4221 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2110 (fun k : Fin 4221 => decide (k.val = 8)) ≠
+            rule30n 2110 (flipCell (fun k : Fin 4221 => decide (k.val = 8)) (4212 : Fin 4221)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4221 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2109_4 hscB2109_4212 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2110_eq : n' = 2110
+  ·
+    subst hn2110_eq
+    have h_only_scB : ∀ mv : Fin 4223,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4223 → mv.val ≠ 4220 →
+        mv.val ≠ 4214 →
+        rule30n 2111 (fun k : Fin 4223 => decide (k.val = mv.val)) = true ∨
+        rule30n 2111 (fun k : Fin 4223 => decide (k.val = mv.val ∨ k.val = 4222)) = false := by
+      native_decide
+    by_cases hscB2110_4214 : m.val = 4214
+    · -- m = 4214: sub-case B
+      have hm_eq : m = (4214 : Fin 4223) := Fin.ext hscB2110_4214
+      have hodd : ∀ k : Fin 2111, (fun k : Fin 4223 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2111 (fun k : Fin 4223 => decide (k.val = 2)) ≠
+          rule30n 2111 (flipCell (fun k : Fin 4223 => decide (k.val = 2)) (4214 : Fin 4223)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4223 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2110_4214 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2111_eq : n' = 2111
+  ·
+    subst hn2111_eq
+    have h_no_scB : ∀ mv : Fin 4225,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4225 → mv.val ≠ 4222 →
+        rule30n 2112 (fun k : Fin 4225 => decide (k.val = mv.val)) = true ∨
+        rule30n 2112 (fun k : Fin 4225 => decide (k.val = mv.val ∨ k.val = 4224)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2112_eq : n' = 2112
+  ·
+    subst hn2112_eq
+    have h_no_scB : ∀ mv : Fin 4227,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4227 → mv.val ≠ 4224 →
+        rule30n 2113 (fun k : Fin 4227 => decide (k.val = mv.val)) = true ∨
+        rule30n 2113 (fun k : Fin 4227 => decide (k.val = mv.val ∨ k.val = 4226)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2113_eq : n' = 2113
+  ·
+    subst hn2113_eq
+    have h_only_scB : ∀ mv : Fin 4229,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4229 → mv.val ≠ 4226 →
+        mv.val ≠ 4220 →
+        rule30n 2114 (fun k : Fin 4229 => decide (k.val = mv.val)) = true ∨
+        rule30n 2114 (fun k : Fin 4229 => decide (k.val = mv.val ∨ k.val = 4228)) = false := by
+      native_decide
+    by_cases hscB2113_4220 : m.val = 4220
+    · -- m = 4220: sub-case B
+      have hm_eq : m = (4220 : Fin 4229) := Fin.ext hscB2113_4220
+      have hodd : ∀ k : Fin 2114, (fun k : Fin 4229 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2114 (fun k : Fin 4229 => decide (k.val = 12)) ≠
+          rule30n 2114 (flipCell (fun k : Fin 4229 => decide (k.val = 12)) (4220 : Fin 4229)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4229 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2113_4220 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2114_eq : n' = 2114
+  ·
+    subst hn2114_eq
+    have h_only_scB : ∀ mv : Fin 4231,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4231 → mv.val ≠ 4228 →
+        mv.val ≠ 4222 →
+        rule30n 2115 (fun k : Fin 4231 => decide (k.val = mv.val)) = true ∨
+        rule30n 2115 (fun k : Fin 4231 => decide (k.val = mv.val ∨ k.val = 4230)) = false := by
+      native_decide
+    by_cases hscB2114_4222 : m.val = 4222
+    · -- m = 4222: sub-case B
+      have hm_eq : m = (4222 : Fin 4231) := Fin.ext hscB2114_4222
+      have hodd : ∀ k : Fin 2115, (fun k : Fin 4231 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2115 (fun k : Fin 4231 => decide (k.val = 2)) ≠
+          rule30n 2115 (flipCell (fun k : Fin 4231 => decide (k.val = 2)) (4222 : Fin 4231)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4231 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2114_4222 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2115_eq : n' = 2115
+  ·
+    subst hn2115_eq
+    have h_no_scB : ∀ mv : Fin 4233,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4233 → mv.val ≠ 4230 →
+        rule30n 2116 (fun k : Fin 4233 => decide (k.val = mv.val)) = true ∨
+        rule30n 2116 (fun k : Fin 4233 => decide (k.val = mv.val ∨ k.val = 4232)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2116_eq : n' = 2116
+  ·
+    subst hn2116_eq
+    have h_no_scB : ∀ mv : Fin 4235,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4235 → mv.val ≠ 4232 →
+        rule30n 2117 (fun k : Fin 4235 => decide (k.val = mv.val)) = true ∨
+        rule30n 2117 (fun k : Fin 4235 => decide (k.val = mv.val ∨ k.val = 4234)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2117_eq : n' = 2117
+  ·
+    subst hn2117_eq
+    have h_only_scB : ∀ mv : Fin 4237,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4237 → mv.val ≠ 4234 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4228 →
+        rule30n 2118 (fun k : Fin 4237 => decide (k.val = mv.val)) = true ∨
+        rule30n 2118 (fun k : Fin 4237 => decide (k.val = mv.val ∨ k.val = 4236)) = false := by
+      native_decide
+    by_cases hscB2117_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4237) := Fin.ext hscB2117_4
+      have hodd : ∀ k : Fin 2118, (fun k : Fin 4237 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2118 (fun k : Fin 4237 => decide (k.val = 12)) ≠
+          rule30n 2118 (flipCell (fun k : Fin 4237 => decide (k.val = 12)) (4 : Fin 4237)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4237 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      by_cases hscB2117_4228 : m.val = 4228
+      · -- m = 4228: sub-case B
+        have hm_eq : m = (4228 : Fin 4237) := Fin.ext hscB2117_4228
+        have hodd : ∀ k : Fin 2118, (fun k : Fin 4237 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2118 (fun k : Fin 4237 => decide (k.val = 8)) ≠
+            rule30n 2118 (flipCell (fun k : Fin 4237 => decide (k.val = 8)) (4228 : Fin 4237)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4237 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2117_4 hscB2117_4228 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2118_eq : n' = 2118
+  ·
+    subst hn2118_eq
+    have h_only_scB : ∀ mv : Fin 4239,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4239 → mv.val ≠ 4236 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4230 →
+        rule30n 2119 (fun k : Fin 4239 => decide (k.val = mv.val)) = true ∨
+        rule30n 2119 (fun k : Fin 4239 => decide (k.val = mv.val ∨ k.val = 4238)) = false := by
+      native_decide
+    by_cases hscB2118_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4239) := Fin.ext hscB2118_6
+      have hodd : ∀ k : Fin 2119, (fun k : Fin 4239 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2119 (fun k : Fin 4239 => decide (k.val = 2)) ≠
+          rule30n 2119 (flipCell (fun k : Fin 4239 => decide (k.val = 2)) (6 : Fin 4239)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4239 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2118_4230 : m.val = 4230
+      · -- m = 4230: sub-case B
+        have hm_eq : m = (4230 : Fin 4239) := Fin.ext hscB2118_4230
+        have hodd : ∀ k : Fin 2119, (fun k : Fin 4239 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2119 (fun k : Fin 4239 => decide (k.val = 2)) ≠
+            rule30n 2119 (flipCell (fun k : Fin 4239 => decide (k.val = 2)) (4230 : Fin 4239)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4239 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2118_6 hscB2118_4230 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2119_eq : n' = 2119
+  ·
+    subst hn2119_eq
+    have h_no_scB : ∀ mv : Fin 4241,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4241 → mv.val ≠ 4238 →
+        rule30n 2120 (fun k : Fin 4241 => decide (k.val = mv.val)) = true ∨
+        rule30n 2120 (fun k : Fin 4241 => decide (k.val = mv.val ∨ k.val = 4240)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2120_eq : n' = 2120
+  ·
+    subst hn2120_eq
+    have h_no_scB : ∀ mv : Fin 4243,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4243 → mv.val ≠ 4240 →
+        rule30n 2121 (fun k : Fin 4243 => decide (k.val = mv.val)) = true ∨
+        rule30n 2121 (fun k : Fin 4243 => decide (k.val = mv.val ∨ k.val = 4242)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2121_eq : n' = 2121
+  ·
+    subst hn2121_eq
+    have h_only_scB : ∀ mv : Fin 4245,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4245 → mv.val ≠ 4242 →
+        mv.val ≠ 12 →
+        mv.val ≠ 4236 →
+        rule30n 2122 (fun k : Fin 4245 => decide (k.val = mv.val)) = true ∨
+        rule30n 2122 (fun k : Fin 4245 => decide (k.val = mv.val ∨ k.val = 4244)) = false := by
+      native_decide
+    by_cases hscB2121_12 : m.val = 12
+    · -- m = 12: sub-case B
+      have hm_eq : m = (12 : Fin 4245) := Fin.ext hscB2121_12
+      have hodd : ∀ k : Fin 2122, (fun k : Fin 4245 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2122 (fun k : Fin 4245 => decide (k.val = 2)) ≠
+          rule30n 2122 (flipCell (fun k : Fin 4245 => decide (k.val = 2)) (12 : Fin 4245)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4245 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2121_4236 : m.val = 4236
+      · -- m = 4236: sub-case B
+        have hm_eq : m = (4236 : Fin 4245) := Fin.ext hscB2121_4236
+        have hodd : ∀ k : Fin 2122, (fun k : Fin 4245 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2122 (fun k : Fin 4245 => decide (k.val = 8)) ≠
+            rule30n 2122 (flipCell (fun k : Fin 4245 => decide (k.val = 8)) (4236 : Fin 4245)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4245 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2121_12 hscB2121_4236 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2122_eq : n' = 2122
+  ·
+    subst hn2122_eq
+    have h_only_scB : ∀ mv : Fin 4247,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4247 → mv.val ≠ 4244 →
+        mv.val ≠ 6 →
+        mv.val ≠ 14 →
+        mv.val ≠ 4238 →
+        rule30n 2123 (fun k : Fin 4247 => decide (k.val = mv.val)) = true ∨
+        rule30n 2123 (fun k : Fin 4247 => decide (k.val = mv.val ∨ k.val = 4246)) = false := by
+      native_decide
+    by_cases hscB2122_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4247) := Fin.ext hscB2122_6
+      have hodd : ∀ k : Fin 2123, (fun k : Fin 4247 => decide (k.val = 14)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2123 (fun k : Fin 4247 => decide (k.val = 14)) ≠
+          rule30n 2123 (flipCell (fun k : Fin 4247 => decide (k.val = 14)) (6 : Fin 4247)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4247 => decide (k.val = 14), hodd, hsens⟩
+    ·
+      by_cases hscB2122_14 : m.val = 14
+      · -- m = 14: sub-case B
+        have hm_eq : m = (14 : Fin 4247) := Fin.ext hscB2122_14
+        have hodd : ∀ k : Fin 2123, (fun k : Fin 4247 => decide (k.val = 4)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2123 (fun k : Fin 4247 => decide (k.val = 4)) ≠
+            rule30n 2123 (flipCell (fun k : Fin 4247 => decide (k.val = 4)) (14 : Fin 4247)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4247 => decide (k.val = 4), hodd, hsens⟩
+      ·
+        by_cases hscB2122_4238 : m.val = 4238
+        · -- m = 4238: sub-case B
+          have hm_eq : m = (4238 : Fin 4247) := Fin.ext hscB2122_4238
+          have hodd : ∀ k : Fin 2123, (fun k : Fin 4247 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+            intro k; simp only [decide_eq_false_iff_not]; omega
+          have hsens : rule30n 2123 (fun k : Fin 4247 => decide (k.val = 2)) ≠
+              rule30n 2123 (flipCell (fun k : Fin 4247 => decide (k.val = 2)) (4238 : Fin 4247)) := by
+            native_decide
+          rw [hm_eq]; exact ⟨fun k : Fin 4247 => decide (k.val = 2), hodd, hsens⟩
+        ·
+          rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2122_6 hscB2122_14 hscB2122_4238 with h | h
+          · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+          · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2123_eq : n' = 2123
+  ·
+    subst hn2123_eq
+    have h_only_scB : ∀ mv : Fin 4249,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4249 → mv.val ≠ 4246 →
+        mv.val ≠ 8 →
+        rule30n 2124 (fun k : Fin 4249 => decide (k.val = mv.val)) = true ∨
+        rule30n 2124 (fun k : Fin 4249 => decide (k.val = mv.val ∨ k.val = 4248)) = false := by
+      native_decide
+    by_cases hscB2123_8 : m.val = 8
+    · -- m = 8: sub-case B
+      have hm_eq : m = (8 : Fin 4249) := Fin.ext hscB2123_8
+      have hodd : ∀ k : Fin 2124, (fun k : Fin 4249 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2124 (fun k : Fin 4249 => decide (k.val = 2)) ≠
+          rule30n 2124 (flipCell (fun k : Fin 4249 => decide (k.val = 2)) (8 : Fin 4249)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4249 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2123_8 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2124_eq : n' = 2124
+  ·
+    subst hn2124_eq
+    have h_no_scB : ∀ mv : Fin 4251,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4251 → mv.val ≠ 4248 →
+        rule30n 2125 (fun k : Fin 4251 => decide (k.val = mv.val)) = true ∨
+        rule30n 2125 (fun k : Fin 4251 => decide (k.val = mv.val ∨ k.val = 4250)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2125_eq : n' = 2125
+  ·
+    subst hn2125_eq
+    have h_only_scB : ∀ mv : Fin 4253,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4253 → mv.val ≠ 4250 →
+        mv.val ≠ 4 →
+        mv.val ≠ 12 →
+        mv.val ≠ 4244 →
+        rule30n 2126 (fun k : Fin 4253 => decide (k.val = mv.val)) = true ∨
+        rule30n 2126 (fun k : Fin 4253 => decide (k.val = mv.val ∨ k.val = 4252)) = false := by
+      native_decide
+    by_cases hscB2125_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4253) := Fin.ext hscB2125_4
+      have hodd : ∀ k : Fin 2126, (fun k : Fin 4253 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2126 (fun k : Fin 4253 => decide (k.val = 6)) ≠
+          rule30n 2126 (flipCell (fun k : Fin 4253 => decide (k.val = 6)) (4 : Fin 4253)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4253 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2125_12 : m.val = 12
+      · -- m = 12: sub-case B
+        have hm_eq : m = (12 : Fin 4253) := Fin.ext hscB2125_12
+        have hodd : ∀ k : Fin 2126, (fun k : Fin 4253 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2126 (fun k : Fin 4253 => decide (k.val = 2)) ≠
+            rule30n 2126 (flipCell (fun k : Fin 4253 => decide (k.val = 2)) (12 : Fin 4253)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4253 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        by_cases hscB2125_4244 : m.val = 4244
+        · -- m = 4244: sub-case B
+          have hm_eq : m = (4244 : Fin 4253) := Fin.ext hscB2125_4244
+          have hodd : ∀ k : Fin 2126, (fun k : Fin 4253 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+            intro k; simp only [decide_eq_false_iff_not]; omega
+          have hsens : rule30n 2126 (fun k : Fin 4253 => decide (k.val = 12)) ≠
+              rule30n 2126 (flipCell (fun k : Fin 4253 => decide (k.val = 12)) (4244 : Fin 4253)) := by
+            native_decide
+          rw [hm_eq]; exact ⟨fun k : Fin 4253 => decide (k.val = 12), hodd, hsens⟩
+        ·
+          rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2125_4 hscB2125_12 hscB2125_4244 with h | h
+          · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+          · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2126_eq : n' = 2126
+  ·
+    subst hn2126_eq
+    have h_only_scB : ∀ mv : Fin 4255,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4255 → mv.val ≠ 4252 →
+        mv.val ≠ 14 →
+        mv.val ≠ 4246 →
+        rule30n 2127 (fun k : Fin 4255 => decide (k.val = mv.val)) = true ∨
+        rule30n 2127 (fun k : Fin 4255 => decide (k.val = mv.val ∨ k.val = 4254)) = false := by
+      native_decide
+    by_cases hscB2126_14 : m.val = 14
+    · -- m = 14: sub-case B
+      have hm_eq : m = (14 : Fin 4255) := Fin.ext hscB2126_14
+      have hodd : ∀ k : Fin 2127, (fun k : Fin 4255 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2127 (fun k : Fin 4255 => decide (k.val = 2)) ≠
+          rule30n 2127 (flipCell (fun k : Fin 4255 => decide (k.val = 2)) (14 : Fin 4255)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4255 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2126_4246 : m.val = 4246
+      · -- m = 4246: sub-case B
+        have hm_eq : m = (4246 : Fin 4255) := Fin.ext hscB2126_4246
+        have hodd : ∀ k : Fin 2127, (fun k : Fin 4255 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2127 (fun k : Fin 4255 => decide (k.val = 2)) ≠
+            rule30n 2127 (flipCell (fun k : Fin 4255 => decide (k.val = 2)) (4246 : Fin 4255)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4255 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2126_14 hscB2126_4246 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2127_eq : n' = 2127
+  ·
+    subst hn2127_eq
+    have h_no_scB : ∀ mv : Fin 4257,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4257 → mv.val ≠ 4254 →
+        rule30n 2128 (fun k : Fin 4257 => decide (k.val = mv.val)) = true ∨
+        rule30n 2128 (fun k : Fin 4257 => decide (k.val = mv.val ∨ k.val = 4256)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2128_eq : n' = 2128
+  ·
+    subst hn2128_eq
+    have h_no_scB : ∀ mv : Fin 4259,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4259 → mv.val ≠ 4256 →
+        rule30n 2129 (fun k : Fin 4259 => decide (k.val = mv.val)) = true ∨
+        rule30n 2129 (fun k : Fin 4259 => decide (k.val = mv.val ∨ k.val = 4258)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2129_eq : n' = 2129
+  ·
+    subst hn2129_eq
+    have h_only_scB : ∀ mv : Fin 4261,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4261 → mv.val ≠ 4258 →
+        mv.val ≠ 4252 →
+        rule30n 2130 (fun k : Fin 4261 => decide (k.val = mv.val)) = true ∨
+        rule30n 2130 (fun k : Fin 4261 => decide (k.val = mv.val ∨ k.val = 4260)) = false := by
+      native_decide
+    by_cases hscB2129_4252 : m.val = 4252
+    · -- m = 4252: sub-case B
+      have hm_eq : m = (4252 : Fin 4261) := Fin.ext hscB2129_4252
+      have hodd : ∀ k : Fin 2130, (fun k : Fin 4261 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2130 (fun k : Fin 4261 => decide (k.val = 16)) ≠
+          rule30n 2130 (flipCell (fun k : Fin 4261 => decide (k.val = 16)) (4252 : Fin 4261)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4261 => decide (k.val = 16), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2129_4252 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2130_eq : n' = 2130
+  ·
+    subst hn2130_eq
+    have h_only_scB : ∀ mv : Fin 4263,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4263 → mv.val ≠ 4260 →
+        mv.val ≠ 4254 →
+        rule30n 2131 (fun k : Fin 4263 => decide (k.val = mv.val)) = true ∨
+        rule30n 2131 (fun k : Fin 4263 => decide (k.val = mv.val ∨ k.val = 4262)) = false := by
+      native_decide
+    by_cases hscB2130_4254 : m.val = 4254
+    · -- m = 4254: sub-case B
+      have hm_eq : m = (4254 : Fin 4263) := Fin.ext hscB2130_4254
+      have hodd : ∀ k : Fin 2131, (fun k : Fin 4263 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2131 (fun k : Fin 4263 => decide (k.val = 2)) ≠
+          rule30n 2131 (flipCell (fun k : Fin 4263 => decide (k.val = 2)) (4254 : Fin 4263)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4263 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2130_4254 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2131_eq : n' = 2131
+  ·
+    subst hn2131_eq
+    have h_no_scB : ∀ mv : Fin 4265,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4265 → mv.val ≠ 4262 →
+        rule30n 2132 (fun k : Fin 4265 => decide (k.val = mv.val)) = true ∨
+        rule30n 2132 (fun k : Fin 4265 => decide (k.val = mv.val ∨ k.val = 4264)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2132_eq : n' = 2132
+  ·
+    subst hn2132_eq
+    have h_no_scB : ∀ mv : Fin 4267,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4267 → mv.val ≠ 4264 →
+        rule30n 2133 (fun k : Fin 4267 => decide (k.val = mv.val)) = true ∨
+        rule30n 2133 (fun k : Fin 4267 => decide (k.val = mv.val ∨ k.val = 4266)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2133_eq : n' = 2133
+  ·
+    subst hn2133_eq
+    have h_only_scB : ∀ mv : Fin 4269,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4269 → mv.val ≠ 4266 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4260 →
+        rule30n 2134 (fun k : Fin 4269 => decide (k.val = mv.val)) = true ∨
+        rule30n 2134 (fun k : Fin 4269 => decide (k.val = mv.val ∨ k.val = 4268)) = false := by
+      native_decide
+    by_cases hscB2133_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4269) := Fin.ext hscB2133_4
+      have hodd : ∀ k : Fin 2134, (fun k : Fin 4269 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2134 (fun k : Fin 4269 => decide (k.val = 12)) ≠
+          rule30n 2134 (flipCell (fun k : Fin 4269 => decide (k.val = 12)) (4 : Fin 4269)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4269 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      by_cases hscB2133_4260 : m.val = 4260
+      · -- m = 4260: sub-case B
+        have hm_eq : m = (4260 : Fin 4269) := Fin.ext hscB2133_4260
+        have hodd : ∀ k : Fin 2134, (fun k : Fin 4269 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2134 (fun k : Fin 4269 => decide (k.val = 16)) ≠
+            rule30n 2134 (flipCell (fun k : Fin 4269 => decide (k.val = 16)) (4260 : Fin 4269)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4269 => decide (k.val = 16), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2133_4 hscB2133_4260 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2134_eq : n' = 2134
+  ·
+    subst hn2134_eq
+    have h_only_scB : ∀ mv : Fin 4271,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4271 → mv.val ≠ 4268 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4262 →
+        rule30n 2135 (fun k : Fin 4271 => decide (k.val = mv.val)) = true ∨
+        rule30n 2135 (fun k : Fin 4271 => decide (k.val = mv.val ∨ k.val = 4270)) = false := by
+      native_decide
+    by_cases hscB2134_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4271) := Fin.ext hscB2134_6
+      have hodd : ∀ k : Fin 2135, (fun k : Fin 4271 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2135 (fun k : Fin 4271 => decide (k.val = 2)) ≠
+          rule30n 2135 (flipCell (fun k : Fin 4271 => decide (k.val = 2)) (6 : Fin 4271)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4271 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2134_4262 : m.val = 4262
+      · -- m = 4262: sub-case B
+        have hm_eq : m = (4262 : Fin 4271) := Fin.ext hscB2134_4262
+        have hodd : ∀ k : Fin 2135, (fun k : Fin 4271 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2135 (fun k : Fin 4271 => decide (k.val = 2)) ≠
+            rule30n 2135 (flipCell (fun k : Fin 4271 => decide (k.val = 2)) (4262 : Fin 4271)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4271 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2134_6 hscB2134_4262 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2135_eq : n' = 2135
+  ·
+    subst hn2135_eq
+    have h_no_scB : ∀ mv : Fin 4273,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4273 → mv.val ≠ 4270 →
+        rule30n 2136 (fun k : Fin 4273 => decide (k.val = mv.val)) = true ∨
+        rule30n 2136 (fun k : Fin 4273 => decide (k.val = mv.val ∨ k.val = 4272)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2136_eq : n' = 2136
+  ·
+    subst hn2136_eq
+    have h_no_scB : ∀ mv : Fin 4275,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4275 → mv.val ≠ 4272 →
+        rule30n 2137 (fun k : Fin 4275 => decide (k.val = mv.val)) = true ∨
+        rule30n 2137 (fun k : Fin 4275 => decide (k.val = mv.val ∨ k.val = 4274)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2137_eq : n' = 2137
+  ·
+    subst hn2137_eq
+    have h_only_scB : ∀ mv : Fin 4277,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4277 → mv.val ≠ 4274 →
+        mv.val ≠ 4268 →
+        rule30n 2138 (fun k : Fin 4277 => decide (k.val = mv.val)) = true ∨
+        rule30n 2138 (fun k : Fin 4277 => decide (k.val = mv.val ∨ k.val = 4276)) = false := by
+      native_decide
+    by_cases hscB2137_4268 : m.val = 4268
+    · -- m = 4268: sub-case B
+      have hm_eq : m = (4268 : Fin 4277) := Fin.ext hscB2137_4268
+      have hodd : ∀ k : Fin 2138, (fun k : Fin 4277 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2138 (fun k : Fin 4277 => decide (k.val = 8)) ≠
+          rule30n 2138 (flipCell (fun k : Fin 4277 => decide (k.val = 8)) (4268 : Fin 4277)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4277 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2137_4268 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2138_eq : n' = 2138
+  ·
+    subst hn2138_eq
+    have h_only_scB : ∀ mv : Fin 4279,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4279 → mv.val ≠ 4276 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4270 →
+        rule30n 2139 (fun k : Fin 4279 => decide (k.val = mv.val)) = true ∨
+        rule30n 2139 (fun k : Fin 4279 => decide (k.val = mv.val ∨ k.val = 4278)) = false := by
+      native_decide
+    by_cases hscB2138_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4279) := Fin.ext hscB2138_6
+      have hodd : ∀ k : Fin 2139, (fun k : Fin 4279 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2139 (fun k : Fin 4279 => decide (k.val = 8)) ≠
+          rule30n 2139 (flipCell (fun k : Fin 4279 => decide (k.val = 8)) (6 : Fin 4279)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4279 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB2138_4270 : m.val = 4270
+      · -- m = 4270: sub-case B
+        have hm_eq : m = (4270 : Fin 4279) := Fin.ext hscB2138_4270
+        have hodd : ∀ k : Fin 2139, (fun k : Fin 4279 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2139 (fun k : Fin 4279 => decide (k.val = 2)) ≠
+            rule30n 2139 (flipCell (fun k : Fin 4279 => decide (k.val = 2)) (4270 : Fin 4279)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4279 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2138_6 hscB2138_4270 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2139_eq : n' = 2139
+  ·
+    subst hn2139_eq
+    have h_no_scB : ∀ mv : Fin 4281,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4281 → mv.val ≠ 4278 →
+        rule30n 2140 (fun k : Fin 4281 => decide (k.val = mv.val)) = true ∨
+        rule30n 2140 (fun k : Fin 4281 => decide (k.val = mv.val ∨ k.val = 4280)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2140_eq : n' = 2140
+  ·
+    subst hn2140_eq
+    have h_no_scB : ∀ mv : Fin 4283,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4283 → mv.val ≠ 4280 →
+        rule30n 2141 (fun k : Fin 4283 => decide (k.val = mv.val)) = true ∨
+        rule30n 2141 (fun k : Fin 4283 => decide (k.val = mv.val ∨ k.val = 4282)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2141_eq : n' = 2141
+  ·
+    subst hn2141_eq
+    have h_only_scB : ∀ mv : Fin 4285,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4285 → mv.val ≠ 4282 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4276 →
+        rule30n 2142 (fun k : Fin 4285 => decide (k.val = mv.val)) = true ∨
+        rule30n 2142 (fun k : Fin 4285 => decide (k.val = mv.val ∨ k.val = 4284)) = false := by
+      native_decide
+    by_cases hscB2141_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4285) := Fin.ext hscB2141_4
+      have hodd : ∀ k : Fin 2142, (fun k : Fin 4285 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2142 (fun k : Fin 4285 => decide (k.val = 6)) ≠
+          rule30n 2142 (flipCell (fun k : Fin 4285 => decide (k.val = 6)) (4 : Fin 4285)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4285 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2141_4276 : m.val = 4276
+      · -- m = 4276: sub-case B
+        have hm_eq : m = (4276 : Fin 4285) := Fin.ext hscB2141_4276
+        have hodd : ∀ k : Fin 2142, (fun k : Fin 4285 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2142 (fun k : Fin 4285 => decide (k.val = 8)) ≠
+            rule30n 2142 (flipCell (fun k : Fin 4285 => decide (k.val = 8)) (4276 : Fin 4285)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4285 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2141_4 hscB2141_4276 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2142_eq : n' = 2142
+  ·
+    subst hn2142_eq
+    have h_only_scB : ∀ mv : Fin 4287,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4287 → mv.val ≠ 4284 →
+        mv.val ≠ 4278 →
+        rule30n 2143 (fun k : Fin 4287 => decide (k.val = mv.val)) = true ∨
+        rule30n 2143 (fun k : Fin 4287 => decide (k.val = mv.val ∨ k.val = 4286)) = false := by
+      native_decide
+    by_cases hscB2142_4278 : m.val = 4278
+    · -- m = 4278: sub-case B
+      have hm_eq : m = (4278 : Fin 4287) := Fin.ext hscB2142_4278
+      have hodd : ∀ k : Fin 2143, (fun k : Fin 4287 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2143 (fun k : Fin 4287 => decide (k.val = 2)) ≠
+          rule30n 2143 (flipCell (fun k : Fin 4287 => decide (k.val = 2)) (4278 : Fin 4287)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4287 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2142_4278 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2143_eq : n' = 2143
+  ·
+    subst hn2143_eq
+    have h_no_scB : ∀ mv : Fin 4289,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4289 → mv.val ≠ 4286 →
+        rule30n 2144 (fun k : Fin 4289 => decide (k.val = mv.val)) = true ∨
+        rule30n 2144 (fun k : Fin 4289 => decide (k.val = mv.val ∨ k.val = 4288)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2144_eq : n' = 2144
+  ·
+    subst hn2144_eq
+    have h_no_scB : ∀ mv : Fin 4291,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4291 → mv.val ≠ 4288 →
+        rule30n 2145 (fun k : Fin 4291 => decide (k.val = mv.val)) = true ∨
+        rule30n 2145 (fun k : Fin 4291 => decide (k.val = mv.val ∨ k.val = 4290)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2145_eq : n' = 2145
+  ·
+    subst hn2145_eq
+    have h_only_scB : ∀ mv : Fin 4293,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4293 → mv.val ≠ 4290 →
+        mv.val ≠ 4284 →
+        rule30n 2146 (fun k : Fin 4293 => decide (k.val = mv.val)) = true ∨
+        rule30n 2146 (fun k : Fin 4293 => decide (k.val = mv.val ∨ k.val = 4292)) = false := by
+      native_decide
+    by_cases hscB2145_4284 : m.val = 4284
+    · -- m = 4284: sub-case B
+      have hm_eq : m = (4284 : Fin 4293) := Fin.ext hscB2145_4284
+      have hodd : ∀ k : Fin 2146, (fun k : Fin 4293 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2146 (fun k : Fin 4293 => decide (k.val = 12)) ≠
+          rule30n 2146 (flipCell (fun k : Fin 4293 => decide (k.val = 12)) (4284 : Fin 4293)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4293 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2145_4284 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2146_eq : n' = 2146
+  ·
+    subst hn2146_eq
+    have h_only_scB : ∀ mv : Fin 4295,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4295 → mv.val ≠ 4292 →
+        mv.val ≠ 4286 →
+        rule30n 2147 (fun k : Fin 4295 => decide (k.val = mv.val)) = true ∨
+        rule30n 2147 (fun k : Fin 4295 => decide (k.val = mv.val ∨ k.val = 4294)) = false := by
+      native_decide
+    by_cases hscB2146_4286 : m.val = 4286
+    · -- m = 4286: sub-case B
+      have hm_eq : m = (4286 : Fin 4295) := Fin.ext hscB2146_4286
+      have hodd : ∀ k : Fin 2147, (fun k : Fin 4295 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2147 (fun k : Fin 4295 => decide (k.val = 2)) ≠
+          rule30n 2147 (flipCell (fun k : Fin 4295 => decide (k.val = 2)) (4286 : Fin 4295)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4295 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2146_4286 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2147_eq : n' = 2147
+  ·
+    subst hn2147_eq
+    have h_no_scB : ∀ mv : Fin 4297,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4297 → mv.val ≠ 4294 →
+        rule30n 2148 (fun k : Fin 4297 => decide (k.val = mv.val)) = true ∨
+        rule30n 2148 (fun k : Fin 4297 => decide (k.val = mv.val ∨ k.val = 4296)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2148_eq : n' = 2148
+  ·
+    subst hn2148_eq
+    have h_no_scB : ∀ mv : Fin 4299,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4299 → mv.val ≠ 4296 →
+        rule30n 2149 (fun k : Fin 4299 => decide (k.val = mv.val)) = true ∨
+        rule30n 2149 (fun k : Fin 4299 => decide (k.val = mv.val ∨ k.val = 4298)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2149_eq : n' = 2149
+  ·
+    subst hn2149_eq
+    have h_only_scB : ∀ mv : Fin 4301,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4301 → mv.val ≠ 4298 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4292 →
+        rule30n 2150 (fun k : Fin 4301 => decide (k.val = mv.val)) = true ∨
+        rule30n 2150 (fun k : Fin 4301 => decide (k.val = mv.val ∨ k.val = 4300)) = false := by
+      native_decide
+    by_cases hscB2149_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4301) := Fin.ext hscB2149_4
+      have hodd : ∀ k : Fin 2150, (fun k : Fin 4301 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2150 (fun k : Fin 4301 => decide (k.val = 16)) ≠
+          rule30n 2150 (flipCell (fun k : Fin 4301 => decide (k.val = 16)) (4 : Fin 4301)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4301 => decide (k.val = 16), hodd, hsens⟩
+    ·
+      by_cases hscB2149_4292 : m.val = 4292
+      · -- m = 4292: sub-case B
+        have hm_eq : m = (4292 : Fin 4301) := Fin.ext hscB2149_4292
+        have hodd : ∀ k : Fin 2150, (fun k : Fin 4301 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2150 (fun k : Fin 4301 => decide (k.val = 8)) ≠
+            rule30n 2150 (flipCell (fun k : Fin 4301 => decide (k.val = 8)) (4292 : Fin 4301)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4301 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2149_4 hscB2149_4292 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2150_eq : n' = 2150
+  ·
+    subst hn2150_eq
+    have h_only_scB : ∀ mv : Fin 4303,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4303 → mv.val ≠ 4300 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4294 →
+        rule30n 2151 (fun k : Fin 4303 => decide (k.val = mv.val)) = true ∨
+        rule30n 2151 (fun k : Fin 4303 => decide (k.val = mv.val ∨ k.val = 4302)) = false := by
+      native_decide
+    by_cases hscB2150_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4303) := Fin.ext hscB2150_6
+      have hodd : ∀ k : Fin 2151, (fun k : Fin 4303 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2151 (fun k : Fin 4303 => decide (k.val = 2)) ≠
+          rule30n 2151 (flipCell (fun k : Fin 4303 => decide (k.val = 2)) (6 : Fin 4303)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4303 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2150_4294 : m.val = 4294
+      · -- m = 4294: sub-case B
+        have hm_eq : m = (4294 : Fin 4303) := Fin.ext hscB2150_4294
+        have hodd : ∀ k : Fin 2151, (fun k : Fin 4303 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2151 (fun k : Fin 4303 => decide (k.val = 2)) ≠
+            rule30n 2151 (flipCell (fun k : Fin 4303 => decide (k.val = 2)) (4294 : Fin 4303)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4303 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2150_6 hscB2150_4294 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2151_eq : n' = 2151
+  ·
+    subst hn2151_eq
+    have h_no_scB : ∀ mv : Fin 4305,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4305 → mv.val ≠ 4302 →
+        rule30n 2152 (fun k : Fin 4305 => decide (k.val = mv.val)) = true ∨
+        rule30n 2152 (fun k : Fin 4305 => decide (k.val = mv.val ∨ k.val = 4304)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2152_eq : n' = 2152
+  ·
+    subst hn2152_eq
+    have h_no_scB : ∀ mv : Fin 4307,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4307 → mv.val ≠ 4304 →
+        rule30n 2153 (fun k : Fin 4307 => decide (k.val = mv.val)) = true ∨
+        rule30n 2153 (fun k : Fin 4307 => decide (k.val = mv.val ∨ k.val = 4306)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2153_eq : n' = 2153
+  ·
+    subst hn2153_eq
+    have h_only_scB : ∀ mv : Fin 4309,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4309 → mv.val ≠ 4306 →
+        mv.val ≠ 4300 →
+        rule30n 2154 (fun k : Fin 4309 => decide (k.val = mv.val)) = true ∨
+        rule30n 2154 (fun k : Fin 4309 => decide (k.val = mv.val ∨ k.val = 4308)) = false := by
+      native_decide
+    by_cases hscB2153_4300 : m.val = 4300
+    · -- m = 4300: sub-case B
+      have hm_eq : m = (4300 : Fin 4309) := Fin.ext hscB2153_4300
+      have hodd : ∀ k : Fin 2154, (fun k : Fin 4309 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2154 (fun k : Fin 4309 => decide (k.val = 8)) ≠
+          rule30n 2154 (flipCell (fun k : Fin 4309 => decide (k.val = 8)) (4300 : Fin 4309)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4309 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2153_4300 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2154_eq : n' = 2154
+  ·
+    subst hn2154_eq
+    have h_only_scB : ∀ mv : Fin 4311,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4311 → mv.val ≠ 4308 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4302 →
+        rule30n 2155 (fun k : Fin 4311 => decide (k.val = mv.val)) = true ∨
+        rule30n 2155 (fun k : Fin 4311 => decide (k.val = mv.val ∨ k.val = 4310)) = false := by
+      native_decide
+    by_cases hscB2154_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4311) := Fin.ext hscB2154_6
+      have hodd : ∀ k : Fin 2155, (fun k : Fin 4311 => decide (k.val = 10)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2155 (fun k : Fin 4311 => decide (k.val = 10)) ≠
+          rule30n 2155 (flipCell (fun k : Fin 4311 => decide (k.val = 10)) (6 : Fin 4311)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4311 => decide (k.val = 10), hodd, hsens⟩
+    ·
+      by_cases hscB2154_4302 : m.val = 4302
+      · -- m = 4302: sub-case B
+        have hm_eq : m = (4302 : Fin 4311) := Fin.ext hscB2154_4302
+        have hodd : ∀ k : Fin 2155, (fun k : Fin 4311 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2155 (fun k : Fin 4311 => decide (k.val = 2)) ≠
+            rule30n 2155 (flipCell (fun k : Fin 4311 => decide (k.val = 2)) (4302 : Fin 4311)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4311 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2154_6 hscB2154_4302 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2155_eq : n' = 2155
+  ·
+    subst hn2155_eq
+    have h_only_scB : ∀ mv : Fin 4313,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4313 → mv.val ≠ 4310 →
+        mv.val ≠ 8 →
+        rule30n 2156 (fun k : Fin 4313 => decide (k.val = mv.val)) = true ∨
+        rule30n 2156 (fun k : Fin 4313 => decide (k.val = mv.val ∨ k.val = 4312)) = false := by
+      native_decide
+    by_cases hscB2155_8 : m.val = 8
+    · -- m = 8: sub-case B
+      have hm_eq : m = (8 : Fin 4313) := Fin.ext hscB2155_8
+      have hodd : ∀ k : Fin 2156, (fun k : Fin 4313 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2156 (fun k : Fin 4313 => decide (k.val = 2)) ≠
+          rule30n 2156 (flipCell (fun k : Fin 4313 => decide (k.val = 2)) (8 : Fin 4313)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4313 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2155_8 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2156_eq : n' = 2156
+  ·
+    subst hn2156_eq
+    have h_no_scB : ∀ mv : Fin 4315,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4315 → mv.val ≠ 4312 →
+        rule30n 2157 (fun k : Fin 4315 => decide (k.val = mv.val)) = true ∨
+        rule30n 2157 (fun k : Fin 4315 => decide (k.val = mv.val ∨ k.val = 4314)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2157_eq : n' = 2157
+  ·
+    subst hn2157_eq
+    have h_only_scB : ∀ mv : Fin 4317,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4317 → mv.val ≠ 4314 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4308 →
+        rule30n 2158 (fun k : Fin 4317 => decide (k.val = mv.val)) = true ∨
+        rule30n 2158 (fun k : Fin 4317 => decide (k.val = mv.val ∨ k.val = 4316)) = false := by
+      native_decide
+    by_cases hscB2157_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4317) := Fin.ext hscB2157_4
+      have hodd : ∀ k : Fin 2158, (fun k : Fin 4317 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2158 (fun k : Fin 4317 => decide (k.val = 6)) ≠
+          rule30n 2158 (flipCell (fun k : Fin 4317 => decide (k.val = 6)) (4 : Fin 4317)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4317 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2157_4308 : m.val = 4308
+      · -- m = 4308: sub-case B
+        have hm_eq : m = (4308 : Fin 4317) := Fin.ext hscB2157_4308
+        have hodd : ∀ k : Fin 2158, (fun k : Fin 4317 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2158 (fun k : Fin 4317 => decide (k.val = 16)) ≠
+            rule30n 2158 (flipCell (fun k : Fin 4317 => decide (k.val = 16)) (4308 : Fin 4317)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4317 => decide (k.val = 16), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2157_4 hscB2157_4308 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2158_eq : n' = 2158
+  ·
+    subst hn2158_eq
+    have h_only_scB : ∀ mv : Fin 4319,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4319 → mv.val ≠ 4316 →
+        mv.val ≠ 4310 →
+        rule30n 2159 (fun k : Fin 4319 => decide (k.val = mv.val)) = true ∨
+        rule30n 2159 (fun k : Fin 4319 => decide (k.val = mv.val ∨ k.val = 4318)) = false := by
+      native_decide
+    by_cases hscB2158_4310 : m.val = 4310
+    · -- m = 4310: sub-case B
+      have hm_eq : m = (4310 : Fin 4319) := Fin.ext hscB2158_4310
+      have hodd : ∀ k : Fin 2159, (fun k : Fin 4319 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2159 (fun k : Fin 4319 => decide (k.val = 2)) ≠
+          rule30n 2159 (flipCell (fun k : Fin 4319 => decide (k.val = 2)) (4310 : Fin 4319)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4319 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2158_4310 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2159_eq : n' = 2159
+  ·
+    subst hn2159_eq
+    have h_no_scB : ∀ mv : Fin 4321,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4321 → mv.val ≠ 4318 →
+        rule30n 2160 (fun k : Fin 4321 => decide (k.val = mv.val)) = true ∨
+        rule30n 2160 (fun k : Fin 4321 => decide (k.val = mv.val ∨ k.val = 4320)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2160_eq : n' = 2160
+  ·
+    subst hn2160_eq
+    have h_only_scB : ∀ mv : Fin 4323,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4323 → mv.val ≠ 4320 →
+        mv.val ≠ 10 →
+        rule30n 2161 (fun k : Fin 4323 => decide (k.val = mv.val)) = true ∨
+        rule30n 2161 (fun k : Fin 4323 => decide (k.val = mv.val ∨ k.val = 4322)) = false := by
+      native_decide
+    by_cases hscB2160_10 : m.val = 10
+    · -- m = 10: sub-case B
+      have hm_eq : m = (10 : Fin 4323) := Fin.ext hscB2160_10
+      have hodd : ∀ k : Fin 2161, (fun k : Fin 4323 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2161 (fun k : Fin 4323 => decide (k.val = 2)) ≠
+          rule30n 2161 (flipCell (fun k : Fin 4323 => decide (k.val = 2)) (10 : Fin 4323)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4323 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2160_10 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2161_eq : n' = 2161
+  ·
+    subst hn2161_eq
+    have h_only_scB : ∀ mv : Fin 4325,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4325 → mv.val ≠ 4322 →
+        mv.val ≠ 4316 →
+        rule30n 2162 (fun k : Fin 4325 => decide (k.val = mv.val)) = true ∨
+        rule30n 2162 (fun k : Fin 4325 => decide (k.val = mv.val ∨ k.val = 4324)) = false := by
+      native_decide
+    by_cases hscB2161_4316 : m.val = 4316
+    · -- m = 4316: sub-case B
+      have hm_eq : m = (4316 : Fin 4325) := Fin.ext hscB2161_4316
+      have hodd : ∀ k : Fin 2162, (fun k : Fin 4325 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2162 (fun k : Fin 4325 => decide (k.val = 12)) ≠
+          rule30n 2162 (flipCell (fun k : Fin 4325 => decide (k.val = 12)) (4316 : Fin 4325)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4325 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2161_4316 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2162_eq : n' = 2162
+  ·
+    subst hn2162_eq
+    have h_only_scB : ∀ mv : Fin 4327,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4327 → mv.val ≠ 4324 →
+        mv.val ≠ 4318 →
+        rule30n 2163 (fun k : Fin 4327 => decide (k.val = mv.val)) = true ∨
+        rule30n 2163 (fun k : Fin 4327 => decide (k.val = mv.val ∨ k.val = 4326)) = false := by
+      native_decide
+    by_cases hscB2162_4318 : m.val = 4318
+    · -- m = 4318: sub-case B
+      have hm_eq : m = (4318 : Fin 4327) := Fin.ext hscB2162_4318
+      have hodd : ∀ k : Fin 2163, (fun k : Fin 4327 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2163 (fun k : Fin 4327 => decide (k.val = 2)) ≠
+          rule30n 2163 (flipCell (fun k : Fin 4327 => decide (k.val = 2)) (4318 : Fin 4327)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4327 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2162_4318 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2163_eq : n' = 2163
+  ·
+    subst hn2163_eq
+    have h_no_scB : ∀ mv : Fin 4329,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4329 → mv.val ≠ 4326 →
+        rule30n 2164 (fun k : Fin 4329 => decide (k.val = mv.val)) = true ∨
+        rule30n 2164 (fun k : Fin 4329 => decide (k.val = mv.val ∨ k.val = 4328)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2164_eq : n' = 2164
+  ·
+    subst hn2164_eq
+    have h_no_scB : ∀ mv : Fin 4331,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4331 → mv.val ≠ 4328 →
+        rule30n 2165 (fun k : Fin 4331 => decide (k.val = mv.val)) = true ∨
+        rule30n 2165 (fun k : Fin 4331 => decide (k.val = mv.val ∨ k.val = 4330)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2165_eq : n' = 2165
+  ·
+    subst hn2165_eq
+    have h_only_scB : ∀ mv : Fin 4333,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4333 → mv.val ≠ 4330 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4324 →
+        rule30n 2166 (fun k : Fin 4333 => decide (k.val = mv.val)) = true ∨
+        rule30n 2166 (fun k : Fin 4333 => decide (k.val = mv.val ∨ k.val = 4332)) = false := by
+      native_decide
+    by_cases hscB2165_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4333) := Fin.ext hscB2165_4
+      have hodd : ∀ k : Fin 2166, (fun k : Fin 4333 => decide (k.val = 10)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2166 (fun k : Fin 4333 => decide (k.val = 10)) ≠
+          rule30n 2166 (flipCell (fun k : Fin 4333 => decide (k.val = 10)) (4 : Fin 4333)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4333 => decide (k.val = 10), hodd, hsens⟩
+    ·
+      by_cases hscB2165_4324 : m.val = 4324
+      · -- m = 4324: sub-case B
+        have hm_eq : m = (4324 : Fin 4333) := Fin.ext hscB2165_4324
+        have hodd : ∀ k : Fin 2166, (fun k : Fin 4333 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2166 (fun k : Fin 4333 => decide (k.val = 12)) ≠
+            rule30n 2166 (flipCell (fun k : Fin 4333 => decide (k.val = 12)) (4324 : Fin 4333)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4333 => decide (k.val = 12), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2165_4 hscB2165_4324 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2166_eq : n' = 2166
+  ·
+    subst hn2166_eq
+    have h_only_scB : ∀ mv : Fin 4335,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4335 → mv.val ≠ 4332 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4326 →
+        rule30n 2167 (fun k : Fin 4335 => decide (k.val = mv.val)) = true ∨
+        rule30n 2167 (fun k : Fin 4335 => decide (k.val = mv.val ∨ k.val = 4334)) = false := by
+      native_decide
+    by_cases hscB2166_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4335) := Fin.ext hscB2166_6
+      have hodd : ∀ k : Fin 2167, (fun k : Fin 4335 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2167 (fun k : Fin 4335 => decide (k.val = 2)) ≠
+          rule30n 2167 (flipCell (fun k : Fin 4335 => decide (k.val = 2)) (6 : Fin 4335)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4335 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2166_4326 : m.val = 4326
+      · -- m = 4326: sub-case B
+        have hm_eq : m = (4326 : Fin 4335) := Fin.ext hscB2166_4326
+        have hodd : ∀ k : Fin 2167, (fun k : Fin 4335 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2167 (fun k : Fin 4335 => decide (k.val = 2)) ≠
+            rule30n 2167 (flipCell (fun k : Fin 4335 => decide (k.val = 2)) (4326 : Fin 4335)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4335 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2166_6 hscB2166_4326 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2167_eq : n' = 2167
+  ·
+    subst hn2167_eq
+    have h_no_scB : ∀ mv : Fin 4337,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4337 → mv.val ≠ 4334 →
+        rule30n 2168 (fun k : Fin 4337 => decide (k.val = mv.val)) = true ∨
+        rule30n 2168 (fun k : Fin 4337 => decide (k.val = mv.val ∨ k.val = 4336)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2168_eq : n' = 2168
+  ·
+    subst hn2168_eq
+    have h_no_scB : ∀ mv : Fin 4339,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4339 → mv.val ≠ 4336 →
+        rule30n 2169 (fun k : Fin 4339 => decide (k.val = mv.val)) = true ∨
+        rule30n 2169 (fun k : Fin 4339 => decide (k.val = mv.val ∨ k.val = 4338)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2169_eq : n' = 2169
+  ·
+    subst hn2169_eq
+    have h_only_scB : ∀ mv : Fin 4341,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4341 → mv.val ≠ 4338 →
+        mv.val ≠ 4332 →
+        rule30n 2170 (fun k : Fin 4341 => decide (k.val = mv.val)) = true ∨
+        rule30n 2170 (fun k : Fin 4341 => decide (k.val = mv.val ∨ k.val = 4340)) = false := by
+      native_decide
+    by_cases hscB2169_4332 : m.val = 4332
+    · -- m = 4332: sub-case B
+      have hm_eq : m = (4332 : Fin 4341) := Fin.ext hscB2169_4332
+      have hodd : ∀ k : Fin 2170, (fun k : Fin 4341 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2170 (fun k : Fin 4341 => decide (k.val = 8)) ≠
+          rule30n 2170 (flipCell (fun k : Fin 4341 => decide (k.val = 8)) (4332 : Fin 4341)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4341 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2169_4332 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2170_eq : n' = 2170
+  ·
+    subst hn2170_eq
+    have h_only_scB : ∀ mv : Fin 4343,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4343 → mv.val ≠ 4340 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4334 →
+        rule30n 2171 (fun k : Fin 4343 => decide (k.val = mv.val)) = true ∨
+        rule30n 2171 (fun k : Fin 4343 => decide (k.val = mv.val ∨ k.val = 4342)) = false := by
+      native_decide
+    by_cases hscB2170_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4343) := Fin.ext hscB2170_6
+      have hodd : ∀ k : Fin 2171, (fun k : Fin 4343 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2171 (fun k : Fin 4343 => decide (k.val = 8)) ≠
+          rule30n 2171 (flipCell (fun k : Fin 4343 => decide (k.val = 8)) (6 : Fin 4343)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4343 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB2170_4334 : m.val = 4334
+      · -- m = 4334: sub-case B
+        have hm_eq : m = (4334 : Fin 4343) := Fin.ext hscB2170_4334
+        have hodd : ∀ k : Fin 2171, (fun k : Fin 4343 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2171 (fun k : Fin 4343 => decide (k.val = 2)) ≠
+            rule30n 2171 (flipCell (fun k : Fin 4343 => decide (k.val = 2)) (4334 : Fin 4343)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4343 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2170_6 hscB2170_4334 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2171_eq : n' = 2171
+  ·
+    subst hn2171_eq
+    have h_no_scB : ∀ mv : Fin 4345,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4345 → mv.val ≠ 4342 →
+        rule30n 2172 (fun k : Fin 4345 => decide (k.val = mv.val)) = true ∨
+        rule30n 2172 (fun k : Fin 4345 => decide (k.val = mv.val ∨ k.val = 4344)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2172_eq : n' = 2172
+  ·
+    subst hn2172_eq
+    have h_no_scB : ∀ mv : Fin 4347,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4347 → mv.val ≠ 4344 →
+        rule30n 2173 (fun k : Fin 4347 => decide (k.val = mv.val)) = true ∨
+        rule30n 2173 (fun k : Fin 4347 => decide (k.val = mv.val ∨ k.val = 4346)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2173_eq : n' = 2173
+  ·
+    subst hn2173_eq
+    have h_only_scB : ∀ mv : Fin 4349,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4349 → mv.val ≠ 4346 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4340 →
+        rule30n 2174 (fun k : Fin 4349 => decide (k.val = mv.val)) = true ∨
+        rule30n 2174 (fun k : Fin 4349 => decide (k.val = mv.val ∨ k.val = 4348)) = false := by
+      native_decide
+    by_cases hscB2173_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4349) := Fin.ext hscB2173_4
+      have hodd : ∀ k : Fin 2174, (fun k : Fin 4349 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2174 (fun k : Fin 4349 => decide (k.val = 6)) ≠
+          rule30n 2174 (flipCell (fun k : Fin 4349 => decide (k.val = 6)) (4 : Fin 4349)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4349 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2173_4340 : m.val = 4340
+      · -- m = 4340: sub-case B
+        have hm_eq : m = (4340 : Fin 4349) := Fin.ext hscB2173_4340
+        have hodd : ∀ k : Fin 2174, (fun k : Fin 4349 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2174 (fun k : Fin 4349 => decide (k.val = 8)) ≠
+            rule30n 2174 (flipCell (fun k : Fin 4349 => decide (k.val = 8)) (4340 : Fin 4349)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4349 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2173_4 hscB2173_4340 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2174_eq : n' = 2174
+  ·
+    subst hn2174_eq
+    have h_only_scB : ∀ mv : Fin 4351,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4351 → mv.val ≠ 4348 →
+        mv.val ≠ 4342 →
+        rule30n 2175 (fun k : Fin 4351 => decide (k.val = mv.val)) = true ∨
+        rule30n 2175 (fun k : Fin 4351 => decide (k.val = mv.val ∨ k.val = 4350)) = false := by
+      native_decide
+    by_cases hscB2174_4342 : m.val = 4342
+    · -- m = 4342: sub-case B
+      have hm_eq : m = (4342 : Fin 4351) := Fin.ext hscB2174_4342
+      have hodd : ∀ k : Fin 2175, (fun k : Fin 4351 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2175 (fun k : Fin 4351 => decide (k.val = 2)) ≠
+          rule30n 2175 (flipCell (fun k : Fin 4351 => decide (k.val = 2)) (4342 : Fin 4351)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4351 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2174_4342 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2175_eq : n' = 2175
+  ·
+    subst hn2175_eq
+    have h_no_scB : ∀ mv : Fin 4353,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4353 → mv.val ≠ 4350 →
+        rule30n 2176 (fun k : Fin 4353 => decide (k.val = mv.val)) = true ∨
+        rule30n 2176 (fun k : Fin 4353 => decide (k.val = mv.val ∨ k.val = 4352)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2176_eq : n' = 2176
+  ·
+    subst hn2176_eq
+    have h_no_scB : ∀ mv : Fin 4355,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4355 → mv.val ≠ 4352 →
+        rule30n 2177 (fun k : Fin 4355 => decide (k.val = mv.val)) = true ∨
+        rule30n 2177 (fun k : Fin 4355 => decide (k.val = mv.val ∨ k.val = 4354)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2177_eq : n' = 2177
+  ·
+    subst hn2177_eq
+    have h_only_scB : ∀ mv : Fin 4357,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4357 → mv.val ≠ 4354 →
+        mv.val ≠ 4348 →
+        rule30n 2178 (fun k : Fin 4357 => decide (k.val = mv.val)) = true ∨
+        rule30n 2178 (fun k : Fin 4357 => decide (k.val = mv.val ∨ k.val = 4356)) = false := by
+      native_decide
+    by_cases hscB2177_4348 : m.val = 4348
+    · -- m = 4348: sub-case B
+      have hm_eq : m = (4348 : Fin 4357) := Fin.ext hscB2177_4348
+      have hodd : ∀ k : Fin 2178, (fun k : Fin 4357 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2178 (fun k : Fin 4357 => decide (k.val = 12)) ≠
+          rule30n 2178 (flipCell (fun k : Fin 4357 => decide (k.val = 12)) (4348 : Fin 4357)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4357 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2177_4348 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2178_eq : n' = 2178
+  ·
+    subst hn2178_eq
+    have h_only_scB : ∀ mv : Fin 4359,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4359 → mv.val ≠ 4356 →
+        mv.val ≠ 4350 →
+        rule30n 2179 (fun k : Fin 4359 => decide (k.val = mv.val)) = true ∨
+        rule30n 2179 (fun k : Fin 4359 => decide (k.val = mv.val ∨ k.val = 4358)) = false := by
+      native_decide
+    by_cases hscB2178_4350 : m.val = 4350
+    · -- m = 4350: sub-case B
+      have hm_eq : m = (4350 : Fin 4359) := Fin.ext hscB2178_4350
+      have hodd : ∀ k : Fin 2179, (fun k : Fin 4359 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2179 (fun k : Fin 4359 => decide (k.val = 2)) ≠
+          rule30n 2179 (flipCell (fun k : Fin 4359 => decide (k.val = 2)) (4350 : Fin 4359)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4359 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2178_4350 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2179_eq : n' = 2179
+  ·
+    subst hn2179_eq
+    have h_no_scB : ∀ mv : Fin 4361,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4361 → mv.val ≠ 4358 →
+        rule30n 2180 (fun k : Fin 4361 => decide (k.val = mv.val)) = true ∨
+        rule30n 2180 (fun k : Fin 4361 => decide (k.val = mv.val ∨ k.val = 4360)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2180_eq : n' = 2180
+  ·
+    subst hn2180_eq
+    have h_no_scB : ∀ mv : Fin 4363,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4363 → mv.val ≠ 4360 →
+        rule30n 2181 (fun k : Fin 4363 => decide (k.val = mv.val)) = true ∨
+        rule30n 2181 (fun k : Fin 4363 => decide (k.val = mv.val ∨ k.val = 4362)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  · -- n'≥2181: TODO
+    exact parity_sensitivity_even_subcaseB_ge2181 n' (by omega) m hm_even hm_low hm_ne_r hm_high hcase hts
+
+set_option maxHeartbeats 800000000 in
+/-- parity_sensitivity_even_subcaseB for n'≥1941. -/
+private lemma parity_sensitivity_even_subcaseB_ge1941
+    (n' : Nat) (hn_ge : 1941 ≤ n')
+    (m : Fin (2 * (n' + 1) + 1))
+    (hm_even : m.val % 2 = 0)
+    (hm_low : 1 ≤ m.val)
+    (hm_ne_r : m.val ≠ 2 * n')
+    (hm_high : m.val + 1 < 2 * (n' + 1) + 1)
+    (hcase : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+               decide (k.val = m.val)) = false)
+    (hts : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+             decide (k.val = m.val ∨ k.val = 2 * (n' + 1))) = true) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  by_cases hn1941_eq : n' = 1941
+  ·
+    subst hn1941_eq
+    have h_only_scB : ∀ mv : Fin 3885,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3885 → mv.val ≠ 3882 →
+        mv.val ≠ 4 →
+        mv.val ≠ 3876 →
+        rule30n 1942 (fun k : Fin 3885 => decide (k.val = mv.val)) = true ∨
+        rule30n 1942 (fun k : Fin 3885 => decide (k.val = mv.val ∨ k.val = 3884)) = false := by
+      native_decide
+    by_cases hscB1941_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 3885) := Fin.ext hscB1941_4
+      have hodd : ∀ k : Fin 1942, (fun k : Fin 3885 => decide (k.val = 14)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1942 (fun k : Fin 3885 => decide (k.val = 14)) ≠
+          rule30n 1942 (flipCell (fun k : Fin 3885 => decide (k.val = 14)) (4 : Fin 3885)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3885 => decide (k.val = 14), hodd, hsens⟩
+    ·
+      by_cases hscB1941_3876 : m.val = 3876
+      · -- m = 3876: sub-case B
+        have hm_eq : m = (3876 : Fin 3885) := Fin.ext hscB1941_3876
+        have hodd : ∀ k : Fin 1942, (fun k : Fin 3885 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1942 (fun k : Fin 3885 => decide (k.val = 16)) ≠
+            rule30n 1942 (flipCell (fun k : Fin 3885 => decide (k.val = 16)) (3876 : Fin 3885)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3885 => decide (k.val = 16), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1941_4 hscB1941_3876 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1942_eq : n' = 1942
+  ·
+    subst hn1942_eq
+    have h_only_scB : ∀ mv : Fin 3887,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3887 → mv.val ≠ 3884 →
+        mv.val ≠ 6 →
+        mv.val ≠ 3878 →
+        rule30n 1943 (fun k : Fin 3887 => decide (k.val = mv.val)) = true ∨
+        rule30n 1943 (fun k : Fin 3887 => decide (k.val = mv.val ∨ k.val = 3886)) = false := by
+      native_decide
+    by_cases hscB1942_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 3887) := Fin.ext hscB1942_6
+      have hodd : ∀ k : Fin 1943, (fun k : Fin 3887 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1943 (fun k : Fin 3887 => decide (k.val = 2)) ≠
+          rule30n 1943 (flipCell (fun k : Fin 3887 => decide (k.val = 2)) (6 : Fin 3887)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3887 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB1942_3878 : m.val = 3878
+      · -- m = 3878: sub-case B
+        have hm_eq : m = (3878 : Fin 3887) := Fin.ext hscB1942_3878
+        have hodd : ∀ k : Fin 1943, (fun k : Fin 3887 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1943 (fun k : Fin 3887 => decide (k.val = 2)) ≠
+            rule30n 1943 (flipCell (fun k : Fin 3887 => decide (k.val = 2)) (3878 : Fin 3887)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3887 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1942_6 hscB1942_3878 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1943_eq : n' = 1943
+  ·
+    subst hn1943_eq
+    have h_no_scB : ∀ mv : Fin 3889,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3889 → mv.val ≠ 3886 →
+        rule30n 1944 (fun k : Fin 3889 => decide (k.val = mv.val)) = true ∨
+        rule30n 1944 (fun k : Fin 3889 => decide (k.val = mv.val ∨ k.val = 3888)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1944_eq : n' = 1944
+  ·
+    subst hn1944_eq
+    have h_no_scB : ∀ mv : Fin 3891,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3891 → mv.val ≠ 3888 →
+        rule30n 1945 (fun k : Fin 3891 => decide (k.val = mv.val)) = true ∨
+        rule30n 1945 (fun k : Fin 3891 => decide (k.val = mv.val ∨ k.val = 3890)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1945_eq : n' = 1945
+  ·
+    subst hn1945_eq
+    have h_only_scB : ∀ mv : Fin 3893,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3893 → mv.val ≠ 3890 →
+        mv.val ≠ 3884 →
+        rule30n 1946 (fun k : Fin 3893 => decide (k.val = mv.val)) = true ∨
+        rule30n 1946 (fun k : Fin 3893 => decide (k.val = mv.val ∨ k.val = 3892)) = false := by
+      native_decide
+    by_cases hscB1945_3884 : m.val = 3884
+    · -- m = 3884: sub-case B
+      have hm_eq : m = (3884 : Fin 3893) := Fin.ext hscB1945_3884
+      have hodd : ∀ k : Fin 1946, (fun k : Fin 3893 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1946 (fun k : Fin 3893 => decide (k.val = 8)) ≠
+          rule30n 1946 (flipCell (fun k : Fin 3893 => decide (k.val = 8)) (3884 : Fin 3893)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3893 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1945_3884 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1946_eq : n' = 1946
+  ·
+    subst hn1946_eq
+    have h_only_scB : ∀ mv : Fin 3895,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3895 → mv.val ≠ 3892 →
+        mv.val ≠ 6 →
+        mv.val ≠ 3886 →
+        rule30n 1947 (fun k : Fin 3895 => decide (k.val = mv.val)) = true ∨
+        rule30n 1947 (fun k : Fin 3895 => decide (k.val = mv.val ∨ k.val = 3894)) = false := by
+      native_decide
+    by_cases hscB1946_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 3895) := Fin.ext hscB1946_6
+      have hodd : ∀ k : Fin 1947, (fun k : Fin 3895 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1947 (fun k : Fin 3895 => decide (k.val = 8)) ≠
+          rule30n 1947 (flipCell (fun k : Fin 3895 => decide (k.val = 8)) (6 : Fin 3895)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3895 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB1946_3886 : m.val = 3886
+      · -- m = 3886: sub-case B
+        have hm_eq : m = (3886 : Fin 3895) := Fin.ext hscB1946_3886
+        have hodd : ∀ k : Fin 1947, (fun k : Fin 3895 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1947 (fun k : Fin 3895 => decide (k.val = 2)) ≠
+            rule30n 1947 (flipCell (fun k : Fin 3895 => decide (k.val = 2)) (3886 : Fin 3895)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3895 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1946_6 hscB1946_3886 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1947_eq : n' = 1947
+  ·
+    subst hn1947_eq
+    have h_no_scB : ∀ mv : Fin 3897,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3897 → mv.val ≠ 3894 →
+        rule30n 1948 (fun k : Fin 3897 => decide (k.val = mv.val)) = true ∨
+        rule30n 1948 (fun k : Fin 3897 => decide (k.val = mv.val ∨ k.val = 3896)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1948_eq : n' = 1948
+  ·
+    subst hn1948_eq
+    have h_no_scB : ∀ mv : Fin 3899,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3899 → mv.val ≠ 3896 →
+        rule30n 1949 (fun k : Fin 3899 => decide (k.val = mv.val)) = true ∨
+        rule30n 1949 (fun k : Fin 3899 => decide (k.val = mv.val ∨ k.val = 3898)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1949_eq : n' = 1949
+  ·
+    subst hn1949_eq
+    have h_only_scB : ∀ mv : Fin 3901,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3901 → mv.val ≠ 3898 →
+        mv.val ≠ 4 →
+        mv.val ≠ 3892 →
+        rule30n 1950 (fun k : Fin 3901 => decide (k.val = mv.val)) = true ∨
+        rule30n 1950 (fun k : Fin 3901 => decide (k.val = mv.val ∨ k.val = 3900)) = false := by
+      native_decide
+    by_cases hscB1949_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 3901) := Fin.ext hscB1949_4
+      have hodd : ∀ k : Fin 1950, (fun k : Fin 3901 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1950 (fun k : Fin 3901 => decide (k.val = 6)) ≠
+          rule30n 1950 (flipCell (fun k : Fin 3901 => decide (k.val = 6)) (4 : Fin 3901)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3901 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB1949_3892 : m.val = 3892
+      · -- m = 3892: sub-case B
+        have hm_eq : m = (3892 : Fin 3901) := Fin.ext hscB1949_3892
+        have hodd : ∀ k : Fin 1950, (fun k : Fin 3901 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1950 (fun k : Fin 3901 => decide (k.val = 8)) ≠
+            rule30n 1950 (flipCell (fun k : Fin 3901 => decide (k.val = 8)) (3892 : Fin 3901)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3901 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1949_4 hscB1949_3892 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1950_eq : n' = 1950
+  ·
+    subst hn1950_eq
+    have h_only_scB : ∀ mv : Fin 3903,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3903 → mv.val ≠ 3900 →
+        mv.val ≠ 3894 →
+        rule30n 1951 (fun k : Fin 3903 => decide (k.val = mv.val)) = true ∨
+        rule30n 1951 (fun k : Fin 3903 => decide (k.val = mv.val ∨ k.val = 3902)) = false := by
+      native_decide
+    by_cases hscB1950_3894 : m.val = 3894
+    · -- m = 3894: sub-case B
+      have hm_eq : m = (3894 : Fin 3903) := Fin.ext hscB1950_3894
+      have hodd : ∀ k : Fin 1951, (fun k : Fin 3903 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1951 (fun k : Fin 3903 => decide (k.val = 2)) ≠
+          rule30n 1951 (flipCell (fun k : Fin 3903 => decide (k.val = 2)) (3894 : Fin 3903)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3903 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1950_3894 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1951_eq : n' = 1951
+  ·
+    subst hn1951_eq
+    have h_no_scB : ∀ mv : Fin 3905,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3905 → mv.val ≠ 3902 →
+        rule30n 1952 (fun k : Fin 3905 => decide (k.val = mv.val)) = true ∨
+        rule30n 1952 (fun k : Fin 3905 => decide (k.val = mv.val ∨ k.val = 3904)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1952_eq : n' = 1952
+  ·
+    subst hn1952_eq
+    have h_no_scB : ∀ mv : Fin 3907,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3907 → mv.val ≠ 3904 →
+        rule30n 1953 (fun k : Fin 3907 => decide (k.val = mv.val)) = true ∨
+        rule30n 1953 (fun k : Fin 3907 => decide (k.val = mv.val ∨ k.val = 3906)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1953_eq : n' = 1953
+  ·
+    subst hn1953_eq
+    have h_only_scB : ∀ mv : Fin 3909,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3909 → mv.val ≠ 3906 →
+        mv.val ≠ 3900 →
+        rule30n 1954 (fun k : Fin 3909 => decide (k.val = mv.val)) = true ∨
+        rule30n 1954 (fun k : Fin 3909 => decide (k.val = mv.val ∨ k.val = 3908)) = false := by
+      native_decide
+    by_cases hscB1953_3900 : m.val = 3900
+    · -- m = 3900: sub-case B
+      have hm_eq : m = (3900 : Fin 3909) := Fin.ext hscB1953_3900
+      have hodd : ∀ k : Fin 1954, (fun k : Fin 3909 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1954 (fun k : Fin 3909 => decide (k.val = 12)) ≠
+          rule30n 1954 (flipCell (fun k : Fin 3909 => decide (k.val = 12)) (3900 : Fin 3909)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3909 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1953_3900 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1954_eq : n' = 1954
+  ·
+    subst hn1954_eq
+    have h_only_scB : ∀ mv : Fin 3911,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3911 → mv.val ≠ 3908 →
+        mv.val ≠ 3902 →
+        rule30n 1955 (fun k : Fin 3911 => decide (k.val = mv.val)) = true ∨
+        rule30n 1955 (fun k : Fin 3911 => decide (k.val = mv.val ∨ k.val = 3910)) = false := by
+      native_decide
+    by_cases hscB1954_3902 : m.val = 3902
+    · -- m = 3902: sub-case B
+      have hm_eq : m = (3902 : Fin 3911) := Fin.ext hscB1954_3902
+      have hodd : ∀ k : Fin 1955, (fun k : Fin 3911 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1955 (fun k : Fin 3911 => decide (k.val = 2)) ≠
+          rule30n 1955 (flipCell (fun k : Fin 3911 => decide (k.val = 2)) (3902 : Fin 3911)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3911 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1954_3902 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1955_eq : n' = 1955
+  ·
+    subst hn1955_eq
+    have h_no_scB : ∀ mv : Fin 3913,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3913 → mv.val ≠ 3910 →
+        rule30n 1956 (fun k : Fin 3913 => decide (k.val = mv.val)) = true ∨
+        rule30n 1956 (fun k : Fin 3913 => decide (k.val = mv.val ∨ k.val = 3912)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1956_eq : n' = 1956
+  ·
+    subst hn1956_eq
+    have h_no_scB : ∀ mv : Fin 3915,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3915 → mv.val ≠ 3912 →
+        rule30n 1957 (fun k : Fin 3915 => decide (k.val = mv.val)) = true ∨
+        rule30n 1957 (fun k : Fin 3915 => decide (k.val = mv.val ∨ k.val = 3914)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1957_eq : n' = 1957
+  ·
+    subst hn1957_eq
+    have h_only_scB : ∀ mv : Fin 3917,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3917 → mv.val ≠ 3914 →
+        mv.val ≠ 4 →
+        mv.val ≠ 3908 →
+        rule30n 1958 (fun k : Fin 3917 => decide (k.val = mv.val)) = true ∨
+        rule30n 1958 (fun k : Fin 3917 => decide (k.val = mv.val ∨ k.val = 3916)) = false := by
+      native_decide
+    by_cases hscB1957_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 3917) := Fin.ext hscB1957_4
+      have hodd : ∀ k : Fin 1958, (fun k : Fin 3917 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1958 (fun k : Fin 3917 => decide (k.val = 12)) ≠
+          rule30n 1958 (flipCell (fun k : Fin 3917 => decide (k.val = 12)) (4 : Fin 3917)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3917 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      by_cases hscB1957_3908 : m.val = 3908
+      · -- m = 3908: sub-case B
+        have hm_eq : m = (3908 : Fin 3917) := Fin.ext hscB1957_3908
+        have hodd : ∀ k : Fin 1958, (fun k : Fin 3917 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1958 (fun k : Fin 3917 => decide (k.val = 8)) ≠
+            rule30n 1958 (flipCell (fun k : Fin 3917 => decide (k.val = 8)) (3908 : Fin 3917)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3917 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1957_4 hscB1957_3908 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1958_eq : n' = 1958
+  ·
+    subst hn1958_eq
+    have h_only_scB : ∀ mv : Fin 3919,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3919 → mv.val ≠ 3916 →
+        mv.val ≠ 6 →
+        mv.val ≠ 3910 →
+        rule30n 1959 (fun k : Fin 3919 => decide (k.val = mv.val)) = true ∨
+        rule30n 1959 (fun k : Fin 3919 => decide (k.val = mv.val ∨ k.val = 3918)) = false := by
+      native_decide
+    by_cases hscB1958_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 3919) := Fin.ext hscB1958_6
+      have hodd : ∀ k : Fin 1959, (fun k : Fin 3919 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1959 (fun k : Fin 3919 => decide (k.val = 2)) ≠
+          rule30n 1959 (flipCell (fun k : Fin 3919 => decide (k.val = 2)) (6 : Fin 3919)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3919 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB1958_3910 : m.val = 3910
+      · -- m = 3910: sub-case B
+        have hm_eq : m = (3910 : Fin 3919) := Fin.ext hscB1958_3910
+        have hodd : ∀ k : Fin 1959, (fun k : Fin 3919 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1959 (fun k : Fin 3919 => decide (k.val = 2)) ≠
+            rule30n 1959 (flipCell (fun k : Fin 3919 => decide (k.val = 2)) (3910 : Fin 3919)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3919 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1958_6 hscB1958_3910 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1959_eq : n' = 1959
+  ·
+    subst hn1959_eq
+    have h_no_scB : ∀ mv : Fin 3921,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3921 → mv.val ≠ 3918 →
+        rule30n 1960 (fun k : Fin 3921 => decide (k.val = mv.val)) = true ∨
+        rule30n 1960 (fun k : Fin 3921 => decide (k.val = mv.val ∨ k.val = 3920)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1960_eq : n' = 1960
+  ·
+    subst hn1960_eq
+    have h_no_scB : ∀ mv : Fin 3923,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3923 → mv.val ≠ 3920 →
+        rule30n 1961 (fun k : Fin 3923 => decide (k.val = mv.val)) = true ∨
+        rule30n 1961 (fun k : Fin 3923 => decide (k.val = mv.val ∨ k.val = 3922)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1961_eq : n' = 1961
+  ·
+    subst hn1961_eq
+    have h_only_scB : ∀ mv : Fin 3925,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3925 → mv.val ≠ 3922 →
+        mv.val ≠ 3916 →
+        rule30n 1962 (fun k : Fin 3925 => decide (k.val = mv.val)) = true ∨
+        rule30n 1962 (fun k : Fin 3925 => decide (k.val = mv.val ∨ k.val = 3924)) = false := by
+      native_decide
+    by_cases hscB1961_3916 : m.val = 3916
+    · -- m = 3916: sub-case B
+      have hm_eq : m = (3916 : Fin 3925) := Fin.ext hscB1961_3916
+      have hodd : ∀ k : Fin 1962, (fun k : Fin 3925 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1962 (fun k : Fin 3925 => decide (k.val = 8)) ≠
+          rule30n 1962 (flipCell (fun k : Fin 3925 => decide (k.val = 8)) (3916 : Fin 3925)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3925 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1961_3916 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1962_eq : n' = 1962
+  ·
+    subst hn1962_eq
+    have h_only_scB : ∀ mv : Fin 3927,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3927 → mv.val ≠ 3924 →
+        mv.val ≠ 6 →
+        mv.val ≠ 3918 →
+        rule30n 1963 (fun k : Fin 3927 => decide (k.val = mv.val)) = true ∨
+        rule30n 1963 (fun k : Fin 3927 => decide (k.val = mv.val ∨ k.val = 3926)) = false := by
+      native_decide
+    by_cases hscB1962_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 3927) := Fin.ext hscB1962_6
+      have hodd : ∀ k : Fin 1963, (fun k : Fin 3927 => decide (k.val = 10)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1963 (fun k : Fin 3927 => decide (k.val = 10)) ≠
+          rule30n 1963 (flipCell (fun k : Fin 3927 => decide (k.val = 10)) (6 : Fin 3927)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3927 => decide (k.val = 10), hodd, hsens⟩
+    ·
+      by_cases hscB1962_3918 : m.val = 3918
+      · -- m = 3918: sub-case B
+        have hm_eq : m = (3918 : Fin 3927) := Fin.ext hscB1962_3918
+        have hodd : ∀ k : Fin 1963, (fun k : Fin 3927 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1963 (fun k : Fin 3927 => decide (k.val = 2)) ≠
+            rule30n 1963 (flipCell (fun k : Fin 3927 => decide (k.val = 2)) (3918 : Fin 3927)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3927 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1962_6 hscB1962_3918 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1963_eq : n' = 1963
+  ·
+    subst hn1963_eq
+    have h_only_scB : ∀ mv : Fin 3929,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3929 → mv.val ≠ 3926 →
+        mv.val ≠ 8 →
+        rule30n 1964 (fun k : Fin 3929 => decide (k.val = mv.val)) = true ∨
+        rule30n 1964 (fun k : Fin 3929 => decide (k.val = mv.val ∨ k.val = 3928)) = false := by
+      native_decide
+    by_cases hscB1963_8 : m.val = 8
+    · -- m = 8: sub-case B
+      have hm_eq : m = (8 : Fin 3929) := Fin.ext hscB1963_8
+      have hodd : ∀ k : Fin 1964, (fun k : Fin 3929 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1964 (fun k : Fin 3929 => decide (k.val = 2)) ≠
+          rule30n 1964 (flipCell (fun k : Fin 3929 => decide (k.val = 2)) (8 : Fin 3929)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3929 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1963_8 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1964_eq : n' = 1964
+  ·
+    subst hn1964_eq
+    have h_no_scB : ∀ mv : Fin 3931,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3931 → mv.val ≠ 3928 →
+        rule30n 1965 (fun k : Fin 3931 => decide (k.val = mv.val)) = true ∨
+        rule30n 1965 (fun k : Fin 3931 => decide (k.val = mv.val ∨ k.val = 3930)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1965_eq : n' = 1965
+  ·
+    subst hn1965_eq
+    have h_only_scB : ∀ mv : Fin 3933,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3933 → mv.val ≠ 3930 →
+        mv.val ≠ 4 →
+        mv.val ≠ 3924 →
+        rule30n 1966 (fun k : Fin 3933 => decide (k.val = mv.val)) = true ∨
+        rule30n 1966 (fun k : Fin 3933 => decide (k.val = mv.val ∨ k.val = 3932)) = false := by
+      native_decide
+    by_cases hscB1965_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 3933) := Fin.ext hscB1965_4
+      have hodd : ∀ k : Fin 1966, (fun k : Fin 3933 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1966 (fun k : Fin 3933 => decide (k.val = 6)) ≠
+          rule30n 1966 (flipCell (fun k : Fin 3933 => decide (k.val = 6)) (4 : Fin 3933)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3933 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB1965_3924 : m.val = 3924
+      · -- m = 3924: sub-case B
+        have hm_eq : m = (3924 : Fin 3933) := Fin.ext hscB1965_3924
+        have hodd : ∀ k : Fin 1966, (fun k : Fin 3933 => decide (k.val = 20)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1966 (fun k : Fin 3933 => decide (k.val = 20)) ≠
+            rule30n 1966 (flipCell (fun k : Fin 3933 => decide (k.val = 20)) (3924 : Fin 3933)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3933 => decide (k.val = 20), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1965_4 hscB1965_3924 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1966_eq : n' = 1966
+  ·
+    subst hn1966_eq
+    have h_only_scB : ∀ mv : Fin 3935,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3935 → mv.val ≠ 3932 →
+        mv.val ≠ 3926 →
+        rule30n 1967 (fun k : Fin 3935 => decide (k.val = mv.val)) = true ∨
+        rule30n 1967 (fun k : Fin 3935 => decide (k.val = mv.val ∨ k.val = 3934)) = false := by
+      native_decide
+    by_cases hscB1966_3926 : m.val = 3926
+    · -- m = 3926: sub-case B
+      have hm_eq : m = (3926 : Fin 3935) := Fin.ext hscB1966_3926
+      have hodd : ∀ k : Fin 1967, (fun k : Fin 3935 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1967 (fun k : Fin 3935 => decide (k.val = 2)) ≠
+          rule30n 1967 (flipCell (fun k : Fin 3935 => decide (k.val = 2)) (3926 : Fin 3935)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3935 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1966_3926 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1967_eq : n' = 1967
+  ·
+    subst hn1967_eq
+    have h_no_scB : ∀ mv : Fin 3937,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3937 → mv.val ≠ 3934 →
+        rule30n 1968 (fun k : Fin 3937 => decide (k.val = mv.val)) = true ∨
+        rule30n 1968 (fun k : Fin 3937 => decide (k.val = mv.val ∨ k.val = 3936)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1968_eq : n' = 1968
+  ·
+    subst hn1968_eq
+    have h_only_scB : ∀ mv : Fin 3939,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3939 → mv.val ≠ 3936 →
+        mv.val ≠ 10 →
+        rule30n 1969 (fun k : Fin 3939 => decide (k.val = mv.val)) = true ∨
+        rule30n 1969 (fun k : Fin 3939 => decide (k.val = mv.val ∨ k.val = 3938)) = false := by
+      native_decide
+    by_cases hscB1968_10 : m.val = 10
+    · -- m = 10: sub-case B
+      have hm_eq : m = (10 : Fin 3939) := Fin.ext hscB1968_10
+      have hodd : ∀ k : Fin 1969, (fun k : Fin 3939 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1969 (fun k : Fin 3939 => decide (k.val = 2)) ≠
+          rule30n 1969 (flipCell (fun k : Fin 3939 => decide (k.val = 2)) (10 : Fin 3939)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3939 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1968_10 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1969_eq : n' = 1969
+  ·
+    subst hn1969_eq
+    have h_only_scB : ∀ mv : Fin 3941,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3941 → mv.val ≠ 3938 →
+        mv.val ≠ 3932 →
+        rule30n 1970 (fun k : Fin 3941 => decide (k.val = mv.val)) = true ∨
+        rule30n 1970 (fun k : Fin 3941 => decide (k.val = mv.val ∨ k.val = 3940)) = false := by
+      native_decide
+    by_cases hscB1969_3932 : m.val = 3932
+    · -- m = 3932: sub-case B
+      have hm_eq : m = (3932 : Fin 3941) := Fin.ext hscB1969_3932
+      have hodd : ∀ k : Fin 1970, (fun k : Fin 3941 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1970 (fun k : Fin 3941 => decide (k.val = 12)) ≠
+          rule30n 1970 (flipCell (fun k : Fin 3941 => decide (k.val = 12)) (3932 : Fin 3941)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3941 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1969_3932 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1970_eq : n' = 1970
+  ·
+    subst hn1970_eq
+    have h_only_scB : ∀ mv : Fin 3943,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3943 → mv.val ≠ 3940 →
+        mv.val ≠ 3934 →
+        rule30n 1971 (fun k : Fin 3943 => decide (k.val = mv.val)) = true ∨
+        rule30n 1971 (fun k : Fin 3943 => decide (k.val = mv.val ∨ k.val = 3942)) = false := by
+      native_decide
+    by_cases hscB1970_3934 : m.val = 3934
+    · -- m = 3934: sub-case B
+      have hm_eq : m = (3934 : Fin 3943) := Fin.ext hscB1970_3934
+      have hodd : ∀ k : Fin 1971, (fun k : Fin 3943 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1971 (fun k : Fin 3943 => decide (k.val = 2)) ≠
+          rule30n 1971 (flipCell (fun k : Fin 3943 => decide (k.val = 2)) (3934 : Fin 3943)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3943 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1970_3934 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1971_eq : n' = 1971
+  ·
+    subst hn1971_eq
+    have h_no_scB : ∀ mv : Fin 3945,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3945 → mv.val ≠ 3942 →
+        rule30n 1972 (fun k : Fin 3945 => decide (k.val = mv.val)) = true ∨
+        rule30n 1972 (fun k : Fin 3945 => decide (k.val = mv.val ∨ k.val = 3944)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1972_eq : n' = 1972
+  ·
+    subst hn1972_eq
+    have h_no_scB : ∀ mv : Fin 3947,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3947 → mv.val ≠ 3944 →
+        rule30n 1973 (fun k : Fin 3947 => decide (k.val = mv.val)) = true ∨
+        rule30n 1973 (fun k : Fin 3947 => decide (k.val = mv.val ∨ k.val = 3946)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1973_eq : n' = 1973
+  ·
+    subst hn1973_eq
+    have h_only_scB : ∀ mv : Fin 3949,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3949 → mv.val ≠ 3946 →
+        mv.val ≠ 4 →
+        mv.val ≠ 3940 →
+        rule30n 1974 (fun k : Fin 3949 => decide (k.val = mv.val)) = true ∨
+        rule30n 1974 (fun k : Fin 3949 => decide (k.val = mv.val ∨ k.val = 3948)) = false := by
+      native_decide
+    by_cases hscB1973_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 3949) := Fin.ext hscB1973_4
+      have hodd : ∀ k : Fin 1974, (fun k : Fin 3949 => decide (k.val = 10)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1974 (fun k : Fin 3949 => decide (k.val = 10)) ≠
+          rule30n 1974 (flipCell (fun k : Fin 3949 => decide (k.val = 10)) (4 : Fin 3949)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3949 => decide (k.val = 10), hodd, hsens⟩
+    ·
+      by_cases hscB1973_3940 : m.val = 3940
+      · -- m = 3940: sub-case B
+        have hm_eq : m = (3940 : Fin 3949) := Fin.ext hscB1973_3940
+        have hodd : ∀ k : Fin 1974, (fun k : Fin 3949 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1974 (fun k : Fin 3949 => decide (k.val = 12)) ≠
+            rule30n 1974 (flipCell (fun k : Fin 3949 => decide (k.val = 12)) (3940 : Fin 3949)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3949 => decide (k.val = 12), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1973_4 hscB1973_3940 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1974_eq : n' = 1974
+  ·
+    subst hn1974_eq
+    have h_only_scB : ∀ mv : Fin 3951,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3951 → mv.val ≠ 3948 →
+        mv.val ≠ 6 →
+        mv.val ≠ 3942 →
+        rule30n 1975 (fun k : Fin 3951 => decide (k.val = mv.val)) = true ∨
+        rule30n 1975 (fun k : Fin 3951 => decide (k.val = mv.val ∨ k.val = 3950)) = false := by
+      native_decide
+    by_cases hscB1974_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 3951) := Fin.ext hscB1974_6
+      have hodd : ∀ k : Fin 1975, (fun k : Fin 3951 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1975 (fun k : Fin 3951 => decide (k.val = 2)) ≠
+          rule30n 1975 (flipCell (fun k : Fin 3951 => decide (k.val = 2)) (6 : Fin 3951)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3951 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB1974_3942 : m.val = 3942
+      · -- m = 3942: sub-case B
+        have hm_eq : m = (3942 : Fin 3951) := Fin.ext hscB1974_3942
+        have hodd : ∀ k : Fin 1975, (fun k : Fin 3951 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1975 (fun k : Fin 3951 => decide (k.val = 2)) ≠
+            rule30n 1975 (flipCell (fun k : Fin 3951 => decide (k.val = 2)) (3942 : Fin 3951)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3951 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1974_6 hscB1974_3942 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1975_eq : n' = 1975
+  ·
+    subst hn1975_eq
+    have h_no_scB : ∀ mv : Fin 3953,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3953 → mv.val ≠ 3950 →
+        rule30n 1976 (fun k : Fin 3953 => decide (k.val = mv.val)) = true ∨
+        rule30n 1976 (fun k : Fin 3953 => decide (k.val = mv.val ∨ k.val = 3952)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1976_eq : n' = 1976
+  ·
+    subst hn1976_eq
+    have h_no_scB : ∀ mv : Fin 3955,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3955 → mv.val ≠ 3952 →
+        rule30n 1977 (fun k : Fin 3955 => decide (k.val = mv.val)) = true ∨
+        rule30n 1977 (fun k : Fin 3955 => decide (k.val = mv.val ∨ k.val = 3954)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1977_eq : n' = 1977
+  ·
+    subst hn1977_eq
+    have h_only_scB : ∀ mv : Fin 3957,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3957 → mv.val ≠ 3954 →
+        mv.val ≠ 3948 →
+        rule30n 1978 (fun k : Fin 3957 => decide (k.val = mv.val)) = true ∨
+        rule30n 1978 (fun k : Fin 3957 => decide (k.val = mv.val ∨ k.val = 3956)) = false := by
+      native_decide
+    by_cases hscB1977_3948 : m.val = 3948
+    · -- m = 3948: sub-case B
+      have hm_eq : m = (3948 : Fin 3957) := Fin.ext hscB1977_3948
+      have hodd : ∀ k : Fin 1978, (fun k : Fin 3957 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1978 (fun k : Fin 3957 => decide (k.val = 8)) ≠
+          rule30n 1978 (flipCell (fun k : Fin 3957 => decide (k.val = 8)) (3948 : Fin 3957)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3957 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1977_3948 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1978_eq : n' = 1978
+  ·
+    subst hn1978_eq
+    have h_only_scB : ∀ mv : Fin 3959,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3959 → mv.val ≠ 3956 →
+        mv.val ≠ 6 →
+        mv.val ≠ 3950 →
+        rule30n 1979 (fun k : Fin 3959 => decide (k.val = mv.val)) = true ∨
+        rule30n 1979 (fun k : Fin 3959 => decide (k.val = mv.val ∨ k.val = 3958)) = false := by
+      native_decide
+    by_cases hscB1978_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 3959) := Fin.ext hscB1978_6
+      have hodd : ∀ k : Fin 1979, (fun k : Fin 3959 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1979 (fun k : Fin 3959 => decide (k.val = 8)) ≠
+          rule30n 1979 (flipCell (fun k : Fin 3959 => decide (k.val = 8)) (6 : Fin 3959)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3959 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB1978_3950 : m.val = 3950
+      · -- m = 3950: sub-case B
+        have hm_eq : m = (3950 : Fin 3959) := Fin.ext hscB1978_3950
+        have hodd : ∀ k : Fin 1979, (fun k : Fin 3959 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1979 (fun k : Fin 3959 => decide (k.val = 2)) ≠
+            rule30n 1979 (flipCell (fun k : Fin 3959 => decide (k.val = 2)) (3950 : Fin 3959)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3959 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1978_6 hscB1978_3950 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1979_eq : n' = 1979
+  ·
+    subst hn1979_eq
+    have h_no_scB : ∀ mv : Fin 3961,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3961 → mv.val ≠ 3958 →
+        rule30n 1980 (fun k : Fin 3961 => decide (k.val = mv.val)) = true ∨
+        rule30n 1980 (fun k : Fin 3961 => decide (k.val = mv.val ∨ k.val = 3960)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1980_eq : n' = 1980
+  ·
+    subst hn1980_eq
+    have h_no_scB : ∀ mv : Fin 3963,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3963 → mv.val ≠ 3960 →
+        rule30n 1981 (fun k : Fin 3963 => decide (k.val = mv.val)) = true ∨
+        rule30n 1981 (fun k : Fin 3963 => decide (k.val = mv.val ∨ k.val = 3962)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1981_eq : n' = 1981
+  ·
+    subst hn1981_eq
+    have h_only_scB : ∀ mv : Fin 3965,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3965 → mv.val ≠ 3962 →
+        mv.val ≠ 4 →
+        mv.val ≠ 3956 →
+        rule30n 1982 (fun k : Fin 3965 => decide (k.val = mv.val)) = true ∨
+        rule30n 1982 (fun k : Fin 3965 => decide (k.val = mv.val ∨ k.val = 3964)) = false := by
+      native_decide
+    by_cases hscB1981_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 3965) := Fin.ext hscB1981_4
+      have hodd : ∀ k : Fin 1982, (fun k : Fin 3965 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1982 (fun k : Fin 3965 => decide (k.val = 6)) ≠
+          rule30n 1982 (flipCell (fun k : Fin 3965 => decide (k.val = 6)) (4 : Fin 3965)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3965 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB1981_3956 : m.val = 3956
+      · -- m = 3956: sub-case B
+        have hm_eq : m = (3956 : Fin 3965) := Fin.ext hscB1981_3956
+        have hodd : ∀ k : Fin 1982, (fun k : Fin 3965 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1982 (fun k : Fin 3965 => decide (k.val = 8)) ≠
+            rule30n 1982 (flipCell (fun k : Fin 3965 => decide (k.val = 8)) (3956 : Fin 3965)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3965 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1981_4 hscB1981_3956 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1982_eq : n' = 1982
+  ·
+    subst hn1982_eq
+    have h_only_scB : ∀ mv : Fin 3967,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3967 → mv.val ≠ 3964 →
+        mv.val ≠ 3958 →
+        rule30n 1983 (fun k : Fin 3967 => decide (k.val = mv.val)) = true ∨
+        rule30n 1983 (fun k : Fin 3967 => decide (k.val = mv.val ∨ k.val = 3966)) = false := by
+      native_decide
+    by_cases hscB1982_3958 : m.val = 3958
+    · -- m = 3958: sub-case B
+      have hm_eq : m = (3958 : Fin 3967) := Fin.ext hscB1982_3958
+      have hodd : ∀ k : Fin 1983, (fun k : Fin 3967 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1983 (fun k : Fin 3967 => decide (k.val = 2)) ≠
+          rule30n 1983 (flipCell (fun k : Fin 3967 => decide (k.val = 2)) (3958 : Fin 3967)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3967 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1982_3958 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1983_eq : n' = 1983
+  ·
+    subst hn1983_eq
+    have h_no_scB : ∀ mv : Fin 3969,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3969 → mv.val ≠ 3966 →
+        rule30n 1984 (fun k : Fin 3969 => decide (k.val = mv.val)) = true ∨
+        rule30n 1984 (fun k : Fin 3969 => decide (k.val = mv.val ∨ k.val = 3968)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1984_eq : n' = 1984
+  ·
+    subst hn1984_eq
+    have h_no_scB : ∀ mv : Fin 3971,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3971 → mv.val ≠ 3968 →
+        rule30n 1985 (fun k : Fin 3971 => decide (k.val = mv.val)) = true ∨
+        rule30n 1985 (fun k : Fin 3971 => decide (k.val = mv.val ∨ k.val = 3970)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1985_eq : n' = 1985
+  ·
+    subst hn1985_eq
+    have h_only_scB : ∀ mv : Fin 3973,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3973 → mv.val ≠ 3970 →
+        mv.val ≠ 3964 →
+        rule30n 1986 (fun k : Fin 3973 => decide (k.val = mv.val)) = true ∨
+        rule30n 1986 (fun k : Fin 3973 => decide (k.val = mv.val ∨ k.val = 3972)) = false := by
+      native_decide
+    by_cases hscB1985_3964 : m.val = 3964
+    · -- m = 3964: sub-case B
+      have hm_eq : m = (3964 : Fin 3973) := Fin.ext hscB1985_3964
+      have hodd : ∀ k : Fin 1986, (fun k : Fin 3973 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1986 (fun k : Fin 3973 => decide (k.val = 12)) ≠
+          rule30n 1986 (flipCell (fun k : Fin 3973 => decide (k.val = 12)) (3964 : Fin 3973)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3973 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1985_3964 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1986_eq : n' = 1986
+  ·
+    subst hn1986_eq
+    have h_only_scB : ∀ mv : Fin 3975,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3975 → mv.val ≠ 3972 →
+        mv.val ≠ 3966 →
+        rule30n 1987 (fun k : Fin 3975 => decide (k.val = mv.val)) = true ∨
+        rule30n 1987 (fun k : Fin 3975 => decide (k.val = mv.val ∨ k.val = 3974)) = false := by
+      native_decide
+    by_cases hscB1986_3966 : m.val = 3966
+    · -- m = 3966: sub-case B
+      have hm_eq : m = (3966 : Fin 3975) := Fin.ext hscB1986_3966
+      have hodd : ∀ k : Fin 1987, (fun k : Fin 3975 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1987 (fun k : Fin 3975 => decide (k.val = 2)) ≠
+          rule30n 1987 (flipCell (fun k : Fin 3975 => decide (k.val = 2)) (3966 : Fin 3975)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3975 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1986_3966 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1987_eq : n' = 1987
+  ·
+    subst hn1987_eq
+    have h_no_scB : ∀ mv : Fin 3977,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3977 → mv.val ≠ 3974 →
+        rule30n 1988 (fun k : Fin 3977 => decide (k.val = mv.val)) = true ∨
+        rule30n 1988 (fun k : Fin 3977 => decide (k.val = mv.val ∨ k.val = 3976)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1988_eq : n' = 1988
+  ·
+    subst hn1988_eq
+    have h_no_scB : ∀ mv : Fin 3979,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3979 → mv.val ≠ 3976 →
+        rule30n 1989 (fun k : Fin 3979 => decide (k.val = mv.val)) = true ∨
+        rule30n 1989 (fun k : Fin 3979 => decide (k.val = mv.val ∨ k.val = 3978)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1989_eq : n' = 1989
+  ·
+    subst hn1989_eq
+    have h_only_scB : ∀ mv : Fin 3981,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3981 → mv.val ≠ 3978 →
+        mv.val ≠ 4 →
+        mv.val ≠ 3972 →
+        rule30n 1990 (fun k : Fin 3981 => decide (k.val = mv.val)) = true ∨
+        rule30n 1990 (fun k : Fin 3981 => decide (k.val = mv.val ∨ k.val = 3980)) = false := by
+      native_decide
+    by_cases hscB1989_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 3981) := Fin.ext hscB1989_4
+      have hodd : ∀ k : Fin 1990, (fun k : Fin 3981 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1990 (fun k : Fin 3981 => decide (k.val = 12)) ≠
+          rule30n 1990 (flipCell (fun k : Fin 3981 => decide (k.val = 12)) (4 : Fin 3981)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3981 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      by_cases hscB1989_3972 : m.val = 3972
+      · -- m = 3972: sub-case B
+        have hm_eq : m = (3972 : Fin 3981) := Fin.ext hscB1989_3972
+        have hodd : ∀ k : Fin 1990, (fun k : Fin 3981 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1990 (fun k : Fin 3981 => decide (k.val = 8)) ≠
+            rule30n 1990 (flipCell (fun k : Fin 3981 => decide (k.val = 8)) (3972 : Fin 3981)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3981 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1989_4 hscB1989_3972 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1990_eq : n' = 1990
+  ·
+    subst hn1990_eq
+    have h_only_scB : ∀ mv : Fin 3983,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3983 → mv.val ≠ 3980 →
+        mv.val ≠ 6 →
+        mv.val ≠ 3974 →
+        rule30n 1991 (fun k : Fin 3983 => decide (k.val = mv.val)) = true ∨
+        rule30n 1991 (fun k : Fin 3983 => decide (k.val = mv.val ∨ k.val = 3982)) = false := by
+      native_decide
+    by_cases hscB1990_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 3983) := Fin.ext hscB1990_6
+      have hodd : ∀ k : Fin 1991, (fun k : Fin 3983 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1991 (fun k : Fin 3983 => decide (k.val = 2)) ≠
+          rule30n 1991 (flipCell (fun k : Fin 3983 => decide (k.val = 2)) (6 : Fin 3983)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3983 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB1990_3974 : m.val = 3974
+      · -- m = 3974: sub-case B
+        have hm_eq : m = (3974 : Fin 3983) := Fin.ext hscB1990_3974
+        have hodd : ∀ k : Fin 1991, (fun k : Fin 3983 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1991 (fun k : Fin 3983 => decide (k.val = 2)) ≠
+            rule30n 1991 (flipCell (fun k : Fin 3983 => decide (k.val = 2)) (3974 : Fin 3983)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3983 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1990_6 hscB1990_3974 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1991_eq : n' = 1991
+  ·
+    subst hn1991_eq
+    have h_no_scB : ∀ mv : Fin 3985,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3985 → mv.val ≠ 3982 →
+        rule30n 1992 (fun k : Fin 3985 => decide (k.val = mv.val)) = true ∨
+        rule30n 1992 (fun k : Fin 3985 => decide (k.val = mv.val ∨ k.val = 3984)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1992_eq : n' = 1992
+  ·
+    subst hn1992_eq
+    have h_no_scB : ∀ mv : Fin 3987,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3987 → mv.val ≠ 3984 →
+        rule30n 1993 (fun k : Fin 3987 => decide (k.val = mv.val)) = true ∨
+        rule30n 1993 (fun k : Fin 3987 => decide (k.val = mv.val ∨ k.val = 3986)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1993_eq : n' = 1993
+  ·
+    subst hn1993_eq
+    have h_only_scB : ∀ mv : Fin 3989,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3989 → mv.val ≠ 3986 →
+        mv.val ≠ 12 →
+        mv.val ≠ 3980 →
+        rule30n 1994 (fun k : Fin 3989 => decide (k.val = mv.val)) = true ∨
+        rule30n 1994 (fun k : Fin 3989 => decide (k.val = mv.val ∨ k.val = 3988)) = false := by
+      native_decide
+    by_cases hscB1993_12 : m.val = 12
+    · -- m = 12: sub-case B
+      have hm_eq : m = (12 : Fin 3989) := Fin.ext hscB1993_12
+      have hodd : ∀ k : Fin 1994, (fun k : Fin 3989 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1994 (fun k : Fin 3989 => decide (k.val = 2)) ≠
+          rule30n 1994 (flipCell (fun k : Fin 3989 => decide (k.val = 2)) (12 : Fin 3989)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3989 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB1993_3980 : m.val = 3980
+      · -- m = 3980: sub-case B
+        have hm_eq : m = (3980 : Fin 3989) := Fin.ext hscB1993_3980
+        have hodd : ∀ k : Fin 1994, (fun k : Fin 3989 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1994 (fun k : Fin 3989 => decide (k.val = 8)) ≠
+            rule30n 1994 (flipCell (fun k : Fin 3989 => decide (k.val = 8)) (3980 : Fin 3989)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3989 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1993_12 hscB1993_3980 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1994_eq : n' = 1994
+  ·
+    subst hn1994_eq
+    have h_only_scB : ∀ mv : Fin 3991,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3991 → mv.val ≠ 3988 →
+        mv.val ≠ 6 →
+        mv.val ≠ 14 →
+        mv.val ≠ 3982 →
+        rule30n 1995 (fun k : Fin 3991 => decide (k.val = mv.val)) = true ∨
+        rule30n 1995 (fun k : Fin 3991 => decide (k.val = mv.val ∨ k.val = 3990)) = false := by
+      native_decide
+    by_cases hscB1994_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 3991) := Fin.ext hscB1994_6
+      have hodd : ∀ k : Fin 1995, (fun k : Fin 3991 => decide (k.val = 14)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1995 (fun k : Fin 3991 => decide (k.val = 14)) ≠
+          rule30n 1995 (flipCell (fun k : Fin 3991 => decide (k.val = 14)) (6 : Fin 3991)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3991 => decide (k.val = 14), hodd, hsens⟩
+    ·
+      by_cases hscB1994_14 : m.val = 14
+      · -- m = 14: sub-case B
+        have hm_eq : m = (14 : Fin 3991) := Fin.ext hscB1994_14
+        have hodd : ∀ k : Fin 1995, (fun k : Fin 3991 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1995 (fun k : Fin 3991 => decide (k.val = 2)) ≠
+            rule30n 1995 (flipCell (fun k : Fin 3991 => decide (k.val = 2)) (14 : Fin 3991)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3991 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        by_cases hscB1994_3982 : m.val = 3982
+        · -- m = 3982: sub-case B
+          have hm_eq : m = (3982 : Fin 3991) := Fin.ext hscB1994_3982
+          have hodd : ∀ k : Fin 1995, (fun k : Fin 3991 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+            intro k; simp only [decide_eq_false_iff_not]; omega
+          have hsens : rule30n 1995 (fun k : Fin 3991 => decide (k.val = 2)) ≠
+              rule30n 1995 (flipCell (fun k : Fin 3991 => decide (k.val = 2)) (3982 : Fin 3991)) := by
+            native_decide
+          rw [hm_eq]; exact ⟨fun k : Fin 3991 => decide (k.val = 2), hodd, hsens⟩
+        ·
+          rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1994_6 hscB1994_14 hscB1994_3982 with h | h
+          · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+          · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1995_eq : n' = 1995
+  ·
+    subst hn1995_eq
+    have h_only_scB : ∀ mv : Fin 3993,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3993 → mv.val ≠ 3990 →
+        mv.val ≠ 8 →
+        rule30n 1996 (fun k : Fin 3993 => decide (k.val = mv.val)) = true ∨
+        rule30n 1996 (fun k : Fin 3993 => decide (k.val = mv.val ∨ k.val = 3992)) = false := by
+      native_decide
+    by_cases hscB1995_8 : m.val = 8
+    · -- m = 8: sub-case B
+      have hm_eq : m = (8 : Fin 3993) := Fin.ext hscB1995_8
+      have hodd : ∀ k : Fin 1996, (fun k : Fin 3993 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1996 (fun k : Fin 3993 => decide (k.val = 2)) ≠
+          rule30n 1996 (flipCell (fun k : Fin 3993 => decide (k.val = 2)) (8 : Fin 3993)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3993 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1995_8 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1996_eq : n' = 1996
+  ·
+    subst hn1996_eq
+    have h_no_scB : ∀ mv : Fin 3995,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3995 → mv.val ≠ 3992 →
+        rule30n 1997 (fun k : Fin 3995 => decide (k.val = mv.val)) = true ∨
+        rule30n 1997 (fun k : Fin 3995 => decide (k.val = mv.val ∨ k.val = 3994)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1997_eq : n' = 1997
+  ·
+    subst hn1997_eq
+    have h_only_scB : ∀ mv : Fin 3997,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3997 → mv.val ≠ 3994 →
+        mv.val ≠ 4 →
+        mv.val ≠ 12 →
+        mv.val ≠ 3988 →
+        rule30n 1998 (fun k : Fin 3997 => decide (k.val = mv.val)) = true ∨
+        rule30n 1998 (fun k : Fin 3997 => decide (k.val = mv.val ∨ k.val = 3996)) = false := by
+      native_decide
+    by_cases hscB1997_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 3997) := Fin.ext hscB1997_4
+      have hodd : ∀ k : Fin 1998, (fun k : Fin 3997 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1998 (fun k : Fin 3997 => decide (k.val = 6)) ≠
+          rule30n 1998 (flipCell (fun k : Fin 3997 => decide (k.val = 6)) (4 : Fin 3997)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3997 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB1997_12 : m.val = 12
+      · -- m = 12: sub-case B
+        have hm_eq : m = (12 : Fin 3997) := Fin.ext hscB1997_12
+        have hodd : ∀ k : Fin 1998, (fun k : Fin 3997 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1998 (fun k : Fin 3997 => decide (k.val = 2)) ≠
+            rule30n 1998 (flipCell (fun k : Fin 3997 => decide (k.val = 2)) (12 : Fin 3997)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3997 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        by_cases hscB1997_3988 : m.val = 3988
+        · -- m = 3988: sub-case B
+          have hm_eq : m = (3988 : Fin 3997) := Fin.ext hscB1997_3988
+          have hodd : ∀ k : Fin 1998, (fun k : Fin 3997 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+            intro k; simp only [decide_eq_false_iff_not]; omega
+          have hsens : rule30n 1998 (fun k : Fin 3997 => decide (k.val = 12)) ≠
+              rule30n 1998 (flipCell (fun k : Fin 3997 => decide (k.val = 12)) (3988 : Fin 3997)) := by
+            native_decide
+          rw [hm_eq]; exact ⟨fun k : Fin 3997 => decide (k.val = 12), hodd, hsens⟩
+        ·
+          rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1997_4 hscB1997_12 hscB1997_3988 with h | h
+          · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+          · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1998_eq : n' = 1998
+  ·
+    subst hn1998_eq
+    have h_only_scB : ∀ mv : Fin 3999,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 3999 → mv.val ≠ 3996 →
+        mv.val ≠ 14 →
+        mv.val ≠ 3990 →
+        rule30n 1999 (fun k : Fin 3999 => decide (k.val = mv.val)) = true ∨
+        rule30n 1999 (fun k : Fin 3999 => decide (k.val = mv.val ∨ k.val = 3998)) = false := by
+      native_decide
+    by_cases hscB1998_14 : m.val = 14
+    · -- m = 14: sub-case B
+      have hm_eq : m = (14 : Fin 3999) := Fin.ext hscB1998_14
+      have hodd : ∀ k : Fin 1999, (fun k : Fin 3999 => decide (k.val = 4)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 1999 (fun k : Fin 3999 => decide (k.val = 4)) ≠
+          rule30n 1999 (flipCell (fun k : Fin 3999 => decide (k.val = 4)) (14 : Fin 3999)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 3999 => decide (k.val = 4), hodd, hsens⟩
+    ·
+      by_cases hscB1998_3990 : m.val = 3990
+      · -- m = 3990: sub-case B
+        have hm_eq : m = (3990 : Fin 3999) := Fin.ext hscB1998_3990
+        have hodd : ∀ k : Fin 1999, (fun k : Fin 3999 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 1999 (fun k : Fin 3999 => decide (k.val = 2)) ≠
+            rule30n 1999 (flipCell (fun k : Fin 3999 => decide (k.val = 2)) (3990 : Fin 3999)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 3999 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1998_14 hscB1998_3990 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn1999_eq : n' = 1999
+  ·
+    subst hn1999_eq
+    have h_only_scB : ∀ mv : Fin 4001,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4001 → mv.val ≠ 3998 →
+        mv.val ≠ 16 →
+        rule30n 2000 (fun k : Fin 4001 => decide (k.val = mv.val)) = true ∨
+        rule30n 2000 (fun k : Fin 4001 => decide (k.val = mv.val ∨ k.val = 4000)) = false := by
+      native_decide
+    by_cases hscB1999_16 : m.val = 16
+    · -- m = 16: sub-case B
+      have hm_eq : m = (16 : Fin 4001) := Fin.ext hscB1999_16
+      have hodd : ∀ k : Fin 2000, (fun k : Fin 4001 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2000 (fun k : Fin 4001 => decide (k.val = 8)) ≠
+          rule30n 2000 (flipCell (fun k : Fin 4001 => decide (k.val = 8)) (16 : Fin 4001)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4001 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB1999_16 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2000_eq : n' = 2000
+  ·
+    subst hn2000_eq
+    have h_no_scB : ∀ mv : Fin 4003,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4003 → mv.val ≠ 4000 →
+        rule30n 2001 (fun k : Fin 4003 => decide (k.val = mv.val)) = true ∨
+        rule30n 2001 (fun k : Fin 4003 => decide (k.val = mv.val ∨ k.val = 4002)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2001_eq : n' = 2001
+  ·
+    subst hn2001_eq
+    have h_only_scB : ∀ mv : Fin 4005,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4005 → mv.val ≠ 4002 →
+        mv.val ≠ 3996 →
+        rule30n 2002 (fun k : Fin 4005 => decide (k.val = mv.val)) = true ∨
+        rule30n 2002 (fun k : Fin 4005 => decide (k.val = mv.val ∨ k.val = 4004)) = false := by
+      native_decide
+    by_cases hscB2001_3996 : m.val = 3996
+    · -- m = 3996: sub-case B
+      have hm_eq : m = (3996 : Fin 4005) := Fin.ext hscB2001_3996
+      have hodd : ∀ k : Fin 2002, (fun k : Fin 4005 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2002 (fun k : Fin 4005 => decide (k.val = 16)) ≠
+          rule30n 2002 (flipCell (fun k : Fin 4005 => decide (k.val = 16)) (3996 : Fin 4005)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4005 => decide (k.val = 16), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2001_3996 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2002_eq : n' = 2002
+  ·
+    subst hn2002_eq
+    have h_only_scB : ∀ mv : Fin 4007,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4007 → mv.val ≠ 4004 →
+        mv.val ≠ 3998 →
+        rule30n 2003 (fun k : Fin 4007 => decide (k.val = mv.val)) = true ∨
+        rule30n 2003 (fun k : Fin 4007 => decide (k.val = mv.val ∨ k.val = 4006)) = false := by
+      native_decide
+    by_cases hscB2002_3998 : m.val = 3998
+    · -- m = 3998: sub-case B
+      have hm_eq : m = (3998 : Fin 4007) := Fin.ext hscB2002_3998
+      have hodd : ∀ k : Fin 2003, (fun k : Fin 4007 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2003 (fun k : Fin 4007 => decide (k.val = 2)) ≠
+          rule30n 2003 (flipCell (fun k : Fin 4007 => decide (k.val = 2)) (3998 : Fin 4007)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4007 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2002_3998 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2003_eq : n' = 2003
+  ·
+    subst hn2003_eq
+    have h_no_scB : ∀ mv : Fin 4009,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4009 → mv.val ≠ 4006 →
+        rule30n 2004 (fun k : Fin 4009 => decide (k.val = mv.val)) = true ∨
+        rule30n 2004 (fun k : Fin 4009 => decide (k.val = mv.val ∨ k.val = 4008)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2004_eq : n' = 2004
+  ·
+    subst hn2004_eq
+    have h_no_scB : ∀ mv : Fin 4011,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4011 → mv.val ≠ 4008 →
+        rule30n 2005 (fun k : Fin 4011 => decide (k.val = mv.val)) = true ∨
+        rule30n 2005 (fun k : Fin 4011 => decide (k.val = mv.val ∨ k.val = 4010)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2005_eq : n' = 2005
+  ·
+    subst hn2005_eq
+    have h_only_scB : ∀ mv : Fin 4013,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4013 → mv.val ≠ 4010 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4004 →
+        rule30n 2006 (fun k : Fin 4013 => decide (k.val = mv.val)) = true ∨
+        rule30n 2006 (fun k : Fin 4013 => decide (k.val = mv.val ∨ k.val = 4012)) = false := by
+      native_decide
+    by_cases hscB2005_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4013) := Fin.ext hscB2005_4
+      have hodd : ∀ k : Fin 2006, (fun k : Fin 4013 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2006 (fun k : Fin 4013 => decide (k.val = 12)) ≠
+          rule30n 2006 (flipCell (fun k : Fin 4013 => decide (k.val = 12)) (4 : Fin 4013)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4013 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      by_cases hscB2005_4004 : m.val = 4004
+      · -- m = 4004: sub-case B
+        have hm_eq : m = (4004 : Fin 4013) := Fin.ext hscB2005_4004
+        have hodd : ∀ k : Fin 2006, (fun k : Fin 4013 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2006 (fun k : Fin 4013 => decide (k.val = 16)) ≠
+            rule30n 2006 (flipCell (fun k : Fin 4013 => decide (k.val = 16)) (4004 : Fin 4013)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4013 => decide (k.val = 16), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2005_4 hscB2005_4004 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2006_eq : n' = 2006
+  ·
+    subst hn2006_eq
+    have h_only_scB : ∀ mv : Fin 4015,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4015 → mv.val ≠ 4012 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4006 →
+        rule30n 2007 (fun k : Fin 4015 => decide (k.val = mv.val)) = true ∨
+        rule30n 2007 (fun k : Fin 4015 => decide (k.val = mv.val ∨ k.val = 4014)) = false := by
+      native_decide
+    by_cases hscB2006_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4015) := Fin.ext hscB2006_6
+      have hodd : ∀ k : Fin 2007, (fun k : Fin 4015 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2007 (fun k : Fin 4015 => decide (k.val = 2)) ≠
+          rule30n 2007 (flipCell (fun k : Fin 4015 => decide (k.val = 2)) (6 : Fin 4015)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4015 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2006_4006 : m.val = 4006
+      · -- m = 4006: sub-case B
+        have hm_eq : m = (4006 : Fin 4015) := Fin.ext hscB2006_4006
+        have hodd : ∀ k : Fin 2007, (fun k : Fin 4015 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2007 (fun k : Fin 4015 => decide (k.val = 2)) ≠
+            rule30n 2007 (flipCell (fun k : Fin 4015 => decide (k.val = 2)) (4006 : Fin 4015)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4015 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2006_6 hscB2006_4006 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2007_eq : n' = 2007
+  ·
+    subst hn2007_eq
+    have h_no_scB : ∀ mv : Fin 4017,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4017 → mv.val ≠ 4014 →
+        rule30n 2008 (fun k : Fin 4017 => decide (k.val = mv.val)) = true ∨
+        rule30n 2008 (fun k : Fin 4017 => decide (k.val = mv.val ∨ k.val = 4016)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2008_eq : n' = 2008
+  ·
+    subst hn2008_eq
+    have h_no_scB : ∀ mv : Fin 4019,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4019 → mv.val ≠ 4016 →
+        rule30n 2009 (fun k : Fin 4019 => decide (k.val = mv.val)) = true ∨
+        rule30n 2009 (fun k : Fin 4019 => decide (k.val = mv.val ∨ k.val = 4018)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2009_eq : n' = 2009
+  ·
+    subst hn2009_eq
+    have h_only_scB : ∀ mv : Fin 4021,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4021 → mv.val ≠ 4018 →
+        mv.val ≠ 4012 →
+        rule30n 2010 (fun k : Fin 4021 => decide (k.val = mv.val)) = true ∨
+        rule30n 2010 (fun k : Fin 4021 => decide (k.val = mv.val ∨ k.val = 4020)) = false := by
+      native_decide
+    by_cases hscB2009_4012 : m.val = 4012
+    · -- m = 4012: sub-case B
+      have hm_eq : m = (4012 : Fin 4021) := Fin.ext hscB2009_4012
+      have hodd : ∀ k : Fin 2010, (fun k : Fin 4021 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2010 (fun k : Fin 4021 => decide (k.val = 8)) ≠
+          rule30n 2010 (flipCell (fun k : Fin 4021 => decide (k.val = 8)) (4012 : Fin 4021)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4021 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2009_4012 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2010_eq : n' = 2010
+  ·
+    subst hn2010_eq
+    have h_only_scB : ∀ mv : Fin 4023,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4023 → mv.val ≠ 4020 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4014 →
+        rule30n 2011 (fun k : Fin 4023 => decide (k.val = mv.val)) = true ∨
+        rule30n 2011 (fun k : Fin 4023 => decide (k.val = mv.val ∨ k.val = 4022)) = false := by
+      native_decide
+    by_cases hscB2010_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4023) := Fin.ext hscB2010_6
+      have hodd : ∀ k : Fin 2011, (fun k : Fin 4023 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2011 (fun k : Fin 4023 => decide (k.val = 8)) ≠
+          rule30n 2011 (flipCell (fun k : Fin 4023 => decide (k.val = 8)) (6 : Fin 4023)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4023 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB2010_4014 : m.val = 4014
+      · -- m = 4014: sub-case B
+        have hm_eq : m = (4014 : Fin 4023) := Fin.ext hscB2010_4014
+        have hodd : ∀ k : Fin 2011, (fun k : Fin 4023 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2011 (fun k : Fin 4023 => decide (k.val = 2)) ≠
+            rule30n 2011 (flipCell (fun k : Fin 4023 => decide (k.val = 2)) (4014 : Fin 4023)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4023 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2010_6 hscB2010_4014 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2011_eq : n' = 2011
+  ·
+    subst hn2011_eq
+    have h_no_scB : ∀ mv : Fin 4025,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4025 → mv.val ≠ 4022 →
+        rule30n 2012 (fun k : Fin 4025 => decide (k.val = mv.val)) = true ∨
+        rule30n 2012 (fun k : Fin 4025 => decide (k.val = mv.val ∨ k.val = 4024)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2012_eq : n' = 2012
+  ·
+    subst hn2012_eq
+    have h_no_scB : ∀ mv : Fin 4027,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4027 → mv.val ≠ 4024 →
+        rule30n 2013 (fun k : Fin 4027 => decide (k.val = mv.val)) = true ∨
+        rule30n 2013 (fun k : Fin 4027 => decide (k.val = mv.val ∨ k.val = 4026)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2013_eq : n' = 2013
+  ·
+    subst hn2013_eq
+    have h_only_scB : ∀ mv : Fin 4029,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4029 → mv.val ≠ 4026 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4020 →
+        rule30n 2014 (fun k : Fin 4029 => decide (k.val = mv.val)) = true ∨
+        rule30n 2014 (fun k : Fin 4029 => decide (k.val = mv.val ∨ k.val = 4028)) = false := by
+      native_decide
+    by_cases hscB2013_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4029) := Fin.ext hscB2013_4
+      have hodd : ∀ k : Fin 2014, (fun k : Fin 4029 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2014 (fun k : Fin 4029 => decide (k.val = 6)) ≠
+          rule30n 2014 (flipCell (fun k : Fin 4029 => decide (k.val = 6)) (4 : Fin 4029)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4029 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2013_4020 : m.val = 4020
+      · -- m = 4020: sub-case B
+        have hm_eq : m = (4020 : Fin 4029) := Fin.ext hscB2013_4020
+        have hodd : ∀ k : Fin 2014, (fun k : Fin 4029 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2014 (fun k : Fin 4029 => decide (k.val = 8)) ≠
+            rule30n 2014 (flipCell (fun k : Fin 4029 => decide (k.val = 8)) (4020 : Fin 4029)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4029 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2013_4 hscB2013_4020 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2014_eq : n' = 2014
+  ·
+    subst hn2014_eq
+    have h_only_scB : ∀ mv : Fin 4031,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4031 → mv.val ≠ 4028 →
+        mv.val ≠ 4022 →
+        rule30n 2015 (fun k : Fin 4031 => decide (k.val = mv.val)) = true ∨
+        rule30n 2015 (fun k : Fin 4031 => decide (k.val = mv.val ∨ k.val = 4030)) = false := by
+      native_decide
+    by_cases hscB2014_4022 : m.val = 4022
+    · -- m = 4022: sub-case B
+      have hm_eq : m = (4022 : Fin 4031) := Fin.ext hscB2014_4022
+      have hodd : ∀ k : Fin 2015, (fun k : Fin 4031 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2015 (fun k : Fin 4031 => decide (k.val = 2)) ≠
+          rule30n 2015 (flipCell (fun k : Fin 4031 => decide (k.val = 2)) (4022 : Fin 4031)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4031 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2014_4022 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2015_eq : n' = 2015
+  ·
+    subst hn2015_eq
+    have h_no_scB : ∀ mv : Fin 4033,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4033 → mv.val ≠ 4030 →
+        rule30n 2016 (fun k : Fin 4033 => decide (k.val = mv.val)) = true ∨
+        rule30n 2016 (fun k : Fin 4033 => decide (k.val = mv.val ∨ k.val = 4032)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2016_eq : n' = 2016
+  ·
+    subst hn2016_eq
+    have h_no_scB : ∀ mv : Fin 4035,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4035 → mv.val ≠ 4032 →
+        rule30n 2017 (fun k : Fin 4035 => decide (k.val = mv.val)) = true ∨
+        rule30n 2017 (fun k : Fin 4035 => decide (k.val = mv.val ∨ k.val = 4034)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2017_eq : n' = 2017
+  ·
+    subst hn2017_eq
+    have h_only_scB : ∀ mv : Fin 4037,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4037 → mv.val ≠ 4034 →
+        mv.val ≠ 4028 →
+        rule30n 2018 (fun k : Fin 4037 => decide (k.val = mv.val)) = true ∨
+        rule30n 2018 (fun k : Fin 4037 => decide (k.val = mv.val ∨ k.val = 4036)) = false := by
+      native_decide
+    by_cases hscB2017_4028 : m.val = 4028
+    · -- m = 4028: sub-case B
+      have hm_eq : m = (4028 : Fin 4037) := Fin.ext hscB2017_4028
+      have hodd : ∀ k : Fin 2018, (fun k : Fin 4037 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2018 (fun k : Fin 4037 => decide (k.val = 12)) ≠
+          rule30n 2018 (flipCell (fun k : Fin 4037 => decide (k.val = 12)) (4028 : Fin 4037)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4037 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2017_4028 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2018_eq : n' = 2018
+  ·
+    subst hn2018_eq
+    have h_only_scB : ∀ mv : Fin 4039,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4039 → mv.val ≠ 4036 →
+        mv.val ≠ 4030 →
+        rule30n 2019 (fun k : Fin 4039 => decide (k.val = mv.val)) = true ∨
+        rule30n 2019 (fun k : Fin 4039 => decide (k.val = mv.val ∨ k.val = 4038)) = false := by
+      native_decide
+    by_cases hscB2018_4030 : m.val = 4030
+    · -- m = 4030: sub-case B
+      have hm_eq : m = (4030 : Fin 4039) := Fin.ext hscB2018_4030
+      have hodd : ∀ k : Fin 2019, (fun k : Fin 4039 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2019 (fun k : Fin 4039 => decide (k.val = 2)) ≠
+          rule30n 2019 (flipCell (fun k : Fin 4039 => decide (k.val = 2)) (4030 : Fin 4039)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4039 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2018_4030 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2019_eq : n' = 2019
+  ·
+    subst hn2019_eq
+    have h_no_scB : ∀ mv : Fin 4041,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4041 → mv.val ≠ 4038 →
+        rule30n 2020 (fun k : Fin 4041 => decide (k.val = mv.val)) = true ∨
+        rule30n 2020 (fun k : Fin 4041 => decide (k.val = mv.val ∨ k.val = 4040)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2020_eq : n' = 2020
+  ·
+    subst hn2020_eq
+    have h_no_scB : ∀ mv : Fin 4043,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4043 → mv.val ≠ 4040 →
+        rule30n 2021 (fun k : Fin 4043 => decide (k.val = mv.val)) = true ∨
+        rule30n 2021 (fun k : Fin 4043 => decide (k.val = mv.val ∨ k.val = 4042)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2021_eq : n' = 2021
+  ·
+    subst hn2021_eq
+    have h_only_scB : ∀ mv : Fin 4045,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4045 → mv.val ≠ 4042 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4036 →
+        rule30n 2022 (fun k : Fin 4045 => decide (k.val = mv.val)) = true ∨
+        rule30n 2022 (fun k : Fin 4045 => decide (k.val = mv.val ∨ k.val = 4044)) = false := by
+      native_decide
+    by_cases hscB2021_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4045) := Fin.ext hscB2021_4
+      have hodd : ∀ k : Fin 2022, (fun k : Fin 4045 => decide (k.val = 14)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2022 (fun k : Fin 4045 => decide (k.val = 14)) ≠
+          rule30n 2022 (flipCell (fun k : Fin 4045 => decide (k.val = 14)) (4 : Fin 4045)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4045 => decide (k.val = 14), hodd, hsens⟩
+    ·
+      by_cases hscB2021_4036 : m.val = 4036
+      · -- m = 4036: sub-case B
+        have hm_eq : m = (4036 : Fin 4045) := Fin.ext hscB2021_4036
+        have hodd : ∀ k : Fin 2022, (fun k : Fin 4045 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2022 (fun k : Fin 4045 => decide (k.val = 8)) ≠
+            rule30n 2022 (flipCell (fun k : Fin 4045 => decide (k.val = 8)) (4036 : Fin 4045)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4045 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2021_4 hscB2021_4036 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2022_eq : n' = 2022
+  ·
+    subst hn2022_eq
+    have h_only_scB : ∀ mv : Fin 4047,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4047 → mv.val ≠ 4044 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4038 →
+        rule30n 2023 (fun k : Fin 4047 => decide (k.val = mv.val)) = true ∨
+        rule30n 2023 (fun k : Fin 4047 => decide (k.val = mv.val ∨ k.val = 4046)) = false := by
+      native_decide
+    by_cases hscB2022_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4047) := Fin.ext hscB2022_6
+      have hodd : ∀ k : Fin 2023, (fun k : Fin 4047 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2023 (fun k : Fin 4047 => decide (k.val = 2)) ≠
+          rule30n 2023 (flipCell (fun k : Fin 4047 => decide (k.val = 2)) (6 : Fin 4047)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4047 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2022_4038 : m.val = 4038
+      · -- m = 4038: sub-case B
+        have hm_eq : m = (4038 : Fin 4047) := Fin.ext hscB2022_4038
+        have hodd : ∀ k : Fin 2023, (fun k : Fin 4047 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2023 (fun k : Fin 4047 => decide (k.val = 2)) ≠
+            rule30n 2023 (flipCell (fun k : Fin 4047 => decide (k.val = 2)) (4038 : Fin 4047)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4047 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2022_6 hscB2022_4038 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2023_eq : n' = 2023
+  ·
+    subst hn2023_eq
+    have h_no_scB : ∀ mv : Fin 4049,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4049 → mv.val ≠ 4046 →
+        rule30n 2024 (fun k : Fin 4049 => decide (k.val = mv.val)) = true ∨
+        rule30n 2024 (fun k : Fin 4049 => decide (k.val = mv.val ∨ k.val = 4048)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2024_eq : n' = 2024
+  ·
+    subst hn2024_eq
+    have h_no_scB : ∀ mv : Fin 4051,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4051 → mv.val ≠ 4048 →
+        rule30n 2025 (fun k : Fin 4051 => decide (k.val = mv.val)) = true ∨
+        rule30n 2025 (fun k : Fin 4051 => decide (k.val = mv.val ∨ k.val = 4050)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2025_eq : n' = 2025
+  ·
+    subst hn2025_eq
+    have h_only_scB : ∀ mv : Fin 4053,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4053 → mv.val ≠ 4050 →
+        mv.val ≠ 4044 →
+        rule30n 2026 (fun k : Fin 4053 => decide (k.val = mv.val)) = true ∨
+        rule30n 2026 (fun k : Fin 4053 => decide (k.val = mv.val ∨ k.val = 4052)) = false := by
+      native_decide
+    by_cases hscB2025_4044 : m.val = 4044
+    · -- m = 4044: sub-case B
+      have hm_eq : m = (4044 : Fin 4053) := Fin.ext hscB2025_4044
+      have hodd : ∀ k : Fin 2026, (fun k : Fin 4053 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2026 (fun k : Fin 4053 => decide (k.val = 8)) ≠
+          rule30n 2026 (flipCell (fun k : Fin 4053 => decide (k.val = 8)) (4044 : Fin 4053)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4053 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2025_4044 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2026_eq : n' = 2026
+  ·
+    subst hn2026_eq
+    have h_only_scB : ∀ mv : Fin 4055,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4055 → mv.val ≠ 4052 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4046 →
+        rule30n 2027 (fun k : Fin 4055 => decide (k.val = mv.val)) = true ∨
+        rule30n 2027 (fun k : Fin 4055 => decide (k.val = mv.val ∨ k.val = 4054)) = false := by
+      native_decide
+    by_cases hscB2026_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4055) := Fin.ext hscB2026_6
+      have hodd : ∀ k : Fin 2027, (fun k : Fin 4055 => decide (k.val = 10)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2027 (fun k : Fin 4055 => decide (k.val = 10)) ≠
+          rule30n 2027 (flipCell (fun k : Fin 4055 => decide (k.val = 10)) (6 : Fin 4055)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4055 => decide (k.val = 10), hodd, hsens⟩
+    ·
+      by_cases hscB2026_4046 : m.val = 4046
+      · -- m = 4046: sub-case B
+        have hm_eq : m = (4046 : Fin 4055) := Fin.ext hscB2026_4046
+        have hodd : ∀ k : Fin 2027, (fun k : Fin 4055 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2027 (fun k : Fin 4055 => decide (k.val = 2)) ≠
+            rule30n 2027 (flipCell (fun k : Fin 4055 => decide (k.val = 2)) (4046 : Fin 4055)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4055 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2026_6 hscB2026_4046 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2027_eq : n' = 2027
+  ·
+    subst hn2027_eq
+    have h_only_scB : ∀ mv : Fin 4057,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4057 → mv.val ≠ 4054 →
+        mv.val ≠ 8 →
+        rule30n 2028 (fun k : Fin 4057 => decide (k.val = mv.val)) = true ∨
+        rule30n 2028 (fun k : Fin 4057 => decide (k.val = mv.val ∨ k.val = 4056)) = false := by
+      native_decide
+    by_cases hscB2027_8 : m.val = 8
+    · -- m = 8: sub-case B
+      have hm_eq : m = (8 : Fin 4057) := Fin.ext hscB2027_8
+      have hodd : ∀ k : Fin 2028, (fun k : Fin 4057 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2028 (fun k : Fin 4057 => decide (k.val = 2)) ≠
+          rule30n 2028 (flipCell (fun k : Fin 4057 => decide (k.val = 2)) (8 : Fin 4057)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4057 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2027_8 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2028_eq : n' = 2028
+  ·
+    subst hn2028_eq
+    have h_no_scB : ∀ mv : Fin 4059,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4059 → mv.val ≠ 4056 →
+        rule30n 2029 (fun k : Fin 4059 => decide (k.val = mv.val)) = true ∨
+        rule30n 2029 (fun k : Fin 4059 => decide (k.val = mv.val ∨ k.val = 4058)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2029_eq : n' = 2029
+  ·
+    subst hn2029_eq
+    have h_only_scB : ∀ mv : Fin 4061,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4061 → mv.val ≠ 4058 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4052 →
+        rule30n 2030 (fun k : Fin 4061 => decide (k.val = mv.val)) = true ∨
+        rule30n 2030 (fun k : Fin 4061 => decide (k.val = mv.val ∨ k.val = 4060)) = false := by
+      native_decide
+    by_cases hscB2029_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4061) := Fin.ext hscB2029_4
+      have hodd : ∀ k : Fin 2030, (fun k : Fin 4061 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2030 (fun k : Fin 4061 => decide (k.val = 6)) ≠
+          rule30n 2030 (flipCell (fun k : Fin 4061 => decide (k.val = 6)) (4 : Fin 4061)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4061 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2029_4052 : m.val = 4052
+      · -- m = 4052: sub-case B
+        have hm_eq : m = (4052 : Fin 4061) := Fin.ext hscB2029_4052
+        have hodd : ∀ k : Fin 2030, (fun k : Fin 4061 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2030 (fun k : Fin 4061 => decide (k.val = 16)) ≠
+            rule30n 2030 (flipCell (fun k : Fin 4061 => decide (k.val = 16)) (4052 : Fin 4061)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4061 => decide (k.val = 16), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2029_4 hscB2029_4052 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2030_eq : n' = 2030
+  ·
+    subst hn2030_eq
+    have h_only_scB : ∀ mv : Fin 4063,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4063 → mv.val ≠ 4060 →
+        mv.val ≠ 4054 →
+        rule30n 2031 (fun k : Fin 4063 => decide (k.val = mv.val)) = true ∨
+        rule30n 2031 (fun k : Fin 4063 => decide (k.val = mv.val ∨ k.val = 4062)) = false := by
+      native_decide
+    by_cases hscB2030_4054 : m.val = 4054
+    · -- m = 4054: sub-case B
+      have hm_eq : m = (4054 : Fin 4063) := Fin.ext hscB2030_4054
+      have hodd : ∀ k : Fin 2031, (fun k : Fin 4063 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2031 (fun k : Fin 4063 => decide (k.val = 2)) ≠
+          rule30n 2031 (flipCell (fun k : Fin 4063 => decide (k.val = 2)) (4054 : Fin 4063)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4063 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2030_4054 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2031_eq : n' = 2031
+  ·
+    subst hn2031_eq
+    have h_no_scB : ∀ mv : Fin 4065,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4065 → mv.val ≠ 4062 →
+        rule30n 2032 (fun k : Fin 4065 => decide (k.val = mv.val)) = true ∨
+        rule30n 2032 (fun k : Fin 4065 => decide (k.val = mv.val ∨ k.val = 4064)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2032_eq : n' = 2032
+  ·
+    subst hn2032_eq
+    have h_only_scB : ∀ mv : Fin 4067,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4067 → mv.val ≠ 4064 →
+        mv.val ≠ 10 →
+        rule30n 2033 (fun k : Fin 4067 => decide (k.val = mv.val)) = true ∨
+        rule30n 2033 (fun k : Fin 4067 => decide (k.val = mv.val ∨ k.val = 4066)) = false := by
+      native_decide
+    by_cases hscB2032_10 : m.val = 10
+    · -- m = 10: sub-case B
+      have hm_eq : m = (10 : Fin 4067) := Fin.ext hscB2032_10
+      have hodd : ∀ k : Fin 2033, (fun k : Fin 4067 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2033 (fun k : Fin 4067 => decide (k.val = 2)) ≠
+          rule30n 2033 (flipCell (fun k : Fin 4067 => decide (k.val = 2)) (10 : Fin 4067)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4067 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2032_10 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2033_eq : n' = 2033
+  ·
+    subst hn2033_eq
+    have h_only_scB : ∀ mv : Fin 4069,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4069 → mv.val ≠ 4066 →
+        mv.val ≠ 4060 →
+        rule30n 2034 (fun k : Fin 4069 => decide (k.val = mv.val)) = true ∨
+        rule30n 2034 (fun k : Fin 4069 => decide (k.val = mv.val ∨ k.val = 4068)) = false := by
+      native_decide
+    by_cases hscB2033_4060 : m.val = 4060
+    · -- m = 4060: sub-case B
+      have hm_eq : m = (4060 : Fin 4069) := Fin.ext hscB2033_4060
+      have hodd : ∀ k : Fin 2034, (fun k : Fin 4069 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2034 (fun k : Fin 4069 => decide (k.val = 12)) ≠
+          rule30n 2034 (flipCell (fun k : Fin 4069 => decide (k.val = 12)) (4060 : Fin 4069)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4069 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2033_4060 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2034_eq : n' = 2034
+  ·
+    subst hn2034_eq
+    have h_only_scB : ∀ mv : Fin 4071,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4071 → mv.val ≠ 4068 →
+        mv.val ≠ 4062 →
+        rule30n 2035 (fun k : Fin 4071 => decide (k.val = mv.val)) = true ∨
+        rule30n 2035 (fun k : Fin 4071 => decide (k.val = mv.val ∨ k.val = 4070)) = false := by
+      native_decide
+    by_cases hscB2034_4062 : m.val = 4062
+    · -- m = 4062: sub-case B
+      have hm_eq : m = (4062 : Fin 4071) := Fin.ext hscB2034_4062
+      have hodd : ∀ k : Fin 2035, (fun k : Fin 4071 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2035 (fun k : Fin 4071 => decide (k.val = 2)) ≠
+          rule30n 2035 (flipCell (fun k : Fin 4071 => decide (k.val = 2)) (4062 : Fin 4071)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4071 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2034_4062 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2035_eq : n' = 2035
+  ·
+    subst hn2035_eq
+    have h_no_scB : ∀ mv : Fin 4073,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4073 → mv.val ≠ 4070 →
+        rule30n 2036 (fun k : Fin 4073 => decide (k.val = mv.val)) = true ∨
+        rule30n 2036 (fun k : Fin 4073 => decide (k.val = mv.val ∨ k.val = 4072)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2036_eq : n' = 2036
+  ·
+    subst hn2036_eq
+    have h_no_scB : ∀ mv : Fin 4075,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4075 → mv.val ≠ 4072 →
+        rule30n 2037 (fun k : Fin 4075 => decide (k.val = mv.val)) = true ∨
+        rule30n 2037 (fun k : Fin 4075 => decide (k.val = mv.val ∨ k.val = 4074)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2037_eq : n' = 2037
+  ·
+    subst hn2037_eq
+    have h_only_scB : ∀ mv : Fin 4077,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4077 → mv.val ≠ 4074 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4068 →
+        rule30n 2038 (fun k : Fin 4077 => decide (k.val = mv.val)) = true ∨
+        rule30n 2038 (fun k : Fin 4077 => decide (k.val = mv.val ∨ k.val = 4076)) = false := by
+      native_decide
+    by_cases hscB2037_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4077) := Fin.ext hscB2037_4
+      have hodd : ∀ k : Fin 2038, (fun k : Fin 4077 => decide (k.val = 10)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2038 (fun k : Fin 4077 => decide (k.val = 10)) ≠
+          rule30n 2038 (flipCell (fun k : Fin 4077 => decide (k.val = 10)) (4 : Fin 4077)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4077 => decide (k.val = 10), hodd, hsens⟩
+    ·
+      by_cases hscB2037_4068 : m.val = 4068
+      · -- m = 4068: sub-case B
+        have hm_eq : m = (4068 : Fin 4077) := Fin.ext hscB2037_4068
+        have hodd : ∀ k : Fin 2038, (fun k : Fin 4077 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2038 (fun k : Fin 4077 => decide (k.val = 12)) ≠
+            rule30n 2038 (flipCell (fun k : Fin 4077 => decide (k.val = 12)) (4068 : Fin 4077)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4077 => decide (k.val = 12), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2037_4 hscB2037_4068 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2038_eq : n' = 2038
+  ·
+    subst hn2038_eq
+    have h_only_scB : ∀ mv : Fin 4079,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4079 → mv.val ≠ 4076 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4070 →
+        rule30n 2039 (fun k : Fin 4079 => decide (k.val = mv.val)) = true ∨
+        rule30n 2039 (fun k : Fin 4079 => decide (k.val = mv.val ∨ k.val = 4078)) = false := by
+      native_decide
+    by_cases hscB2038_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4079) := Fin.ext hscB2038_6
+      have hodd : ∀ k : Fin 2039, (fun k : Fin 4079 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2039 (fun k : Fin 4079 => decide (k.val = 2)) ≠
+          rule30n 2039 (flipCell (fun k : Fin 4079 => decide (k.val = 2)) (6 : Fin 4079)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4079 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2038_4070 : m.val = 4070
+      · -- m = 4070: sub-case B
+        have hm_eq : m = (4070 : Fin 4079) := Fin.ext hscB2038_4070
+        have hodd : ∀ k : Fin 2039, (fun k : Fin 4079 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2039 (fun k : Fin 4079 => decide (k.val = 2)) ≠
+            rule30n 2039 (flipCell (fun k : Fin 4079 => decide (k.val = 2)) (4070 : Fin 4079)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4079 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2038_6 hscB2038_4070 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2039_eq : n' = 2039
+  ·
+    subst hn2039_eq
+    have h_no_scB : ∀ mv : Fin 4081,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4081 → mv.val ≠ 4078 →
+        rule30n 2040 (fun k : Fin 4081 => decide (k.val = mv.val)) = true ∨
+        rule30n 2040 (fun k : Fin 4081 => decide (k.val = mv.val ∨ k.val = 4080)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2040_eq : n' = 2040
+  ·
+    subst hn2040_eq
+    have h_no_scB : ∀ mv : Fin 4083,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4083 → mv.val ≠ 4080 →
+        rule30n 2041 (fun k : Fin 4083 => decide (k.val = mv.val)) = true ∨
+        rule30n 2041 (fun k : Fin 4083 => decide (k.val = mv.val ∨ k.val = 4082)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2041_eq : n' = 2041
+  ·
+    subst hn2041_eq
+    have h_only_scB : ∀ mv : Fin 4085,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4085 → mv.val ≠ 4082 →
+        mv.val ≠ 4076 →
+        rule30n 2042 (fun k : Fin 4085 => decide (k.val = mv.val)) = true ∨
+        rule30n 2042 (fun k : Fin 4085 => decide (k.val = mv.val ∨ k.val = 4084)) = false := by
+      native_decide
+    by_cases hscB2041_4076 : m.val = 4076
+    · -- m = 4076: sub-case B
+      have hm_eq : m = (4076 : Fin 4085) := Fin.ext hscB2041_4076
+      have hodd : ∀ k : Fin 2042, (fun k : Fin 4085 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2042 (fun k : Fin 4085 => decide (k.val = 8)) ≠
+          rule30n 2042 (flipCell (fun k : Fin 4085 => decide (k.val = 8)) (4076 : Fin 4085)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4085 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2041_4076 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2042_eq : n' = 2042
+  ·
+    subst hn2042_eq
+    have h_only_scB : ∀ mv : Fin 4087,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4087 → mv.val ≠ 4084 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4078 →
+        rule30n 2043 (fun k : Fin 4087 => decide (k.val = mv.val)) = true ∨
+        rule30n 2043 (fun k : Fin 4087 => decide (k.val = mv.val ∨ k.val = 4086)) = false := by
+      native_decide
+    by_cases hscB2042_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4087) := Fin.ext hscB2042_6
+      have hodd : ∀ k : Fin 2043, (fun k : Fin 4087 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2043 (fun k : Fin 4087 => decide (k.val = 8)) ≠
+          rule30n 2043 (flipCell (fun k : Fin 4087 => decide (k.val = 8)) (6 : Fin 4087)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4087 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB2042_4078 : m.val = 4078
+      · -- m = 4078: sub-case B
+        have hm_eq : m = (4078 : Fin 4087) := Fin.ext hscB2042_4078
+        have hodd : ∀ k : Fin 2043, (fun k : Fin 4087 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2043 (fun k : Fin 4087 => decide (k.val = 2)) ≠
+            rule30n 2043 (flipCell (fun k : Fin 4087 => decide (k.val = 2)) (4078 : Fin 4087)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4087 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2042_6 hscB2042_4078 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2043_eq : n' = 2043
+  ·
+    subst hn2043_eq
+    have h_no_scB : ∀ mv : Fin 4089,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4089 → mv.val ≠ 4086 →
+        rule30n 2044 (fun k : Fin 4089 => decide (k.val = mv.val)) = true ∨
+        rule30n 2044 (fun k : Fin 4089 => decide (k.val = mv.val ∨ k.val = 4088)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2044_eq : n' = 2044
+  ·
+    subst hn2044_eq
+    have h_no_scB : ∀ mv : Fin 4091,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4091 → mv.val ≠ 4088 →
+        rule30n 2045 (fun k : Fin 4091 => decide (k.val = mv.val)) = true ∨
+        rule30n 2045 (fun k : Fin 4091 => decide (k.val = mv.val ∨ k.val = 4090)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2045_eq : n' = 2045
+  ·
+    subst hn2045_eq
+    have h_only_scB : ∀ mv : Fin 4093,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4093 → mv.val ≠ 4090 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4084 →
+        rule30n 2046 (fun k : Fin 4093 => decide (k.val = mv.val)) = true ∨
+        rule30n 2046 (fun k : Fin 4093 => decide (k.val = mv.val ∨ k.val = 4092)) = false := by
+      native_decide
+    by_cases hscB2045_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4093) := Fin.ext hscB2045_4
+      have hodd : ∀ k : Fin 2046, (fun k : Fin 4093 => decide (k.val = 6)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2046 (fun k : Fin 4093 => decide (k.val = 6)) ≠
+          rule30n 2046 (flipCell (fun k : Fin 4093 => decide (k.val = 6)) (4 : Fin 4093)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4093 => decide (k.val = 6), hodd, hsens⟩
+    ·
+      by_cases hscB2045_4084 : m.val = 4084
+      · -- m = 4084: sub-case B
+        have hm_eq : m = (4084 : Fin 4093) := Fin.ext hscB2045_4084
+        have hodd : ∀ k : Fin 2046, (fun k : Fin 4093 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2046 (fun k : Fin 4093 => decide (k.val = 8)) ≠
+            rule30n 2046 (flipCell (fun k : Fin 4093 => decide (k.val = 8)) (4084 : Fin 4093)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4093 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2045_4 hscB2045_4084 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2046_eq : n' = 2046
+  ·
+    subst hn2046_eq
+    have h_only_scB : ∀ mv : Fin 4095,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4095 → mv.val ≠ 4092 →
+        mv.val ≠ 4086 →
+        rule30n 2047 (fun k : Fin 4095 => decide (k.val = mv.val)) = true ∨
+        rule30n 2047 (fun k : Fin 4095 => decide (k.val = mv.val ∨ k.val = 4094)) = false := by
+      native_decide
+    by_cases hscB2046_4086 : m.val = 4086
+    · -- m = 4086: sub-case B
+      have hm_eq : m = (4086 : Fin 4095) := Fin.ext hscB2046_4086
+      have hodd : ∀ k : Fin 2047, (fun k : Fin 4095 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2047 (fun k : Fin 4095 => decide (k.val = 2)) ≠
+          rule30n 2047 (flipCell (fun k : Fin 4095 => decide (k.val = 2)) (4086 : Fin 4095)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4095 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2046_4086 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2047_eq : n' = 2047
+  ·
+    subst hn2047_eq
+    have h_no_scB : ∀ mv : Fin 4097,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4097 → mv.val ≠ 4094 →
+        rule30n 2048 (fun k : Fin 4097 => decide (k.val = mv.val)) = true ∨
+        rule30n 2048 (fun k : Fin 4097 => decide (k.val = mv.val ∨ k.val = 4096)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2048_eq : n' = 2048
+  ·
+    subst hn2048_eq
+    have h_no_scB : ∀ mv : Fin 4099,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4099 → mv.val ≠ 4096 →
+        rule30n 2049 (fun k : Fin 4099 => decide (k.val = mv.val)) = true ∨
+        rule30n 2049 (fun k : Fin 4099 => decide (k.val = mv.val ∨ k.val = 4098)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2049_eq : n' = 2049
+  ·
+    subst hn2049_eq
+    have h_only_scB : ∀ mv : Fin 4101,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4101 → mv.val ≠ 4098 →
+        mv.val ≠ 4092 →
+        rule30n 2050 (fun k : Fin 4101 => decide (k.val = mv.val)) = true ∨
+        rule30n 2050 (fun k : Fin 4101 => decide (k.val = mv.val ∨ k.val = 4100)) = false := by
+      native_decide
+    by_cases hscB2049_4092 : m.val = 4092
+    · -- m = 4092: sub-case B
+      have hm_eq : m = (4092 : Fin 4101) := Fin.ext hscB2049_4092
+      have hodd : ∀ k : Fin 2050, (fun k : Fin 4101 => decide (k.val = 12)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2050 (fun k : Fin 4101 => decide (k.val = 12)) ≠
+          rule30n 2050 (flipCell (fun k : Fin 4101 => decide (k.val = 12)) (4092 : Fin 4101)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4101 => decide (k.val = 12), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2049_4092 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2050_eq : n' = 2050
+  ·
+    subst hn2050_eq
+    have h_only_scB : ∀ mv : Fin 4103,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4103 → mv.val ≠ 4100 →
+        mv.val ≠ 4094 →
+        rule30n 2051 (fun k : Fin 4103 => decide (k.val = mv.val)) = true ∨
+        rule30n 2051 (fun k : Fin 4103 => decide (k.val = mv.val ∨ k.val = 4102)) = false := by
+      native_decide
+    by_cases hscB2050_4094 : m.val = 4094
+    · -- m = 4094: sub-case B
+      have hm_eq : m = (4094 : Fin 4103) := Fin.ext hscB2050_4094
+      have hodd : ∀ k : Fin 2051, (fun k : Fin 4103 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2051 (fun k : Fin 4103 => decide (k.val = 2)) ≠
+          rule30n 2051 (flipCell (fun k : Fin 4103 => decide (k.val = 2)) (4094 : Fin 4103)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4103 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2050_4094 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2051_eq : n' = 2051
+  ·
+    subst hn2051_eq
+    have h_no_scB : ∀ mv : Fin 4105,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4105 → mv.val ≠ 4102 →
+        rule30n 2052 (fun k : Fin 4105 => decide (k.val = mv.val)) = true ∨
+        rule30n 2052 (fun k : Fin 4105 => decide (k.val = mv.val ∨ k.val = 4104)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2052_eq : n' = 2052
+  ·
+    subst hn2052_eq
+    have h_no_scB : ∀ mv : Fin 4107,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4107 → mv.val ≠ 4104 →
+        rule30n 2053 (fun k : Fin 4107 => decide (k.val = mv.val)) = true ∨
+        rule30n 2053 (fun k : Fin 4107 => decide (k.val = mv.val ∨ k.val = 4106)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2053_eq : n' = 2053
+  ·
+    subst hn2053_eq
+    have h_only_scB : ∀ mv : Fin 4109,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4109 → mv.val ≠ 4106 →
+        mv.val ≠ 4 →
+        mv.val ≠ 4100 →
+        rule30n 2054 (fun k : Fin 4109 => decide (k.val = mv.val)) = true ∨
+        rule30n 2054 (fun k : Fin 4109 => decide (k.val = mv.val ∨ k.val = 4108)) = false := by
+      native_decide
+    by_cases hscB2053_4 : m.val = 4
+    · -- m = 4: sub-case B
+      have hm_eq : m = (4 : Fin 4109) := Fin.ext hscB2053_4
+      have hodd : ∀ k : Fin 2054, (fun k : Fin 4109 => decide (k.val = 30)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2054 (fun k : Fin 4109 => decide (k.val = 30)) ≠
+          rule30n 2054 (flipCell (fun k : Fin 4109 => decide (k.val = 30)) (4 : Fin 4109)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4109 => decide (k.val = 30), hodd, hsens⟩
+    ·
+      by_cases hscB2053_4100 : m.val = 4100
+      · -- m = 4100: sub-case B
+        have hm_eq : m = (4100 : Fin 4109) := Fin.ext hscB2053_4100
+        have hodd : ∀ k : Fin 2054, (fun k : Fin 4109 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2054 (fun k : Fin 4109 => decide (k.val = 8)) ≠
+            rule30n 2054 (flipCell (fun k : Fin 4109 => decide (k.val = 8)) (4100 : Fin 4109)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4109 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2053_4 hscB2053_4100 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2054_eq : n' = 2054
+  ·
+    subst hn2054_eq
+    have h_only_scB : ∀ mv : Fin 4111,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4111 → mv.val ≠ 4108 →
+        mv.val ≠ 6 →
+        mv.val ≠ 4102 →
+        rule30n 2055 (fun k : Fin 4111 => decide (k.val = mv.val)) = true ∨
+        rule30n 2055 (fun k : Fin 4111 => decide (k.val = mv.val ∨ k.val = 4110)) = false := by
+      native_decide
+    by_cases hscB2054_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4111) := Fin.ext hscB2054_6
+      have hodd : ∀ k : Fin 2055, (fun k : Fin 4111 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2055 (fun k : Fin 4111 => decide (k.val = 2)) ≠
+          rule30n 2055 (flipCell (fun k : Fin 4111 => decide (k.val = 2)) (6 : Fin 4111)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4111 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      by_cases hscB2054_4102 : m.val = 4102
+      · -- m = 4102: sub-case B
+        have hm_eq : m = (4102 : Fin 4111) := Fin.ext hscB2054_4102
+        have hodd : ∀ k : Fin 2055, (fun k : Fin 4111 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2055 (fun k : Fin 4111 => decide (k.val = 2)) ≠
+            rule30n 2055 (flipCell (fun k : Fin 4111 => decide (k.val = 2)) (4102 : Fin 4111)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4111 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2054_6 hscB2054_4102 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2055_eq : n' = 2055
+  ·
+    subst hn2055_eq
+    have h_no_scB : ∀ mv : Fin 4113,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4113 → mv.val ≠ 4110 →
+        rule30n 2056 (fun k : Fin 4113 => decide (k.val = mv.val)) = true ∨
+        rule30n 2056 (fun k : Fin 4113 => decide (k.val = mv.val ∨ k.val = 4112)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2056_eq : n' = 2056
+  ·
+    subst hn2056_eq
+    have h_no_scB : ∀ mv : Fin 4115,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4115 → mv.val ≠ 4112 →
+        rule30n 2057 (fun k : Fin 4115 => decide (k.val = mv.val)) = true ∨
+        rule30n 2057 (fun k : Fin 4115 => decide (k.val = mv.val ∨ k.val = 4114)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2057_eq : n' = 2057
+  ·
+    subst hn2057_eq
+    have h_only_scB : ∀ mv : Fin 4117,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4117 → mv.val ≠ 4114 →
+        mv.val ≠ 12 →
+        mv.val ≠ 4108 →
+        rule30n 2058 (fun k : Fin 4117 => decide (k.val = mv.val)) = true ∨
+        rule30n 2058 (fun k : Fin 4117 => decide (k.val = mv.val ∨ k.val = 4116)) = false := by
+      native_decide
+    by_cases hscB2057_12 : m.val = 12
+    · -- m = 12: sub-case B
+      have hm_eq : m = (12 : Fin 4117) := Fin.ext hscB2057_12
+      have hodd : ∀ k : Fin 2058, (fun k : Fin 4117 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2058 (fun k : Fin 4117 => decide (k.val = 8)) ≠
+          rule30n 2058 (flipCell (fun k : Fin 4117 => decide (k.val = 8)) (12 : Fin 4117)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4117 => decide (k.val = 8), hodd, hsens⟩
+    ·
+      by_cases hscB2057_4108 : m.val = 4108
+      · -- m = 4108: sub-case B
+        have hm_eq : m = (4108 : Fin 4117) := Fin.ext hscB2057_4108
+        have hodd : ∀ k : Fin 2058, (fun k : Fin 4117 => decide (k.val = 8)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2058 (fun k : Fin 4117 => decide (k.val = 8)) ≠
+            rule30n 2058 (flipCell (fun k : Fin 4117 => decide (k.val = 8)) (4108 : Fin 4117)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4117 => decide (k.val = 8), hodd, hsens⟩
+      ·
+        rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2057_12 hscB2057_4108 with h | h
+        · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+        · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2058_eq : n' = 2058
+  ·
+    subst hn2058_eq
+    have h_only_scB : ∀ mv : Fin 4119,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4119 → mv.val ≠ 4116 →
+        mv.val ≠ 6 →
+        mv.val ≠ 14 →
+        mv.val ≠ 4110 →
+        rule30n 2059 (fun k : Fin 4119 => decide (k.val = mv.val)) = true ∨
+        rule30n 2059 (fun k : Fin 4119 => decide (k.val = mv.val ∨ k.val = 4118)) = false := by
+      native_decide
+    by_cases hscB2058_6 : m.val = 6
+    · -- m = 6: sub-case B
+      have hm_eq : m = (6 : Fin 4119) := Fin.ext hscB2058_6
+      have hodd : ∀ k : Fin 2059, (fun k : Fin 4119 => decide (k.val = 16)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2059 (fun k : Fin 4119 => decide (k.val = 16)) ≠
+          rule30n 2059 (flipCell (fun k : Fin 4119 => decide (k.val = 16)) (6 : Fin 4119)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4119 => decide (k.val = 16), hodd, hsens⟩
+    ·
+      by_cases hscB2058_14 : m.val = 14
+      · -- m = 14: sub-case B
+        have hm_eq : m = (14 : Fin 4119) := Fin.ext hscB2058_14
+        have hodd : ∀ k : Fin 2059, (fun k : Fin 4119 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+          intro k; simp only [decide_eq_false_iff_not]; omega
+        have hsens : rule30n 2059 (fun k : Fin 4119 => decide (k.val = 2)) ≠
+            rule30n 2059 (flipCell (fun k : Fin 4119 => decide (k.val = 2)) (14 : Fin 4119)) := by
+          native_decide
+        rw [hm_eq]; exact ⟨fun k : Fin 4119 => decide (k.val = 2), hodd, hsens⟩
+      ·
+        by_cases hscB2058_4110 : m.val = 4110
+        · -- m = 4110: sub-case B
+          have hm_eq : m = (4110 : Fin 4119) := Fin.ext hscB2058_4110
+          have hodd : ∀ k : Fin 2059, (fun k : Fin 4119 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+            intro k; simp only [decide_eq_false_iff_not]; omega
+          have hsens : rule30n 2059 (fun k : Fin 4119 => decide (k.val = 2)) ≠
+              rule30n 2059 (flipCell (fun k : Fin 4119 => decide (k.val = 2)) (4110 : Fin 4119)) := by
+            native_decide
+          rw [hm_eq]; exact ⟨fun k : Fin 4119 => decide (k.val = 2), hodd, hsens⟩
+        ·
+          rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2058_6 hscB2058_14 hscB2058_4110 with h | h
+          · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+          · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2059_eq : n' = 2059
+  ·
+    subst hn2059_eq
+    have h_only_scB : ∀ mv : Fin 4121,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4121 → mv.val ≠ 4118 →
+        mv.val ≠ 8 →
+        rule30n 2060 (fun k : Fin 4121 => decide (k.val = mv.val)) = true ∨
+        rule30n 2060 (fun k : Fin 4121 => decide (k.val = mv.val ∨ k.val = 4120)) = false := by
+      native_decide
+    by_cases hscB2059_8 : m.val = 8
+    · -- m = 8: sub-case B
+      have hm_eq : m = (8 : Fin 4121) := Fin.ext hscB2059_8
+      have hodd : ∀ k : Fin 2060, (fun k : Fin 4121 => decide (k.val = 2)) ⟨2 * k.val + 1, by omega⟩ = false := by
+        intro k; simp only [decide_eq_false_iff_not]; omega
+      have hsens : rule30n 2060 (fun k : Fin 4121 => decide (k.val = 2)) ≠
+          rule30n 2060 (flipCell (fun k : Fin 4121 => decide (k.val = 2)) (8 : Fin 4121)) := by
+        native_decide
+      rw [hm_eq]; exact ⟨fun k : Fin 4121 => decide (k.val = 2), hodd, hsens⟩
+    ·
+      rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB2059_8 with h | h
+      · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+      · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  by_cases hn2060_eq : n' = 2060
+  ·
+    subst hn2060_eq
+    have h_no_scB : ∀ mv : Fin 4123,
+        mv.val % 2 = 0 → 1 ≤ mv.val → mv.val + 1 < 4123 → mv.val ≠ 4120 →
+        rule30n 2061 (fun k : Fin 4123 => decide (k.val = mv.val)) = true ∨
+        rule30n 2061 (fun k : Fin 4123 => decide (k.val = mv.val ∨ k.val = 4122)) = false := by
+      native_decide
+    rcases h_no_scB m hm_even hm_low (by omega) hm_ne_r with h | h
+    · exact absurd (hcase.symm.trans h) Bool.false_ne_true
+    · exact absurd (h.symm.trans hts) Bool.false_ne_true
+  · -- n'≥2061: TODO
+    exact parity_sensitivity_even_subcaseB_ge2061 n' (by omega) m hm_even hm_low hm_ne_r hm_high hcase hts
+
+set_option maxHeartbeats 800000000 in
 /-- parity_sensitivity_even_subcaseB for n'≥1821. -/
 private lemma parity_sensitivity_even_subcaseB_ge1821
     (n' : Nat) (hn_ge : 1821 ≤ n')
@@ -4120,7 +11965,7 @@ private lemma parity_sensitivity_even_subcaseB_ge1821
     · exact absurd (hcase.symm.trans h) Bool.false_ne_true
     · exact absurd (h.symm.trans hts) Bool.false_ne_true
   · -- n'≥1941: TODO
-    sorry
+    exact parity_sensitivity_even_subcaseB_ge1941 n' (by omega) m hm_even hm_low hm_ne_r hm_high hcase hts
 
 set_option maxHeartbeats 800000000 in
 /-- parity_sensitivity_even_subcaseB for n'≥1701. -/
