@@ -589,8 +589,7 @@ FORMALIZATION STATUS (honest):
   - AllEssential: all 2n+1 cells essential at every level n
   - all_essential_succ / all_essential_all: inductive chain
   - rule30_bs_ge_n: HasBlockSensitivity n (rule30n n) n for all n
-  - lifting_conjecture: bs ≥ n → bs ≥ n+1 (theorem, not axiom)
-  - prize3_lower_bound_conditional: unconditional Ω(n) lower bound
+  - prize3_lower_bound_conditional: unconditional Ω(n) lower bound (= rule30_bs_ge_n)
 
 ⊡ ONE REMAINING AXIOM:
   - lifting_lemma: Essential n k → Essential (n+1) (k+1)
@@ -686,14 +685,10 @@ theorem rule30_bs_ge_n_from_all_essential (n : Nat) :
 theorem rule30_bs_ge_n (n : Nat) : HasBlockSensitivity n (rule30n n) n :=
   rule30_bs_ge_n_from_all_essential n
 
-/-- Lifting conjecture: bs(f_{n+1}) ≥ n+1 given bs(f_n) ≥ n.
-    PROVED unconditionally via rule30_bs_ge_n — no longer an axiom. -/
-theorem lifting_conjecture (n : Nat) (_h : HasBlockSensitivity n (rule30n n) n) :
-    HasBlockSensitivity (n + 1) (rule30n (n + 1)) (n + 1) :=
-  rule30_bs_ge_n (n + 1)
-
 /-- Unconditional Ω(n) lower bound: bs(rule30n n) ≥ n for all n.
-    PROVED: chains through AllEssential → rule30_bs_ge_n. -/
+    PROVED: chains through AllEssential → rule30_bs_ge_n.
+    (lifting_conjecture removed — it was vacuous: hypothesis ignored, conclusion
+     follows unconditionally from rule30_bs_ge_n.) -/
 theorem prize3_lower_bound_conditional (n : Nat) :
     HasBlockSensitivity n (rule30n n) n :=
   rule30_bs_ge_n n
