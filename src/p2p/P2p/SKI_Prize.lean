@@ -456,3 +456,107 @@ theorem s_no_constant_function (P c : SExpr) (fuel : Nat)
   rw [hPx_leaves] at h_ge
   omega
 
+/-
+================================================================================
+SECTION 12: S CANNOT COMPUTE BOUNDED-OUTPUT FUNCTIONS
+================================================================================
+
+The constant function impossibility generalizes: S cannot compute any function
+whose output sLeaves count is bounded, when the input sLeaves count is unbounded.
+
+This rules out:
+- Constant functions (outputs have sLeaves ≤ max_output_leaves for all inputs)
+- Parity (outputs are one of two values, both with fixed sLeaves count)
+- Church numeral zero (outputs S = 1 leaf, but inputs can be arbitrarily large)
+-/
+
+/-- A function f : ℕ → SExpr has unbounded sLeaves if for any bound M,
+    there exists n with f(n).sLeaves > M. -/
+def HasUnboundedSLeaves (enc : Nat → SExpr) : Prop :=
+  ∀ M : Nat, ∃ n : Nat, M < (enc n).sLeaves
+
+/-- A function f : ℕ → SExpr has bounded sLeaves if there exists M
+    such that for all n, f(n).sLeaves ≤ M. -/
+def HasBoundedSLeaves (f : Nat → SExpr) : Prop :=
+  ∃ M : Nat, ∀ n : Nat, (f n).sLeaves ≤ M
+
+/-- The sSpineTower encoding has unbounded sLeaves: sSpineTower n has n+1 leaves. -/
+theorem sSpineTower_hasUnboundedSLeaves : HasUnboundedSLeaves sSpineTower := by
+  intro M
+  refine ⟨M, ?_⟩
+  rw [sSpineTower_sLeaves]
+  omega
+
+/-- KEY THEOREM: S cannot compute any function from an unbounded-input encoding
+    to a bounded-output set.
+
+    If enc_in has unbounded sLeaves AND out has bounded sLeaves,
+    then no S-only program P can compute f (in the sense that
+    P applied to enc_in(n) normalizes to out(f(n)) for all n). -/
+theorem s_no_bounded_output_function
+    (P : SExpr)
+    (enc_in : Nat → SExpr)
+    (out : Nat → SExpr)
+    (h_unbounded : HasUnboundedSLeaves enc_in)
+    (h_bounded : HasBoundedSLeaves out)
+    (f : Nat → Nat)
+    (fuel : Nat)
+    (h_computes : ∀ n, sNorm fuel (SExpr.app P (enc_in n)) = some (out (f n))) :
+    False := by
+  -- Get the bound M on output sLeaves
+  obtain ⟨M, hM⟩ := h_bounded
+  -- Choose n large enough that enc_in(n).sLeaves > M + P.sLeaves
+  obtain ⟨n, hn⟩ := h_unbounded (M + P.sLeaves)
+  -- The input enc_in n has sLeaves > M + P.sLeaves
+  -- So (P (enc_in n)).sLeaves = P.sLeaves + enc_in(n).sLeaves > M + 2·P.sLeaves ≥ M
+  have hPx_leaves : (SExpr.app P (enc_in n)).sLeaves = P.sLeaves + (enc_in n).sLeaves :=
+    sLeaves_app P (enc_in n)
+  -- By normalization monotonicity: out(f n).sLeaves ≥ (P(enc_in n)).sLeaves
+  have h_ge := sNorm_sLeaves_ge fuel (SExpr.app P (enc_in n)) (out (f n)) (h_computes n)
+  -- But out(f n).sLeaves ≤ M (by boundedness)
+  have h_le : (out (f n)).sLeaves ≤ M := hM (f n)
+  -- Contradiction: out(f n).sLeaves ≥ P.sLeaves + enc_in(n).sLeaves > M + P.sLeaves ≥ M
+  rw [hPx_leaves] at h_ge
+  omega
+
+/-
+================================================================================
+SECTION 13: PARITY IS NOT S-COMPUTABLE
+================================================================================
+
+Parity outputs: one of two values (representing 0 or 1).
+Any two-value output set has bounded sLeaves (max of the two).
+Any useful encoding of naturals must have unbounded sLeaves (else not injective).
+
+Therefore, by s_no_bounded_output_function, parity is not S-computable.
+-/
+
+/-- For parity to be S-computable, we need:
+    - An encoding enc_in : ℕ → SExpr with unbounded sLeaves
+    - Two distinct output values (representing 0 and 1)
+    - A program P that maps enc_in(n) to the right output
+
+    The two-value output set has bounded sLeaves. By s_no_bounded_output_function,
+    no such P exists. -/
+theorem parity_not_s_computable
+    (P : SExpr)
+    (enc_in : Nat → SExpr)
+    (zero_enc one_enc : SExpr)
+    (h_unbounded : HasUnboundedSLeaves enc_in)
+    (fuel : Nat)
+    (h_parity : ∀ n, sNorm fuel (SExpr.app P (enc_in n)) =
+        some (if n % 2 = 0 then zero_enc else one_enc)) :
+    False := by
+  -- The output function maps to {zero_enc, one_enc}, which has bounded sLeaves
+  let out := fun k => if k % 2 = 0 then zero_enc else one_enc
+  have h_bounded : HasBoundedSLeaves out := by
+    refine ⟨max zero_enc.sLeaves one_enc.sLeaves, ?_⟩
+    intro n
+    simp [out]
+    split
+    · exact Nat.le_max_left _ _
+    · exact Nat.le_max_right _ _
+  -- Apply the general theorem
+  exact s_no_bounded_output_function P enc_in out
+    h_unbounded h_bounded (fun n => n) fuel h_parity
+
