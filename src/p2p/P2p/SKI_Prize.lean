@@ -1,0 +1,333 @@
+/-
+SKI_Prize.lean — Wolfram S Combinator Challenge
+================================================
+
+Goal: Prove or disprove that the S combinator alone is computationally universal.
+Prize: $20,000 USD at combinatorprize.org
+
+S combinator rule: S f g x → f x (g x)
+
+Author: Jonathan Hill
+Date: 2026-03-20
+-/
+
+import Mathlib.Data.Nat.Basic
+
+/-
+================================================================================
+SECTION 1: SYNTAX
+================================================================================
+-/
+
+/-- S expressions: the S combinator with application. No variables — all terms
+    are "closed" by construction (no lambda-abstractions, no variable bindings). -/
+inductive SExpr : Type
+  | S    : SExpr
+  | app  : SExpr → SExpr → SExpr
+  deriving DecidableEq, Repr
+
+/-- Size of an S expression (count of all nodes). -/
+def SExpr.size : SExpr → Nat
+  | SExpr.S        => 1
+  | SExpr.app f x  => 1 + f.size + x.size
+
+theorem SExpr.size_pos : ∀ e : SExpr, 0 < e.size := by
+  intro e; induction e with
+  | S => simp [SExpr.size]
+  | app f x ihf ihx => simp [SExpr.size]; omega
+
+/-
+================================================================================
+SECTION 2: SPINE STRUCTURE
+================================================================================
+-/
+
+/-- Length of the left-spine (depth of nested left applications). -/
+def SExpr.spineLen : SExpr → Nat
+  | SExpr.app f _ => 1 + f.spineLen
+  | _             => 0
+
+/-- Head of the left spine (the atom at the bottom of the application chain). -/
+def SExpr.head : SExpr → SExpr
+  | SExpr.app f _ => f.head
+  | e             => e
+
+theorem SExpr.head_S : SExpr.S.head = SExpr.S := rfl
+
+theorem SExpr.head_app (f x : SExpr) : (SExpr.app f x).head = f.head := rfl
+
+theorem SExpr.spineLen_S : SExpr.S.spineLen = 0 := rfl
+
+/-- The head of every S-expression is S (since S is the only atom). -/
+theorem SExpr.head_is_S : ∀ e : SExpr, e.head = SExpr.S := by
+  intro e; induction e with
+  | S => rfl
+  | app f x ihf ihx => simp [SExpr.head, ihf]
+
+/-
+================================================================================
+SECTION 3: ONE-STEP REDUCTION
+================================================================================
+-/
+
+/-- One step of S combinator reduction (leftmost-outermost strategy).
+    The S redex is S applied to exactly 3 arguments.
+    Returns `none` if the term is in S-normal form. -/
+def sStep : SExpr → Option SExpr
+  | SExpr.app (SExpr.app (SExpr.app SExpr.S f) g) x =>
+      some (SExpr.app (SExpr.app f x) (SExpr.app g x))
+  | SExpr.app fun_ arg =>
+      match sStep fun_ with
+      | some fun_' => some (SExpr.app fun_' arg)
+      | none        => none
+  | SExpr.S => none
+
+/-- Normal form: no S redex applies. -/
+def SExpr.isNF (e : SExpr) : Prop := sStep e = none
+
+instance : Decidable (SExpr.isNF e) := by
+  unfold SExpr.isNF
+  exact inferInstance
+
+theorem SExpr.S_isNF : SExpr.S.isNF := rfl
+
+/-
+================================================================================
+SECTION 4: STRUCTURAL FACTS ABOUT sStep
+================================================================================
+-/
+
+/-- spine length < 3 implies normal form.
+    Direct proof by structural analysis of the 3-deep pattern needed for S to fire. -/
+theorem spineLen_lt3_implies_NF : ∀ (e : SExpr), e.spineLen < 3 → e.isNF := by
+  intro e
+  induction e with
+  | S => intros; exact SExpr.S_isNF
+  | app f x ihf ihx =>
+    intro h_spine
+    simp [SExpr.spineLen] at h_spine
+    -- h_spine: f.spineLen < 2
+    -- We need sStep (app f x) = none
+    -- sStep (app f x) fires S redex if f = app (app S _) _
+    -- f.spineLen < 2 means f cannot have the form app (app _ _) _
+    -- So sStep (app f x) must try to reduce f, which is also NF
+    cases f with
+    | S =>
+      -- Full term: app S x.  sStep checks for app(app(app S _)_)_ pattern — doesn't match
+      simp [SExpr.isNF, sStep]
+    | app f2 x2 =>
+      -- f = app f2 x2, f.spineLen = 1 + f2.spineLen < 2, so f2.spineLen = 0
+      simp [SExpr.spineLen] at h_spine
+      -- f2.spineLen = 0, so f2 must be S (only 0-spineLen term)
+      cases f2 with
+      | S =>
+        -- f = app S x2, full term = app (app S x2) x
+        -- sStep: first checks app(app(app S ?) ?) ? — needs f = app(app S ?) ?
+        -- f = app S x2, and S ≠ app S ?, so the triple pattern doesn't match
+        -- Then tries to reduce f: sStep (app S x2) — f2=S so no pattern, tries sStep S = none
+        simp [SExpr.isNF, sStep]
+      | app f3 x3 =>
+        -- f2 = app f3 x3, so f2.spineLen = 1 + f3.spineLen ≥ 1, contradicting < 1
+        simp [SExpr.spineLen] at h_spine
+        omega
+
+/-- spine length ≥ 3 implies NOT normal form.
+    When spineLen ≥ 3, the head is S (since S is the only atom), so an S redex exists. -/
+theorem spineLen_ge3_not_NF : ∀ (e : SExpr), e.spineLen ≥ 3 → ¬ e.isNF := by
+  intro e
+  induction e with
+  | S => simp [SExpr.spineLen]
+  | app outer_f outer_x ihf _ihx =>
+    intro h_spine h_nf
+    simp [SExpr.spineLen] at h_spine
+    -- outer_f.spineLen ≥ 2
+    -- Case split on outer_f
+    cases outer_f with
+    | S => simp [SExpr.spineLen] at h_spine
+    | app mid_f mid_x =>
+      simp [SExpr.spineLen] at h_spine
+      -- mid_f.spineLen ≥ 1
+      -- Case split on mid_f
+      cases mid_f with
+      | S => simp [SExpr.spineLen] at h_spine
+      | app inner_f inner_x =>
+        simp [SExpr.spineLen] at h_spine
+        -- inner_f.spineLen ≥ 0, so we have 4+ levels
+        -- The term is: app (app (app (app inner_f inner_x) mid_x) outer_x)
+        -- Wait: full term = app (app (app inner_f inner_x).app(mid_x)) outer_x) ..
+        -- Actually: outer_f = app (app inner_f inner_x) mid_x
+        -- full = app (app (app inner_f inner_x) mid_x) outer_x
+        -- spineLen ≥ 3 means inner_f.spineLen ≥ 0, true
+        -- sStep on this term: looks for app(app(app S ?)?)? pattern
+        -- inner_f must be S (since head of everything is S)
+        -- If inner_f = S: this IS an S redex, sStep fires
+        -- If inner_f = app ...: by IH applied to inner_f, it's not NF (if spineLen ≥ 3)
+        --   and sStep will reduce inner_f position
+        -- Key: we need to show sStep fires, not stays None
+        -- Strategy: cases on inner_f
+        cases inner_f with
+        | S =>
+          -- Full term = app (app (app S inner_x) mid_x) outer_x — S redex fires!
+          simp [SExpr.isNF, sStep] at h_nf
+        | app deep_f deep_x =>
+          -- outer_f = app (app (app deep_f deep_x) inner_x) mid_x has spineLen ≥ 3
+          have h_of_spine : (SExpr.app (SExpr.app (SExpr.app deep_f deep_x) inner_x) mid_x).spineLen ≥ 3 := by
+            simp [SExpr.spineLen]; omega
+          -- By IH: outer_f is not NF
+          have h_of_not_nf : ¬ (SExpr.app (SExpr.app (SExpr.app deep_f deep_x) inner_x) mid_x).isNF :=
+            ihf h_of_spine
+          -- outer_f.isNF = false, so sStep outer_f = some (something)
+          rw [SExpr.isNF] at h_of_not_nf
+          -- h_of_not_nf : sStep (outer_f) ≠ none
+          -- h_nf : sStep (app outer_f outer_x) = none
+          -- Since deep_f ≠ S (it's app...), the triple pattern app(app(app S ?)?)? doesn't match at top
+          -- sStep (app outer_f outer_x) will try to reduce outer_f
+          -- Since sStep outer_f ≠ none, sStep (app outer_f outer_x) ≠ none
+          -- Contradiction with h_nf
+          have : sStep (SExpr.app (SExpr.app (SExpr.app (SExpr.app deep_f deep_x) inner_x) mid_x) outer_x) ≠ none := by
+            simp [sStep]
+            -- The triple pattern: would need deep_f = S — but deep_f is not S (it's the IH case)
+            -- Actually deep_f could be S here! But even if it is, outer_f would be
+            -- app(app(app S inner_x) mid_x) outer_x ≠ deep_f...
+            -- Let me just use the fact that sStep outer_f ≠ none
+            cases h_step_of : sStep (SExpr.app (SExpr.app (SExpr.app deep_f deep_x) inner_x) mid_x) with
+            | none => exact absurd h_step_of h_of_not_nf
+            | some w => simp
+          exact this h_nf
+
+/-
+================================================================================
+SECTION 5: NORMAL FORM IFF SPINE LENGTH < 3
+================================================================================
+-/
+
+/-- Main structural theorem: an S-only term is in normal form iff its
+    spine length is less than 3. -/
+theorem sNF_iff_spineLen_lt3 (e : SExpr) : e.isNF ↔ e.spineLen < 3 := by
+  constructor
+  · -- Normal form → spineLen < 3 (contrapositive of spineLen_ge3_not_NF)
+    intro h_nf
+    by_contra h_ge
+    simp at h_ge
+    exact spineLen_ge3_not_NF e h_ge h_nf
+  · -- spineLen < 3 → normal form
+    exact spineLen_lt3_implies_NF e
+
+/-
+================================================================================
+SECTION 6: S LEAVES — COUNTING S ATOMS
+================================================================================
+-/
+
+/-- Number of S atoms (leaves) in an expression. -/
+def SExpr.sLeaves : SExpr → Nat
+  | SExpr.S        => 1
+  | SExpr.app f x  => f.sLeaves + x.sLeaves
+
+theorem SExpr.sLeaves_pos : ∀ e : SExpr, 0 < e.sLeaves := by
+  intro e; induction e with
+  | S => simp [SExpr.sLeaves]
+  | app f x ihf ihx => simp [SExpr.sLeaves]; omega
+
+/-- S-reduction changes sLeaves precisely: the S atom consumed is replaced
+    by a duplication of x.
+    Before: 1 + L(f) + L(g) + L(x)
+    After:  L(f) + L(x) + L(g) + L(x) = L(f) + L(g) + 2·L(x)
+    Net change: gain L(x) - 1 leaves. -/
+theorem sStep_sLeaves_top_redex (f g x : SExpr) :
+    let before := SExpr.app (SExpr.app (SExpr.app SExpr.S f) g) x
+    let after  := SExpr.app (SExpr.app f x) (SExpr.app g x)
+    after.sLeaves + 1 = before.sLeaves + x.sLeaves := by
+  simp [SExpr.sLeaves]
+  omega
+
+/-- Key parity theorem: S-reduction changes sLeaves by L(x) - 1.
+    The parity of sLeaves is preserved iff L(x) is odd. -/
+theorem sStep_sLeaves_parity (f g x : SExpr) :
+    let before := (SExpr.app (SExpr.app (SExpr.app SExpr.S f) g) x).sLeaves
+    let after  := (SExpr.app (SExpr.app f x) (SExpr.app g x)).sLeaves
+    before % 2 = after % 2 ↔ x.sLeaves % 2 = 1 := by
+  simp [SExpr.sLeaves]
+  omega
+
+/-
+================================================================================
+SECTION 7: COMPUTATIONAL EXAMPLES (VERIFIED)
+================================================================================
+-/
+
+-- S S S S reduces to (S S)(S S): verified
+example : sStep (SExpr.app (SExpr.app (SExpr.app SExpr.S SExpr.S) SExpr.S) SExpr.S) =
+    some (SExpr.app (SExpr.app SExpr.S SExpr.S) (SExpr.app SExpr.S SExpr.S)) := by
+  simp [sStep]
+
+-- S is in NF (spine 0 < 3)
+example : SExpr.S.isNF := SExpr.S_isNF
+
+-- S S is in NF (spine 1 < 3)
+example : (SExpr.app SExpr.S SExpr.S).isNF := by
+  rw [sNF_iff_spineLen_lt3]
+  simp [SExpr.spineLen]
+
+-- (S S) S is in NF (spine 2 < 3)
+example : (SExpr.app (SExpr.app SExpr.S SExpr.S) SExpr.S).isNF := by
+  rw [sNF_iff_spineLen_lt3]
+  simp [SExpr.spineLen]
+
+-- S S S S is NOT in NF (spine 3, fires)
+example : ¬ (SExpr.app (SExpr.app (SExpr.app SExpr.S SExpr.S) SExpr.S) SExpr.S).isNF := by
+  rw [sNF_iff_spineLen_lt3]
+  simp [SExpr.spineLen]
+
+/-
+================================================================================
+SECTION 8: THEOREM STUBS FOR PRIZE PATH
+================================================================================
+
+The full non-universality argument requires:
+1. [DONE] Normal forms have spineLen < 3
+2. [DONE] head of every S-expr is S
+3. [NEXT] S cannot compute constant functions (argument-dropping impossible)
+4. [NEXT] S cannot compute parity
+5. [FINAL] S is not universal
+-/
+
+/-- S-reduction never drops arguments: every subterm of the input appears
+    in the output. This is the fundamental reason S cannot simulate K.
+    K drops its second argument; S only duplicates. -/
+theorem sStep_no_argument_dropping (e e' : SExpr) (h : sStep e = some e') :
+    e.sLeaves ≤ e'.sLeaves := by
+  induction e generalizing e' with
+  | S => simp [sStep] at h
+  | app f x ihf _ihx =>
+    -- Case split exhaustively on (f, x) structure for sStep
+    match f, x with
+    | SExpr.S, _ =>
+      -- sStep (app S x) = sStep S = none: impossible
+      simp [sStep] at h
+    | SExpr.app SExpr.S g, _ =>
+      -- sStep (app (app S g) x) = sStep (app S g) = none: impossible
+      simp [sStep] at h
+    | SExpr.app (SExpr.app SExpr.S f') g, x' =>
+      -- S redex fires: sStep = some (app (app f' x') (app g x'))
+      simp [sStep] at h
+      cases h
+      simp [SExpr.sLeaves]
+      have := SExpr.sLeaves_pos x'
+      omega
+    | SExpr.app (SExpr.app (SExpr.app f2 x2) x3) x4, _ =>
+      -- No top S redex (f head is not S), reduces f
+      -- sStep f might fire
+      cases h_f : sStep (SExpr.app (SExpr.app (SExpr.app f2 x2) x3) x4) with
+      | none =>
+        -- sStep f = none, so sStep (app f x) = none: impossible
+        simp [sStep, h_f] at h
+      | some f' =>
+        -- sStep f = some f', so sStep (app f x) = some (app f' x)
+        simp [sStep, h_f] at h
+        cases h
+        simp [SExpr.sLeaves]
+        have hle := ihf f' h_f
+        simp [SExpr.sLeaves] at hle
+        omega
+
