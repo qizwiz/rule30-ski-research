@@ -748,3 +748,38 @@ theorem s_not_universal
     ¬ SComputable U enc_in enc_out const_zero fuel :=
   s_cannot_compute_const_zero U enc_in enc_out h_unbounded fuel
 
+
+/-
+================================================================================
+SECTION 15: COMPLETENESS — VERIFICATION OF PROOF CHAIN
+================================================================================
+
+Summary of what has been proved:
+1. sStep_no_argument_dropping: S-reduction is monotone in sLeaves (never drops)
+2. sNorm_sLeaves_ge: bounded normalization is monotone in sLeaves
+3. injective_encoding_unbounded: any injective enc : ℕ → SExpr has unbounded sLeaves
+4. s_no_constant_function_varying_fuel: no S-only term computes a constant
+5. s_no_bounded_output_function: no S-only term maps unbounded inputs to bounded outputs
+6. parity_not_s_computable: parity is not S-computable
+7. s_not_universal: S alone is not Turing-complete
+
+The constant-zero function IS Turing-computable (trivially: output 0 always).
+The theorem s_not_universal shows it is NOT S-computable.
+Therefore S alone does not compute all Turing-computable functions.
+Therefore S alone is not computationally universal.
+
+QED.
+-/
+
+/-- Explicit summary theorem combining everything:
+    There exists a Turing-computable function (constant zero) that is not S-computable
+    under any injective encoding of ℕ.
+    This proves S is not computationally universal. -/
+theorem s_not_universal_summary
+    (U : SExpr)
+    (enc_in : Nat → SExpr)
+    (enc_out : Nat → SExpr)
+    (h_inj : Function.Injective enc_in)
+    (fuel : Nat → Nat) :
+    ¬ SComputable U enc_in enc_out const_zero fuel :=
+  s_not_universal U enc_in enc_out (injective_encoding_unbounded enc_in h_inj) fuel

@@ -1,0 +1,6 @@
+commit	score_delta	total_score	status	description
+8bb9c2f	0	0	baseline	baseline — SKI_Prize.lean does not exist yet
+a09837e	+5	5	keep	SExpr + sStep definitions + 5 proved theorems (spineLen NF char, sLeaves no-drop) — zero sorries zero axioms
+aab8051	+15	20	keep	s_no_constant_function proved: no S-only P computes a constant (sLeaves grows with input, normalization cannot reduce it)
+b134563	+50	70	keep	parity_not_s_computable proved: no S program maps unbounded input encoding to 2 fixed output values (sLeaves argument); also proved s_no_bounded_output_function (general case)
+8c94083	+200	270	keep	s_not_universal proved: S cannot compute constant-zero on any injective encoding; injective_encoding_unbounded proves any injective encoding has unbounded sLeaves; full non-universality established. Zero sorries, zero axioms.
