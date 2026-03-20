@@ -331,3 +331,128 @@ theorem sStep_no_argument_dropping (e e' : SExpr) (h : sStep e = some e') :
         simp [SExpr.sLeaves] at hle
         omega
 
+/-
+================================================================================
+SECTION 9: NORMALIZATION WITH FUEL
+================================================================================
+
+Since S-reduction can diverge (e.g., S S S S → S S (S S) → ...), we use
+a fuel-bounded normalization. If the fuel runs out, we return None.
+-/
+
+/-- Reduce an expression up to `fuel` steps. Returns None if fuel runs out. -/
+def sNorm : Nat → SExpr → Option SExpr
+  | 0,        _ => none        -- fuel exhausted
+  | fuel + 1, e =>
+      match sStep e with
+      | none    => some e      -- already in NF
+      | some e' => sNorm fuel e'
+
+/-- sNorm returns a value that is in normal form. -/
+theorem sNorm_isNF (fuel : Nat) (e r : SExpr) (h : sNorm fuel e = some r) :
+    r.isNF := by
+  induction fuel generalizing e with
+  | zero => simp [sNorm] at h
+  | succ n ih =>
+    simp [sNorm] at h
+    cases h_step : sStep e with
+    | none =>
+      simp [h_step] at h
+      cases h
+      rwa [SExpr.isNF]
+    | some e' =>
+      simp [h_step] at h
+      exact ih e' h
+
+/-- sNorm preserves sLeaves (non-decreasing): if normalization completes,
+    the result has at least as many S-leaves as the input. -/
+theorem sNorm_sLeaves_ge (fuel : Nat) (e r : SExpr) (h : sNorm fuel e = some r) :
+    e.sLeaves ≤ r.sLeaves := by
+  induction fuel generalizing e with
+  | zero => simp [sNorm] at h
+  | succ n ih =>
+    simp [sNorm] at h
+    cases h_step : sStep e with
+    | none =>
+      simp [h_step] at h; cases h; exact Nat.le_refl _
+    | some e' =>
+      simp [h_step] at h
+      have h1 := sStep_no_argument_dropping e e' h_step
+      have h2 := ih e' h
+      omega
+
+/-
+================================================================================
+SECTION 10: S SPINE TOWER — UNBOUNDED INPUTS
+================================================================================
+-/
+
+/-- The spine tower: sSpineTower n = app (app (... app S S) S) ... S
+    with n applications. It has n+1 S-leaves. -/
+def sSpineTower : Nat → SExpr
+  | 0     => SExpr.S
+  | n + 1 => SExpr.app (sSpineTower n) SExpr.S
+
+/-- sSpineTower n has spine length n. -/
+theorem sSpineTower_spineLen (n : Nat) : (sSpineTower n).spineLen = n := by
+  induction n with
+  | zero => simp [sSpineTower, SExpr.spineLen]
+  | succ n ih => simp [sSpineTower, SExpr.spineLen, ih]; omega
+
+/-- sSpineTower n has exactly n+1 S-leaves. -/
+theorem sSpineTower_sLeaves (n : Nat) : (sSpineTower n).sLeaves = n + 1 := by
+  induction n with
+  | zero => simp [sSpineTower, SExpr.sLeaves]
+  | succ n ih => simp [sSpineTower, SExpr.sLeaves, ih]
+
+/-- sSpineTower n is in normal form for n < 3 (spine < 3). -/
+theorem sSpineTower_isNF_lt3 (n : Nat) (hn : n < 3) : (sSpineTower n).isNF := by
+  rw [sNF_iff_spineLen_lt3, sSpineTower_spineLen]
+  exact hn
+
+/-
+================================================================================
+SECTION 11: S CANNOT COMPUTE CONSTANT FUNCTIONS
+================================================================================
+
+Theorem: There is no S-only expression P such that for all inputs x,
+the normal form of (P x) is a fixed expression c.
+
+Proof: If (P x) normalizes to c, then c.sLeaves ≥ (P x).sLeaves = P.sLeaves + x.sLeaves.
+By choosing x = sSpineTower n, we get c.sLeaves ≥ P.sLeaves + (n+1).
+Since this holds for all n, c.sLeaves must be unbounded — contradiction.
+-/
+
+/-- Applying P to x has sLeaves = P.sLeaves + x.sLeaves. -/
+theorem sLeaves_app (P x : SExpr) :
+    (SExpr.app P x).sLeaves = P.sLeaves + x.sLeaves := by
+  simp [SExpr.sLeaves]
+
+/-- A constant S-function: P normalizes (P x) to the same value c for all x
+    (within a given fuel budget). -/
+def sComputes_const (P c : SExpr) (fuel : Nat) : Prop :=
+  ∀ x : SExpr, sNorm fuel (SExpr.app P x) = some c
+
+/-- KEY THEOREM: S cannot compute any constant function.
+    No S-only expression P with any fuel budget has the property that
+    (P x) normalizes to the same result c for all x. -/
+theorem s_no_constant_function (P c : SExpr) (fuel : Nat)
+    (h : sComputes_const P c fuel) : False := by
+  -- Choose x large enough that x.sLeaves > c.sLeaves - P.sLeaves
+  -- Specifically, x = sSpineTower (c.sLeaves + 1) has c.sLeaves + 2 leaves
+  let n := c.sLeaves + 1
+  let x := sSpineTower n
+  have hx_leaves : x.sLeaves = n + 1 := sSpineTower_sLeaves n
+  -- (P x).sLeaves = P.sLeaves + x.sLeaves ≥ x.sLeaves = n + 1 = c.sLeaves + 2
+  have hPx_leaves : (SExpr.app P x).sLeaves = P.sLeaves + x.sLeaves := sLeaves_app P x
+  -- h says sNorm fuel (P x) = some c
+  have h_norm := h x
+  -- By sNorm_sLeaves_ge: c.sLeaves ≥ (P x).sLeaves = P.sLeaves + x.sLeaves
+  have h_ge := sNorm_sLeaves_ge fuel (SExpr.app P x) c h_norm
+  -- But c.sLeaves < P.sLeaves + x.sLeaves (since x.sLeaves = c.sLeaves + 2)
+  have h_contra : P.sLeaves + x.sLeaves > c.sLeaves := by
+    rw [hx_leaves]; simp [n]; omega
+  -- Contradiction: c.sLeaves ≥ P.sLeaves + x.sLeaves > c.sLeaves
+  rw [hPx_leaves] at h_ge
+  omega
+
