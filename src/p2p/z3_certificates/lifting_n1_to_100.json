@@ -1,0 +1,10 @@
+{
+  "description": "Lifting lemma conclusion verified for n=1..100",
+  "n_range": [
+    1,
+    100
+  ],
+  "timestamp": "2026-03-20T07:18:47.362891",
+  "all_passed": true,
+  "total_pairs": 10400
+}

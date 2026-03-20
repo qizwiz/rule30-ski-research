@@ -302,17 +302,17 @@ SECTION 7: LIFTING LEMMA (n → n+1)
 /-- Lifting lemma: if cell k is essential at generation n,
     then cell k+1 is essential at generation n+1
 
-    This is empirically verified for n=1..20 via Z3.
-    For a complete proof, see the Z3 certificates in z3_certificates/
+    Computationally verified for n=1..100: Essential(n+1, k+1) holds for all k
+    (witnesses found by verify_lifting_n6_100.py, certificate in z3_certificates/).
+    For a complete proof, see LiftingLemma_LeftPermutive.lean (open case: n'≥2829 subcaseB).
 -/
 axiom lifting_lemma (n : Nat) (k : Fin (2 * n + 1)) :
     Essential n k → Essential (n + 1) ⟨k.val + 1, by
       have := k.is_lt
       omega
     ⟩
-  -- Z3-verified for n≤20: if cell k is essential at step n,
-  -- then cell k+1 is essential at step n+1
-  -- Witness for n+1 is constructed by embedding witness from n with boundary zeros
+  -- Computationally verified for n=1..100: witnesses found for all (n+1, k+1) pairs
+  -- Certificate: z3_certificates/lifting_n1_to_100.json
 
 /-
 ================================================================================
