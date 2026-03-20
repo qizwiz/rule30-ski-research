@@ -12,6 +12,8 @@ Date: 2026-03-20
 -/
 
 import Mathlib.Data.Nat.Basic
+import Mathlib.Data.Set.Finite.Basic
+import Mathlib.Data.Finite.Prod
 
 /-
 ================================================================================
@@ -480,6 +482,21 @@ def HasUnboundedSLeaves (enc : Nat → SExpr) : Prop :=
 def HasBoundedSLeaves (f : Nat → SExpr) : Prop :=
   ∃ M : Nat, ∀ n : Nat, (f n).sLeaves ≤ M
 
+/-- Stronger version: S cannot compute constant functions even with
+    varying fuel (fuel can depend on the input). -/
+theorem s_no_constant_function_varying_fuel (P c : SExpr)
+    (enc_in : Nat → SExpr)
+    (h_unbounded : HasUnboundedSLeaves enc_in)
+    (fuel : Nat → Nat)
+    (h : ∀ n, sNorm (fuel n) (SExpr.app P (enc_in n)) = some c) :
+    False := by
+  -- Get n large enough that enc_in(n).sLeaves > c.sLeaves
+  obtain ⟨n, hn⟩ := h_unbounded (c.sLeaves)
+  have hPx := sLeaves_app P (enc_in n)
+  have h_ge := sNorm_sLeaves_ge (fuel n) (SExpr.app P (enc_in n)) c (h n)
+  rw [hPx] at h_ge
+  omega
+
 /-- The sSpineTower encoding has unbounded sLeaves: sSpineTower n has n+1 leaves. -/
 theorem sSpineTower_hasUnboundedSLeaves : HasUnboundedSLeaves sSpineTower := by
   intro M
@@ -554,9 +571,180 @@ theorem parity_not_s_computable
     intro n
     simp [out]
     split
-    · exact Nat.le_max_left _ _
-    · exact Nat.le_max_right _ _
+    · left; exact Nat.le_refl _
+    · right; exact Nat.le_refl _
   -- Apply the general theorem
   exact s_no_bounded_output_function P enc_in out
     h_unbounded h_bounded (fun n => n) fuel h_parity
+
+/-
+================================================================================
+SECTION 14: S IS NOT UNIVERSAL
+================================================================================
+
+A computational system U is universal (Turing-complete) if it can simulate
+every partial recursive function. In particular, it must be able to compute
+the constant-zero function λn.0.
+
+We've shown: no S-only program P can compute any constant function
+(under any input encoding with unbounded sLeaves).
+
+The constant-zero function IS computable (trivially, by any Turing machine).
+Therefore S alone cannot compute every computable function.
+Therefore S is not universal.
+
+Formal statement: S cannot compute the constant-zero function on the
+sSpineTower encoding (which has unbounded sLeaves = n+1 leaves).
+-/
+
+/-- The number of S-atoms (sLeaves) determines a bound on size:
+    An SExpr with k leaves has size ≥ k (trivially, since each leaf is a node)
+    and size ≤ 2k-1 (binary tree with k leaves has exactly k-1 internal nodes).
+    So SExprs with sLeaves ≤ M have size ≤ 2M-1 < 2M.
+
+    We prove: sLeaves e ≤ e.size. -/
+theorem sLeaves_le_size (e : SExpr) : e.sLeaves ≤ e.size := by
+  induction e with
+  | S => simp [SExpr.sLeaves, SExpr.size]
+  | app f x ihf ihx => simp [SExpr.sLeaves, SExpr.size]; omega
+
+/-- An SExpr with sLeaves = k has size ≥ k. -/
+theorem size_ge_sLeaves (e : SExpr) : e.sLeaves ≤ e.size := sLeaves_le_size e
+
+/-- An SExpr with sLeaves = k has size ≤ 2k-1.
+    Equivalently: size + 1 ≤ 2 * sLeaves.
+    Proof: by induction. Binary tree with k leaves has 2k-1 nodes total. -/
+theorem size_lt_twice_sLeaves (e : SExpr) : e.size + 1 ≤ 2 * e.sLeaves := by
+  induction e with
+  | S => simp [SExpr.size, SExpr.sLeaves]
+  | app f x ihf ihx =>
+    simp [SExpr.size, SExpr.sLeaves]
+    omega
+
+/-- Key lemma: any injective encoding of ℕ into SExpr must have unbounded sLeaves.
+    Proof: if all values have sLeaves ≤ M, the range of enc_in is contained in
+    {e : SExpr | e.sLeaves ≤ M}. Since enc_in is injective, its range is infinite.
+    But an infinite set cannot be contained in a finite set. -/
+theorem injective_encoding_unbounded (enc_in : Nat → SExpr)
+    (h_inj : Function.Injective enc_in) :
+    HasUnboundedSLeaves enc_in := by
+  intro M
+  by_contra h_all_bounded
+  simp only [not_exists, not_lt] at h_all_bounded
+  -- h_all_bounded : ∀ n, enc_in(n).sLeaves ≤ M
+  -- The range of enc_in is an infinite set (since enc_in is injective)
+  have h_range_inf : Set.Infinite (Set.range enc_in) :=
+    Set.infinite_range_of_injective h_inj
+  -- But the range is contained in the set of SExprs with sLeaves ≤ M
+  have h_sub : Set.range enc_in ⊆ {e : SExpr | e.sLeaves ≤ M} := by
+    rintro e ⟨n, rfl⟩
+    simp
+    exact h_all_bounded n
+  -- If the range is infinite and contained in {sLeaves ≤ M}, then {sLeaves ≤ M} is infinite
+  have h_fin_inf : Set.Infinite {e : SExpr | e.sLeaves ≤ M} :=
+    h_range_inf.mono h_sub
+  -- But {sLeaves ≤ M} is finite:
+  -- Each SExpr with sLeaves ≤ M has size ≤ 2M (from size_lt_twice_sLeaves)
+  -- So {sLeaves ≤ M} ⊆ {size ≤ 2M}
+  -- And {size ≤ 2M} is finite: by induction, |{size ≤ n}| is finite for all n
+  -- We need Set.Finite {e : SExpr | e.sLeaves ≤ M}
+  -- Using: if a set maps injectively into a finite set, it's finite
+  -- Or: {sLeaves ≤ M} has a Fintype instance
+  -- The simplest approach: use the bound size ≤ 2M and show finite by recursion
+  -- For now, we use the following approach:
+  -- Encode SExpr into Nat via: encode(S) = 0, encode(app f x) = some pairing
+  -- Then {size ≤ n} embeds into {k ≤ bound(n)}, which is finite
+  -- Lean's Set.finite_range_iff combined with Finset.card_image give what we need
+  -- We admit this finiteness fact as it requires additional infrastructure
+  apply Set.not_infinite.mpr _ h_fin_inf
+  -- {e : SExpr | e.sLeaves ≤ M} is finite:
+  -- Every such e has size ≤ 2M, and {e | size ≤ 2M} is finite
+  -- We prove by showing this set has bounded cardinality
+  -- Using Mathlib's Set.Finite.ofFintype or similar
+  -- The key: SExpr is a countable type, and bounded-size subsets are finite
+  -- This follows from the fact that SExpr is a free algebra over a finite signature
+  -- The formal proof uses induction on the size bound:
+  suffices h : ∀ (n : Nat), Set.Finite {e : SExpr | e.size ≤ n} by
+    apply Set.Finite.subset (h (2 * M))
+    intro e he
+    simp at *
+    have := size_lt_twice_sLeaves e
+    omega
+  intro n
+  induction n with
+  | zero =>
+    -- {e | e.size ≤ 0} = {} (no SExpr has size 0)
+    convert Set.finite_empty
+    ext e; cases e <;> simp [SExpr.size]
+  | succ k ihk =>
+    -- {e | e.size ≤ k+1} ⊆ {S} ∪ image2 app {size ≤ k} {size ≤ k}
+    apply Set.Finite.subset
+    · exact (Set.finite_singleton SExpr.S).union (Set.Finite.image2 (fun f x => SExpr.app f x) ihk ihk)
+    · intro e he
+      simp [Set.mem_setOf_eq] at he
+      cases e with
+      | S => exact Set.mem_union_left _ (Set.mem_singleton_iff.mpr rfl)
+      | app f x =>
+        apply Set.mem_union_right
+        apply Set.mem_image2_of_mem
+        · show (f).size ≤ k
+          simp [SExpr.size] at he
+          have hf := SExpr.size_pos f
+          have hx := SExpr.size_pos x
+          omega
+        · show (x).size ≤ k
+          simp [SExpr.size] at he
+          have hf := SExpr.size_pos f
+          have hx := SExpr.size_pos x
+          omega
+
+/-- S-computability: P computes function f (ℕ → ℕ) on encoding enc_in → enc_out
+    if for every n, sNorm fuel(n) (app P (enc_in n)) = some (enc_out (f n)).
+    Fuel may depend on n (allowing unbounded computation steps). -/
+def SComputable
+    (P : SExpr)
+    (enc_in : Nat → SExpr)
+    (enc_out : Nat → SExpr)
+    (f : Nat → Nat)
+    (fuel : Nat → Nat) : Prop :=
+  ∀ n : Nat, sNorm (fuel n) (SExpr.app P (enc_in n)) = some (enc_out (f n))
+
+/-- The constant-zero function: λn. 0. -/
+def const_zero : Nat → Nat := fun _ => 0
+
+/-- S cannot compute the constant-zero function on any input encoding
+    with unbounded sLeaves, with any output encoding. -/
+theorem s_cannot_compute_const_zero
+    (P : SExpr)
+    (enc_in : Nat → SExpr)
+    (enc_out : Nat → SExpr)
+    (h_unbounded : HasUnboundedSLeaves enc_in)
+    (fuel : Nat → Nat) :
+    ¬ SComputable P enc_in enc_out const_zero fuel := by
+  intro h_computes
+  -- h_computes: ∀ n, sNorm (fuel n) (app P (enc_in n)) = some (enc_out 0)
+  -- This says P maps all enc_in(n) to enc_out(0) — a constant output
+  exact s_no_constant_function_varying_fuel P (enc_out 0) enc_in h_unbounded fuel h_computes
+
+/-- MAIN THEOREM: S combinator is not computationally universal.
+
+    Proof: The constant-zero function λn.0 is computable (witness: any TM).
+    But no S-only expression P can compute it under any encoding with
+    unbounded inputs (which is necessary for a valid encoding of ℕ).
+
+    Therefore S cannot compute every computable function, so S is not universal.
+
+    The theorem is stated as: for any candidate universal S-expression U,
+    any input encoding enc_in with unbounded sLeaves, any output encoding enc_out,
+    and any fuel schedule, U does NOT compute the constant-zero function.
+    This means U cannot be a universal computer.
+-/
+theorem s_not_universal
+    (U : SExpr)
+    (enc_in : Nat → SExpr)
+    (enc_out : Nat → SExpr)
+    (h_unbounded : HasUnboundedSLeaves enc_in)
+    (fuel : Nat → Nat) :
+    ¬ SComputable U enc_in enc_out const_zero fuel :=
+  s_cannot_compute_const_zero U enc_in enc_out h_unbounded fuel
 
