@@ -1,5 +1,162 @@
 # Rule 30 Prize 3 — Persistent Research Findings
 
+## Loop 47 findings (2026-03-24) — Attack 1: m in [40,60]; Attack 2: weakest sentence
+
+### Computation run: adversarial_loop47.py
+
+**Script**: `/Users/jonathanhill/src/p2p/research/adversarial_loop47.py`
+**Runtime**: ~5.7s total (Attack 1: 5.7s; Attack 2: ~18s for naive-reduction check)
+
+---
+
+### Attack 1: Even m in [40, 60] — SubcaseB scan in n' in [0, 5000]
+
+**Method**: Single-simulation trick. For each m, one tape of size T=2*5000+3=10003.
+Spike at m (for F) and at m + last_big (for G). Evolve 5001 steps.
+Center at step t gives F(t-1, m) and G(t-1, m) simultaneously. Runtime ~0.5s per m.
+Valid (exact) for n' up to ~N_max/2 = 2500; boundary artifacts possible near n'=5000.
+
+| m  | n_min | F=0 count | G=1 count | SubcaseB count | Status   |
+|----|-------|-----------|-----------|----------------|----------|
+| 40 | 19    | 4961      | 21        | 0              | INACTIVE |
+| 42 | 20    | 4959      | 22        | 0              | INACTIVE |
+| 44 | 21    | 4954      | 26        | 0              | INACTIVE |
+| 46 | 22    | 4953      | 26        | 0              | INACTIVE |
+| 48 | 23    | 4946      | 32        | 0              | INACTIVE |
+| 50 | 24    | 4943      | 34        | 0              | INACTIVE |
+| 52 | 25    | 4949      | 27        | 0              | INACTIVE |
+| 54 | 26    | 4943      | 32        | 0              | INACTIVE |
+| 56 | 27    | 4943      | 31        | 0              | INACTIVE |
+| 58 | 28    | 4938      | 35        | 0              | INACTIVE |
+| 60 | 29    | 4939      | 33        | 0              | INACTIVE |
+
+**Result**: All 11 even m values in [40, 60] are INACTIVE. No SubcaseB found in n' in [0, 5000].
+This is consistent with the paper's claim that the active set terminates at m=38 and
+all m >= 40 are inactive.
+
+**Context from prior loops**: The paper already verified m=40 to n'=110000 (loop-16/32),
+m=42..80 exhaustively to n'=7000 and by triangle to n'=20001 (loop-24/32), and m=82..300
+by first-100 G-check (loop-34/36). The present scan to n'=5000 is an independent
+confirmation for m in [40,60] using a different (single-simulation) method.
+
+**Verdict**: No new active m values found in [40,60]. The paper's inactivity claim for
+all m >= 40 is further supported.
+
+---
+
+### Attack 2: Weakest sentence in the proof plan section
+
+**Target sentence** (Part C, proof plan section):
+
+> "(i) the inductive step reduces a large-m case at n' to a small-m case at n'-1
+> (non-trivially, via the lifting lemma's algebraic structure)"
+
+**Why this is the weakest sentence**:
+
+1. It asserts a reduction path exists "via the lifting lemma's algebraic structure"
+   without showing what the reduction is or that it is feasible.
+
+2. The paper immediately concedes that the naive candidate reduction
+   (n', 2n'-6) → (n'-1, 2n'-8) FAILS: "computation shows this fails: the predecessor
+   n'-1 has no large-m SubcaseB case at all." The only explicit candidate is already refuted.
+
+3. No alternative reduction is described. Using the lifting lemma (itself the open conjecture)
+   as the engine for a reduction within the proof of itself is potentially circular.
+
+4. The paper labels this "the second critical open subproblem" — acknowledging it is open —
+   but calling path (i) a "candidate path" implies plausibility without supporting evidence.
+
+**Computational verification of the naive reduction failure**:
+
+Checked SubcaseB(n', 2n'-6) → SubcaseB(n'-1, 2n'-8) for n' in [3089, 3129]:
+
+```
+SubcaseB(3089, 6172) → NOT SubcaseB(3088, 6170): F=1, G=0  [FAIL]
+SubcaseB(3090, 6174) → SubcaseB(3089, 6172)                [SUCCESS]
+SubcaseB(3093, 6180) → NOT SubcaseB(3092, 6178): F=1, G=0  [FAIL]
+SubcaseB(3094, 6182) → SubcaseB(3093, 6180)                [SUCCESS]
+...pattern repeats...
+```
+
+**Reduction success rate: 10/21 = 48%.**
+
+**Critical structural observation**: The reduction SUCCEEDS exactly when n' ≡ 2 (mod 4),
+and FAILS when n' ≡ 1 (mod 4). The SubcaseB pairs (n', n'+1) map as:
+- n' ≡ 1 (mod 4): SubcaseB at n' does NOT imply SubcaseB at n'-1 (F=1 at n'-1)
+- n' ≡ 2 (mod 4): SubcaseB at n' DOES imply SubcaseB at n'-1 (which is ≡ 1 mod 4, verified)
+
+This 50/50 split reveals the large-m family is internally self-referential:
+each (n' ≡ 2 mod 4) SubcaseB event chains back to the (n' ≡ 1 mod 4) event just before it,
+but the (n' ≡ 1 mod 4) events have no large-m predecessor at n'-1. This means path (i)
+of the proof plan is only a PARTIAL reduction: it handles half the large-m cases via
+backward chaining but leaves the other half (the "first" event in each pair) needing a
+completely different argument.
+
+**What would be needed to fix the weak sentence**:
+- State explicitly that path (i) only handles n' ≡ 2 (mod 4) cases
+  (the second in each SubcaseB pair) and is silent on n' ≡ 1 (mod 4) cases.
+- For n' ≡ 1 (mod 4), either:
+  (a) construct direct witnesses analogous to the ge-block approach (path ii), OR
+  (b) reduce to the fixed-m (small-m) family by showing a small-m active position
+      always provides a valid lifting witness at those n'.
+- Without this split treatment, path (i) is incomplete even as a sketch.
+
+**Net verdict**: The sentence is genuinely weak. The paper would be strengthened by
+replacing "or (ii)" with "for n' ≡ 2 (mod 4); for n' ≡ 1 (mod 4), only path (ii)
+(direct witnesses) is available."
+
+---
+
+## Loop 45 findings (2026-03-24) — Adversarial attack: are "inactive" m in [2,38] truly inactive?
+
+### Computation run: adversarial_loop45.py
+
+**Script**: `/Users/jonathanhill/src/p2p/research/adversarial_loop45.py`
+**Runtime**: ~307s total (m=2: 3s, m=18: 72s, m=32: 233s)
+
+**Goal**: Adversarially test the paper's claim that m in {2, 18, 32} are "inactive" —
+meaning G(n',m)=0 for all valid n' (i.e., no SubcaseB event F=0, G=1).
+In particular: could these be long-period positions where SubcaseB first appears at large n'?
+
+**Method**: For each inactive m, scan all n' in [n_min(m), N_max] where:
+- n_min(m) = ceil((m-2)/2) = smallest n' where spike at m is within tape of size 2n'+3
+- N_max: m=2 → 1000; m=18 → 4000 (covers 3+ full periods past n'=3087); m=32 → 7200 (covers full first period [3087,7183))
+- F computed via big-triangle (one O(N^2) run); G computed per-n' (O(n'^2) each)
+
+**Important finding during development**: when n' < n_min(m) (spike at m is OUTSIDE the tape),
+the computation gives F=0 trivially and G=1 (only last spike, which always contributes 1).
+These "SubcaseB" hits are vacuous — the spike at m doesn't exist for those n'.
+The paper's inactive-m claim is only meaningful for n' >= n_min(m), which our scan correctly restricts to.
+
+---
+
+### Results: all three inactive m CONFIRMED — no SubcaseB in valid range
+
+| m | Scan range (valid) | F=0 count | G=1 count | SubcaseB (F=0,G=1) | Status |
+|---|---|---|---|---|---|
+| 2 | [0, 1000] | 500/1001 | 1/1001 | 0 | weakly inactive confirmed |
+| 18 | [8, 4000] | 1995/3993 | 1952/3993 | 0 | weakly inactive confirmed |
+| 32 | [15, 7200] | 3569/7186 | 3613/7186 | 0 | weakly inactive confirmed |
+
+**m=2**: G=1 occurs once (at n'=0, F=1). No SubcaseB ever. Consistent with Lean proof (ts2_last_always_false).
+
+**m=18**: G=1 occurs 1952 times in [8,4000] but ALWAYS with F=1 (never F=0).
+  Zero SubcaseB. Covers 3+ full periods (period=256) past the SubcaseB region start n'=3087.
+  Confirms paper: m=18 is weakly inactive (F=G or F=1 when G differs from F).
+
+**m=32**: G=1 occurs 3613 times in [15,7200] but ALWAYS with F=1.
+  Zero SubcaseB in [15,7200], covering the full first period [3087,7183).
+  Confirms paper: m=32 has period 4096, zero (0,1) in entire first period.
+
+**Adversarial verdict**: The inactive m in {2, 18, 32} are NOT long-period active positions.
+No SubcaseB event found in any valid scan range. The paper's inactivity claims for these
+three m values are confirmed through n'=4000 (m=18) and n'=7200 (m=32).
+
+The F=G pattern is the expected behavior: for weakly inactive m, whenever G=1, F=1 also.
+This is exactly the anti-SubcaseB condition the paper asserts.
+
+---
+
 ## Loop 46 findings (2026-03-24) — Adversarial attack: can we find a fast algorithm for s(n)?
 
 ### Computation run: adversarial_loop46.py
