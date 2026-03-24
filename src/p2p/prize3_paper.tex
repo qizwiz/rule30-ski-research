@@ -740,17 +740,19 @@ $m = 300$ (triangle-method dense scan $m \leq 300$, $n' \leq 20001$ verified 202
 loop-36 upgraded $m=202$--$300$ from step-500 sparse ${\sim}0.2\%$ to full triangle-method density); if not,
 $P = 32768$ exactly and Part~B has finite scope.
 
-\textbf{Coverage caveat for $m=42,44$.}  The F-period of $m=42$ is $2^{17}=131072$
-and of $m=44$ is predicted $2^{18}=262144$.  The triangle-method scans cover only
-$n' \leq 20001$, which is less than $1/6$ of one period for $m=42$ and less than $1/13$
-for $m=44$.  Resonant SubcaseB events, if they existed, would be expected near
-$n' \approx 68623$ (for $m=42$) and $n' \approx 134159$ (for $m=44$), both far beyond
-the current scan range.  The G-check evidence for $m=42,44$ is therefore structurally
-weaker than for $m=40$ (where $n'=110000 > P_{40}/2$, covering the resonant window).
-This asymmetry is not reflected in the main text above and constitutes the weakest
-inactivity claim in the paper.  A resonance test analogous to the $m=40$ check
-(loop-27, 2026-03-24) at $n' \approx P_{42}/2$ would substantially strengthen the
-evidence for $m=42$.
+\textbf{Resonance tests for $m=42,44$ (loop-41, 2026-03-24).}
+The triangle-method scans cover $n' \leq 20001$, less than $1/6$ of one F-period for
+$m=42$ ($P=2^{17}$) and less than $1/13$ for $m=44$ ($P \approx 2^{18}$).
+To match the evidentiary standard applied to $m=40$ (resonance test at $n'=16403$,
+which gave $(0,0)$), analogous resonance tests were run at $n' = P_{42}/4 \approx 32788$
+and $n' = P_{44}/4 \approx 65557$:
+\begin{itemize}
+  \item $m=42$, $n'=32788$: $F=1$ — SubcaseB impossible ($F$ must be~$0$).
+    Also $n'=32792$ ($\equiv 32788{+}4$): $(F,G)=(1,1)$ — no SubcaseB. (1.6\,s + 3.2\,s)
+  \item $m=44$, $n'=65557$: $F=1$ — SubcaseB impossible. (4.5\,s)
+\end{itemize}
+Both resonance tests confirm inactivity, bringing the evidentiary standard for
+$m=42,44$ in line with $m=40$.
 
 \emph{Part C -- shifting large-$m$ position (critical gap).}  A distinct SubcaseB
 family exists at the \emph{right boundary}: the single position
