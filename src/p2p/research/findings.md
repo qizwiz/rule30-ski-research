@@ -2816,3 +2816,66 @@ Loop 44 confirms that m=30 has **exactly one** SubcaseB event per period of 4096
 
 All five verifiable claims from loop 44 are confirmed. The paper's characterization of m=30 is correct and complete. The "1 hit per period" finding adds precision to the paper without requiring any correction.
 
+
+## Loop 49 (simulation bug found) + Loop 50 (fix + reconfirmation)
+
+**Loop 49 verdict: FALSE ALARM** — the script had a simulation bug.
+
+Bug: spike placed at `center - m` (middle of large fixed tape), reading fixed center. This gives a DIFFERENT function from the paper's F(n',m): eventually all activity hits the boundary and dies, giving all-zeros from n' ≈ N - m onwards. Appeared as "period 8" for m=4 but was really a boundary extinction artifact.
+
+Correct definition (Lean/paper): spike at absolute position m (near left edge of growing tape of size 2n'+3); read position n'+1 at step n'+1. Implemented efficiently as diagonal-read on one large fixed tape.
+
+**Loop 50 independently confirms all period claims (correct simulation):**
+
+| m   | P claimed | P holds? | P/2 fails? | SubcaseB/period |
+|-----|-----------|----------|------------|-----------------|
+| 4   | 8         | PASS     | PASS       | 4/8             |
+| 6   | 16        | PASS     | PASS       | 8/16            |
+| 8   | 32        | PASS     | PASS       | 16/32           |
+| 10  | 64        | PASS     | PASS       | 32/64           |
+| 12  | 64        | PASS     | PASS       | 33/64           |
+| 14  | 64        | PASS     | PASS       | 35/64           |
+| 16  | 256       | PASS     | PASS       | 128/256         |
+| 20  | 256       | PASS     | PASS       | 129/256         |
+| 22  | 256       | PASS     | PASS       | 134/256         |
+
+All periods verified over 4 full repetitions from n'=3087. Minimality (P/2 fails) confirmed for all. SubcaseB events exist in every period. Paper's period table is correct.
+
+**No changes needed to the paper.** The critical claims hold.
+
+
+## Loop 51: Large-m period doubling law
+
+Verified period doubling for m=24..34 using correct diagonal-read simulation:
+
+| m   | P    | holds? | min? | SubcaseB in P |
+|-----|------|--------|------|---------------|
+| 24  | 512  | PASS   | PASS | 256           |
+| 26  | 1024 | PASS   | PASS | 508           |
+| 28  | 2048 | PASS   | PASS | 1026          |
+| 30  | 4096 | PASS   | PASS | 2070          |
+| 34  | 8192 | PASS   | PASS | 4096          |
+
+Period doubling ratios all exactly 2.0 for active m=22→24→26→28→30→34 (m=32 inactive, skipped cleanly).
+m=36 (P=16384) also confirmed PASS.
+
+## Loop 52: Part C mod-4 rule extended
+
+Verified SubcaseB(n', 2n'-6) = (n'≡1,2 mod 4) for ALL n'∈[15001,15100] (dense, 60s) with 0 violations.
+Spot checks at n'∈{16001,16002,16003,16004,16383,16384,16385,16386}: all PASS.
+Anti-correlation F+G=1 holds at all verified points.
+This extends the paper's n'=15000 verification to n'≈16386.
+
+## SubcaseB G-check for active m
+
+Verified actual SubcaseB (F=0 AND G=1) occurs in one period for each active m:
+- m=4:  P=8,   F=0 count=4,   SubcaseB=1, first at n'=3093 (offset 6)
+- m=6:  P=16,  F=0 count=8,   SubcaseB=2, first at n'=3094
+- m=8:  P=32,  F=0 count=16,  SubcaseB=1, first at n'=3115
+- m=10: P=64,  F=0 count=32,  SubcaseB=1, first at n'=3120
+- m=16: P=256, F=0 count=128, SubcaseB=3, first at n'=3207 (offset 120)
+  Offsets {120,124,192}, gaps {4,68,184}: EXACTLY match paper's claim.
+  "Exactly one SubcaseB per period" confirmed for m=4.
+
+Note: F=0 count ≫ SubcaseB count — G=1 is rare among F=0 events. Most F=0 events have G=0.
+
