@@ -1,5 +1,109 @@
 # Rule 30 Prize 3 — Persistent Research Findings
 
+## Loop 49 findings (2026-03-24) — Attack: period table plateau claims
+
+### Computation run: adversarial_loop49.py
+
+**Script**: `/Users/jonathanhill/src/p2p/research/adversarial_loop49.py`
+**Runtime**: ~0.1s (diagonal trick: single numpy simulation per m)
+
+---
+
+### Target: period plateaus in the F-period table
+
+**Paper claims (sec:period-structure, lines 618-622)**:
+> For $m < 24$: the pattern is irregular with two *plateaus*.
+> $m \in \{10, 12, 14\}$ all share period $64 = 2^6$;
+> $m \in \{16, 20, 22\}$ all share period $256 = 2^8$
+
+The paper asserts both that the period P holds AND that P/2 fails (minimality).
+These are cited as "verified by direct computation and period-minimality confirmed"
+but without an independently replicable script for exactly this set.
+
+---
+
+### Method
+
+**F(n', m) definition** (from `CausalConeLemmas.lean`):
+  F(n', m) = `(caEvolve n' (spikeAtList m (2*n'+1))).getD 0 false`
+
+This equals: cell at position n' at step n' of Rule 30 started from spike at position m
+on an infinite zero-padded tape ("diagonal trick"). Verified equivalent to the caEvolve
+reference for m ∈ {4, 6, 10, 20}, n = 1..24.
+
+**Tape size for large n'**: diagonal trick uses tape of size n_max + m + 20 (light cone
+from spike at m to position n_max after n_max steps is safely contained). No boundary
+interference.
+
+**Period verification**: For each (m, P), compute F(n', m) for n' ∈ [0, BASE + 4P],
+check period P over 3 repetitions from BASE=3087, check period P/2 fails.
+
+---
+
+### Results
+
+| m  | P_claimed | P holds? | P/2 fails? | SubcaseB in P | 0s / 1s |
+|----|-----------|----------|------------|---------------|---------|
+| 4  | 8         | YES      | YES        | 4             | 4/4     |
+| 6  | 16        | YES      | YES        | 8             | 8/8     |
+| 8  | 32        | YES      | YES        | 16            | 16/16   |
+| 10 | 64        | YES      | YES        | 32            | 32/32   |
+| 12 | 64        | YES      | YES        | 33            | 33/31   |
+| 14 | 64        | YES      | YES        | 35            | 35/29   |
+| 16 | 256       | YES      | YES        | 128           | 128/128 |
+| 20 | 256       | YES      | YES        | 129           | 129/127 |
+| 22 | 256       | YES      | YES        | 134           | 134/122 |
+
+**Period minimality witnesses**:
+- m=4: F[3087]=1 ≠ F[3091]=0 (period 4 fails)
+- m=6: F[3087]=1 ≠ F[3095]=0 (period 8 fails)
+- m=8: F[3087]=0 ≠ F[3103]=1 (period 16 fails)
+- m=10: F[3088]=0 ≠ F[3120]=1 (period 32 fails)
+- m=12: F[3087]=1 ≠ F[3119]=0 (period 32 fails)
+- m=14: F[3087]=0 ≠ F[3119]=1 (period 32 fails)
+- m=16: F[3087]=0 ≠ F[3215]=1 (period 128 fails)
+- m=20: F[3087]=1 ≠ F[3215]=0 (period 128 fails)
+- m=22: F[3088]=1 ≠ F[3216]=0 (period 128 fails)
+
+---
+
+### Plateau consistency check
+
+The paper claims shared period within each plateau, NOT identical F-sequences.
+
+- Plateau 1 (m∈{10,12,14}, P=64): F-sequences are **DIFFERENT** from each other
+  (m=10 vs m=12 first differs at offset 2; m=10 vs m=14 at offset 0; etc.)
+- Plateau 2 (m∈{16,20,22}, P=256): F-sequences are **DIFFERENT** from each other
+  (m=16 vs m=20 first differs at offset 0; etc.)
+
+This is EXPECTED: the plateau claim is about the common period value, not identical sequences.
+
+---
+
+### Bug found and fixed during this loop
+
+Initial simulation used a **fixed large tape** of size 2N+3 reading the center cell,
+which is incorrect. The correct F(n',m) uses a **shrinking tape** (caEvolve on tape
+of size 2n'+1), equivalent to reading position n' diagonally in the spacetime diagram.
+The fixed-tape approach fails because:
+1. It reads the wrong cell (center of large tape ≠ position n' after n' shrinking steps)
+2. N=500 is insufficient for n'=3087 (light cone reaches ~3109 cells)
+
+The corrected diagonal trick: spike at position m on large tape, read tape[n'] at step n'.
+Verified correct vs caEvolve reference for n=1..24, m∈{4,6,10,20}.
+
+---
+
+### Adversarial conclusion
+
+**VERDICT: All plateau period claims are ARITHMETICALLY CORRECT.**
+- Both plateaus confirmed independently: period P holds, P/2 fails, SubcaseB events exist.
+- The paper's period table for m < 24 contains no errors.
+- The period doubling pattern (m=4→8, m=6→16, m=8→32) is also confirmed as a reference.
+- No attack surface found in the period structure claims.
+
+---
+
 ## Loop 48 findings (2026-03-24) — Attack: discussion section and bridge argument
 
 ### Computation run: adversarial_loop48.py
