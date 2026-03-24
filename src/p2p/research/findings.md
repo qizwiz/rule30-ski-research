@@ -2911,3 +2911,22 @@ This represents the full period-certificate infrastructure for SubcaseB closure,
 axiom-free for all active m ≤ 30. The remaining gap is m=34,36,38 (need Array Bool
 implementation) and the step from "F,G periodic" to "SubcaseB resolves at n'≥3087"
 (requires showing SubcaseB events occur in [3087, 3087+P] — the existential witnesses).
+
+## Loop 54 — Full Results (2026-03-24)
+
+### Active m-set scan m=302..400 (full, 473s)
+- All 50 m-values have F=0 candidates (~8440-8460 per m in [3087,20001))
+- G-checked first 3 F=0 positions per m in [3087,3287): G=0 in ALL cases
+- 0 SubcaseB found for any m=302..400
+
+### Resonance tests for m=46, 48, 50
+Tests at resonant n' = (2^k + m - 2)/2 (where SubcaseB would first appear if active):
+- m=46, n'=32815 (last-m=2^16): F=1 → SubcaseB impossible (14s)
+- m=46, n'=65814 (last-m=2^17): F=0, G=0 → not SubcaseB (44s)
+- m=48, n'=32816 (last-m=2^16): F=1 → SubcaseB impossible (19s)
+- m=48, n'=65815 (last-m=2^17): F=1 → SubcaseB impossible (41s)
+- m=50, n'=32817 (last-m=2^16): F=0, G=0 → not SubcaseB (17s)
+- m=50, n'=65816 (last-m=2^17): F=0, G=0 → not SubcaseB (45s)
+
+All 6 resonance checks negative. m=46,48,50 are inactive, consistent with 2-adic criterion.
+The period-P = 32768 bound is confirmed by all adversarial checks.
