@@ -4,6 +4,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{hyperref}
+\usepackage{url}
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{geometry}
@@ -71,7 +72,7 @@ value from index $n$ requires $\Omega(n)$ effort), though completing the connect
 Wolfram's TM-complexity model requires one additional bridge argument, discussed in
 Section~\ref{sec:discussion}.
 
-The proof is formalized in Lean~4: \texttt{rule30\_prize3} is proved by induction
+The proof is formalized in Lean~4 (source at \url{https://github.com/qizwiz/rule30-ski-research/tree/autoresearch/mar20}): \texttt{rule30\_prize3} is proved by induction
 from two unconditionally proved boundary theorems together with one domain conjecture
 (\texttt{lifting\_lemma}).  The lifting conjecture is computationally verified for
 $n \leq 20$ by checking $O(n)$ spike-form configurations per generation and formally
