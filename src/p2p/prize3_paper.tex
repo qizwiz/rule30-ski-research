@@ -606,7 +606,7 @@ producing $(0,1)$ and $m=18$ producing only $(1,0)$).
 Similarly, inactive $m=32$ has period~$4096$, matching active $m=30$,
 with zero $(0,1)$ verified directly in the full first period $[3087, 7183)$.
 The $m=16$ cluster has a more complex internal structure: three hits per period at offsets
-$0,4,72$ with gaps $(4, 68, 184)$ summing to~$256$.
+$120,124,192$ (measured from $n'=3087$) with gaps $(4, 68, 184)$ summing to~$256$.
 The doubling law does \emph{not} hold universally across all active $m$.
 
 \emph{F-period certificates (Python-verified, 2026-03-24).}
@@ -909,18 +909,22 @@ individually closes the bridge to Prize~3, but they make it implausible that any
 short-period recurrence or low-complexity formula computes $s(n)$.  The
 status of Prize~3 is genuinely open.
 
-\begin{remark}[Unconditional lower bound in the integer-input model]
+\begin{remark}[ANF degree in the integer-input model]
 \label{rem:integermodel}
 Prize~3's model takes integer $n$ as input ($K = \lceil \log_2 n \rceil$ bits) and asks
 for $s(n)$.  Treating $s$ as a Boolean function of the $K$-bit input, computation
-confirms that the algebraic normal form of $n \mapsto s(n)$ has degree exactly $K$
+confirms that the algebraic normal form (ANF) of $n \mapsto s(n)$ has degree exactly $K$
 for $K \in \{2,3,4,6,7\}$ (full degree, with a unique highest-degree monomial at
-$K=6,7$; $K=5$ is degree~$4$ by coincidence).  A full-degree Boolean function on
-$K$ bits requires circuit depth $\Omega(K) = \Omega(\log n)$ (depth-$d$ circuits
-compute functions of degree at most $2^d$).  This gives an unconditional
-$\Omega(\log n)$ circuit lower bound for Prize~3's integer-input model — the first
-lower bound in that specific model not depending on Prize~1.  The gap to the
-conjectured $\Omega(n)$ remains open.
+$K=6,7$; $K=5$ is degree~$4$).  Full ANF degree~$K$ means every strict subset of the
+$K$ bits of~$n$ is insufficient to determine~$s(n)$: any Boolean decision tree or
+query algorithm computing $n \mapsto s(n)$ must read \emph{all} $K = \Theta(\log n)$ bits.
+This is equivalent to the block-sensitivity lower bound $\mathrm{bs}(s) = K$, and implies
+an $\Omega(\log n)$ lower bound in the \emph{bit-query model} (where the algorithm
+may adaptively query individual bits of~$n$).  Note that this is a trivial-input-size
+lower bound and does not bound TM time or circuit depth beyond $\Omega(\log\log n)$
+(depth-$d$ AND/OR formulas have ANF degree $\leq 2^d$, giving depth $\geq \log_2 K
+= \Omega(\log\log n)$ for the formula model).  The gap to
+the conjectured $\Omega(n)$ TM time complexity remains fully open.
 \end{remark}
 
 Our essentiality theorem characterizes the causal structure of Rule~30 precisely and
