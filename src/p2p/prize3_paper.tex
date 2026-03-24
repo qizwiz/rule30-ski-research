@@ -643,6 +643,14 @@ Furthermore, a layered sweep confirms no active $m \geq 40$:
   in $[3087, 7000)$ (1929--1979 per $m$; ${\approx}37\,840$ total including $m=42$)
   individually verified $G=0$ — exhaustive 100\% coverage in this subrange
   ($m=44,\ldots,80$: 872\,s loop-24; $m=42$: 67\,s loop-32).
+  \emph{Resonance tests for $m=42,44$} (loop-41, 2026-03-24): the $\mathrm{last}{-}m=2^k$
+  criterion predicts resonant $n'=32788$ ($m=42$, $k=16$) and $n'=65557$ ($m=44$, $k=17$)
+  as the first positions where SubcaseB would appear if these $m$-values were active.
+  Direct computation gives $(F,G)=(1,1)$ at $n'=32788$ and $(1,1)$ at $n'=65557$ — no SubcaseB.
+  Additional resonance checks: $(0,0)$ at $n'=16404$ and $(0,0)$ at $n'=65572$ for $m=42$;
+  $(1,1)$ at $n'=32794$ and $n'=131093$ for $m=44$ — all consistent with inactivity
+  (note: triangle-method coverage is $0.15{\times}$ one $F$-period for $m=42$ and $0.08{\times}$
+  for $m=44$; resonance tests extend to the structurally decisive positions).
   \textbf{Caution on prior step-500 claim}: for active $m=34$, the step-500 sparse scan
   in $[3087,15000)$ finds \emph{0 of 4} actual SubcaseB events (0\% detection rate —
   the 4 events at $n'=4112,4116,12304,12308$ do not coincide with any step-500 sample
@@ -890,6 +898,20 @@ variables), confirmed computationally for $n \leq 10$.  None of these properties
 individually closes the bridge to Prize~3, but they make it implausible that any
 short-period recurrence or low-complexity formula computes $s(n)$.  The
 status of Prize~3 is genuinely open.
+
+\begin{remark}[Unconditional lower bound in the integer-input model]
+\label{rem:integermodel}
+Prize~3's model takes integer $n$ as input ($K = \lceil \log_2 n \rceil$ bits) and asks
+for $s(n)$.  Treating $s$ as a Boolean function of the $K$-bit input, computation
+confirms that the algebraic normal form of $n \mapsto s(n)$ has degree exactly $K$
+for $K \in \{2,3,4,6,7\}$ (full degree, with a unique highest-degree monomial at
+$K=6,7$; $K=5$ is degree~$4$ by coincidence).  A full-degree Boolean function on
+$K$ bits requires circuit depth $\Omega(K) = \Omega(\log n)$ (depth-$d$ circuits
+compute functions of degree at most $2^d$).  This gives an unconditional
+$\Omega(\log n)$ circuit lower bound for Prize~3's integer-input model — the first
+lower bound in that specific model not depending on Prize~1.  The gap to the
+conjectured $\Omega(n)$ remains open.
+\end{remark}
 
 Our essentiality theorem characterizes the causal structure of Rule~30 precisely and
 constitutes necessary groundwork; it is not itself sufficient for Prize~3.
