@@ -196,17 +196,35 @@ $2n$ is essential for all $n$, proved in Lean~4
   \includegraphics[width=\linewidth]{rule30_figure.pdf}
   \caption{%
     \textbf{(a)}~Rule~30 space-time diagram from the single-black-cell initial
-    condition $e_n$ ($n=28$ steps).  The orange triangle marks the causal cone boundary,
-    contracting at one cell per step on each side; the orange circle marks the
-    center-cell output $s(n) = \mathtt{rule30}_n(e_n)$.  Every cell in the cone
-    contributes to this output for some initial configuration (Theorem~\ref{thm:main}).
-    \textbf{(b)}~Evolution from a spike at fixed position $m=8$.  The blue marker
-    indicates the $F(n,m)$ read point: the leftmost cell of the cone after $n$ steps.
-    The SubcaseB condition $F(n,m)=0,\,G(n,m)=1$ is the key open case in the lifting
-    lemma proof; its periodic structure (period $P_m = 2^6$ for $m=8$) drives the
-    proof plan of Section~\ref{sec:discussion}.%
+    condition $e_n$ ($n=30$ steps).  The orange lines mark the causal cone boundary
+    (one cell per step); the orange dot marks the center-cell output $s(30)$.
+    Every cell in the cone is essential for some initial configuration
+    (Theorem~\ref{thm:main}).
+    \textbf{(b)}~Evolution from a spike at fixed position $m=8$ on the same tape.
+    The blue triangle marks $F(n,m)$: the \emph{center cell} of the tape after $n+1$
+    steps.  When $F(n,m)=0$ and $G(n,m)=1$ (SubcaseB), the two-spike tape produces
+    a different center value than the single-spike tape; this is the key open case
+    in the lifting lemma.%
   }
   \label{fig:rule30}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{rule30_subcaseB_figure.pdf}
+  \caption{%
+    \textbf{(a)}~Period structure of the active set
+    $M_{\mathrm{act}} = \{4,6,\ldots,38\}$.  Each active position $m$ has a
+    SubcaseB cluster period $P_m$; inactive positions ($m \in \{2,18,32\}$,
+    red dotted lines) break the sequence but not the doubling law, which holds
+    exactly for $m \geq 22$.  The overall period is
+    $P = \mathrm{lcm}(P_m) = 32768 = 2^{15}$.
+    \textbf{(b)}~SubcaseB occurrences for $m=4$ (period $P_4 = 8$) over 32
+    consecutive values of $n'$.  Red bars: SubcaseB fires ($F=0, G=1$).
+    Blue bars: $F=0, G=0$.  Gray bars: $F=1$.  Exactly one SubcaseB event
+    per period; the pattern repeats perfectly.%
+  }
+  \label{fig:subcaseB}
 \end{figure}
 
 \subsection{The Lifting Lemma}
