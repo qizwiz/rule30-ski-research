@@ -66,11 +66,13 @@ We prove that every position in the width-$n$ light cone of Rule~30 is
 configuration $c$ such that the $n$-step center-cell output changes when $c[k]$ is
 flipped.  Since every input cell is essential, any algorithm computing
 $\mathtt{rule30}_n(c)$ for general $c$ must read all $2n+1$ input cells in the worst
-case, giving an $\Omega(n)$ \emph{query-complexity} lower bound.  This is directly
-relevant to Wolfram Prize~3 (which asks whether computing the $n$-th center-column
-value from index $n$ requires $\Omega(n)$ effort), though completing the connection to
-Wolfram's TM-complexity model requires one additional bridge argument, discussed in
-Section~\ref{sec:discussion}.
+case, giving an $\Omega(n)$ \emph{query-complexity} lower bound for the
+\emph{general-input} problem $\mathtt{rule30}_n(c)$.  This is related to
+Wolfram Prize~3 (which asks whether computing the $n$-th center-column value
+from the \emph{fixed} single-spike input $e_n$ requires $\Omega(n)$ effort),
+though the two problems differ: Prize~3's input is always $e_n$ and every
+cell of $e_n$ is immediately computable from $n$, so the connection requires
+an additional bridge argument, discussed in Section~\ref{sec:discussion}.
 
 The result is formalized in Lean~4.\footnote{Source:
 \url{https://github.com/qizwiz/rule30-ski-research/tree/autoresearch/mar20}}
