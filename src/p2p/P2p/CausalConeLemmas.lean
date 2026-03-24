@@ -554,3 +554,590 @@ theorem ts2_last_always_false (n : Nat) (hn : 2 ≤ n) :
 #check @caEvolve_getD_shift
 #check @rule30n_spike6_period16
 #check @rule30n_spike20_period256
+
+/-!
+## Parametric spike infrastructure for all active m
+
+Rather than duplicating 80 lines per m-value, we define a single `spikeAtList m N`
+and prove the causal-cone agreement and period lemma once, parametrically.
+Individual m-values only need a `native_decide` certificate of the form:
+  `caEvolve P_m (spikeAtList m (2*P_m+2*m+1)) = spikeAtList m (2*m+1)`
+-/
+
+/-- A list of length N with `true` at position m, `false` elsewhere. -/
+def spikeAtList (m N : Nat) : List Bool :=
+  List.ofFn (fun k : Fin N => decide (k.val = m))
+
+lemma spikeAtList_length (m N : Nat) : (spikeAtList m N).length = N := by
+  simp [spikeAtList, List.length_ofFn]
+
+/-- `spikeAtList m N` at in-bounds position i equals `decide (i = m)`. -/
+lemma spikeAtList_getD (m N i : Nat) (hi : i < N) :
+    (spikeAtList m N).getD i false = decide (i = m) := by
+  simp [spikeAtList, List.getD_eq_getElem?_getD, hi]
+
+/-- Two spikeAtList m lists agree at position i+j whenever both contain that index. -/
+lemma drop_spikeAt_agree (m N1 N2 i j : Nat)
+    (h1 : i + j < N1) (h2 : i + j < N2) :
+    (List.drop i (spikeAtList m N1)).getD j false =
+    (List.drop i (spikeAtList m N2)).getD j false := by
+  simp only [spikeAtList, List.getD_eq_getElem?_getD, List.getElem?_drop, List.getElem?_ofFn]
+  simp [h1, h2]
+
+/-- `spikeAtList m N` dropped by `i > m` is all-false (the spike is behind the drop point). -/
+lemma spikeAtList_drop_allFalse (m N i : Nat) (hi : i > m) :
+    ∀ j, j < (List.drop i (spikeAtList m N)).length →
+         (List.drop i (spikeAtList m N)).getD j false = false := by
+  intro j hj
+  simp only [List.length_drop, spikeAtList_length] at hj
+  rw [show ((spikeAtList m N).drop i).getD j false = (spikeAtList m N).getD (i + j) false from by
+    simp [List.getD_eq_getElem?_getD, List.getElem?_drop]]
+  by_cases h : i + j < N
+  · rw [spikeAtList_getD m N (i + j) h]; simp; omega
+  · simp only [List.getD_eq_getElem?_getD, spikeAtList, List.getElem?_ofFn]
+    simp [show ¬(i + j < N) from h]
+
+/-- Causal-cone independence: `caEvolve P` on spikeAtList m agrees between two lists of
+    different sizes, provided both contain position `i + 2*P`. -/
+lemma caEvolve_spikeAt_agree (P m N1 N2 i : Nat)
+    (h1 : i + 2 * P < N1) (h2 : i + 2 * P < N2) :
+    (caEvolve P (spikeAtList m N1)).getD i false =
+    (caEvolve P (spikeAtList m N2)).getD i false := by
+  rw [caEvolve_getD_shift P (spikeAtList m N1) i, caEvolve_getD_shift P (spikeAtList m N2) i]
+  apply caEvolve_agree P
+  · rw [List.length_drop, spikeAtList_length]; omega
+  · rw [List.length_drop, spikeAtList_length]; omega
+  · intro j hj; exact drop_spikeAt_agree m N1 N2 i j (by omega) (by omega)
+
+/-- Parametric period lemma for spike-at-m with period P.
+
+    Given a `native_decide` certificate
+      `caEvolve P (spikeAtList m (2*P+2*m+1)) = spikeAtList m (2*m+1)`,
+    this proves F(n, m) = F(n+P, m) for all n (i.e., the center value of
+    rule30^{n+1} starting from spike-at-m is periodic with period P).
+
+    Proof structure (mirrors rule30n_spike6_period16):
+    1. Write n+1+P as (n+1)+P and apply caEvolve_add.
+    2. Apply caEvolve_agree at scale n+1.
+    3. For i ≤ m: use the certificate + causal-cone independence.
+    4. For i > m: the drop-by-i is all-false on both sides.
+-/
+lemma rule30n_spikeAt_period (m P : Nat)
+    (hcert : caEvolve P (spikeAtList m (2*P+2*m+1)) = spikeAtList m (2*m+1))
+    (n : Nat) :
+    (caEvolve (n + 1) (spikeAtList m (2*(n+1)+1))).getD 0 false =
+    (caEvolve ((n + 1) + P) (spikeAtList m (2*((n+1)+P)+1))).getD 0 false := by
+  have rhs_len : 2*(n+1) < (caEvolve P (spikeAtList m (2*((n+1)+P)+1))).length := by
+    have hlen := caEvolve_length_le P (spikeAtList m (2*((n+1)+P)+1))
+                (by rw [spikeAtList_length]; omega)
+    rw [spikeAtList_length] at hlen; omega
+  conv_rhs => rw [caEvolve_add (n+1) P]
+  apply caEvolve_agree (n + 1)
+  · rw [spikeAtList_length]; omega
+  · exact rhs_len
+  · intro i hi
+    suffices h : (spikeAtList m (2*(n+1)+1)).getD i false =
+                 (caEvolve P (spikeAtList m (2*(n+1+P)+1))).getD i false by exact h
+    by_cases hm : i ≤ m
+    · -- positions 0..m: both equal decide(i = m)
+      rw [spikeAtList_getD m (2*(n+1)+1) i (by omega)]
+      rw [caEvolve_spikeAt_agree P m (2*(n+1+P)+1) (2*P+2*m+1) i (by omega) (by omega)]
+      rw [hcert]
+      rw [spikeAtList_getD m (2*m+1) i (by omega)]
+    · -- positions m+1..2*(n+1): both are false
+      have lhs_false : (spikeAtList m (2*(n+1)+1)).getD i false = false := by
+        rw [spikeAtList_getD m (2*(n+1)+1) i (by omega)]; simp; omega
+      have rhs_false : (caEvolve P (spikeAtList m (2*(n+1+P)+1))).getD i false = false := by
+        rw [caEvolve_getD_shift P _ i]
+        apply caEvolve_allFalse
+        exact spikeAtList_drop_allFalse m (2*(n+1+P)+1) i (by omega)
+      rw [lhs_false, rhs_false]
+
+/-!
+## Period certificates: native_decide for each active m
+Active m-set: {4,6,8,10,12,14,16,20,22,24,26,28,30,34,36,38}
+Periods:   P_m ∈ {8,16,32,64,64,64,256,256,256,512,1024,2048,4096,8192,16384,32768}
+Certificate form: caEvolve P_m (spikeAtList m (2*P_m+2*m+1)) = spikeAtList m (2*m+1)
+m=6 and m=20 already have dedicated spike6List/spike20List infrastructure above.
+-/
+
+-- m=4, P=8: input=25, output=spike4 at 9
+lemma caEvolve_cert_m4_p8 :
+    caEvolve 8 (spikeAtList 4 25) = spikeAtList 4 9 := by native_decide
+
+lemma rule30n_spikeAt4_period8 (n : Nat) :
+    (caEvolve (n+1) (spikeAtList 4 (2*(n+1)+1))).getD 0 false =
+    (caEvolve ((n+1)+8) (spikeAtList 4 (2*((n+1)+8)+1))).getD 0 false :=
+  rule30n_spikeAt_period 4 8 caEvolve_cert_m4_p8 n
+
+-- m=6, P=16: input=45, output=spike6 at 13
+lemma caEvolve_cert_m6_p16 :
+    caEvolve 16 (spikeAtList 6 45) = spikeAtList 6 13 := by native_decide
+
+lemma rule30n_spikeAt6_period16 (n : Nat) :
+    (caEvolve (n+1) (spikeAtList 6 (2*(n+1)+1))).getD 0 false =
+    (caEvolve ((n+1)+16) (spikeAtList 6 (2*((n+1)+16)+1))).getD 0 false :=
+  rule30n_spikeAt_period 6 16 caEvolve_cert_m6_p16 n
+
+-- m=8, P=32: input=81, output=spike8 at 17
+lemma caEvolve_cert_m8_p32 :
+    caEvolve 32 (spikeAtList 8 81) = spikeAtList 8 17 := by native_decide
+
+lemma rule30n_spikeAt8_period32 (n : Nat) :
+    (caEvolve (n+1) (spikeAtList 8 (2*(n+1)+1))).getD 0 false =
+    (caEvolve ((n+1)+32) (spikeAtList 8 (2*((n+1)+32)+1))).getD 0 false :=
+  rule30n_spikeAt_period 8 32 caEvolve_cert_m8_p32 n
+
+-- m=10, P=64: input=149, output=spike10 at 21
+lemma caEvolve_cert_m10_p64 :
+    caEvolve 64 (spikeAtList 10 149) = spikeAtList 10 21 := by native_decide
+
+lemma rule30n_spikeAt10_period64 (n : Nat) :
+    (caEvolve (n+1) (spikeAtList 10 (2*(n+1)+1))).getD 0 false =
+    (caEvolve ((n+1)+64) (spikeAtList 10 (2*((n+1)+64)+1))).getD 0 false :=
+  rule30n_spikeAt_period 10 64 caEvolve_cert_m10_p64 n
+
+-- m=12, P=64: input=153, output=spike12 at 25
+lemma caEvolve_cert_m12_p64 :
+    caEvolve 64 (spikeAtList 12 153) = spikeAtList 12 25 := by native_decide
+
+lemma rule30n_spikeAt12_period64 (n : Nat) :
+    (caEvolve (n+1) (spikeAtList 12 (2*(n+1)+1))).getD 0 false =
+    (caEvolve ((n+1)+64) (spikeAtList 12 (2*((n+1)+64)+1))).getD 0 false :=
+  rule30n_spikeAt_period 12 64 caEvolve_cert_m12_p64 n
+
+-- m=14, P=64: input=157, output=spike14 at 29
+lemma caEvolve_cert_m14_p64 :
+    caEvolve 64 (spikeAtList 14 157) = spikeAtList 14 29 := by native_decide
+
+lemma rule30n_spikeAt14_period64 (n : Nat) :
+    (caEvolve (n+1) (spikeAtList 14 (2*(n+1)+1))).getD 0 false =
+    (caEvolve ((n+1)+64) (spikeAtList 14 (2*((n+1)+64)+1))).getD 0 false :=
+  rule30n_spikeAt_period 14 64 caEvolve_cert_m14_p64 n
+
+-- m=16, P=256: input=545, output=spike16 at 33
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_cert_m16_p256 :
+    caEvolve 256 (spikeAtList 16 545) = spikeAtList 16 33 := by native_decide
+
+lemma rule30n_spikeAt16_period256 (n : Nat) :
+    (caEvolve (n+1) (spikeAtList 16 (2*(n+1)+1))).getD 0 false =
+    (caEvolve ((n+1)+256) (spikeAtList 16 (2*((n+1)+256)+1))).getD 0 false :=
+  rule30n_spikeAt_period 16 256 caEvolve_cert_m16_p256 n
+
+-- m=20, P=256: input=553, output=spike20 at 41
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_cert_m20_p256 :
+    caEvolve 256 (spikeAtList 20 553) = spikeAtList 20 41 := by native_decide
+
+set_option maxHeartbeats 4000000000 in
+lemma rule30n_spikeAt20_period256 (n : Nat) :
+    (caEvolve (n+1) (spikeAtList 20 (2*(n+1)+1))).getD 0 false =
+    (caEvolve ((n+1)+256) (spikeAtList 20 (2*((n+1)+256)+1))).getD 0 false :=
+  rule30n_spikeAt_period 20 256 caEvolve_cert_m20_p256 n
+
+-- m=22, P=256: input=557, output=spike22 at 45
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_cert_m22_p256 :
+    caEvolve 256 (spikeAtList 22 557) = spikeAtList 22 45 := by native_decide
+
+lemma rule30n_spikeAt22_period256 (n : Nat) :
+    (caEvolve (n+1) (spikeAtList 22 (2*(n+1)+1))).getD 0 false =
+    (caEvolve ((n+1)+256) (spikeAtList 22 (2*((n+1)+256)+1))).getD 0 false :=
+  rule30n_spikeAt_period 22 256 caEvolve_cert_m22_p256 n
+
+-- m=24, P=512: input=1073, output=spike24 at 49
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_cert_m24_p512 :
+    caEvolve 512 (spikeAtList 24 1073) = spikeAtList 24 49 := by native_decide
+
+lemma rule30n_spikeAt24_period512 (n : Nat) :
+    (caEvolve (n+1) (spikeAtList 24 (2*(n+1)+1))).getD 0 false =
+    (caEvolve ((n+1)+512) (spikeAtList 24 (2*((n+1)+512)+1))).getD 0 false :=
+  rule30n_spikeAt_period 24 512 caEvolve_cert_m24_p512 n
+
+-- m=26, P=1024: input=2101, output=spike26 at 53
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_cert_m26_p1024 :
+    caEvolve 1024 (spikeAtList 26 2101) = spikeAtList 26 53 := by native_decide
+
+lemma rule30n_spikeAt26_period1024 (n : Nat) :
+    (caEvolve (n+1) (spikeAtList 26 (2*(n+1)+1))).getD 0 false =
+    (caEvolve ((n+1)+1024) (spikeAtList 26 (2*((n+1)+1024)+1))).getD 0 false :=
+  rule30n_spikeAt_period 26 1024 caEvolve_cert_m26_p1024 n
+
+-- m=28, P=2048: input=4153, output=spike28 at 57
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_cert_m28_p2048 :
+    caEvolve 2048 (spikeAtList 28 4153) = spikeAtList 28 57 := by native_decide
+
+lemma rule30n_spikeAt28_period2048 (n : Nat) :
+    (caEvolve (n+1) (spikeAtList 28 (2*(n+1)+1))).getD 0 false =
+    (caEvolve ((n+1)+2048) (spikeAtList 28 (2*((n+1)+2048)+1))).getD 0 false :=
+  rule30n_spikeAt_period 28 2048 caEvolve_cert_m28_p2048 n
+
+-- m=30, P=4096: input=8253, output=spike30 at 61
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_cert_m30_p4096 :
+    caEvolve 4096 (spikeAtList 30 8253) = spikeAtList 30 61 := by native_decide
+
+lemma rule30n_spikeAt30_period4096 (n : Nat) :
+    (caEvolve (n+1) (spikeAtList 30 (2*(n+1)+1))).getD 0 false =
+    (caEvolve ((n+1)+4096) (spikeAtList 30 (2*((n+1)+4096)+1))).getD 0 false :=
+  rule30n_spikeAt_period 30 4096 caEvolve_cert_m30_p4096 n
+
+-- m=34, P=8192: input=16453, output=spike34 at 69
+-- NOTE: ~67M List Bool cells → crashes with linked-list native_decide (OOM).
+-- Needs a packed BitVec/Array Bool implementation. Deferred.
+-- lemma caEvolve_cert_m34_p8192 :
+--     caEvolve 8192 (spikeAtList 34 16453) = spikeAtList 34 69 := by native_decide
+
+-- m=36, P=16384: input=32841, output=spike36 at 73
+-- NOTE: ~270M cells — requires BitVec/Array Bool implementation.
+-- lemma caEvolve_cert_m36_p16384 :
+--     caEvolve 16384 (spikeAtList 36 32841) = spikeAtList 36 73 := by native_decide
+
+-- m=38, P=32768: input=65613, output=spike38 at 77
+-- NOTE: ~1.1B cells — requires BitVec/Array Bool implementation.
+-- lemma caEvolve_cert_m38_p32768 :
+--     caEvolve 32768 (spikeAtList 38 65613) = spikeAtList 38 77 := by native_decide
+
+/-!
+## Two-spike-last infrastructure for G-periodicity
+
+The SubcaseB condition requires showing G(n', m) is periodic (in addition to F).
+G(n', m) = caEvolve (n'+1) (twoSpikeLastList m (2*(n'+1)+1)).getD 0 false
+where twoSpikeLastList m N has spikes at position m and at the LAST position N-1.
+
+Key: same period certificate holds:
+  caEvolve P_m (twoSpikeLastList m (2*P_m+2*m+1)) = twoSpikeLastList m (2*m+1)
+Proof sketch: after P_m steps the last spike (at position 2*P_m+2*m) is at the last
+position of the output (2*m), and the left spike at m is preserved by the F certificate.
+The right spike for positions i ≤ 2*(n'+1)-1 is outside the causal cone (> 2*P_m away)
+so cannot affect those positions.
+-/
+
+/-- A list of length N with `true` at position m AND at position N-1 (last). -/
+def twoSpikeLastList (m N : Nat) : List Bool :=
+  List.ofFn (fun k : Fin N => decide (k.val = m || k.val = N - 1))
+
+lemma twoSpikeLastList_length (m N : Nat) : (twoSpikeLastList m N).length = N := by
+  simp [twoSpikeLastList, List.length_ofFn]
+
+/-- `twoSpikeLastList m N` at in-bounds position i = `decide (i = m ∨ i = N-1)`. -/
+lemma twoSpikeLastList_getD (m N i : Nat) (hi : i < N) :
+    (twoSpikeLastList m N).getD i false = decide (i = m ∨ i = N - 1) := by
+  simp [twoSpikeLastList, List.getD_eq_getElem?_getD, hi]
+
+/-- `twoSpikeLastList m N` dropped by i, with i+j+1 < N (in-bounds), gives
+    value `decide(i+j = m ∨ i+j = N-1)`. -/
+lemma twoSpikeLastList_drop_getD (m N i j : Nat) (h : i + j < N) :
+    (List.drop i (twoSpikeLastList m N)).getD j false = decide (i + j = m ∨ i + j = N - 1) := by
+  rw [show ((List.drop i (twoSpikeLastList m N)).getD j false) =
+        (twoSpikeLastList m N).getD (i + j) false from by
+    simp [List.getD_eq_getElem?_getD, List.getElem?_drop]]
+  rw [twoSpikeLastList_getD m N (i + j) h]
+
+/-!
+## Period certificates for twoSpikeLastList
+
+Same formula as spikeAtList:
+  caEvolve P_m (twoSpikeLastList m (2*P_m+2*m+1)) = twoSpikeLastList m (2*m+1)
+Verified computationally for all active m with P_m ≤ 256.
+-/
+
+-- m=4, P=8: input=25, output=twoSpikeLast(4,9): spikes at 4 and 8
+lemma caEvolve_tsl_cert_m4_p8 :
+    caEvolve 8 (twoSpikeLastList 4 25) = twoSpikeLastList 4 9 := by native_decide
+
+-- m=6, P=16: input=45, output=twoSpikeLast(6,13): spikes at 6 and 12
+lemma caEvolve_tsl_cert_m6_p16 :
+    caEvolve 16 (twoSpikeLastList 6 45) = twoSpikeLastList 6 13 := by native_decide
+
+-- m=8, P=32: input=81, output=twoSpikeLast(8,17): spikes at 8 and 16
+lemma caEvolve_tsl_cert_m8_p32 :
+    caEvolve 32 (twoSpikeLastList 8 81) = twoSpikeLastList 8 17 := by native_decide
+
+-- m=10, P=64: input=149, output=twoSpikeLast(10,21): spikes at 10 and 20
+lemma caEvolve_tsl_cert_m10_p64 :
+    caEvolve 64 (twoSpikeLastList 10 149) = twoSpikeLastList 10 21 := by native_decide
+
+-- m=12, P=64: input=153, output=twoSpikeLast(12,25): spikes at 12 and 24
+lemma caEvolve_tsl_cert_m12_p64 :
+    caEvolve 64 (twoSpikeLastList 12 153) = twoSpikeLastList 12 25 := by native_decide
+
+-- m=14, P=64: input=157, output=twoSpikeLast(14,29): spikes at 14 and 28
+lemma caEvolve_tsl_cert_m14_p64 :
+    caEvolve 64 (twoSpikeLastList 14 157) = twoSpikeLastList 14 29 := by native_decide
+
+-- m=16, P=256: input=545, output=twoSpikeLast(16,33): spikes at 16 and 32
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_tsl_cert_m16_p256 :
+    caEvolve 256 (twoSpikeLastList 16 545) = twoSpikeLastList 16 33 := by native_decide
+
+-- m=20, P=256: input=553, output=twoSpikeLast(20,41): spikes at 20 and 40
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_tsl_cert_m20_p256 :
+    caEvolve 256 (twoSpikeLastList 20 553) = twoSpikeLastList 20 41 := by native_decide
+
+-- m=22, P=256: input=557, output=twoSpikeLast(22,45): spikes at 22 and 44
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_tsl_cert_m22_p256 :
+    caEvolve 256 (twoSpikeLastList 22 557) = twoSpikeLastList 22 45 := by native_decide
+
+/-!
+## G-periodicity: rule30n_twoSpikeLast_period
+
+The center value G(n', m) = caEvolve (n'+1) (twoSpikeLastList m (2*(n'+1)+1)) .getD 0 false
+is periodic with the same period P_m as F(n', m).
+
+Three key ingredients:
+1. `caEvolve_twoSpike_eq_spikeAt`: for positions i where the right spike (at N-1) is strictly
+   beyond i+2*P, caEvolve P of twoSpikeLastList agrees with caEvolve P of spikeAtList.
+2. `twoSpikeLastList_drop_last_getD`: after dropping 2*(n+1) > m elements, position j of
+   the dropped tape is decide(j = 2*P) — only the right spike at 2*P remains.
+3. H=1: `caEvolve P (spikeAtList (2*P) (2*P+1)).getD 0 false = true`.
+   Proof by induction: caStepList moves the last spike 2 positions left each step,
+   reaching position 0 of a length-1 tape after P steps. (Certified below by native_decide
+   for each specific P; general proof deferred.)
+-/
+
+/-- When the right spike (at N-1) lies strictly beyond position i+2*P,
+    caEvolve P of twoSpikeLastList at i equals caEvolve P of spikeAtList at i. -/
+lemma caEvolve_twoSpike_eq_spikeAt (P m N i : Nat)
+    (h1 : i + 2 * P < N)
+    (h2 : i + 2 * P + 1 < N) :  -- i.e., right spike N-1 > i+2*P
+    (caEvolve P (twoSpikeLastList m N)).getD i false =
+    (caEvolve P (spikeAtList m N)).getD i false := by
+  rw [caEvolve_getD_shift P (twoSpikeLastList m N) i,
+      caEvolve_getD_shift P (spikeAtList m N) i]
+  apply caEvolve_agree P
+  · rw [List.length_drop, twoSpikeLastList_length]; omega
+  · rw [List.length_drop, spikeAtList_length]; omega
+  · intro j hj
+    have hij : i + j < N := by omega
+    rw [twoSpikeLastList_drop_getD m N i j hij]
+    rw [show ((spikeAtList m N).drop i).getD j false = (spikeAtList m N).getD (i + j) false from by
+      simp [List.getD_eq_getElem?_getD, List.getElem?_drop]]
+    rw [spikeAtList_getD m N (i + j) hij]
+    -- Both sides are decide(i+j = m); need i+j ≠ N-1
+    have hright : i + j ≠ N - 1 := by omega
+    simp [hright]
+
+/-- After dropping 2*(n+1) > m elements from the big two-spike tape, position j agrees
+    with spikeAtList (2*P) (2*P+1) — only the right spike at 2*P remains. -/
+lemma twoSpikeLastList_drop_last_getD (m P n : Nat) (hn : n ≥ m) (j : Nat) (hj : j ≤ 2 * P) :
+    (List.drop (2 * (n + 1)) (twoSpikeLastList m (2 * ((n + 1) + P) + 1))).getD j false =
+    decide (j = 2 * P) := by
+  rw [twoSpikeLastList_drop_getD m (2 * ((n + 1) + P) + 1) (2 * (n + 1)) j (by omega)]
+  rcases Decidable.em (j = 2 * P) with rfl | hne
+  · -- j = 2*P: both sides evaluate to true
+    have hlhs : 2*(n+1)+2*P = m ∨ 2*(n+1)+2*P = 2*((n+1)+P)+1-1 := Or.inr (by omega)
+    rw [decide_eq_true_eq.mpr hlhs, decide_eq_true_eq.mpr (show 2*P = 2*P from rfl)]
+  · -- j ≠ 2*P: both sides evaluate to false
+    have hlhs : ¬(2*(n+1)+j = m ∨ 2*(n+1)+j = 2*((n+1)+P)+1-1) := by rintro (h|h) <;> omega
+    rw [decide_eq_false_iff_not.mpr hlhs, decide_eq_false_iff_not.mpr hne]
+
+/-!
+## H=1 lemma: caEvolve_lastSpike_true
+
+Proof sketch: by induction on P, caStepList maps spikeAtList(2*(k+1))(2*(k+1)+1) to
+spikeAtList(2*k)(2*k+1). After P steps the spike reaches position 0 of a length-1 tape.
+We certify specific instances by native_decide below.
+-/
+
+/-- At a non-last position (i ≠ N-1), twoSpikeLastList agrees with spikeAtList. -/
+lemma twoSpikeLastList_eq_spikeAt_notLast (m N i : Nat) (hi : i < N) (hne : i ≠ N - 1) :
+    (twoSpikeLastList m N).getD i false = (spikeAtList m N).getD i false := by
+  rw [twoSpikeLastList_getD m N i hi, spikeAtList_getD m N i hi]
+  simp [decide_eq_false_iff_not.mpr hne]
+
+/-- G-periodicity: the two-spike-last center value is periodic with period P.
+
+    Given:
+    - hF_cert: caEvolve P (spikeAtList m (2*P+2*m+1)) = spikeAtList m (2*m+1)
+    - hH: (caEvolve P (spikeAtList (2*P) (2*P+1))).getD 0 false = true  (H=1 cert)
+    - hn: n ≥ m
+
+    Proves: G(n, m) = G(n+P, m). -/
+lemma rule30n_twoSpikeLast_period (m P : Nat)
+    (hF_cert : caEvolve P (spikeAtList m (2 * P + 2 * m + 1)) = spikeAtList m (2 * m + 1))
+    (hH : (caEvolve P (spikeAtList (2 * P) (2 * P + 1))).getD 0 false = true)
+    (n : Nat) (hn : n ≥ m) :
+    (caEvolve (n + 1) (twoSpikeLastList m (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + P) (twoSpikeLastList m (2 * ((n + 1) + P) + 1))).getD 0 false := by
+  have rhs_len : 2 * (n + 1) < (caEvolve P (twoSpikeLastList m (2 * ((n + 1) + P) + 1))).length := by
+    have hlen := caEvolve_length_le P (twoSpikeLastList m (2 * ((n + 1) + P) + 1))
+                 (by rw [twoSpikeLastList_length]; omega)
+    rw [twoSpikeLastList_length] at hlen; omega
+  conv_rhs => rw [caEvolve_add (n + 1) P]
+  apply caEvolve_agree (n + 1)
+  · rw [twoSpikeLastList_length]; omega
+  · exact rhs_len
+  · intro i hi
+    by_cases heq : i = 2 * (n + 1)
+    · -- Case i = 2*(n+1): last spike of tape1 → true; RHS also true via H=1
+      subst heq
+      have lhs_true : (twoSpikeLastList m (2*(n+1)+1)).getD (2*(n+1)) false = true := by
+        rw [twoSpikeLastList_getD m (2*(n+1)+1) (2*(n+1)) (by omega)]
+        simp [decide_eq_true_iff.mpr (show 2*(n+1) = 2*(n+1)+1-1 from by omega)]
+      have rhs_true : (caEvolve P (twoSpikeLastList m (2*((n+1)+P)+1))).getD (2*(n+1)) false = true := by
+        rw [caEvolve_getD_shift P]
+        calc (caEvolve P ((twoSpikeLastList m (2*((n+1)+P)+1)).drop (2*(n+1)))).getD 0 false
+            = (caEvolve P (spikeAtList (2*P) (2*P+1))).getD 0 false := by
+              apply caEvolve_agree P
+              · rw [List.length_drop, twoSpikeLastList_length]; omega
+              · rw [spikeAtList_length]; omega
+              · intro j hj
+                rw [twoSpikeLastList_drop_last_getD m P n hn j (by omega),
+                    spikeAtList_getD (2*P) (2*P+1) j (by omega)]
+          _ = true := hH
+      rw [lhs_true, rhs_true]
+    · -- Case i ≠ 2*(n+1), so i < 2*(n+1)
+      have hlt : i < 2 * (n + 1) := by omega
+      -- Right spike of tape2 (at 2*(n+1+P)) is outside causal cone of position i
+      rw [caEvolve_twoSpike_eq_spikeAt P m (2 * ((n + 1) + P) + 1) i (by omega) (by omega)]
+      -- Left side: i ≠ 2*(n+1) means i ≠ 2*(n+1)+1-1 (= last pos), so notLast applies
+      rw [twoSpikeLastList_eq_spikeAt_notLast m (2*(n+1)+1) i (by omega) (by omega : i ≠ 2*(n+1)+1-1)]
+      by_cases hle : i ≤ m
+      · -- Sub-case i ≤ m: use F periodicity cert
+        rw [spikeAtList_getD m (2*(n+1)+1) i (by omega),
+            caEvolve_spikeAt_agree P m (2*((n+1)+P)+1) (2*P+2*m+1) i (by omega) (by omega),
+            hF_cert, spikeAtList_getD m (2*m+1) i (by omega)]
+      · -- Sub-case m < i < 2*(n+1): both sides false
+        rw [spikeAtList_getD m (2*(n+1)+1) i (by omega)]
+        have him : decide (i = m) = false := decide_eq_false_iff_not.mpr (by omega)
+        rw [him, caEvolve_getD_shift P]
+        exact (caEvolve_allFalse P _ (spikeAtList_drop_allFalse m (2*((n+1)+P)+1) i (by omega))).symm
+
+/-- H=1 certs for each active period P. -/
+lemma caEvolve_h1_p8 :
+    (caEvolve 8 (spikeAtList 16 17)).getD 0 false = true := by native_decide
+lemma caEvolve_h1_p16 :
+    (caEvolve 16 (spikeAtList 32 33)).getD 0 false = true := by native_decide
+lemma caEvolve_h1_p32 :
+    (caEvolve 32 (spikeAtList 64 65)).getD 0 false = true := by native_decide
+lemma caEvolve_h1_p64 :
+    (caEvolve 64 (spikeAtList 128 129)).getD 0 false = true := by native_decide
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_h1_p256 :
+    (caEvolve 256 (spikeAtList 512 513)).getD 0 false = true := by native_decide
+
+/-- Specific G-period lemmas for each active m. -/
+
+lemma rule30n_twoSpikeLast4_period8 (n : Nat) (hn : n ≥ 4) :
+    (caEvolve (n + 1) (twoSpikeLastList 4 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 8) (twoSpikeLastList 4 (2 * ((n + 1) + 8) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 4 8 caEvolve_cert_m4_p8 caEvolve_h1_p8 n hn
+
+lemma rule30n_twoSpikeLast6_period16 (n : Nat) (hn : n ≥ 6) :
+    (caEvolve (n + 1) (twoSpikeLastList 6 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 16) (twoSpikeLastList 6 (2 * ((n + 1) + 16) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 6 16 caEvolve_cert_m6_p16 caEvolve_h1_p16 n hn
+
+lemma rule30n_twoSpikeLast8_period32 (n : Nat) (hn : n ≥ 8) :
+    (caEvolve (n + 1) (twoSpikeLastList 8 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 32) (twoSpikeLastList 8 (2 * ((n + 1) + 32) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 8 32 caEvolve_cert_m8_p32 caEvolve_h1_p32 n hn
+
+lemma rule30n_twoSpikeLast10_period64 (n : Nat) (hn : n ≥ 10) :
+    (caEvolve (n + 1) (twoSpikeLastList 10 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 64) (twoSpikeLastList 10 (2 * ((n + 1) + 64) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 10 64 caEvolve_cert_m10_p64 caEvolve_h1_p64 n hn
+
+lemma rule30n_twoSpikeLast12_period64 (n : Nat) (hn : n ≥ 12) :
+    (caEvolve (n + 1) (twoSpikeLastList 12 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 64) (twoSpikeLastList 12 (2 * ((n + 1) + 64) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 12 64 caEvolve_cert_m12_p64 caEvolve_h1_p64 n hn
+
+lemma rule30n_twoSpikeLast14_period64 (n : Nat) (hn : n ≥ 14) :
+    (caEvolve (n + 1) (twoSpikeLastList 14 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 64) (twoSpikeLastList 14 (2 * ((n + 1) + 64) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 14 64 caEvolve_cert_m14_p64 caEvolve_h1_p64 n hn
+
+set_option maxHeartbeats 4000000000 in
+lemma rule30n_twoSpikeLast16_period256 (n : Nat) (hn : n ≥ 16) :
+    (caEvolve (n + 1) (twoSpikeLastList 16 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 256) (twoSpikeLastList 16 (2 * ((n + 1) + 256) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 16 256 caEvolve_cert_m16_p256 caEvolve_h1_p256 n hn
+
+set_option maxHeartbeats 4000000000 in
+lemma rule30n_twoSpikeLast20_period256 (n : Nat) (hn : n ≥ 20) :
+    (caEvolve (n + 1) (twoSpikeLastList 20 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 256) (twoSpikeLastList 20 (2 * ((n + 1) + 256) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 20 256 caEvolve_cert_m20_p256 caEvolve_h1_p256 n hn
+
+set_option maxHeartbeats 4000000000 in
+lemma rule30n_twoSpikeLast22_period256 (n : Nat) (hn : n ≥ 22) :
+    (caEvolve (n + 1) (twoSpikeLastList 22 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 256) (twoSpikeLastList 22 (2 * ((n + 1) + 256) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 22 256 caEvolve_cert_m22_p256 caEvolve_h1_p256 n hn
+
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_h1_p512 :
+    (caEvolve 512 (spikeAtList 1024 1025)).getD 0 false = true := by native_decide
+
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_h1_p1024 :
+    (caEvolve 1024 (spikeAtList 2048 2049)).getD 0 false = true := by native_decide
+
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_h1_p2048 :
+    (caEvolve 2048 (spikeAtList 4096 4097)).getD 0 false = true := by native_decide
+
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_h1_p4096 :
+    (caEvolve 4096 (spikeAtList 8192 8193)).getD 0 false = true := by native_decide
+
+set_option maxHeartbeats 4000000000 in
+lemma rule30n_twoSpikeLast24_period512 (n : Nat) (hn : n ≥ 24) :
+    (caEvolve (n + 1) (twoSpikeLastList 24 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 512) (twoSpikeLastList 24 (2 * ((n + 1) + 512) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 24 512 caEvolve_cert_m24_p512 caEvolve_h1_p512 n hn
+
+set_option maxHeartbeats 4000000000 in
+lemma rule30n_twoSpikeLast26_period1024 (n : Nat) (hn : n ≥ 26) :
+    (caEvolve (n + 1) (twoSpikeLastList 26 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 1024) (twoSpikeLastList 26 (2 * ((n + 1) + 1024) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 26 1024 caEvolve_cert_m26_p1024 caEvolve_h1_p1024 n hn
+
+set_option maxHeartbeats 4000000000 in
+lemma rule30n_twoSpikeLast28_period2048 (n : Nat) (hn : n ≥ 28) :
+    (caEvolve (n + 1) (twoSpikeLastList 28 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 2048) (twoSpikeLastList 28 (2 * ((n + 1) + 2048) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 28 2048 caEvolve_cert_m28_p2048 caEvolve_h1_p2048 n hn
+
+set_option maxHeartbeats 4000000000 in
+lemma rule30n_twoSpikeLast30_period4096 (n : Nat) (hn : n ≥ 30) :
+    (caEvolve (n + 1) (twoSpikeLastList 30 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 4096) (twoSpikeLastList 30 (2 * ((n + 1) + 4096) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 30 4096 caEvolve_cert_m30_p4096 caEvolve_h1_p4096 n hn
+
+/-!
+## Pending: m=34,36,38 (periods 8192, 16384, 32768)
+
+Lean 4.29 native_decide crashes (SIGABRT exit 134) during native binary
+CODE GENERATION for lists of size ≥ 16K elements, specifically at the
+`decl_1_1` step for `caEvolve_cert_m34_p8192`. This is a Lean tooling
+limitation, not a mathematical obstruction.
+
+Verified in Python:
+- m=34, P=8192: caEvolve 8192 (spikeAtList 34 16453) = spikeAtList 34 69 ✓
+- m=36, P=16384: caEvolve 16384 (spikeAtList 36 32841) = spikeAtList 36 73 ✓ (expected)
+- m=38, P=32768: caEvolve 32768 (spikeAtList 38 65613) = spikeAtList 38 77 ✓ (expected)
+- H=1 certs: all True for P=8192,16384,32768 ✓
+
+Workaround options:
+1. Staged native_decide (4 stages of 2048 steps each) — reduces per-stage list size
+2. Tail-recursive caStepList + proof of equivalence with accumulator
+3. Lean 4.30+ (if the code generation limit is raised)
+
+-- m=34, P=8192: (staged approach template, pending implementation)
+-- def m34_s1 : List Bool := List.ofFn (fun k : Fin 12357 => decide (k.val = 1 || k.val = 3 || k.val = 5 || k.val = 34))
+-- def m34_s2 : List Bool := List.ofFn (fun k : Fin 8261 => decide (k.val = 0 || k.val = 34))
+-- def m34_s3 : List Bool := List.ofFn (fun k : Fin 4165 => decide (k.val = 0 || k.val = 1 || k.val = 3 || k.val = 5 || k.val = 34))
+-- lemma caEvolve_cert_m34_p8192 : caEvolve 8192 (spikeAtList 34 16453) = spikeAtList 34 69 := ...
+-- lemma caEvolve_h1_p8192 : (caEvolve 8192 (spikeAtList 16384 16385)).getD 0 false = true := ...
+-- lemma rule30n_twoSpikeLast34_period8192 : ... := rule30n_twoSpikeLast_period 34 8192 ...
+-- (analogously for m=36,38)
+-/

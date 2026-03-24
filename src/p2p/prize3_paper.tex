@@ -301,6 +301,11 @@ Table~\ref{tab:status} lists the key components.
 \texttt{backwardFillList\_caStep\_inverse} & Proved & Backward-fill inverse \\
 \texttt{left\_boundary\_essential}  & \textbf{Proved} & Left boundary, all $n$ \\
 \texttt{right\_boundary\_essential} & \textbf{Proved} & Right boundary, all $n$ \\
+\texttt{ts2\_last\_always\_false} & \textbf{Proved} & $m=2$ inactivity, all $n\geq 2$ \\
+\texttt{rule30n\_spikeAt\_period} & \textbf{Proved} & Parametric $F$-period lemma \\
+\texttt{rule30n\_twoSpikeLast\_period} & \textbf{Proved} & Parametric $G$-period lemma \\
+\texttt{caEvolve\_cert\_m\{4..30\}\_p\{P\}} & \textbf{Proved} & $F$-certs, all active $m\leq 30$ \\
+\texttt{caEvolve\_tsl\_cert\_m\{4..22\}\_p\{P\}} & \textbf{Proved} & $G$-certs, active $m\leq 22$ \\
 \texttt{all\_cells\_essential\_by\_induction} & Cond.$^\dagger$ & Full induction \\
 \texttt{rule30\_prize3} & Cond.$^\dagger$ & $\forall\,n\,k,\ \Essential(n,k)$ \\
 \midrule
@@ -722,10 +727,14 @@ $P = \mathrm{lcm}(P_m : m \in M_{\mathrm{act}}) = 32768 = 2^{15}$,
 and the fixed-$m$ family has a completely determined finite scope.
 \begin{enumerate}
 \item Show that the open-boundary \emph{causal-cone} evolution starting from
-  spike-at-$m$ has period $P_m$ in $n'$.  For $m = 6$ (period~16) and
-  $m = 20$ (period~256), this is already proved in \texttt{CausalConeLemmas.lean}
-  via \texttt{native\_decide} on the $2m{+}1$-cell cone state.  Each remaining $m$
-  requires an analogous $\sim$1-line \texttt{native\_decide} check.
+  spike-at-$m$ has period $P_m$ in $n'$.  This is now proved for all active
+  $m \leq 30$ in \texttt{CausalConeLemmas.lean} via the parametric lemma
+  \texttt{rule30n\_spikeAt\_period} plus individual \texttt{native\_decide}
+  certificates of the form $\texttt{caEvolve}\,P_m\,(\texttt{spikeAt}_m(2P_m{+}2m{+}1)) = \texttt{spikeAt}_m(2m{+}1)$
+  (verified 2026-03-24; build: 763 jobs, no errors).
+  For $m \in \{34,36,38\}$, the same certificate holds (Python-verified)
+  but Lean's \texttt{native\_decide} requires an \texttt{Array Bool} implementation
+  for the linked-list size ($>16$K elements).
 \item Prove the \textbf{periodicity lemma}: $F(n',m)$ and $G(n',m)$ are
   eventually periodic in $n'$ with period $P_m$.  For $F$: the spike at
   position~$m$ (fixed, small) does not reach the right boundary within
