@@ -1,0 +1,4 @@
+SubcaseB max_m per period — numpy-accelerated
+============================================================
+Base: 3087, Period: 256, M_MAX: 60, Num periods: 8
+

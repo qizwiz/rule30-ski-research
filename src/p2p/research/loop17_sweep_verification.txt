@@ -1,0 +1,44 @@
+Loop 17 — Sweep Coverage Correction — 2026-03-23
+=================================================
+
+ADVERSARIAL TARGET:
+  Paper claimed "step-100 to n'=45000 for all even m ∈ [4,80]" after loop 15 update.
+  Risk: only m=40 (step-10) and m=42 (step-100) were actually scanned to 45000.
+  For m=44,...,80, the original sweep only covered [3087,4500).
+  Overclaim: the paper was asserting broader coverage than actually computed.
+
+VERIFICATION PERFORMED:
+  1. Dense scan m=42..60 in [3087,5000): ZERO hits for all 10 m-values (167.9s)
+  2. Spot check at n'=36887 for m=42..80: ZERO hits (8.5s)
+  3. m=42 resonant positions (last-m = 2^13..16):
+     n'=4116: F=1,G=1  n'=8212: F=1,G=1  n'=16404: F=0,G=0  n'=32788: F=1,G=1
+     ALL EQUAL (no SubcaseB) — m=42 is not active at any resonance
+  4. m=42 sparse [3087,20000) step 100: ZERO hits (9.3s)
+
+EVIDENCE SUMMARY:
+  m=40: weakly inactive — 1 (1,0) at n'=36887, zero (0,1) in [3087,45000)
+  m=42: strictly inactive — zero hits in [3087,20000) step 100, zero in [3087,5000) dense
+  m=44..60: strictly inactive — zero hits in [3087,5000) dense (10 m-values × 1913 points)
+  m=44..80: zero hits at n'=36887 spot check
+  m=62..80: zero hits in [3087,4500) (original sweep)
+
+PAPER CORRECTION MADE:
+  Replaced single overclaimed "step-100 to 45000 for all m≤80" with a layered
+  5-item table accurately listing the actual verified ranges per m-group.
+  The CONCLUSION (active set = {4,...,38}) is unchanged; only the evidence
+  statement was made more precise.
+
+NOTE ON POTENTIAL REMAINING RISK:
+  If m=44,...,60 are active with period ~131072 (=2^17), their first (0,1) could be
+  at n' >> 5000 and outside all scanned ranges. But:
+  - No active m has been found with a "gap" larger than factor ~2 between m=40 (1st hit
+    at 36887) and m=42 (0 hits to 20000)
+  - The resonance pattern: m=38 (n'=8210), m=40 (n'=16403 resonance but empty),
+    m=42 (n'=32788 resonance but empty) suggests the pattern breaks at m=40 or m=42
+  - All resonant positions through 2^16 checked for m=42 with zero results
+  Conclusion: classification "active set terminates at m=38" remains well-supported.
+
+WHAT WAS NOT CHANGED:
+  - Active set M_act = {4,6,...,36,38} (unchanged)
+  - P = 32768 = 2^15 (unchanged)
+  - Period table (unchanged)

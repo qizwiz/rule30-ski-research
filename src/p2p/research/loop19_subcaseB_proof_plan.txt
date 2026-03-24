@@ -1,0 +1,83 @@
+Loop 19 — SubcaseB Resolution Proof Architecture — 2026-03-23
+==============================================================
+
+GOAL: Eliminate `axiom subcaseB_resolution` (line 1648 of LiftingLemma_LeftPermutive.lean)
+
+WHAT THE AXIOM SAYS:
+  Given n' ≥ 5, m ∈ M_act (even, in bounds, not last), F(n',m)=0, G(n',m)=1,
+  produce ∃ c_n (odd-positions-false) with rule30n(c_n) ≠ rule30n(flipCell c_n m).
+  (SubcaseB witness existence)
+
+WHERE IT'S USED:
+  Line 1782: for n' ≥ 3087 with SubcaseB(n', m), directly calls the axiom.
+
+PROOF ARCHITECTURE:
+
+Step 1: F-periodicity (DONE in CausalConeLemmas.lean)
+  rule30n_spikeAt_period m P_m hcert n:
+    F(n, m) = F(n+P_m, m) for all n ≥ 0
+  Certificates compiled for m=4..30 (m=34,36,38 deferred, need Array Bool).
+
+Step 2: G-periodicity (PLANNED, needs two-spike-last period lemma)
+  G(n, m) = caEvolve (n+1) (twoSpikeLastList m (2*(n+1)+1)).getD 0
+  Certificate: caEvolve P_m (twoSpikeLastList m (2*P_m+2*m+1)) = twoSpikeLastList m (2*m+1)
+  Compiled for m=4..22 (P ≤ 256). Need to extend to m=24..30.
+
+  Proof of rule30n_twoSpikeLast_period: 3-case analysis on position i ≤ 2*(n+1):
+    Case i ≤ m: right spike outside cone (> 2*P_m away); use spikeAtList period cert
+    Case m < i < 2*(n+1): right spike at 2*(n+P_m+1)-i > 2*P_m (outside cone); output = 0
+    Case i = 2*(n+1): right spike at exactly 2*P_m (cone boundary); output = H(P_m-1) = 1
+  Requires hypothesis n ≥ m (so right spike is outside cone for cases i ≤ m).
+
+Step 3: Witness-period lemma (NEEDED)
+  For each (m, residue r mod P_m): the witness config c_n is not universal.
+  Different n' ≡ r mod P_m may need different witnesses.
+  Witness cycles with period W_m = LCM(P_m, period_of_F2_function).
+
+  ALTERNATIVE APPROACH: Use native_decide for a FULL WITNESS CYCLE.
+  For m=4 (P=8): one SubcaseB per 8, witness cycle of period W (TBD).
+  Cover [3087, 3087+W): all SubcaseB events by native_decide with explicit witnesses.
+  Then use F and G periodicity to reduce general n' to [3087, 3087+W).
+
+Step 4: Putting it together
+  Given hcase (F=0) and hts (G=1) at n' ≥ 3087:
+  1. Use F-period lemma: n' ≡ r_F (mod P_m) where F(r_F, m) = 0
+  2. Use G-period lemma: G(r_F, m) = 1 (same residue class)
+  3. Reduce to base case n'_0 in [3087, 3087+W_m)
+  4. native_decide for specific witness at n'_0
+  5. Lift witness to general n' (the witness config scales with n')
+
+KEY OBSTACLE:
+  Witnesses are NOT universal across periods — they vary.
+  The witness for n'=3093 (m=4) is spike_at_16.
+  The witness for n'=3101 is spike_at_6.
+  Need to track which witness works for which residue class.
+
+  Strategy: cover a LONGER period (W = LCM of witness cycle) by native_decide.
+  For m=4: cover n' ∈ {3093, 3101, 3109, 3117} (4 SubcaseB events in period 32).
+  Each native_decide: tape ~6200 cells, ~3100 steps ≈ 10M cells. Feasible.
+  Then period W=32 handles all future n' by periodicity.
+
+WHAT WAS ACCOMPLISHED IN LOOP 19:
+1. Added spikeAtList + rule30n_spikeAt_period to CausalConeLemmas.lean ✓
+   Period certs for m=4..30 (13 values) ✓
+2. Added twoSpikeLastList + period certs for m=4..22 ✓
+3. Found SubcaseB residues: m=4 (residue 5/8), m=6 (residues 6,10/16), m=8 (residue 11/32)
+4. Discovered H(n')=1 always (single last-spike lemma)
+5. Proved G period proof architecture (3-case analysis)
+
+NEXT STEPS:
+1. Write rule30n_twoSpikeLast_period in Lean (the G period lemma)
+2. Add H(n')=1 lemma (single last-spike always gives center=true)
+3. Compute full SubcaseB residues for all active m
+4. Determine witness cycles W_m for each active m
+5. For m=4..14 (small P_m), write complete SubcaseB resolution proof by native_decide
+6. Address m=34,36,38: Array Bool implementation for period certs
+
+ESTIMATED LEAN LINES (when complete):
+  Per active m:
+    - G period cert: 1 line (native_decide)
+    - Witness cycle verification: W_m/P_m × 1 line (native_decide per SubcaseB event)
+    - Period reduction: ~5 lines
+  Total: ~5 × (13 active m with small P) + 3 × (large m) ≈ 80-100 lines
+  vs. current 97,000+ line case-split approach

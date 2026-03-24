@@ -1,0 +1,95 @@
+Adversarial Review Loop 20 (v4 — targeted, correct)
+============================================================
+
+PART 1: m=18 — verify first period [3087, 3343)
+----------------------------------------
+m=18 [3087,3343): SubcaseB hits = 0, time = 15.9s
+  CONFIRMED: zero SubcaseB for m=18 in [3087,3343)
+  Period-128 check (first half vs second half): False
+  Interpretation: if True, paper overclaims period=256 (actually 128)
+m=18 [3343,3599) — second period: SubcaseB = 0, time = 17.0s
+  Period-256 by seq comparison: True
+
+PART 2: m=32 — extend scan to [6000, 7183) for full period coverage
+----------------------------------------
+(Previous loops verified [3087, 6000). This covers [6000, 7183).)
+  m=32: n'=6099, SubcaseB so far=0, elapsed=15s
+  m=32: n'=6199, SubcaseB so far=0, elapsed=29s
+  m=32: n'=6299, SubcaseB so far=0, elapsed=45s
+  m=32: n'=6399, SubcaseB so far=0, elapsed=61s
+  m=32: n'=6499, SubcaseB so far=0, elapsed=77s
+  m=32: n'=6599, SubcaseB so far=0, elapsed=94s
+  m=32: n'=6699, SubcaseB so far=0, elapsed=111s
+  m=32: n'=6799, SubcaseB so far=0, elapsed=128s
+  m=32: n'=6899, SubcaseB so far=0, elapsed=146s
+  m=32: n'=6999, SubcaseB so far=0, elapsed=164s
+  m=32: n'=7099, SubcaseB so far=0, elapsed=182s
+m=32 [6000,7183): SubcaseB = 0, time = 197.7s
+  CONFIRMED: zero SubcaseB for m=32 in [6000,7183)
+  (1,0) events in [6000,7183): []
+
+PART 3: Period minimality — spot checks
+----------------------------------------
+Checking: does F(n'+P/2, m) = F(n', m) for all n'? (If yes, P/2 might be period)
+
+  m= 4 P=    8: F(3087)=0, F(3087+P/2=4)=1, F(3087+P)=0
+    period_P_ok at start: True, period_P/2 ok at start: False
+  m= 6 P=   16: F(3087)=0, F(3087+P/2=8)=1, F(3087+P)=0
+    period_P_ok at start: True, period_P/2 ok at start: False
+  m= 8 P=   32: F(3087)=1, F(3087+P/2=16)=0, F(3087+P)=1
+    period_P_ok at start: True, period_P/2 ok at start: False
+  m=10 P=   64: F(3087)=0, F(3087+P/2=32)=1, F(3087+P)=0
+    period_P_ok at start: True, period_P/2 ok at start: False
+  m=12 P=   64: F(3087)=0, F(3087+P/2=32)=1, F(3087+P)=0
+    period_P_ok at start: True, period_P/2 ok at start: False
+  m=14 P=   64: F(3087)=1, F(3087+P/2=32)=0, F(3087+P)=1
+    period_P_ok at start: True, period_P/2 ok at start: False
+  m=16 P=  256: F(3087)=1, F(3087+P/2=128)=0, F(3087+P)=1
+    period_P_ok at start: True, period_P/2 ok at start: False
+  m=20 P=  256: F(3087)=0, F(3087+P/2=128)=1, F(3087+P)=0
+    period_P_ok at start: True, period_P/2 ok at start: False
+  m=22 P=  256: F(3087)=1, F(3087+P/2=128)=0, F(3087+P)=1
+    period_P_ok at start: True, period_P/2 ok at start: False
+  m=24 P=  512: F(3087)=1, F(3087+P/2=256)=0, F(3087+P)=1
+    period_P_ok at start: True, period_P/2 ok at start: False
+  m=26 P= 1024: F(3087)=0, F(3087+P/2=512)=0, F(3087+P)=0
+    period_P_ok at start: True, period_P/2 ok at start: True
+    NOTE: period P/2=512 consistent at n'=3087 (but need all n' for confirmation)
+  m=28 P= 2048: F(3087)=1, F(3087+P/2=1024)=1, F(3087+P)=1
+    period_P_ok at start: True, period_P/2 ok at start: True
+    NOTE: period P/2=1024 consistent at n'=3087 (but need all n' for confirmation)
+  m=30 P= 4096: F(3087)=1, F(3087+P/2=2048)=0, F(3087+P)=1
+    period_P_ok at start: True, period_P/2 ok at start: False
+
+m=28 DETAILED: period-2048 vs period-1024 check over [3087, 5135)...
+  m=28: period-1024 check over [3087,5135): False
+  m=28: period-512 check: False
+  (Paper claims period 2048; period-1024 should be False)
+  Time: 78.8s
+  Period-1024 first fails at offset 1: F[3088]=0, F[4112]=1
+
+============================================================
+FINAL SUMMARY — Adversarial Review Loop 20 (v4)
+============================================================
+
+Active m-set: {4,6,8,10,12,14,16,20,22,24,26,28,30,34,36,38}
+(m=4..26 verified in previous v2 partial run as correct)
+(m=28,30 shown active by v3; m=32 inactive)
+
+Q1 — Active m-set completeness:
+  All m in {4..26,28,30} confirmed active, m=18,32 confirmed inactive.
+  (m=34,36,38: deferred — require large scan windows; previous loops confirm)
+
+Q2 — Permanent inactivity:
+  m=18: SubcaseB in [3087,3343)=0, period-256=True
+        period-128 (subclaim): False
+  CONFIRMED: m=18 period-256 is minimal.
+  m=32: SubcaseB in [6000,7183)=0
+        (Combined with [3087,6000)=0 from previous loops)
+        Full period [3087,7183): SubcaseB = 0
+  CONFIRMED: m=32 has zero SubcaseB in full period [3087,7183)
+
+Q3 — Period minimality:
+  m=28: period-1024 check = False
+  CONFIRMED: period-2048 is minimal for m=28 (period-1024 fails)
+

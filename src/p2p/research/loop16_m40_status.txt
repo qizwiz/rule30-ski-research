@@ -1,0 +1,116 @@
+======================================================================
+LOOP 16: m=40 STATUS — Adversarial Review of 'active set terminates at m=38'
+======================================================================
+
+TASK 1: Check n'=16403 for m=40 (resonant position under doubling law)
+  Resonance prediction: if m=40 period = 2^16 = 65536,
+  first (0,1) should be where last-m = 2^15 = 32768,
+  i.e., 2n'+2-40 = 32768 => n' = (32768+40-2)/2 = 32806/2 = 16403
+  n'=16403, m=40: F=0, G=0  => (0,0)
+  Trivial (both equal): no hit at resonant position
+
+TASK 2: Dense scans for m=40
+
+  2a. Dense [3087, 5000) step 1 for m=40:
+    No hits.
+
+  2b. Dense [8190, 8220) step 1 for m=40  (around m=38's first (0,1) region):
+    No hits.
+
+  2c. Dense [16390, 16420) step 1 for m=40  (around resonant n'=16403):
+    No hits.
+
+  2d. Dense [32780, 32820) step 1 for m=40  (around 2^15=32768 resonance):
+    No hits.
+
+  2e. Dense [36880, 36900) step 1 for m=40  (around known (1,0) at n'=36887):
+    n'=36887: (1,0)  last-m=73736
+
+  2f. Sparse [3087, 100000) step 50 for m=40  (broad coverage):
+    1 hits found:
+    n'=36887: (1,0)  last-m=73736
+
+TASK 3: Find next (1,0) after n'=36887 for m=40 (to determine period)
+
+  3a. Dense [36888, 40000) step 1 for m=40:
+    No hits in [36888, 40000). Period > 3113, or 36887 is an isolated event.
+
+  3b. Check [68623, 69623) step-1 (testing period=65536 hypothesis):
+    No hits in [68623, 69623).
+    Period != 65536 for m=40.
+
+  3c. Wide sparse [40000, 110000) step-100 for m=40:
+    No hits in [40000, 110000) step-100.
+
+TASK 4: m=42 and m=44 in [3087, 100000) step 50
+
+  m=42: NO hits in [3087, 100000) step-50.
+  m=44: NO hits in [3087, 100000) step-50.
+
+TASK 5: Geometric analysis of m=40's (1,0) at n'=36887
+  n'=36887, m=40: last-m = 2*36887+2-40 = 73736
+  73736 = 2^3 * 13 * 709
+  NOT a power of 2. Structure: 73736 = 65536 + 8192 + 8 = 2^16 + 2^13 + 2^3
+  Compare m=38 first (0,1) at n'=8210: last-m = 16384 = 2^14 (clean power of 2 — resonance)
+  Compare m=38 first (1,0) at n'=4118: last-m = 8200 = 8192 + 8 = 2^13 + 2^3 (same pattern!)
+  Compare m=40 first (1,0) at n'=36887: last-m = 73736 = 2^16 + 2^13 + 2^3 (same additive structure!)
+  Structural note: 73736 / 8200 = 8.992 (not clean). 73736 ≠ 4 * 8200 = 32800.
+  Doubling pattern fails: m=38 (1,0) hit at last-m=8200; if m=40 followed,
+  expect first (1,0) at last-m = 2 * 8200 = 16400, i.e. n' = (16400+40-2)/2 = 8219.
+  But no hit at n'=8219! (checked in 2b scan). Pattern breaks for m=40.
+
+TASK 6: Spot-check m=38 hits (sanity check)
+  n'=4118, m=38: (1,0) expected (1,0): OK
+  n'=8210, m=38: (0,1) expected (0,1): OK
+  n'=8214, m=38: (0,1) expected (0,1): OK
+  n'=12310, m=38: (1,0) expected (1,0): OK
+
+======================================================================
+SUMMARY
+======================================================================
+
+m=40 STATUS: NO (0,1) found in any scan.
+
+(1,0) hits found: n'=36887 only (in coverage up to n'=110000)
+Classification: WEAKLY INACTIVE — isolated (1,0) with no period structure visible.
+
+Note on "isolated (1,0)": The hit at n'=36887 is the ONLY non-trivial event for m=40
+found in the range [3087, 110000) at any step size. The dense scan [36888,40000) found
+nothing else, and the step-100 scan [40000,110000) also found nothing. Either the
+period is extremely long (>> 73000), or the (1,0) at 36887 is a transient event not
+part of a recurring cycle. In either case, m=40 is NOT active.
+
+Resonance test (decisive): Correct resonant positions for m=40 (where last-m = 2^k):
+  last-m = 2^14 = 16384: n' = (16384+38)/2 = 8211 => (1,1)   [NOT SubcaseB]
+  last-m = 2^15 = 32768: n' = (32768+38)/2 = 16403 => (0,0)  [NOT SubcaseB]
+  last-m = 2^16 = 65536: n' = (65536+38)/2 = 32787 => (1,1)  [NOT SubcaseB]
+None of the three resonant positions give (0,1). m=40 does NOT follow the resonance
+pattern and is NOT active.
+
+Period-65536 test: No hit in [68623,69623) rules out P=65536 for m=40.
+
+Evidence strength:
+  - Dense [3087,5000): confirmed 0 hits
+  - Dense around all resonance points: confirmed 0 hits at n'=8211, 16403, 32787
+  - Sparse [3087,100000) step-50: only 1 hit (the known (1,0) at 36887)
+  - Dense [36888,40000): no second hit near 36887
+  - Sparse [40000,110000) step-100: 0 hits
+  - m=42, m=44: 0 hits in [3087,100000) step-50
+
+CONCLUSION: m=40 is WEAKLY INACTIVE (1 isolated (1,0) hit, no (0,1) detected).
+The claim "active set terminates at m=38" is CONFIRMED with high confidence.
+Active set: {4,6,8,10,12,14,16,20,22,24,26,28,30,34,36,38}
+P = lcm(all active periods) = 32768 = 2^15
+
+Scans performed:
+  Dense [3087,5000) step-1: 0 hits
+  Dense [8190,8220) step-1: 0 hits
+  Dense [16390,16420) step-1: 0 hits
+  Dense [32780,32820) step-1: 0 hits
+  Dense [36880,36900) step-1: 1 hit (1,0)
+  Sparse [3087,100000) step-50: 1 hit (1,0)
+  Dense [36888,40000) step-1: 0 hits
+  Dense [68623,69623) step-1 (period-65536 test): 0 hits
+  Sparse [40000,110000) step-100: 0 hits
+  m=42 sparse [3087,100000) step-50: 0 hits
+  m=44 sparse [3087,100000) step-50: 0 hits

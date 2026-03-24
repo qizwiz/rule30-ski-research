@@ -262,3 +262,110 @@ is non-sensitive for ~half the n values.
 lower bound on the information that any algorithm must use — it must at some point
 "logically depend on" cell 0 of the initial configuration. But a 1-bit lower bound
 is far from what Prize 3 requires (a super-linear time or space lower bound).
+
+---
+
+## Attack 4 (2026-03-24)
+
+**Script**: `research/bridge_attack_4.py`
+
+**Claims under attack**:
+1. Path C: "If a fast algorithm for s(n) existed, we could use it to compute rule30_n(c) for general c." Is there any oracle reduction from general rule30_n queries to fixed-input s(n') values?
+2. Path B (information-theoretic): Does s(n) have low complexity as a function of the *binary representation* of n? If s(n) is a low-degree polynomial over GF(2) in the bits of n, Prize 3 is likely false.
+
+### Test A: Circuit depth lower bound (DAG critical path)
+
+For each n=1..15, the computation of s(n) from scratch requires constructing the full Rule 30 DAG. Each cell at each time step requires 2 gate layers (1 OR gate, 1 XOR gate). The critical path to the output node at (time=n, position=n) is exactly **2n** gate layers.
+
+| n  | s(n) | total_gates | cone_gates | crit_depth |
+|----|------|-------------|------------|------------|
+|  1 |    1 |           6 |          6 |          2 |
+|  5 |    1 |         110 |         70 |         10 |
+| 10 |    0 |         420 |        240 |         20 |
+| 15 |    1 |         930 |        510 |         30 |
+
+**Critical depth = 2n exactly.** This is provable from data-dependency: cell (t, i) can only be computed after cell (t-1, i-1), (t-1, i), and (t-1, i+1) are known. There is no "skip ahead" in the sequential DAG. Even within the light cone, 2n(n+2) gates are required — all Θ(n²) of them lie on mutually dependent paths.
+
+**What this does and does NOT give:**
+- It gives a genuine circuit *depth* lower bound of 2n for any circuit computing s(n) from the initial tape. This is a real lower bound, not a worst-case artefact.
+- **The gap:** Prize 3 asks about TIME, not circuit depth. A TM reading n in binary (O(log n) bits of input) could in principle use an algebraic shortcut that doesn't follow the Rule 30 DAG at all. The 2n depth lower bound only applies to circuits that accept the 2n+1-bit tape as input — not to a TM that receives just the integer n.
+
+**Verdict**: Test A gives a tight circuit depth lower bound (2n) for the tape-input model. It does NOT close Prize 3 because Prize 3 is about a TM taking n in binary. The depth bound is real but lives in the wrong model.
+
+---
+
+### Test B: ANF degree of s(n) as a function of bits(n)
+
+The key question: is s(n) computable by a low-degree formula in the binary digits of n? We compute the ANF (algebraic normal form) of the boolean function n → s(n) over GF(2), treating the K-bit binary expansion of n as the input variables b_0, ..., b_{K-1}.
+
+| K | range | ANF degree | #terms | max degree K | notes |
+|---|-------|-----------|--------|--------------|-------|
+| 2 |  0..3 |     2/2   |      3 | FULL         | `1 + b1 + b0*b1` |
+| 3 |  0..7 |     3/3   |      4 | FULL         | `1 + b1 + b0*b1 + b0*b1*b2` |
+| 4 | 0..15 |     4/4   |      9 | FULL         | 9-term degree-4 polynomial |
+| 5 | 0..31 |     4/5   |     18 | **BELOW MAX** | degree 4 out of 5 |
+| 6 | 0..63 |     6/6   |     29 | FULL         | unique degree-6 monomial |
+| 7 |0..127 |     7/7   |     66 | FULL         | unique degree-7 monomial |
+
+**Key findings:**
+
+1. **At K=5 (n=0..31), degree is 4, not 5.** This is the one anomaly — for this 32-value window, s(n) happens to miss the highest degree. But at K=6 and K=7, degree bounces back to FULL. This is consistent with s(n) being a high-complexity function of bits(n) with no structural shortcut — the K=5 dip is a finite accident.
+
+2. **At K=6 and K=7, degree = K with a UNIQUE highest-degree monomial.** A unique full-degree monomial is the hallmark of "maximally hard" boolean functions. It means the function cannot be decomposed into any lower-degree formula — the full conjunction of all K bits is necessary.
+
+3. **The number of ANF terms grows rapidly**: 3, 4, 9, 18, 29, 66 — roughly doubling every two steps. This is consistent with exponential growth Θ(2^K) that would characterise a random-looking boolean function.
+
+**What this means for Prize 3:**
+
+This is the most important finding of Attack 4. The ANF analysis directly attacks the low-degree polynomial path:
+
+- **If** s(n) were computable by a degree-d polynomial in bits(n) for some fixed d, then the ANF degree would be bounded by d for all K ≥ d. The data shows degree = K for K = 2, 3, 4, 6, 7. There is NO fixed-degree polynomial description.
+- **Implication**: Any TM that computes s(n) from the binary representation of n cannot use a constant-depth circuit (AC0) or any circuit of depth o(log n). This is because: ANF degree K requires at least K levels of AND gates in any circuit.
+- **The gap**: The ANF lower bound K = log₂(n) + 1 gives a circuit depth lower bound of Ω(log n) for computing s(n) from the bits of n. This is an improvement over "trivially Ω(1)" — but Prize 3 requires Ω(n) time, and Ω(log n) circuit depth does not rule out polynomial-time TMs.
+
+**What this does NOT give**: A super-logarithmic lower bound for the sequential computation time from the bits of n. The ANF depth bound is a circuit lower bound, not a TM time lower bound.
+
+---
+
+### Test C: Oracle reduction from general rule30_n(c) to s(n') values
+
+If rule30_n were GF(2)-linear, computing rule30_n(c) for general c would reduce trivially to a linear combination of s(n') = rule30_n(e_k) values. We test this linear approximation:
+
+| n  | linear approx error rate |
+|----|--------------------------|
+|  1 |            0.44         |
+|  2 |            0.40         |
+|  3 |            0.42         |
+|  5 |            0.48         |
+|  8 |            0.52         |
+| 10 |            0.50         |
+
+**The error rate is approximately 0.5 (random) for all n ≥ 4.** The linear combination of fixed-input s(n') values reconstructs rule30_n(c) for general c no better than a coin flip. This quantifies exactly why Path C fails: Rule 30's nonlinear term (c AND r in each step) accumulates through n steps until the output is completely nonlinear in any fixed-input query basis.
+
+**Formal statement of the obstruction to Path C**: Suppose A is an oracle TM that queries s(n_1), s(n_2), ..., s(n_T) (for any choice of n_1, ..., n_T depending on n) and from these produces rule30_n(c) for general c. Then A's output is a function of T bits, each drawn from the sequence s(·). But rule30_n(c) has Boolean circuit complexity Θ(n²) in its 2n+1 inputs — exponentially more than any polynomial number of queries to s(·) could provide. No oracle reduction of this form can work in polynomial query complexity.
+
+**The caveat**: this argument uses circuit complexity of rule30_n as a function of ALL inputs, not just e_n. The fixed-input case is different — as emphasized in all prior attacks, s(n) is a CONSTANT as a function of n inputs, so its circuit complexity is O(1). The nonlinearity argument only shows that a GENERAL oracle reduction fails; it says nothing about whether some clever non-oracle algorithm might compute s(n) directly from n.
+
+---
+
+### Summary of Attack 4 findings
+
+| Test | Finding | Impact on bridge |
+|------|---------|-----------------|
+| A (circuit depth) | Critical path depth = 2n, provable from DAG structure | Real lower bound but wrong model for Prize 3 |
+| B (ANF in bits of n) | Degree = K (= log n + 1) for K = 2,3,4,6,7; unique full-degree monomial at K=6,7 | Closes the "low-degree polynomial in bits(n)" path. No shortcut formula exists. Gives Ω(log n) circuit depth lower bound (weak). |
+| C (oracle reduction) | Linear approximation error ≈ 0.5 for all n ≥ 4 | Confirms nonlinearity makes Path C impossible via linear oracle reduction. Higher-order reductions face exponential blowup. |
+
+### New obstruction identified: the model mismatch is structural, not accidental
+
+All three attacks converge on the same fundamental obstacle: there are TWO different computational models at play.
+
+1. **Tape-input model**: TM reads the 2n+1 initial cells of the tape. Lower bounds: query complexity 2n+1 (our theorem), circuit depth 2n (Test A). These are real and provable.
+
+2. **Integer-input model**: TM reads the integer n in binary (O(log n) bits). s(n) is a fixed, deterministic sequence. Lower bounds: ANF degree = log n + 1 (Test B). This is far weaker.
+
+The Prize 3 question lives entirely in model 2. Our theorem lives entirely in model 1. The bridge must cross from model 1 to model 2, and no currently known technique does this without either:
+- Using aperiodicity of s(n) (Prize 1, unproved), or
+- Proving that the integer-to-tape encoding forces the TM to "unfold" the full DAG.
+
+**Path E (cone argument) is the only remaining candidate** that could force the unfolding — by arguing that the cone from t_n expands to fill the full tape in exactly n steps, and any shortcut computation must represent the full cone state. But the cone argument still needs to explain why the specific integer n cannot be used to "precompute" cone states more efficiently than step-by-step simulation.

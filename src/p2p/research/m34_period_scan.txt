@@ -1,0 +1,5 @@
+Scanning m=34 in [4117, 12500)...
+  hit at n=12304
+  hit at n=12308
+hits so far: [4112, 4116, 12304, 12308]
+gaps: [4, 8188, 4]

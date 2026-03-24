@@ -471,3 +471,137 @@ All patterns verified via `patterns_iteration2.py` (2026-03-24):
 
 5. **Iteration 1 period table correction**: m=16, m=20, m=22 all have period 256=2^8,
    NOT 512, 256, 512 as listed in the Iteration 1 table. Verified by F-certificates.
+
+---
+
+## Patterns Iteration 3 (2026-03-24) — Ramanujan loop
+
+Script: `/Users/jonathanhill/src/p2p/research/patterns_iteration3.py`
+
+### Task 1: Why 16 active m in [4,38]? — Not 2^4, just 18-2
+
+The range [4,38] contains 18 even values. Exactly 2 are inactive. So 16 = 18 - 2.
+
+The coincidence with 2^4 is **not structural**: 16 = log2(P_38) + 1 = 15 + 1. Since
+log2(P_{a_i}) = i for all i ≥ 8, and the sequence M_act has 16 elements indexed 0..15,
+we have |M_act| = log2(P_{a_15}) + 1 = log2(P_38) + 1 = 16. The count follows
+from the identity formula, not from any intrinsic "power of 2" structure.
+
+The range [4,38] itself is determined by the computational certificate (loop 40 found
+m=40 inactive). The count 16 = 2^4 is coincidental with the range choice.
+
+### Task 2: Plateau vs doubler — two types of plateaus
+
+The F-period ratio table for consecutive even m (verified):
+```
+m= 4→ 6: ×2   m= 6→ 8: ×2   m= 8→10: ×2   m=10→12: ×1   m=12→14: ×1
+m=14→16: ×4   m=16→18: ×1   m=18→20: ×1   m=20→22: ×1   m=22→24: ×2
+m=24→26: ×2   m=26→28: ×2   m=28→30: ×2   m=30→32: ×1   m=32→34: ×2
+m=34→36: ×2   m=36→38: ×2   m=38→40: ×2   m=40→42: ×2
+```
+
+Plateau m values (F-period unchanged from predecessor): {12,14,18,20,22,32}.
+
+**Two distinct plateau types**:
+- **Type A (active plateaus)**: consecutive active m sharing the same F-period.
+  - {10,12,14} all at 2^6=64. Three positions, one shared period.
+  - {16,20,22} all at 2^8=256. Three positions sharing 256 (m=18 inactive between them).
+  Structural cause: the cone at these widths maps to the same residue class in the
+  right-boundary echo. The CA period structure saturates before the cone is wide enough
+  to introduce new information.
+- **Type B (inactive plateaus)**: inactive m falls in the period plateau of its active neighbors.
+  - m=18 has F-period 256 = same as {16,20,22}. It sits inside a Type-A plateau.
+  - m=32 has F-period 4096 = same as m=30. It extends the plateau by one step.
+
+**The ×4 jump at m=14→16** (from 64 to 256) is explained by the double plateau:
+m=10,12,14 all plateau at 64; then m=16 must "catch up" 2 doublings at once (×4).
+
+There is **no arithmetic rule** that predicts which m values are Type A plateaus.
+The plateau structure appears to be dynamical (cone-width resonances), not number-theoretic.
+
+### Task 3: OEIS analysis — missing m//2 are {9,16}, not all perfect squares
+
+Active m//2 values = {2,3,4,5,6,7,8,10,11,12,13,14,15,17,18,19}.
+Missing from the range [2,19]: **{9, 16}**.
+
+Both 9=3² and 16=4² are perfect squares. But 4=2² is also a perfect square and is NOT
+missing (m=8 is active). So "missing iff perfect square" is false.
+
+**Refined (but still ad hoc) rule**:
+- m//2=4: v2=2 < 4, not an odd-prime square → NOT missing (m=8 active). Correct.
+- m//2=9: v2=0, is odd-prime square (3²) → missing (m=18 inactive). Correct.
+- m//2=16: v2=4 ≥ 4 → missing (m=32 inactive). Correct.
+
+Rule: m//2 is missing from the active set iff it is a perfect square AND
+(it is an odd-prime-power square OR its 2-adic valuation ≥ 4).
+
+This rule correctly classifies all of [4,38] BUT:
+- m=36: v2=2, odd_part=9=3², predicted inactive by the v2=1 clause... wait — the rule
+  says v2=1 AND odd-sq; m=36 has v2=2, so the rule correctly leaves it active. ✓
+- m=40: v2=3, odd_part=5 → predicted ACTIVE, but m=40 is ACTUALLY INACTIVE. **Rule fails.**
+- m=42: v2=1, odd_part=21 (not square) → predicted ACTIVE, but m=42 is ACTUALLY INACTIVE. **Rule fails.**
+
+The arithmetic hypothesis has **zero predictive value beyond m=38**. Confirmed: inactivity
+is a dynamical property of the CA, not an arithmetic property of m.
+
+### Task 4: Gap sequence structure — period ambiguous with 15 data points
+
+Gap sequence (between consecutive active m): **[2,2,2,2,2,2,4,2,2,2,2,2,4,2,2]**
+
+The two gap-4 events occur at positions 6 and 12 (0-indexed). Separation = 6.
+
+- Period-7 [2,2,2,2,2,2,4] repeated: FAILS (reconstructed gap[12]=2, actual=4, mismatch).
+- Period-6 [2,2,2,2,2,4] repeated: FAILS (reconstructed gap[6]=4, actual=4 — ok;
+  but gap[0..4]=[2,2,2,2,2], gap[5] should be 4 but is actually 2; offset by 1).
+
+Neither clean period divides the 15-gap window. The auto-period check finds the sequence
+is only "consistent" with trivial periods ≥ 13 (i.e., no repetition visible yet).
+
+**The gap-4 separation of 6** means we'd need to see a third gap-4 event (at gap index 18,
+corresponding to m≈38+2×12=62 if period-6, or at gap index 19 if period-7 with the shift)
+to resolve the period. The relevant active set is unknown beyond m=38.
+
+Average gap = 34/15 ≈ 2.267, consistent with both period-6 (avg = 14/6 ≈ 2.333) and
+period-7 (avg = 16/7 ≈ 2.286). No Beatty/Stern-Brocot connection found for the gaps
+themselves, though the Beatty sequence gives an accidental match:
+- floor(3·φ²) = 7 and floor(9·φ) = 14, matching the shifted inactive coordinates (m//2-2).
+  This is coincidental (two matches from different k-values, no pattern).
+
+**Key open question**: does the third gap-4 occur at m=50 (period-6 prediction) or m=52
+(if the gap sequence is an offset period-7)? Verifying m=50 computationally would settle this.
+
+### Task 5: Arithmetic inactivity rule — fails at m=40 and m=42
+
+Hypothesis from Iteration 1: m is inactive iff (v2(m)=1 AND odd_part(m) is perfect square)
+OR (m is a pure power of 2 with v2(m) ≥ 5).
+
+**Verification in [4,38]: all 18 predictions correct** (0 failures), EXCEPT:
+- m=36: v2=2, odd_part=9=3². The rule predicts ACTIVE (v2≠1), and m=36 IS active. ✓
+
+**Verification for m=40,42 (both known inactive from loop-40)**:
+- m=40: v2=3, odd_part=5 → rule predicts ACTIVE. Actual: INACTIVE. **FAIL.**
+- m=42: v2=1, odd_part=21=3·7 (not a perfect square) → rule predicts ACTIVE. Actual: INACTIVE. **FAIL.**
+
+The arithmetic rule is a coincidence within [4,38] that breaks immediately at m=40.
+There is no arithmetic characterization of the active set.
+
+### Summary of new mathematical content (Iteration 3)
+
+1. **16 = 18-2, not 2^4**: The active count in [4,38] equals log2(P_38)+1 by the
+   active-index formula from Iteration 2. The "2^4" form is coincidental.
+
+2. **Two plateau types**: Type A (active positions sharing a period level, e.g., {10,12,14}
+   at 2^6 and {16,20,22} at 2^8) and Type B (inactive positions sitting inside a Type-A
+   cluster). The ×4 jump at m=14→16 is a consequence of the double Type-A plateau at 2^6.
+
+3. **Missing m//2 are {9,16}**: These are the unique values in [2,19] that are perfect
+   squares with odd-prime-power body (9=3²) or high 2-valuation (16=2^4). The rule does
+   NOT extend beyond m=38 (fails at m=40,42).
+
+4. **Gap sequence period is unknown**: The two gap-4 events at separation 6 are consistent
+   with periods 6, 7, 13, 14, 15, and others. Resolving requires data on active m>38.
+   Specifically: is m=50 or m=52 the next inactive even m?
+
+5. **Arithmetic inactivity rules are empirical artifacts**: All number-theoretic patterns
+   (v2 analysis, odd-part squares, popcount, binary indicators) correctly classify [4,38]
+   but fail at m=40. The true characterization of the active set remains dynamical.

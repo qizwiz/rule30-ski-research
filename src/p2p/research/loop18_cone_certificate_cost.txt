@@ -1,0 +1,56 @@
+Loop 18 — CausalCone Period Certificate Cost Analysis — 2026-03-23
+==================================================================
+
+ADVERSARIAL TARGET:
+  Paper claimed native_decide cost is O(P_m × (2m+1)) for each active m.
+  For m=38: O(32768 × 77) ≈ 2.5M operations.
+  Risk: this estimate was wrong.
+
+KEY INSIGHT DISCOVERED:
+  The caStepList/caEvolve approach SHRINKS the list by 2 per step.
+  The period certificate checks:
+    caEvolve P_m (spike_m_list(2*P_m + 2*m + 1)) == spike_m_list(2*m + 1)
+  Input size: 2*P_m + 2*m + 1
+  Actual work: sum_{k=0}^{P_m-1} (2*P_m + 2*m + 1 - 2*k) = P_m*(P_m + 2*m + 1)
+  This is O(P_m²), not O(P_m × (2m+1)).
+
+ACTUAL COSTS VERIFIED:
+  m  | P      | Paper estimate | Actual cells   | Ratio | Python time
+  ---|--------|----------------|----------------|-------|------------
+  4  | 8      | 72             | 144            | 2.0×  | 0.00s
+  6  | 16     | 208            | 480            | 2.3×  | 0.00s
+  8  | 32     | 544            | 1,600          | 2.9×  | 0.00s
+  10 | 64     | 1,344          | 5,504          | 4.1×  | 0.00s
+  12 | 64     | 1,600          | 5,760          | 3.6×  | 0.00s
+  14 | 64     | 1,856          | 6,016          | 3.2×  | 0.00s
+  16 | 256    | 8,448          | 74,240         | 8.8×  | 0.01s
+  20 | 256    | 10,496         | 76,288         | 7.3×  | 0.01s
+  22 | 256    | 11,520         | 77,312         | 6.7×  | 0.01s
+  24 | 512    | 25,088         | 287,744        | 11.5× | 0.04s
+  26 | 1024   | 54,272         | 1,103,872      | 20.3× | 0.24s
+  28 | 2048   | 116,736        | 4,313,088      | 36.9× | 1.35s
+  30 | 4096   | 249,856        | 17,031,168     | 68.2× | 4.82s
+  34 | 8192   | 565,248        | 67,682,304     | 119.7×| 19.56s
+  36 | 16384  | 1,196,032      | 269,647,872    | 225.5×| 78.46s
+  38 | 32768  | 2,523,136      | 1,076,297,728  | 426.6×| 315.19s
+
+ALL PERIOD CERTIFICATES VERIFIED CORRECT (✓ for all active m).
+
+PRACTICAL IMPLICATIONS:
+  In Python (interpreted, ~3ns/op): m=38 takes 315s.
+  In Lean native_decide (compiled, ~0.3-3ns/op): ~3-30s estimated.
+  BUT: Lean's List is a linked list (cons cells). 1.1B cons cell allocations
+  may cause GC pressure. A BitVec or Array Bool implementation would be ~10x faster.
+  Conclusion: m≤30 is clearly feasible; m=34,36,38 may need packed bit vectors.
+
+PAPER CORRECTION:
+  Changed: "O(P_m × 77) ≈ 2.5M operations — computationally feasible"
+  To: correct formula P_m*(P_m+2m+1), actual 1.1B cells for m=38, feasible in native
+  code but may need BitVec/Array rather than List Bool for largest m.
+
+BROADER INSIGHT:
+  The shrinking-cone approach is exactly the correct interpretation of caEvolve.
+  The single native_decide computation is:
+    caEvolve P_m (spike_m_list(2*P_m + 2*m + 1)) = spike_m_list(2*m+1)
+  This proves: F(n', m) = F(n'+P_m, m) for ALL n' (by the period lemma + causal cone).
+  Verified correct for all 16 active m values.

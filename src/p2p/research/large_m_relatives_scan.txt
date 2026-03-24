@@ -1,0 +1,10 @@
+=== m=30: scanning [4114, 8500) ===
+hits: [4114, 8210]
+gaps: [4096]
+
+=== Other large-m relatives: last-k for k in {8,16,24,32,40} ===
+  last-8: 56 hits in [3087,3200), first=(3089, 6172)
+  last-16: 0 hits in [3087,3200), first=None
+  last-24: 0 hits in [3087,3200), first=None
+  last-32: 0 hits in [3087,3200), first=None
+  last-40: 0 hits in [3087,3200), first=None

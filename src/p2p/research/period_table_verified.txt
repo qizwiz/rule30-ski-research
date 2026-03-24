@@ -1,0 +1,52 @@
+Rule 30 SubcaseB Period Table — Verified 2026-03-23 (loop 10, arithmetic corrected loop 12, m=38 added loop 15)
+============================================================================================================
+Periods verified by gap analysis; verification range depends on period:
+  m ≤ 28: n' ∈ [3087, 6087) (3000 values, enough for ≥1 full period from first hit)
+  m = 30: through n'=8210 (first hit 4114, one gap 4096 observed: 4114→8210)
+  m = 34: through n'=12308 (first hit 4112, one gap 8192 observed: 4112→12304, 4116→12308)
+  m = 36: through n'=24593 (first hits {4113,4117,8209}, confirmed +16384: {20497,20501,24593})
+  m = 38: through n'=65558 (132-point period check: 0 mismatches; hits 4118,8210,8214 confirmed at +32768)
+(asymptotic region, not ge-block)
+
+m   | Period | Structure         | Verification
+----|--------|-------------------|---------------------------
+4   | 8      | singleton         | gaps all 8; 375 hits in 3000
+6   | 16     | pair(+4,+12)      | 188 clusters, gaps all 16
+8   | 32     | singleton         | 93 hits, gaps all 32
+10  | 64     | singleton         | 47 hits, gaps all 64
+12  | 64     | pair(+4,+60)      | 46 clusters, gaps all 64
+14  | 64     | pair(+4,+60)      | 46 clusters, gaps all 64  *** WAS 128 — CORRECTED ***
+16  | 256    | 3-orbit(+4,+68,+184) | 35 hits; 4+68+184=256 verified; period ×256 confirmed
+20  | 256    | singleton         | first hits: 3341,3597,3853; gaps all 256
+22  | 256    | singleton         | first hits: 3342,3598,3854; gaps all 256
+24  | 512    | pair(+4,+508)     | first hits 3339,3343,3851,3855; gap 512
+26  | 1024   | singleton         | hits 3340,4364; gap 1024
+28  | 2048   | 3-orbit(+4,+768,+1276) | hits 3341,3345,4113; +2048: 5389,5393,6161 ✓
+30  | 4096   | singleton         | hits 4114,8210; gap 4096 ✓
+34  | 8192   | pair(+4,+8188)    | hits 4112,4116,12304,12308; gap 8192 ✓
+36  | 16384  | 3-orbit(+4,+4092,+12288) | hits 4113,4117,8209; +16384: 20497,20501,24593 ✓
+                                         [4+4092+12288=16384 ✓; was +12284 — arithmetic error fixed loop 12]
+38  | 32768  | 8 events/period   | (1,0) at 4118,12310,20498,28690,32786; (0,1) at 8210,8214,32790
+                                   | 4-cycle over 8192-slots: (1,0),(1,0),(1,1),(1,1) repeating
+                                   | period confirmed by 132-point check (0 mismatches, P/2=16384 has 73)
+                                   *** ADDED loop 15 — m=38 is ACTIVE, not weakly inactive ***
+
+PERIOD STRUCTURE:
+  Regime 1 (m < 24): irregular with two plateaus
+    m=4,6,8,10 → periods 8,16,32,64 (doubling)
+    m=10,12,14 → PLATEAU at 64 (3 positions same period)
+    m=16,20,22 → PLATEAU at 256 (3 positions same period; jump ×4 from 64, skipping 128)
+    Inactive m=18 would have "owned" period 128 if active
+  Regime 2 (m ≥ 24): clean doubling per successive active step
+    m=24,26,28,30 → 512,1024,2048,4096 (doubling)
+    m=32 INACTIVE — skipped; does NOT disrupt doubling
+    m=34,36,38 → 8192,16384,32768 (continues doubling)
+
+LCM = LCM(8,16,32,64,256,512,1024,2048,4096,8192,16384,32768) = 32768 = 2^15
+  *** UPDATED loop 15: was 16384=2^14, now 32768=2^15 due to m=38 reclassification ***
+
+KEY CORRECTION loop 12: m=14 period is 64, NOT 128 as previously documented.
+  This does not change the LCM.
+KEY CORRECTION loop 15: m=38 is ACTIVE (period 32768), NOT weakly inactive.
+  Previous scan [3087,8000) missed first (0,1) at n'=8210 by 10 steps.
+  LCM updates from 16384 to 32768.

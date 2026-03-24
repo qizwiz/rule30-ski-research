@@ -1,0 +1,62 @@
+SubcaseB Investigation — CORRECT indexing (spike at position m, not center+m)
+======================================================================
+
+Q1: Known hard m at n'=3085 (from Lean native_decide)
+--------------------------------------------------
+  n'=3085, m=4: SubcaseB=True (spike=0, ts2=1)
+  n'=3085, m=12: SubcaseB=True (spike=0, ts2=1)
+  n'=3085, m=20: SubcaseB=True (spike=0, ts2=1)
+  n'=3085, m=6164: SubcaseB=True (spike=0, ts2=1)
+
+Q2: SubcaseB m-positions for key n' values
+--------------------------------------------------
+  n'=3087: SubcaseB m-positions = []
+  n'=3093: SubcaseB m-positions = [4]
+  n'=3101: SubcaseB m-positions = [4]
+  n'=3109: SubcaseB m-positions = [4]
+
+Q3: m=36 at pre-compaction claimed hits
+--------------------------------------------------
+  n'=4113, m=36: SubcaseB=True (spike=0, ts2=1)
+  n'=4117, m=36: SubcaseB=True (spike=0, ts2=1)
+  n'=8209, m=36: SubcaseB=True (spike=0, ts2=1)
+
+Q4: SubcaseB pairs in n' in [4000, 4100), m in [2, 100)
+--------------------------------------------------
+  n'=4005, m=4: SubcaseB
+  n'=4006, m=6: SubcaseB
+  n'=4010, m=6: SubcaseB
+  n'=4011, m=8: SubcaseB
+  n'=4013, m=4: SubcaseB
+  n'=4016, m=10: SubcaseB
+  n'=4021, m=4: SubcaseB
+  n'=4022, m=6: SubcaseB
+  n'=4026, m=6: SubcaseB
+  n'=4029, m=4: SubcaseB
+  n'=4037, m=4: SubcaseB
+  n'=4038, m=6: SubcaseB
+  n'=4041, m=12: SubcaseB
+  n'=4042, m=6: SubcaseB
+  n'=4042, m=14: SubcaseB
+  n'=4043, m=8: SubcaseB
+  n'=4045, m=4: SubcaseB
+  n'=4045, m=12: SubcaseB
+  n'=4046, m=14: SubcaseB
+  n'=4047, m=16: SubcaseB
+  n'=4053, m=4: SubcaseB
+  n'=4054, m=6: SubcaseB
+  n'=4058, m=6: SubcaseB
+  n'=4061, m=4: SubcaseB
+  n'=4069, m=4: SubcaseB
+  n'=4070, m=6: SubcaseB
+  n'=4074, m=6: SubcaseB
+  n'=4075, m=8: SubcaseB
+  n'=4077, m=4: SubcaseB
+  n'=4080, m=10: SubcaseB
+  n'=4085, m=4: SubcaseB
+  n'=4086, m=6: SubcaseB
+  n'=4090, m=6: SubcaseB
+  n'=4093, m=4: SubcaseB
+  All m-positions found in [4000,4100): [4, 6, 8, 10, 12, 14, 16]
+
+DONE

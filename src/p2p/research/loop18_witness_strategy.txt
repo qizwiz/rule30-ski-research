@@ -1,0 +1,56 @@
+Loop 18 (supplement) — Witness Strategy for subcaseB_resolution — 2026-03-23
+===============================================================================
+
+KEY COMPUTATIONAL FINDINGS:
+
+1. caEvolve mechanism confirmed:
+   caEvolve P_m (spike_m_list (2*P_m + 2*m + 1)) = spike_m_list (2*m + 1)
+   All 16 active m period certificates verified correct.
+   Cost: O(P_m^2) cells, NOT O(P_m * (2m+1)) as paper previously claimed.
+
+2. Witnesses for subcaseB_resolution (m=38):
+   SubcaseB residues mod P_38=32768: {8210, 8214, 22}  (22 = 32790 mod 32768)
+   - n'=8210: witness w=2 (F(8210,2)=1, two_spike{38,2}→0) WORKS
+   - n'=8214: witness w=4 (F(8214,4)=1, two_spike{38,4}→0) WORKS
+   - n'=22:   witness w=2 (F(22,2)=1, two_spike{38,2}→0) WORKS
+   All witnesses are SMALL spikes (w=2 or w=4 in [2,38)).
+
+3. Lean proof path to eliminate subcaseB_resolution axiom:
+   For m=38:
+   Step 1: Prove period lemma: ∀ n'≥3087, SubcaseB(n',38) ↔ SubcaseB(n'+32768,38)
+           (uses caEvolve period certificate: caEvolve 32768 (spike38 65613) = spike38 77)
+   Step 2: For n'=8210 (first SubcaseB residue in [0,32768)):
+           native_decide: ∃ c_n odd-false with rule30n(8211)(c_n)≠rule30n(8211)(flipCell(c_n,m38))
+           Witness: c_n = spike_at_2
+   Step 3: For n'=8214:
+           native_decide: witness c_n = spike_at_4
+   Step 4: For n'=22 (representing 32790):
+           native_decide: witness c_n = spike_at_2
+   Step 5: Period lemma extends all three residues to ALL n'≥3087 ≡ 8210, 8214, 22 (mod 32768)
+
+   Similar approach for all 16 active m values.
+
+4. Feasibility estimate for the Lean native_decide calls:
+   For Step 2 (n'=8210): tape size 16423, 8211 steps → ~67M cells. ~0.1s native.
+   For Step 3 (n'=8214): tape size 16431, 8215 steps → ~67M cells. ~0.1s native.
+   For Step 4 (n'=22): tape size 47, 23 steps → tiny. Immediate.
+
+   These are all FEASIBLE native_decide calls.
+
+5. Why this is better than the current approach:
+   Current: enumerate n' one by one (lines 1664-98000+, ~97K lines of Lean)
+   Proposed: 3 native_decide calls per SubcaseB residue per active m
+   For m=38 (3 residues): 3 × (2 native_decide + period lemma) = ~6 calls
+   For all 16 active m: maybe 100-200 total native_decide calls
+   Result: ~200 lines of Lean instead of 97,000 lines
+
+NEXT LEAN PROOF STEPS:
+  1. Add caEvolve period certificates for all active m in CausalConeLemmas.lean
+     (16 native_decide calls of form: caEvolve P_m (spike_m_list (2*P_m+2*m+1)) = spike_m_list (2*m+1))
+  2. Prove period lemmas for F(n',m) and two_spike(n',m,w) using these certificates
+  3. Replace subcaseB_resolution axiom body with: period reduction + SubcaseB residue witnesses
+  4. For each (m, SubcaseB residue): 1-2 native_decide calls with small witnesses
+
+STATUS:
+  Witnesses computed for m=38 (w=2 and w=4).
+  For other active m: need analogous computation (search in progress).

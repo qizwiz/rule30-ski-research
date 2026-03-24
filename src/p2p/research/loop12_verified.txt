@@ -1,0 +1,52 @@
+Loop 12 — Adversarial Review Results — 2026-03-23
+===================================================
+
+ERRORS FOUND AND FIXED:
+
+1. Period verification range claim (paper line ~478)
+   CLAIM: "All periods are verified by direct computation in n' ∈ [3087, 6087)"
+   PROBLEM: Window is 3000 values; periods for m=30(4096), m=34(8192), m=36(16384)
+            exceed or barely fit. m=30's second hit is 8210 > 6087. Claim was false.
+   FIX: Explicit per-m verification ranges documented:
+     m ≤ 28: [3087, 6087) suffices
+     m = 30: through n'=8210 (first hit 4114, gap 4096: 4114→8210)
+     m = 34: through n'=12308 (hits 4112,4116,12304,12308; gap 8192)
+     m = 36: through n'=24593 (hits 4113,4117,8209 → +16384: 20497,20501,24593)
+
+2. period_table_verified.txt — m=36 orbit arithmetic error
+   CLAIM: "3-orbit(+4,+4092,+12284)"
+   PROBLEM: 4+4092+12284 = 16380 ≠ 16384 (period). Off by 4.
+   CORRECT: From hits 4113,4117,8209: gaps = 4117-4113=4, 8209-4117=4092,
+            20497-8209=12288. Sum: 4+4092+12288=16384 ✓
+   FIX: Updated to "+4,+4092,+12288"
+
+3. Sparse scan sample count (paper line ~446)
+   CLAIM: "n' ∈ [3087, 25000) (47 sample points, step 500)"
+   PROBLEM: range(3087, 25000, 500) = 44 samples (not 47).
+            47 samples requires range(3087, 26088, 500).
+   FIX: Updated to range [3087, 26088) (47 samples confirmed by Python).
+
+EXTENDED VERIFICATIONS (confirming/strengthening existing claims):
+
+4. Boundary family: last-16, last-24, last-32, last-40
+   PREVIOUS CLAIM: Zero SubcaseB in [3087, 3200) — only 113 values
+   NEW RESULT: Zero SubcaseB in [3087, 5500) — 2413 values each
+   Method: bitmask integer Rule 30, verified correct via 9 self-tests
+
+5. Extended boundary offsets: last-48, last-56, last-64, last-72, last-80
+   RESULT: Zero SubcaseB in [3087, 3500) (413 values each)
+
+6. m=38 targeted verification:
+   - (1,0) at n'=4118: CONFIRMED (F=1, G=0) — exactly as paper states
+   - Full scan [3087,6000): only ONE (1,0) at n'=4118, zero (0,1)
+   - (0,1) = zero in [3087,8000): confirmed
+   - m=38 is "weakly inactive" — verified in wider range
+
+7. m=40, m=42 confirmation:
+   - m=40: zero (0,1) AND zero (1,0) in [3087,8000) — strictly F=G behavior
+   - m=42: zero (0,1) AND zero (1,0) in [3087,5000)
+
+CONCLUSION:
+- "Single exceptional position" claim strengthened: from 113 to 2413 values (21× more evidence)
+- Active set termination at m=36 further confirmed
+- Three numerical errors corrected in paper and period_table_verified.txt

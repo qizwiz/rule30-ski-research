@@ -1,0 +1,57 @@
+Loop 14 — Weakly-inactive Period Characterization — 2026-03-23
+===============================================================
+
+ADVERSARIAL TARGET:
+  Paper claimed "I=0 always coincides with F=1" for m=18,32,38 (weakly inactive),
+  but had never determined their (F,G) periods. Risk: if period is long, might miss
+  a cycle where F=0 AND I=0 (SubcaseB).
+
+ERRORS FOUND AND FIXED:
+1. Line ~476: "m=42,44,... verified in [3087,8000) and [3087,5000) respectively"
+   WRONG: m=44,...,80 only verified to [3087,4500). Fixed to separate per-m ranges.
+
+2. Line 522: "factor-of-4 jump skipping 128, corresponding to the gap left by inactive m=18"
+   MISLEADING: m=18 has period 256 (same as active m=16,20,22), NOT period 128.
+   The period-128 slot is simply absent — not occupied by m=18.
+   Fixed: states that m=18 has period 256 (same as active block m=16,18,20,22).
+
+PERIODS DETERMINED:
+
+m=18 (weakly inactive):
+  Period: 256 (exact — period 128 fails with 74 mismatches)
+  (1,0) cluster structure: triplets with offsets {193, 249, 253} within each period
+    gaps [56, 4, 196] repeating, sum = 256 ✓
+  First (1,0) hits: 3280, 3336, 3340, then +256: 3536, 3592, 3596, ...
+  (0,1) hits in [3087, 10000): ZERO (27 full periods)
+  Claim "F=0 ⟹ I=1" CONFIRMED over 27 periods
+
+m=32 (weakly inactive):
+  Period: 4096 (exact — same as active m=30)
+  (1,0) cluster: {3347, 4111, 4115} repeating every 4096:
+    {7443, 8207, 8211} = +4096 ✓
+    {11539, 12303, 12307} = +8192 ✓
+    {19731, 20495, 20499} = +16384 ✓
+    {36115, 36879, 36883} = +32768 ✓
+  (0,1) hits in [3087, 8000): ZERO (nearly 2 full periods of 4096)
+  Period verified by 50-sample check (F,G)@n = (F,G)@(n+4096): 0 mismatches
+  Claim "F=0 ⟹ I=1" CONFIRMED over 2 full periods
+
+m=38 (weakly inactive):
+  Single (1,0) at n'=4118, zero (0,1) in [3087,8000)
+  Period: not yet determined (would need to find next (1,0) hit after 4118)
+
+STRUCTURAL OBSERVATION (new):
+  Inactive positions share periods with nearby active positions:
+    m=18 (inactive): period 256 = same as active m=16,20,22 (period-256 plateau)
+    m=32 (inactive): period 4096 = same as active m=30
+    The "block" {16,18,20,22} all operate at period 256; within it, m=16,20,22 are
+    active (SubcaseB) and m=18 is weakly inactive (only (1,0)).
+    Similarly, {30,32} share period 4096; m=30 active, m=32 weakly inactive.
+
+PROOF TARGET CLARIFIED:
+  For Part A weakly-inactive proof strategy:
+    m=18: prove F=0 ⟹ I=1 for all n' in [3087, 3087+256); periodicity handles rest.
+           (Causal cone for m=18: width 37 cells, 256 steps — feasible for native_decide)
+    m=32: prove F=0 ⟹ I=1 for all n' in [3087, 3087+4096); periodicity handles rest.
+           (Causal cone for m=32: width 65 cells, 4096 steps — O(65×4096)≈260K operations)
+    m=38: prove F=0 ⟹ I=1 for all n' in [3087, 3087+P_38); period still unknown.

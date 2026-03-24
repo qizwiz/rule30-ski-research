@@ -1,0 +1,114 @@
+# Loop 15: m=38 Period Search for Rule 30 Prize 3
+# Date: 2026-03-23
+# Goal: Find the period of m=38's (F,G) pattern, i.e., the next (1,0) hit after n'=4118.
+
+## HEADLINE RESULT
+
+**m=38 is ACTIVE (not weakly inactive).**
+**Period of m=38: P = 32768 = 2^15**
+**First (0,1) SubcaseB hit: n'=8210 (just beyond the previous [3087,8000) scan window)**
+**Next (1,0) hit after n'=4118: n'=12310 = 4118 + 8192**
+
+## Verification of starting condition
+
+  n'=4118, m=38: F=1, G=0  [VERIFIED — matches expected]
+  n'=4113, m=36: F=0, G=1  [VERIFIED — control check]
+  n'=4117, m=36: F=0, G=1  [VERIFIED — control check]
+
+## Period determination
+
+Period candidates tested (by checking (F,G) at n'=4118+P):
+  P=4096:   (0,1) at n'=8214 — not a (1,0) recurrence
+  P=8192:   (1,0) at n'=12310 — FIRST (1,0) HIT after 4118 (but not the full period)
+  P=16384:  (1,1) at n'=20502 — miss
+  P=32768:  (1,0) at n'=36886 — hit
+
+Pattern at 4118 + 8192*k for k=0..19:
+  k=0: (1,0), k=1: (1,0), k=2: (1,1), k=3: (1,1),
+  k=4: (1,0), k=5: (1,0), k=6: (1,1), k=7: (1,1), ...
+  → 4-element cycle → overall period = 4 * 8192 = 32768 = 2^15.
+
+Period confirmation:
+  P=32768: 0 mismatches on 132 diverse test points  ← CONFIRMED
+  P=16384: 73 mismatches                             ← NOT a period
+  P=8192:  35 mismatches                             ← NOT a period
+
+## Complete F≠G hit list within one period [3087, 35855)
+
+Scan method: step-10 scan of [4200,35855), dense ±30 around each 4096-slot,
+             dense [4140,8200) confirming no hits between first two clusters,
+             step-5 scan of [12320,28680) confirming gap is clean.
+
+All n' with F≠G for m=38 in one period:
+
+  Type  | n'    | k (4096-slot) | offset from slot | Geometry: last-m
+  ------|-------|---------------|------------------|-----------------
+  (1,0) | 4118  | k=0 (4118)    | +0               | 8200 = 2^13 + 8
+  (0,1) | 8210  | k=1 (8214)    | -4               | 16384 = 2^14 exactly!
+  (0,1) | 8214  | k=1 (8214)    |  0               | 16392 = 2^14 + 8
+  (1,0) | 12310 | k=2 (12310)   |  0               | 24584 = 2^14 + 8192
+  (1,0) | 20498 | k=4 (20502)   | -4               | 40960 = 2^13 * 5
+  (1,0) | 28690 | k=6 (28694)   | -4               | 57344 = 2^13 * 7
+  (1,0) | 32786 | k=7 (32790)   | -4               | 65536 = 2^16 exactly!
+  (0,1) | 32790 | k=7 (32790)   |  0               | 65544 = 2^16 + 8
+
+Slot occupancy (out of k=0..7):
+  Occupied: k=0, 1, 2, 4, 6, 7
+  Empty:    k=3 (slot 16406), k=5 (slot 24598)
+
+(1,0) hits per period: 5
+(0,1) hits per period: 3
+Total F≠G events per period: 8
+
+## Period verification of all hits
+
+Each hit confirmed at n' AND at n'+32768:
+  4118  → 36886:  (1,0) ✓
+  8210  → 40978:  (0,1) ✓
+  8214  → 40982:  (0,1) ✓
+  12310 → 45078:  (1,0) ✓
+  20498 → 53266:  (1,0) ✓
+  28690 → 61458:  (1,0) ✓
+  32786 → 65554:  (1,0) ✓
+  32790 → 65558:  (0,1) ✓
+
+## Gaps between consecutive (1,0) hits
+
+4118  → 12310: gap = 8192
+12310 → 20498: gap = 8188
+20498 → 28690: gap = 8192
+28690 → 32786: gap = 4096
+32786 → 36886: gap = 4100  (crossing period boundary)
+
+## Why the old classification was wrong
+
+Previous "weakly inactive" label was based on scan [3087, 8000):
+  - Correctly found zero (0,1) in [3087, 8000)
+  - Correctly found one (1,0) at n'=4118
+  - MISSED: first (0,1) at n'=8210 (10 steps beyond scan window)
+
+The distance at n'=8210 is last-m = 16384 = 2^14 = period of m=36.
+This exact resonance appears to explain why the first (0,1) occurs there.
+
+## Impact on paper
+
+1. Active set corrected: {4,6,8,...,36,38} (m=38 added)
+2. P = lcm(period_36, period_38) = lcm(16384, 32768) = 32768 = 2^15
+3. "Active set terminates at m=36" claim is WRONG
+4. m=40: one (1,0) hit at n'=36887 in step-10 scan [3087,45000); no (0,1) found yet
+5. m=42: zero hits in step-100 scan [3087,45000)
+
+## Method
+
+Rule 30 bitmask implementation (verified):
+  def step_rule30(state, mask): l=(state<<1)&mask; r=state>>1; return (l^(state|r))&mask
+  compute_FG: spike at m (F) and at m + last=2n'+2 (G), run n'+1 steps, read center=n'+1
+
+Scan strategy:
+  1. Verified n'=4118 hit
+  2. Sparse step=500 scan to 4118+131072 → no (1,0) hits found
+  3. Targeted period-candidate test → found next (1,0) at 4118+8192=12310
+  4. Recognized 4-element cycle in k → period = 4*8192 = 32768
+  5. Period-32768 verification on 132 test points: 0 mismatches
+  6. Dense window scans around each 4096-slot to find all hits within one period
+  7. Discovered (0,1) hits at 8210, 8214 — reclassifying m=38 as ACTIVE

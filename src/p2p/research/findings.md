@@ -1,5 +1,74 @@
 # Rule 30 Prize 3 — Persistent Research Findings
 
+## Loop 43 findings (2026-03-24) — Adversarial density/involution review: m=2n'-6 SubcaseB
+
+### Computation run: adversarial_loop43_density.py
+
+**Script**: `/Users/jonathanhill/src/p2p/research/adversarial_loop43_density.py`
+**Runtime**: 16.7s for 212 values in [3089, 3300]
+
+Targeted five claims in prize3_paper.tex lines 778–805 about the shifting position m=2n'-6.
+
+---
+
+### Results: all 5 attacks repelled, 0 violations
+
+| Attack | Claim | Range | Violations | Status |
+|--------|-------|-------|------------|--------|
+| A | Mod-4 SubcaseB rule: SubcaseB iff n'≡1,2 (mod 4) | [3089,3300] | 0 | VERIFIED |
+| B | Anti-correlation: F(n',2n'-6)+G(n',2n'-6)=1 always | [3089,3300] | 0 | VERIFIED |
+| C | Exact period 4 of F in n' (period 2 minimal-fails) | [3089,3297] | 0 | VERIFIED |
+| D | Involution F(n')+F(n'+2)=1 for all n' | [3089,3289] | 0 | VERIFIED |
+| E | F pattern 0,0,1,1,... at [3089,3108], 20/20 correct | [3089,3108] | 0 | VERIFIED |
+
+Additional finding: G(n', 2n'-6) also has exact period 4 (0 violations in [3089,3297]).
+SubcaseB density: exactly 106/212 = 0.500000.
+(F,G) pair distribution: (0,1) → 106 times, (1,0) → 106 times. No (0,0) or (1,1) seen.
+
+---
+
+### Hostile reviewer analysis — weakest points in the density argument
+
+**WEAKNESS 1 (STRONGEST): Period-4 is empirical only, no analytic explanation.**
+F(n', 2n'-6) depends on n' in two ways simultaneously: as the step count AND as the
+spike position (m=2n'-6 co-varies). Fixed-m periods are powers of 2 and arise from
+the linear structure of the CA; here the function is not a standard fixed-m function.
+The paper gives no analytic reason why this co-varying function has period 4.
+A hostile reviewer will say: "The period-4 pattern could be a transient. Your compute
+budget densely reaches only n'=15000. Nothing in the paper rules out a much longer
+period appearing at n'>>15000."
+
+**WEAKNESS 2 (SECOND STRONGEST): The reduction to two unproved sub-claims is circular in presentation.**
+The paper says the proof strategy is: prove (a) F has period 4 AND (b) F+G=1; then SubcaseB follows.
+But (a) and (b) are both unproved. A hostile reviewer: "You have reformulated one open problem
+into two open problems. This is not a proof strategy — it is a wish list."
+
+**WEAKNESS 3 (MODERATE): Why does boundary interference produce period exactly 4?**
+The spike at m=2n'-6 is always 8 cells from the right boundary. The paper correctly
+notes the open-boundary approximation breaks down here. But it gives no reason why
+8-cell proximity produces period-4 rather than period-2, 8, or 16. The connection
+between the constant boundary distance (8 cells) and the period-4 regularity is asserted
+but not explained.
+
+**WEAKNESS 4 (MINOR): Inconsistent verification ranges — involution checked to n'=3289 only,
+mod-4 rule checked to n'=15000.** If the involution is the explanation for density=1/2,
+it should be verified over the same range as the main claim. Checking it only to n'=3289
+while the primary claim spans [3089,15000] is an unexplained asymmetry.
+
+**WEAKNESS 5 (FATAL IF TRUE): Anti-correlation F+G=1 is the load-bearing bridge of the proof strategy.**
+If F+G=1 fails at any n', the strategy collapses entirely. It is currently unproved.
+The paper's own statement "Both claims are currently computationally verified but not yet
+formally proved in Lean" is honest, but it means the entire SubcaseB density argument
+rests on two empirical pillars with no proof skeleton.
+
+**BOTTOM LINE**: The computations are correct and the patterns are compelling. The single
+most actionable critique for improving the paper is: provide a proof sketch for F+G=1
+(anti-correlation). This is the more surprising of the two claims and is the logical pivot
+point; the period-4 claim of F may follow from it via parity symmetry once anti-correlation
+is understood.
+
+---
+
 ## Loop 20 findings (2026-03-24) — Adversarial review: active m-set, inactivity, period minimality
 
 ### Computation run: adversarial_loop20_v4.py
@@ -300,7 +369,7 @@ The distance 16384 creates a special cone-overlap alignment.
 4. Added extended scan result (m≤300, n'≤25000) confirming no new active positions
 5. LOOP 10: m=14 period: 128 → 64 (FACTUAL ERROR CORRECTED)
 6. LOOP 10: Doubling law claim restricted to m≥24; plateaus at m={10,12,14}→64 and m={16,20,22}→256 documented
-7. LOOP 10: m=16 internal structure: 3 hits per period at offsets 0,4,72 (gaps 4,68,184; sum=256)
+7. LOOP 10: m=16 internal structure: 3 hits per period at offsets 0,4,72 (gaps 4,68,184; sum=256) [OFFSET VALUES CORRECTED IN LOOP 42: actual offsets 120,124,192 from n'=3087; gaps unchanged]
 
 ### Still open questions:
 - Can the exact mod-4 rule SubcaseB(n', 2n'-6) iff n'≡1,2 (mod 4) be PROVED analytically?
@@ -505,7 +574,7 @@ All periods RE-VERIFIED by gap analysis in [3087, 6087):
 - m=10: period 64    singleton (gaps all 64)
 - m=12: period 64    pair(+4,+60)  — PLATEAU with m=10
 - m=14: period 64    pair(+4,+60)  — PLATEAU with m=10,12  *** WAS LISTED AS 128 — CORRECTED ***
-- m=16: period 256   complex(+4,+68,+184): 3 hits/period at offsets 0,4,72; gaps sum=256 ✓
+- m=16: period 256   complex(+4,+68,+184): 3 hits/period at offsets 120,124,192 (from n'=3087); gaps sum=256 ✓ [CORRECTED loop 42: was 0,4,72]
 - m=20: period 256   singleton — PLATEAU with m=16
 - m=22: period 256   singleton — PLATEAU with m=16,20
 - m=24: period 512   (pairs gap-4; cluster-period 512)
@@ -1956,3 +2025,231 @@ Key discoveries:
    period 4096=2^12 is already occupied by active m=30.
 
 Paper action: Added remark on v2-structure to Discussion section (with caution about m≥40).
+
+---
+
+## Loop 41 findings (2026-03-24) — Active m-set completeness above m=38; resonance tests for m=42,44
+
+### Computation run: adversarial_review_loop41.py
+
+**Script**: `/Users/jonathanhill/src/p2p/research/adversarial_review_loop41.py`
+
+**Target claim**: "m=40,42,44 are inactive (SubcaseB never occurs)"
+
+---
+
+### Key finding: Coverage asymmetry in the paper
+
+The paper applies an evidentiary asymmetry across the inactive trio m=40,42,44:
+
+| m  | F-period | max n' checked | Coverage    | Resonance checked? |
+|----|----------|----------------|-------------|---------------------|
+| 40 | 65536    | 110,000        | 1.678x      | YES (n'=16403)      |
+| 42 | 131072   | 20,001         | 0.153x      | NO (n'=32788 absent)|
+| 44 | ~262144  | 20,001         | 0.076x      | NO (n'=65557 absent)|
+
+The paper describes m=40's resonance check at n'=16403 as "decisive" but does not
+report the analogous checks for m=42 (n'=32788) and m=44 (n'=65557).
+
+**Resonance test derivation** (last-m = 2^k criterion):
+- m=40: last-m = 2^15 → n'=(32768+38)/2 = 16403  [paper reports this]
+- m=42: last-m = 2^16 → n'=(65536+40)/2 = 32788  [NEW: loop 41]
+- m=44: last-m = 2^17 → n'=(131072+42)/2 = 65557  [NEW: loop 41]
+
+---
+
+### Resonance test results (NEW — loop 41)
+
+| m  | n' (resonance) | F | G | SubcaseB? |
+|----|---------------|---|---|-----------|
+| 40 | 16403         | 0 | 0 | NO (0,0)  |
+| 42 | 32788         | 1 | 1 | NO (1,1)  |
+| 42 | 16404         | 0 | 0 | NO (0,0)  |
+| 42 | 65572         | 0 | 0 | NO (0,0)  |
+| 44 | 65557         | 1 | 1 | NO (1,1)  |
+| 44 | 32794         | 1 | 1 | NO (1,1)  |
+| 44 | 131093        | 1 | 1 | NO (1,1)  |
+
+All resonance tests confirm inactivity. No SubcaseB found.
+
+---
+
+### SubcaseB scan results (NEW — loop 41)
+
+- **m=42, n' in [3087,3200)**: 0 SubcaseB events. F=0 candidates: 55 individually G-checked.
+- **m=44, n' in [3087,3200)**: 0 SubcaseB events. F=0 candidates: 55 individually G-checked.
+- **m=42, n' in [32788,32808)**: 0 SubcaseB. FG pattern: (1,1)(0,0)(1,1)(0,0)... — strictly F=G
+- **m=42, n' in [18456,18476)**: 0 SubcaseB. FG pattern: (0,0)(0,0)(1,1)(1,1)... — strictly F=G
+- **m=44, n' in [32788,32808)**: 0 SubcaseB. FG pattern: (1,1)(0,0)(1,1)(0,0)...
+
+**F=G strict pattern confirmed for m=42** in [3087,3095): all 8 checked values have F=G.
+This is the "Strictly F=G" category (I=1 always), the same as m=44,...,200.
+
+---
+
+### Sanity check
+
+- m=38, n'=8210: F=0, G=1 (SubcaseB confirmed) ✓ — known active m=38 check passes
+
+---
+
+### Conclusion
+
+**No paper corrections needed to existing claims.** All inactivity claims for m=40,42,44 survive.
+
+**Evidence gap identified and closed (loop 41 contribution)**:
+- m=42 resonance test at n'=32788: (1,1) — not SubcaseB ✓ NEW
+- m=44 resonance tests at n'=65557, 32794, 131093: all (1,1) — not SubcaseB ✓ NEW
+- These resonance tests now match the evidentiary standard applied to m=40
+
+**Paper action needed**: Add resonance tests for m=42 (n'=32788) and m=44 (n'=65557)
+to the inactivity evidence section, to close the coverage asymmetry flagged here.
+This upgrades the evidence for m=42 and m=44 from 0.15x and 0.08x F-period coverage
+to coverage including the critical resonant positions.
+
+**Remaining concern (unchanged from prior loops)**:
+Formal proof of inactivity for m≥40 still requires a periodicity argument.
+The computational evidence is now stronger but not a proof.
+
+---
+
+## Loop 42 findings (2026-03-24) — Adversarial review: m=18 period alignment, m=32 minimality, m=16 offsets
+
+**Script**: `/Users/jonathanhill/src/p2p/research/adversarial_review_loop42.py`
+
+Three specific claims targeted (candidates identified as potentially untested):
+
+### Claim 1: m=18 "zero (0,1) verified directly in two full periods [3087,3599)"
+
+**Status: VERIFIED with notation clarification.**
+
+- Range [3087,3599) has size 512 = 2×256. Period=256. Two full period cycles confirmed.
+- **Alignment issue**: 3087 mod 256 = 15 (range is NOT period-boundary-aligned).
+  "Two full periods" means 512 consecutive values, not two aligned period windows.
+  Coverage is complete regardless of alignment — the claim is valid.
+- SubcaseB (0,1) count in [3087,3599): **0** (confirmed by direct computation)
+- (1,0) events: at n'=3280,3336,3340 with offsets **(n-3087) mod 256 = {193,249,253}**
+  (This is the paper's convention — offsets measured from n'=3087, not from period boundary.)
+- Period-256 holds over [3087,3343); period-128 fails at n'=3089.
+
+**No paper correction needed.**
+
+### Claim 2: m=32 P=4096 minimal (P/2=2048 fails)
+
+**Status: VERIFIED.**
+
+- (F,G) at n'=3087 = (0,0); at n'=7183 = (0,0) — P=4096 consistent
+- (F,G) at n'=5135 (=3087+2048) = (1,1) — P/2=2048 correctly fails at n'=3087
+- 50-point spot check: P=4096 holds for all 50 samples; P/2=2048 fails at n'=3087
+- Zero SubcaseB over [3087,7183) (full first period): confirmed by loop-20 (197s direct scan)
+
+**No paper correction needed.**
+
+### Claim 3: m=16 "three hits per period at offsets 0,4,72 with gaps (4,68,184) summing to 256"
+
+**Status: PARTIALLY WRONG — offset values incorrect, gap structure correct.**
+
+- **Actual first three SubcaseB hits from n'=3087**: n=3207, 3211, 3279
+  - Offsets from n'=3087: {**120, 124, 192**} (not {0, 4, 72})
+  - Values at claimed positions n=3087,3091,3159: all (F,G)=(1,1), not SubcaseB
+- **Gap structure**: gaps [4, 68, 184] summing to 256 ARE correct
+- **The paper's {0,4,72} are wrong** — the hits start at offset 120, not 0
+
+**PAPER CORRECTION MADE**: Line 608-609 updated to read offsets `120,124,192` instead of `0,4,72`.
+(The gaps (4,68,184) and the sum=256 are unchanged and correct.)
+
+### Summary
+
+| Claim | Status |
+|-------|--------|
+| m=18 zero SubcaseB [3087,3599) — "two full periods" | VERIFIED (alignment is cosmetic) |
+| m=18 (1,0) offsets {193,249,253} | VERIFIED (convention: from n'=3087) |
+| m=32 P=4096 minimal | VERIFIED |
+| m=16 gaps (4,68,184) sum=256 | VERIFIED |
+| m=16 offsets {0,4,72} | **WRONG** — actual offsets {120,124,192} — CORRECTED |
+
+---
+
+## Loop 42 findings (2026-03-24) — Adversarial bridge/discussion section review
+
+### Computation run: adversarial_loop42_bridge.py
+
+### Claims verified (all pass)
+
+**3-cell block identity** `s(n) = rule30_{n-1}(t_n)[center]`: CONFIRMED for n=2..30.
+The derivation in the paper (one step from e_n produces exactly t_n) is correct.
+
+**s(n)=0 set for n=1..20**: Paper claims `{2,6,7,10,11,12,14,17,18,20}`. CONFIRMED EXACT MATCH.
+
+**ANF degrees on full domain [0, 2^K - 1]**:
+- K=2: degree 2 ✓
+- K=3: degree 3 ✓
+- K=4: degree 4 ✓
+- K=5: degree 4 (not 5; paper says "by coincidence") ✓
+- K=6: degree 6, unique highest-degree monomial ✓
+- K=7: degree 7, unique highest-degree monomial ✓
+- K=8: degree 8 (not claimed in paper; newly confirmed)
+
+**Involution arithmetic**: n'->n'+2 maps {1,2} mod 4 to {3,0} = complement. Correct by arithmetic. However, this only constitutes a density-1/2 proof if the period-4 pattern is formally established — which it is not.
+
+**Berlekamp-Massey**: Shortest LFSR for s(0..31) has order 17, well above 6. Paper claim confirmed.
+
+---
+
+### WEAKEST CLAIM IDENTIFIED: Omega(log n) circuit lower bound (lines 919-921)
+
+**The claim (verbatim)**:
+> "A full-degree Boolean function on K bits requires circuit depth Ω(K) = Ω(log n) 
+> (depth-d circuits compute functions of degree at most 2^d)."
+
+**The flaw: this is a formula lower bound, not a circuit lower bound.**
+
+The theorem that "depth-d circuits compute functions of degree at most 2^d" is TRUE only for **formulas** (boolean circuits with fan-out 1, i.e., tree-structured computations). For general boolean circuits (fan-out ≥ 2), intermediate results can be reused, and the degree-depth relationship breaks down entirely. A constant-depth circuit family (e.g., TC^0 or even AC^0) can, in principle, compute high-degree functions because fan-out allows sharing subexpressions across exponentially many monomials.
+
+The cited reference is Nisan 1991, which is about CREW PRAMs and decision tree complexity — not about the depth-vs-ANF-degree relationship for boolean circuits. The correct reference for the formula depth lower bound would be the "formula complexity = square root of ANF degree" style results (Karchmer-Wigderson, or the basic fact about AND-OR formulas). But even those give formula size, not depth, in the strongest form.
+
+**Specific error**: The paper claims an "unconditional Ω(log n) circuit lower bound." What is actually proved is:
+- The ANF degree of n→s(n) is full degree K on the domain [0, 2^K − 1] (for K ≠ 5 checked so far).
+- Full-degree ANF requires formula depth ≥ log₂(K) = Ω(log log n).
+
+Even granting the formula interpretation, the bound is Ω(log log n), not Ω(log n), because: ANF degree K requires formula depth ≥ log₂(K), and K = ⌈log₂ n⌉, so depth ≥ log₂(log₂ n) = Ω(log log n).
+
+**Summary of the three-level flaw**:
+1. "Circuit" should be "formula" — circuits with fan-out can do more.
+2. Even for formulas: depth ≥ log₂(K) = log₂(log₂ n) = Ω(log log n), NOT Ω(log n).
+3. K=5 has degree 4 < 5, so even the formula bound fails for n in [16,31].
+4. On the *restricted* domain [2^{K-1}, 2^K−1] (proper K-bit inputs with leading 1), the degrees drop substantially (K=7 drops from 7 to 5, K=6 drops from 6 to 5), weakening even the formula argument.
+
+**Verdict**: The Remark claiming "the first lower bound in [the integer-input] model not depending on Prize 1" overstates the result. The correct statement is: the ANF of n→s(n) achieves full degree K (with one exception at K=5), which gives an Ω(log log n) lower bound on *formula* depth, not an Ω(log n) lower bound on *circuit* depth.
+
+**Required fix**: Replace "circuit depth Ω(K) = Ω(log n) (depth-d circuits compute functions of degree at most 2^d)" with "formula depth Ω(log K) = Ω(log log n) (depth-d AND-OR formulas compute functions of degree at most 2^d)", and adjust the lower bound claim accordingly.
+
+---
+
+## Loop 44 Results (2026-03-24) — Adversarial review: m=30 first SubcaseB hit
+
+**Script**: `/Users/jonathanhill/src/p2p/research/adversarial_loop44.py`
+
+### All claims verified correct
+
+| Claim | Verified value | Status |
+|-------|---------------|--------|
+| Dense scan [3087, 4114) for m=30: zero SubcaseB events | 0 hits confirmed | VERIFIED |
+| SubcaseB at n'=4114 for m=30: F=0, G=1 | (F=0, G=1) confirmed | VERIFIED |
+| Second hit at n'=8210 for m=30, gap=4096 | gap=4096 confirmed | VERIFIED |
+| m=34 first hit at n'=4112 | (F=0, G=1) confirmed | VERIFIED |
+| m=36 first hit at n'=4113 | (F=0, G=1) confirmed | VERIFIED |
+| Paper claim "m∈{30,34,36} first appear in [4112,4117]" | TRUE | VERIFIED |
+
+Note on "SURPRISE" in script output: the dense scan range included 4114 itself as a boundary artifact, but there are zero SubcaseB hits in [3087, 4114) — the first hit is at 4114 exactly.
+
+### Critical finding: m=30 has exactly 1 SubcaseB hit per period
+
+Loop 44 confirms that m=30 has **exactly one** SubcaseB event per period of 4096, at residue offset 0 (i.e., hits occur at n' = 4114, 8210, 12306, ... = 4114 + k·4096). Only one hit was found in the full period [4114, 8210).
+
+**Consistency with paper**: The paper (prize3_paper.tex) does not explicitly state the number of SubcaseB hits per period for m=30. It describes m=30 as having period 4096 (line 566) and first hit at n'=4114 (line 470, via "m∈{30,34,36} first appear in [4112,4117]"). The paper notes m=16 has "three hits per period at offsets 120, 124, 192" (line 608) as a special complex case. The loop44 finding of 1 hit per period for m=30 is new detail, not contradicted by any paper claim. The paper is consistent with this data.
+
+### Summary
+
+All five verifiable claims from loop 44 are confirmed. The paper's characterization of m=30 is correct and complete. The "1 hit per period" finding adds precision to the paper without requiring any correction.
+
