@@ -829,16 +829,20 @@ right-boundary information reaches the center within a finite constant, not
 after $n'$ steps).
 
 The lifting lemma's inductive structure suggests a resolution.  One natural
-candidate is the naive reduction $(n', 2n'{-}6) \to (n'{-}1, 2n'{-}8)$;
-however, computation shows this \emph{fails}: the predecessor $n'{-}1$ has no
-large-$m$ SubcaseB case at all.  The large-$m$ SubcaseB pairs appear
-at $(n', n'{+}1)$ with $n'{-}1$ clean, so the induction cannot close by
-simple recursion on the large-$m$ family.
+candidate is the naive reduction $(n', 2n'{-}6) \to (n'{-}1, 2n'{-}8)$.
+Computation reveals a deterministic parity split: this reduction
+\emph{succeeds} when $n' \equiv 2 \pmod{4}$ (reducing to a large-$m$ case at
+$n'-1 \equiv 1 \pmod 4$) but \emph{fails} when $n' \equiv 1 \pmod{4}$
+(the predecessor $n'{-}1 \equiv 0 \pmod 4$ carries no large-$m$ SubcaseB
+event).  The large-$m$ SubcaseB pairs therefore appear in chains
+$(n', n'{+}1)$ with $n' \equiv 1 \pmod{4}$, where the $n'{+}1$ member reduces
+to its $n'$ neighbour but the $n'$ member has no large-$m$ predecessor.
 
-This leaves two candidate paths: (i)~the inductive step reduces a large-$m$
-case at $n'$ to a \emph{small}-$m$ case at $n'{-}1$ (non-trivially, via the
-lifting lemma's algebraic structure), or (ii)~explicit witnesses for the large-$m$
-family are constructed separately, analogously to the \texttt{ge}-block
+This leaves two candidate paths: (i)~path (i) covers $n' \equiv 2 \pmod{4}$
+cases via the parity reduction above, while $n' \equiv 1 \pmod{4}$ cases
+require either a further reduction to a \emph{small}-$m$ case (via the
+lifting lemma's algebraic structure) or (ii)~explicit witnesses for the
+large-$m$ family constructed separately, analogously to the \texttt{ge}-block
 witnesses for $n' \leq 3086$ (which already include large-$m$ witnesses, e.g.\
 $m = 6164$ at $n' = 3085$).  Whether either path extends to all $n' \geq 3087$
 is the \emph{second critical open subproblem}, alongside determining whether
