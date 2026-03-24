@@ -1,5 +1,135 @@
 # Rule 30 Prize 3 — Persistent Research Findings
 
+## Loop 48 findings (2026-03-24) — Attack: discussion section and bridge argument
+
+### Computation run: adversarial_loop48.py
+
+**Script**: `/Users/jonathanhill/src/p2p/research/adversarial_loop48.py`
+**Runtime**: ~15s (dominated by ANF computation for K=7: 128 Rule-30 simulations)
+
+---
+
+### Target: bridge from query complexity to Prize 3 TM-time complexity
+
+**Paper claim (abstract, lines 69-73)**: "This is directly relevant to Wolfram Prize 3
+(which asks whether computing the n-th center-column value from index n requires Omega(n)
+effort), though completing the connection to Wolfram's TM-complexity model requires one
+additional bridge argument, discussed in Section:discussion."
+
+**Paper claim (discussion section)**: The Omega(n) lower bound "holds for any sequential
+model in which each cell read costs at least one step." Section sec:discussion then
+explicitly states: "These are different computational problems" and "Bridging to Prize 3
+requires one of two independent results, neither of which is established here."
+
+---
+
+### Part A: Input size gap
+
+The ratio of (2n+1 cells) to (K = ceil(log2(n)) bits) grows without bound:
+
+| n       | K=ceil(log2(n)) | 2n+1 cells | ratio |
+|---------|-----------------|------------|-------|
+| 10      | 4               | 21         | 5.2x  |
+| 100     | 7               | 201        | 28.7x |
+| 1000    | 10              | 2001       | 200x  |
+| 10000   | 14              | 20001      | 1429x |
+
+Our Omega(n) bound refers to the number of cells in the general input configuration c.
+In Prize 3's model, n is the input (K bits). "Omega(n) effort" in Prize 3's model means
+Omega(2^K) steps — EXPONENTIAL in input size. Our result gives no bound on this.
+
+---
+
+### Part B: Three bounds compared
+
+| n     | K | trivial Omega(K) | our Omega(n) queries | Prize 3 needs          |
+|-------|---|-----------------|----------------------|------------------------|
+| 10    | 4 | 4               | 21                   | Omega(2^4) on K-bit n  |
+| 100   | 7 | 7               | 201                  | Omega(2^7) on K-bit n  |
+| 1000  |10 | 10              | 2001                 | Omega(2^10) on K-bit n |
+| 10000 |14 | 14              | 20001                | Omega(2^14) on K-bit n |
+
+---
+
+### Part C: The compressibility gap — Prize 3 input is ALWAYS e_n
+
+For Prize 3, the initial configuration is ALWAYS e_n = single 1 at position n.
+Given integer n, ALL 2n+1 cells of e_n are immediately computable in O(1):
+  e_n[k] = 1 iff k == n.
+
+**This means our query lower bound is vacuously inapplicable to Prize 3's exact model.**
+There is no adversarial input — the hard-case spike witnesses that drive our essentiality
+proof NEVER appear in Prize 3's computation. Prize 3 only asks about the fixed sequence
+s(n) = rule30_n(e_n), and e_n has zero unpredictable cells.
+
+Verified: for n=5,6,7 — tape length 2n+1, exactly 1 nonzero cell, s(5)=1, s(6)=0, s(7)=0.
+
+---
+
+### Part D: ANF degree (paper's own remark — verified correct)
+
+ANF degree of n |-> s(n) as K-bit Boolean function:
+
+| K | n_max | ANF degree | full degree? |
+|---|-------|------------|--------------|
+| 2 | 4     | 2          | YES          |
+| 3 | 8     | 3          | YES          |
+| 4 | 16    | 4          | YES          |
+| 5 | 32    | 4          | NO (paper correct: K=5 gives degree 4) |
+| 6 | 64    | 6          | YES          |
+| 7 | 128   | 7          | YES          |
+
+The paper's Remark on ANF degree is verified correct. Full ANF degree K gives
+Omega(K) = Omega(log n) in the bit-query model. The paper correctly notes this
+implies only Omega(log log n) for depth — MUCH weaker than the conjectured Omega(n).
+
+---
+
+### Four logical gaps identified
+
+**GAP 1 (Critical, acknowledged in paper)**: Different computational models.
+  Our result: Omega(n) queries on GENERAL c (adversarial, 2n+1 cells).
+  Prize 3: steps on FIXED e_n (input is integer n, K = O(log n) bits).
+  The initial config is fully determined by n — zero query cost. Our bound does not apply.
+
+**GAP 2 (Critical, acknowledged)**: Input size mismatch.
+  Our Omega(n) is in terms of config length. Prize 3's Omega(n) would be Omega(2^K) —
+  exponential in the actual input size. Our result gives no such bound.
+
+**GAP 3 (Acknowledged as open)**: Incompressibility of center column.
+  Bridge requires: K(s(0),...,s(n)) >= alpha*n. This is equivalent to Prize 3 itself.
+  Our result does not contribute to proving this.
+
+**GAP 4 (Acknowledged)**: Razborov-Rudich barrier.
+  Our query result avoids RR (correct). But the bridge TO Prize 3 via circuit complexity
+  cannot avoid it. The paper correctly flags this.
+
+---
+
+### Verdict on "directly relevant" (abstract lines 69-73)
+
+**ASSESSMENT**: The discussion section (sec:discussion) is the most transparent and
+carefully written part of the paper. It correctly states "These are different
+computational problems" and lists two bridge results "neither of which is established here."
+The final sentence — "Our essentiality theorem constitutes necessary groundwork; it is
+not itself sufficient for Prize 3" — is accurate.
+
+**One genuine concern**: The abstract phrase "directly relevant" is slightly too strong.
+Our hard-case witnesses (spike configurations) never appear in Prize 3's computation.
+The result is mathematically related but the logical gap is not bridgeable within the
+sensitivity/essentiality framework alone (as the paper itself says). The discussion
+section walks this back correctly, but the abstract creates a misleading initial impression.
+
+**Actionable fix**: In the abstract, change "This is directly relevant to Wolfram Prize 3"
+to "This is related to Wolfram Prize 3" and add "(for an algorithm receiving a general
+initial configuration as input; the fixed-input Prize 3 model requires further work)."
+
+**No hidden logical errors found**: The four gaps are all explicitly acknowledged in
+sec:discussion. The bridge section is honest and clear. The paper would survive peer
+review on this section — the only risk is if a referee reads only the abstract.
+
+---
+
 ## Loop 47 findings (2026-03-24) — Attack 1: m in [40,60]; Attack 2: weakest sentence
 
 ### Computation run: adversarial_loop47.py
