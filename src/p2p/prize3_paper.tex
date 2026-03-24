@@ -671,21 +671,19 @@ The inactive set is $\{18, 32, 40, 42, \ldots\}$, and the active set is
 $M_{\mathrm{act}} = \{4, 6, 8, 10, 12, 14, 16, 20, 22,
 24, 26, 28, 30, 34, 36, 38\}$.
 
-\begin{remark}[Algebraic structure of inactive positions within $[4,38]$]
+\begin{remark}[Arithmetic structure of inactive positions within $[4,38]$]
 \label{rem:inactivestructure}
-The two inactive positions in $[4,38]$ share a 2-adic structure.
-Let $v_2(m)$ denote the 2-adic valuation and let
-$\mathrm{odd}(m) = m/2^{v_2(m)}$ be the odd part.
-Then $m \in \{18, 32\}$ satisfies:
-$m = 18$: $v_2 = 1$ and $\mathrm{odd}(18) = 9 = 3^2$ (a perfect square);
-$m = 32$: $v_2(32) = 5 \geq 5$ (a high power of~2).
-The active positions in $[4,38]$ satisfy neither condition.
-This characterization correctly classifies all 18 even positions in $[4,38]$
-and predicts $m = 50$ inactive ($v_2 = 1$, $\mathrm{odd}(50) = 25 = 5^2$), consistent
-with the absence of SubcaseB for $m = 50$ in loop-24 scans.
-Whether this criterion extends to $m \geq 40$ is open: $m = 40$
-($v_2 = 3$, $\mathrm{odd}(40) = 5$, neither condition) is known inactive,
-so the criterion requires an additional clause.
+The two inactive positions in $[4,38]$ share a 2-adic structure:
+$m=18$ has $v_2(18)=1$ with odd part $9=3^2$ (a perfect square);
+$m=32$ has $v_2(32)=5$ (a pure high power of~2).
+The 16 active positions satisfy neither condition.
+This pattern correctly classifies all 18 even positions in $[4,38]$ and
+predicts $m=50$ inactive ($\mathrm{odd}(50)=25=5^2$), consistent with scans.
+\emph{However}, the criterion fails immediately beyond $[4,38]$:
+$m=40$ ($v_2=3$, $\mathrm{odd}=5$) and $m=42$ ($v_2=1$, $\mathrm{odd}=21$, not a square)
+are both confirmed inactive despite satisfying neither condition.
+Inactivity appears to be a dynamical property of the Rule~30 spike-propagation,
+not an arithmetic one; the 2-adic coincidence within $[4,38]$ has no known explanation.
 \end{remark}
 
 Computational evidence strongly supports that no active positions exist above $m = 38$:
