@@ -72,7 +72,8 @@ value from index $n$ requires $\Omega(n)$ effort), though completing the connect
 Wolfram's TM-complexity model requires one additional bridge argument, discussed in
 Section~\ref{sec:discussion}.
 
-The result is formalized in Lean~4 (source at \url{https://github.com/qizwiz/rule30-ski-research/tree/autoresearch/mar20}).
+The result is formalized in Lean~4.\footnote{Source:
+\url{https://github.com/qizwiz/rule30-ski-research/tree/autoresearch/mar20}}
 Conditional on \texttt{lifting\_lemma} (an open conjecture), \texttt{rule30\_prize3} follows
 by a clean induction from two unconditionally proved boundary theorems; the boundary
 theorems themselves carry no axioms.  The lifting conjecture is computationally verified for
@@ -85,7 +86,7 @@ giving $P = \mathrm{lcm} = 32768$ for all confirmed active positions; and a
 right-boundary family at position $m = 2n'{-}6$ (the unique boundary position
 that is SubcaseB), which shifts linearly with $n'$ and appears at density
 exactly~$\frac{1}{2}$ (mod-4 rule: $n'\equiv 1,2\pmod{4}$, verified densely for
-$n'\in[3089,15000]$ with no exceptions (11912 values; loop-26 to 7000, loop-32 to 10000, loop-37 to 15000) and
+$n'\in[3089,15000]$ with no exceptions (11912 values; loops 26/32/37) and
 spot-checked at 13 consecutive values near $n'=50003$ (loop-31, ${\approx}2.6$\,s each);
 anti-correlation $F+G=1$ confirmed throughout the dense range).  Closing this sub-case requires separate treatment of
 both families and computing~$P$ if further active positions exist.
@@ -270,7 +271,8 @@ Table~\ref{tab:status} lists the key components.
 
 \begin{table}[h]
 \centering
-\begin{tabular}{@{}lll@{}}
+\footnotesize
+\begin{tabular}{@{}p{5.5cm}ll@{}}
 \toprule
 \textbf{Lean identifier} & \textbf{Status} & \textbf{Description} \\
 \midrule
@@ -279,16 +281,15 @@ Table~\ref{tab:status} lists the key components.
 \texttt{backwardFillList\_caStep\_inverse} & Proved & Backward-fill inverse \\
 \texttt{left\_boundary\_essential}  & \textbf{Proved} & Left boundary, all $n$ \\
 \texttt{right\_boundary\_essential} & \textbf{Proved} & Right boundary, all $n$ \\
-\texttt{all\_cells\_essential\_by\_induction} & Cond.\ proved$^\dagger$ & Full induction (uses \texttt{lifting\_lemma}) \\
-\texttt{rule30\_prize3} & Cond.\ proved$^\dagger$ & $\forall\,n\,k,\ \Essential(n,k)$ \\
+\texttt{all\_cells\_essential\_by\_induction} & Cond.$^\dagger$ & Full induction \\
+\texttt{rule30\_prize3} & Cond.$^\dagger$ & $\forall\,n\,k,\ \Essential(n,k)$ \\
 \midrule
-\texttt{lifting\_lemma} & Conjecture$^*$ & $\Essential(n,k) \Rightarrow \Essential(n{+}1,k{+}1)$ \\
+\texttt{lifting\_lemma} & Open$^*$ & $\Essential(n,k) \Rightarrow \Essential(n{+}1,k{+}1)$ \\
 \bottomrule
-\multicolumn{3}{l}{\footnotesize $^\dagger$ Path~A (\texttt{rule30\_prize3}) only: proved from boundary theorems + \texttt{lifting\_lemma}; no \texttt{sorry}/\texttt{admit} in this path.}\\
-\multicolumn{3}{l}{\footnotesize \phantom{$^\dagger$} Path~B (\texttt{rule30\_prize3\_direct}) uses \texttt{subcaseB\_resolution} instead and has a \texttt{sorry} for $n' \geq 3087$; see Sec.~\ref{sec:axioms}.}\\
-\multicolumn{3}{l}{\footnotesize $^*$ Stated as \texttt{axiom} in Lean; computationally verified $n \leq 20$;}\\
-\multicolumn{3}{l}{\footnotesize \phantom{$^*$} Lean \texttt{native\_decide} for $n \leq 3086$; SubcaseB ($n \geq 3087$) open.}
 \end{tabular}
+\smallskip\\
+{\footnotesize $^\dagger$ Proved from boundary theorems $+$ \texttt{lifting\_lemma} (Path~A); no \texttt{sorry}. Path~B uses \texttt{subcaseB\_resolution} with a \texttt{sorry} for $n'\geq 3087$.}\\
+{\footnotesize $^*$ Axiom in Lean; verified $n\leq 20$ computationally, $n\leq 3086$ by \texttt{native\_decide}; SubcaseB at $n\geq 3087$ open.}
 \caption{Lean formalization status.  One open mathematical gap (SubcaseB, $n \geq 3087$); two proof paths each covering it with one axiom.}
 \label{tab:status}
 \end{table}
@@ -335,9 +336,8 @@ The formalization contains \textbf{two domain axioms} across two proof paths:
 
 \end{itemize}
 The \texttt{\#print axioms rule30\_prize3} output (Path~A) lists only
-\texttt{lifting\_lemma} plus standard Lean/Mathlib axioms.
-\texttt{\#print axioms rule30\_prize3\_direct} (Path~B) lists
-\texttt{subcaseB\_resolution} instead.
+\texttt{lifting\_lemma} plus standard Lean/Mathlib axioms;
+Path~B (\texttt{rule30\_prize3\_direct}) lists \texttt{subcaseB\_resolution} instead.
 
 Both paths have precisely one open mathematical gap: the SubcaseB structure at $n \geq 3087$.
 The lifting property holds precisely for the 6 left-permutive rules $\{30, 45, 75, 120, 135, 225\}$
@@ -420,11 +420,13 @@ appear at $n' = 3093, 3101, 3109, \ldots$ (every 8 steps); for $m = 6$, $m = 14$
 and $m = 22$, similarly periodic patterns persist indefinitely.
 
 \textbf{Period structure and max-$m$ growth.}  The existing Lean lemmas in
-\texttt{CausalConeLemmas.lean} establish that the \emph{open-boundary} (causal-cone)
+\texttt{CausalConeLemmas}\allowbreak\texttt{.lean} establish that the
+\emph{open-boundary} (causal-cone)
 evolution starting from a spike at position~6 has period~16, and starting from
 position~20 has period~256; these are certified by \texttt{native\_decide} on finite
 state spaces.  Empirical computation confirms that the SubcaseB condition for
-$m \in \{4, 6, 8, 10, 12, 14, 16, 20\}$ is periodic with period at most~256 in $n'$.
+all eight active positions $m \leq 20$
+is periodic in~$n'$ with period at most~256.
 
 However, the spike at position $m=36$ is first verified to satisfy the SubcaseB
 condition at $n' = 4113$ (offset~$1026 = 4{\times}256+2$ from base~3087), which is
@@ -504,7 +506,8 @@ $n' \geq 3087$, which is itself a periodicity argument.
 inactive $m$: prove $F(n,m)=0 \Rightarrow G(n,m)=0$ for all $n \geq 3087$.
 
 A structural lemma clarifies the algebraic relationship.  Define
-$H(n') = \text{center value after } n'+1 \text{ steps from spike at } \mathtt{last}=2n'{+}2 \text{ alone}$.
+$H(n')$ as the center value after $n'{+}1$ steps from a spike at
+$\mathtt{last}=2n'{+}2$ alone.
 
 \begin{lemma}[Last-spike lemma]
 $H(n') = 1$ for all $n' \geq 0$.
@@ -553,12 +556,18 @@ Defining $I(n',m) := F \oplus G \oplus 1$, the proof targets become:
     periodicity reduces this to checking one period starting from $n'=3087$.
 \end{itemize}
 
-\emph{Part B -- fixed-$m$ active positions.}  For $M_{\mathrm{fix}} = \{4, 6, 8,
-10, 12, 14, 16, 20, 22, 24, 26, 28, 30, 34, 36, 38, \ldots\}$, the cluster
-period $P_m$ grows with $m$: empirically $m=4\to 8$, $m=6\to 16$,
-$m=8\to 32$, $m=10,12,14\to 64$, $m=16,20,22\to 256$,
-$m=24\to 512$, $m=26\to 1024$, $m=28\to 2048$, $m=30\to 4096$, $m=34\to 8192$,
-$m=36\to 16384$, $m=38\to 32768$.
+\emph{Part B -- fixed-$m$ active positions.}  For $M_{\mathrm{act}}$
+(the 16 active positions), the cluster period $P_m$ grows with $m$ (empirical):
+\[
+  m=4\!\to\!8,\; m=6\!\to\!16,\; m=8\!\to\!32,\;
+  m\in\{10,12,14\}\!\to\!64,\; m\in\{16,20,22\}\!\to\!256,
+\]
+\[
+  m=24\!\to\!512,\; m=26\!\to\!1024,\; m=28\!\to\!2048,\; m=30\!\to\!4096,
+\]
+\[
+  m=34\!\to\!8192,\; m=36\!\to\!16384,\; m=38\!\to\!32768.
+\]
 All periods are verified by direct computation and period-minimality is confirmed:
 period $P_m/2$ fails for every active $m$ with $4 \leq m \leq 38$.
 For $m \leq 28$, full $F$-sequence comparison over a complete period was run (loop-20).
@@ -573,21 +582,18 @@ $P/2$ fails at the very first check point $n'=3087$:
   \item $m=38$: $P=16384$ fails at $n'=3087$; $F(3087,38)=1 \neq 0 = F(19471,38)$.
 \end{itemize}
 Each full-period spot-check (4096 points) passes, confirming $P$ is correct.
-Moreover, for $m \in \{34, 36, 38\}$ the F-period certificates themselves confirm minimality
-(loop-39, 2026-03-24): $\texttt{caEvolve}\,P_m\,(\texttt{spike}_m(2P_m{+}2m{+}1)) = \texttt{spike}_m(2m{+}1)$ holds
-while $\texttt{caEvolve}\,(P_m/2)\,(\texttt{spike}_m(P_m{+}2m{+}1)) \neq \texttt{spike}_m(2m{+}1)$ fails
-(mismatch at position~0 in all three cases; $\leq 0.3$\,s each via numpy vectorization).
+Moreover, for $m \in \{34, 36, 38\}$ the F-period certificates confirm minimality
+(loop-39, 2026-03-24): the period-$P_m$ certificate holds while the period-$P_m/2$
+certificate fails at position~0 in all three cases ($\leq 0.3$\,s each via numpy).
 
 The period structure has two regimes.
 For $m \geq 24$: a \emph{clean doubling} holds with each successive active position,
-irrespective of inactive positions.  The active sequence
-$\{24, 26, 28, 30, \mathbf{32\text{ (inactive)}}, 34, 36, 38\}$ yields periods
-$\{512, 1024, 2048, 4096, -, 8192, 16384, 32768\} = 2^{9},\ldots,2^{15}$,
-verified by direct computation ($m=36$ hits at $4113, 4117, 20497=4113{+}16384,
-20501=4117{+}16384, 24593=8209{+}16384$; $m=38$ first hits at $8210, 8214$ with
-period $32768$ confirmed by 132-point check
-(loop-30 exhaustive $G$-check of all 2947 $F{=}0$ candidates in $[3087,9000)$
-confirms $n'=4118$ is a $(1,0)$ event, \emph{not} SubcaseB)).
+irrespective of inactive positions.  Active $m \in \{24,\ldots,38\}$
+skip the inactive $m=32$ and give $P_m = 2^{9}, 2^{10},\ldots,2^{15}$
+in order, verified by direct computation.
+$m=36$: SubcaseB hits confirm period $2^{14}$;
+$m=38$: period $2^{15}$ confirmed by 132-point check
+(loop-30 exhaustively $G$-checked all 2947 $F{=}0$ candidates in $[3087,9000)$).
 
 For $m < 24$: the pattern is irregular with two \emph{plateaus}.
 $m \in \{10, 12, 14\}$ all share period~$64 = 2^6$;
@@ -605,7 +611,9 @@ The doubling law does \emph{not} hold universally across all active $m$.
 
 \emph{F-period certificates (Python-verified, 2026-03-24).}
 The Lean-style certificate
-$\texttt{caEvolve}\,P_m\,(\texttt{spike}_m(2P_m{+}2m{+}1)) = \texttt{spike}_m(2m{+}1)$
+\[
+  \texttt{caEvolve}\;P_m\;(\texttt{spike}_m(2P_m{+}2m{+}1)) \;=\; \texttt{spike}_m(2m{+}1)
+\]
 holds for $m \in \{18, 32\}$ (loop-27: $P=256$ and $P=4096$ respectively, both minimal).
 More strikingly, \emph{the doubling law continues for the first two inactive positions}:
 \begin{itemize}
@@ -667,23 +675,22 @@ Furthermore, a layered sweep confirms no active $m \geq 40$:
   This supersedes the prior step-500 sparse scan ($\approx 0.2\%$ detection rate)
   with full triangle-method dense coverage to $n'=20001$.
 \end{itemize}
-The inactive set is $\{18, 32, 40, 42, \ldots\}$, and the active set is
-$M_{\mathrm{act}} = \{4, 6, 8, 10, 12, 14, 16, 20, 22,
-24, 26, 28, 30, 34, 36, 38\}$.
+The inactive set within $[4,38]$ is $\{18, 32\}$ (with $\{40, 42, \ldots\}$ inactive above), and the active set is
+\[
+  M_{\mathrm{act}} = \{4, 6, 8, 10, 12, 14, 16, 20, 22, 24, 26, 28, 30, 34, 36, 38\}.
+\]
 
-\begin{remark}[Arithmetic structure of inactive positions within $[4,38]$]
+\begin{remark}[2-adic criterion for inactive positions]
 \label{rem:inactivestructure}
 The two inactive positions in $[4,38]$ share a 2-adic structure:
-$m=18$ has $v_2(18)=1$ with odd part $9=3^2$ (a perfect square);
-$m=32$ has $v_2(32)=5$ (a pure high power of~2).
-The 16 active positions satisfy neither condition.
-This pattern correctly classifies all 18 even positions in $[4,38]$ and
-predicts $m=50$ inactive ($\mathrm{odd}(50)=25=5^2$), consistent with scans.
-\emph{However}, the criterion fails immediately beyond $[4,38]$:
-$m=40$ ($v_2=3$, $\mathrm{odd}=5$) and $m=42$ ($v_2=1$, $\mathrm{odd}=21$, not a square)
-are both confirmed inactive despite satisfying neither condition.
-Inactivity appears to be a dynamical property of the Rule~30 spike-propagation,
-not an arithmetic one; the 2-adic coincidence within $[4,38]$ has no known explanation.
+$m=18$ has $v_2(18)=1$ with odd part $9=3^2$ (perfect square);
+$m=32$ has $v_2(32)=5$ (pure power of~2).  The 16 active positions satisfy
+neither condition, giving a criterion that classifies all 18 even positions
+in $[4,38]$ correctly and predicts $m=50$ inactive ($\mathrm{odd}(50)=25=5^2$).
+\emph{However}, the criterion fails beyond $[4,38]$: $m=40$ ($v_2=3$, odd~$5$)
+and $m=42$ ($v_2=1$, odd~$21$) are both confirmed inactive, yet neither satisfies
+the criterion.  Inactivity is a dynamical property, not an arithmetic one;
+the 2-adic coincidence within $[4,38]$ has no known explanation.
 \end{remark}
 
 Computational evidence strongly supports that no active positions exist above $m = 38$:
@@ -730,20 +737,25 @@ and the fixed-$m$ family has a completely determined finite scope.
   in Part~C).
 \end{enumerate}
 
+\begin{sloppypar}
 Note: the period-$P_m$ certificate for position~$m$ checks
 $\texttt{caEvolve}\,P_m\,(\texttt{spike}_m(2P_m{+}2m{+}1)) = \texttt{spike}_m(2m{+}1)$,
-which processes $\sum_{k=0}^{P_m-1}(2P_m{+}2m{+}1-2k) = P_m(P_m{+}2m{+}1)$ list cells in total.
+which processes $P_m(P_m{+}2m{+}1)$ list cells in total.
 For $m=36$ ($P=16384$): $\approx 2.7 \times 10^8$ cells; for $m=38$ ($P=32768$):
-$\approx 1.1 \times 10^9$ cells (verified correct in Python with numpy vectorization in $\approx 0.3$\,s;
+$\approx 1.1 \times 10^9$ cells (verified in Python with numpy in $\approx 0.3$\,s;
 in native compiled code, $\approx 1$--$30$\,s expected, but may require
-a packed \texttt{BitVec} or \texttt{Array Bool} implementation rather than
-\texttt{List Bool} for the largest $m$ due to GC allocation pressure).  Assuming no
-active positions above $m=38$ (supported by extended loop-16 scans: $m=40$ to $n'=110000$
-with resonance test at $n'=16403$ giving $(0,0)$; $m=42,\ldots,300$ (even) to $n'=20001$
-by triangle method, all negative; loops 24/32/34/36, 2026-03-24), the overall period is
-$P = \mathrm{lcm}(P_m : m \in M_{\mathrm{act}}) = 32768$, fully determined.  The first open subproblem is whether active positions exist beyond
-$m = 300$ (triangle-method dense scan $m \leq 300$, $n' \leq 20001$ verified 2026-03-24;
-loop-36 upgraded $m=202$--$300$ from step-500 sparse ${\sim}0.2\%$ to full triangle-method density); if not,
+a packed \texttt{BitVec} or \texttt{Array Bool} rather than
+\texttt{List Bool} for the largest $m$ due to GC pressure).
+Assuming no active positions above $m=38$ (supported by extended scans:
+$m=40$ to $n'=110000$ with resonance test at $n'=16403$ giving $(0,0)$;
+$m=42,\ldots,300$ (even) to $n'=20001$ by triangle method, all negative;
+loops 24/32/34/36, 2026-03-24), the overall period is
+$P = \mathrm{lcm}(P_m : m \in M_{\mathrm{act}}) = 32768$, fully determined.
+\end{sloppypar}
+
+The first open subproblem is whether active positions exist beyond $m = 300$
+(dense scan $m \leq 300$, $n' \leq 20001$ verified; loop-36 upgraded
+$m=202$--$300$ from step-500 sparse to full triangle-method density); if not,
 $P = 32768$ exactly and Part~B has finite scope.
 
 \textbf{Resonance tests for $m=42,44$ (loop-41, 2026-03-24).}
@@ -849,10 +861,10 @@ Bridging to Prize~3 requires one of two independent results, neither of which is
 established here:
 \begin{itemize}
   \item \emph{Incompressibility of the center column}: prove that the Kolmogorov
-    complexity $K(c[0],\ldots,c[n]) \geq \alpha n$ for some $\alpha > 0$ and all
-    large $n$.  A sub-linear TM would then constitute a compression below this
-    threshold, a contradiction.  This is equivalent to Prize~3 restated in
-    information-theoretic language.
+    complexity of $(c[0],\ldots,c[n])$ satisfies $K \geq \alpha n$ for some
+    $\alpha > 0$ and all large~$n$.  A sub-linear TM would then constitute a
+    compression below this threshold, a contradiction.  This is equivalent to
+    Prize~3 restated in information-theoretic language.
   \item \emph{Circuit/TM lower bound}: establish that no $o(n)$-depth circuit
     family (or $o(n)$-time Turing machine receiving $n$ as input) computes the
     center-column value $c[n]$.  The $\Omega(n)$ query-complexity lower bound proved
