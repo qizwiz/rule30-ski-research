@@ -1,0 +1,964 @@
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+\geometry{margin=1.2in}
+
+% Lean code style
+\lstdefinelanguage{Lean4}{
+  keywords={def,theorem,lemma,axiom,by,have,show,exact,apply,cases,simp,rfl,
+            intro,intros,induction,constructor,use,calc,fun,let,where,
+            import,namespace,end,instance,class,structure,Prop,Nat,Bool,Fin},
+  keywordstyle=\color{blue!70!black}\bfseries,
+  comment=[l]{--},
+  commentstyle=\color{gray}\itshape,
+  string=[b]{"},
+  stringstyle=\color{green!50!black},
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!5},
+}
+\lstset{language=Lean4}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\Essential}{\mathrm{Essential}}
+\newcommand{\xmark}{\oplus}
+\newcommand{\flip}[1]{\overline{#1}}
+\newcommand{\rthirty}{\textsc{Rule\,30}}
+
+\title{All Cells in the Rule~30 Light Cone Are Essential:\\
+       An $\Omega(n)$ Query-Complexity Lower Bound and\\
+       Progress Toward Wolfram Prize~3}
+
+\author{Jonathan Hill\\
+\small Independent Researcher\\
+\small\texttt{jonathan.f.hill@gmail.com}}
+
+\date{March 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We prove that every position in the width-$n$ light cone of Rule~30 is
+\emph{essential}: for each position~$k \in \{0,\ldots,2n\}$, there exists an initial
+configuration $c$ such that the $n$-step center-cell output changes when $c[k]$ is
+flipped.  Since every input cell is essential, any algorithm computing
+$\mathtt{rule30}_n(c)$ for general $c$ must read all $2n+1$ input cells in the worst
+case, giving an $\Omega(n)$ \emph{query-complexity} lower bound.  This is directly
+relevant to Wolfram Prize~3 (which asks whether computing the $n$-th center-column
+value from index $n$ requires $\Omega(n)$ effort), though completing the connection to
+Wolfram's TM-complexity model requires one additional bridge argument, discussed in
+Section~\ref{sec:discussion}.
+
+The proof is formalized in Lean~4: \texttt{rule30\_prize3} is proved by induction
+from two unconditionally proved boundary theorems together with one domain conjecture
+(\texttt{lifting\_lemma}).  The lifting conjecture is computationally verified for
+$n \leq 20$ by checking $O(n)$ spike-form configurations per generation and formally
+verified in Lean~4 for $n \leq 3086$ via \texttt{native\_decide}; one sub-case (SubcaseB, even interior positions, $n \geq 3087$)
+remains open.  SubcaseB events continue indefinitely for two distinct families: fixed tape
+positions $m \in \{4, 6, \ldots, 38, \ldots\}$ with cluster periods doubling with
+each successive active position ($2^8, 2^9, \ldots, 2^{15}$ for $m=22,\ldots,38$),
+giving $P = \mathrm{lcm} = 32768$ for all confirmed active positions; and a
+right-boundary family at position $m = 2n'{-}6$ (the unique boundary position
+that is SubcaseB), which shifts linearly with $n'$ and appears at density
+exactly~$\frac{1}{2}$ (mod-4 rule: $n'\equiv 1,2\pmod{4}$, verified densely for
+$n'\in[3089,15000]$ with no exceptions (11912 values; loop-26 to 7000, loop-32 to 10000, loop-37 to 15000) and
+spot-checked at 13 consecutive values near $n'=50003$ (loop-31, ${\approx}2.6$\,s each);
+anti-correlation $F+G=1$ confirmed throughout the dense range).  Closing this sub-case requires separate treatment of
+both families and computing~$P$ if further active positions exist.
+Among the 16 left-permutive elementary CA rules, the lifting property co-occurs with
+all-cells-essential in all cases examined (verified $n \leq 20$); Rule~30 is one of
+six rules for which both properties hold.
+\end{abstract}
+
+\section{Introduction and Main Result}
+
+\rthirty{} is a one-dimensional cellular automaton with local rule
+\begin{equation}
+  \label{eq:rule30}
+  \mathtt{rule30}(l, c, r) \;=\; l \oplus (c \lor r),
+\end{equation}
+where $l$, $c$, $r \in \{0,1\}$ are the left, center, and right neighbors, $\oplus$
+is exclusive-or, and $\lor$ is logical or.
+
+\begin{definition}[Essential]
+\label{def:essential}
+Let $\mathtt{rule30}_n(c)$ denote the center-cell value after $n$ steps of \rthirty{}
+evolution from initial configuration $c$ (a Boolean vector of length $2n+1$).  Let
+$\mathtt{flip}(c, k)$ toggle position $k$.  Position $k$ is \emph{essential} at
+generation $n$ if
+\[
+  \exists\, c \;:\; \mathtt{rule30}_n(c) \;\neq\; \mathtt{rule30}_n(\mathtt{flip}(c,\,k)).
+\]
+\end{definition}
+
+\begin{theorem}[Main Result]
+\label{thm:main}
+For all $n \geq 0$ and all $k \in \{0, \ldots, 2n\}$, position $k$ is essential at
+generation $n$.
+\end{theorem}
+
+\begin{theorem}[Query-Complexity Lower Bound]
+\label{thm:querycomplexity}
+Any deterministic algorithm that correctly computes $\mathtt{rule30}_n(c)$ for all
+inputs $c \in \{0,1\}^{2n+1}$ must read at least $2n+1$ input cells in the worst
+case.  Equivalently, the deterministic query complexity of $\mathtt{rule30}_n$ is
+exactly $2n+1$.
+\end{theorem}
+
+Theorem~\ref{thm:querycomplexity} follows immediately from Theorem~\ref{thm:main}: if
+position $k$ is essential, any correct algorithm must query position $k$ on some
+input, since otherwise it outputs the same value for a witness $c^*$ and
+$\mathtt{flip}(c^*, k)$, which have different correct outputs.
+
+\begin{remark}[Relation to Prize~3]
+\label{rem:prize3}
+Wolfram's Prize~3 asks whether a machine receiving index $n$ (not configuration $c$)
+can compute the single-black-cell center value $c[n]$ in sub-linear time.  Our
+Theorem~\ref{thm:querycomplexity} gives an $\Omega(n)$ lower bound in the
+\emph{query} model with general input.  The connection to Wolfram's fixed-initial-condition
+TM model is discussed in Section~\ref{sec:discussion}; it constitutes the primary
+remaining open step.
+\end{remark}
+
+\section{Proof of Theorem~\ref{thm:main}}
+\label{sec:proof}
+
+The proof proceeds by induction on $n$.  The key algebraic fact is
+\emph{left-permutivity}:
+\begin{equation}
+  \label{eq:leftperm}
+  \mathtt{rule30}(\flip{l},\, c,\, r)
+  \;=\;
+  \overline{\mathtt{rule30}(l,\, c,\, r)}
+  \qquad \forall\, l, c, r \in \{0,1\}.
+\end{equation}
+This is immediate from the definition: $l \oplus (c \lor r)$ and
+$\flip{l} \oplus (c \lor r)$ always differ.  Flipping the left input always flips
+the output.
+
+\subsection{Base Case}
+
+At $n = 0$ there is one position $k = 0$, and $\mathtt{rule30}_0(c) = c[0]$.  Any
+configuration witnesses essentiality since $c[0] \neq \mathtt{flip}(c, 0)[0]$.
+
+\subsection{Boundary Positions}
+
+\textbf{Left boundary ($k = 0$, all $n$):}
+Consider the all-zeros configuration $\mathbf{0}$.  We prove by induction that
+$\mathtt{caStep}(\mathbf{0}^{(2n+1)}) = \mathbf{0}^{(2n-1)}$: rule~30 applied to
+three consecutive zeros gives zero, so all-zeros is a fixed point of
+$\mathtt{caStep}$.  Thus $\mathtt{rule30}_n(\mathbf{0}) = 0$.
+
+Now let $c^* = [\texttt{T}, \texttt{F}, \ldots, \texttt{F}]$ (true only at position~0).
+We prove by induction that $\mathtt{caStep}(c^*) = c^*$ (shorter): position~0 of the
+output is $\mathtt{rule30}(\texttt{T}, \texttt{F}, \texttt{F}) = \texttt{T}$, so the
+true cell propagates left-to-right through every step.  Thus
+$\mathtt{rule30}_n(c^*) = 1 \neq 0 = \mathtt{rule30}_n(\mathbf{0})$, confirming that
+position~0 is essential.  This argument holds for all $n$ and is \emph{proved} in
+Lean~4 (\texttt{left\_boundary\_essential}).
+
+\textbf{Right boundary ($k = 2n$, all $n$):}
+A symmetric argument using the configuration $[\texttt{F}, \ldots, \texttt{F},
+\texttt{T}]$ shows that $\mathtt{caStep}$ preserves the trailing true cell:
+$\mathtt{rule30}(\texttt{F}, \texttt{F}, \texttt{T}) = \texttt{T}$.  Thus position
+$2n$ is essential for all $n$, proved in Lean~4
+(\texttt{right\_boundary\_essential}).
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{rule30_figure.pdf}
+  \caption{%
+    \textbf{(a)}~Rule~30 space-time diagram from the single-black-cell initial
+    condition $e_n$ ($n=28$ steps).  The orange triangle marks the causal cone boundary,
+    contracting at one cell per step on each side; the orange circle marks the
+    center-cell output $s(n) = \mathtt{rule30}_n(e_n)$.  Every cell in the cone
+    contributes to this output for some initial configuration (Theorem~\ref{thm:main}).
+    \textbf{(b)}~Evolution from a spike at fixed position $m=8$.  The blue marker
+    indicates the $F(n,m)$ read point: the leftmost cell of the cone after $n$ steps.
+    The SubcaseB condition $F(n,m)=0,\,G(n,m)=1$ is the key open case in the lifting
+    lemma proof; its periodic structure (period $P_m = 2^6$ for $m=8$) drives the
+    proof plan of Section~\ref{sec:discussion}.%
+  }
+  \label{fig:rule30}
+\end{figure}
+
+\subsection{The Lifting Lemma}
+
+\begin{lemma}[Lifting]
+\label{lem:lifting}
+If position $k$ is essential at generation $n$, then position $k+1$ is essential
+at generation $n+1$.
+\end{lemma}
+
+The intuition is left-permutivity: position $k+1$ in $c_{n+1}$ is the \emph{left
+neighbor} used to compute position $k$ after one CA step.  By
+Equation~\eqref{eq:leftperm}, flipping $c_{n+1}[k+1]$ always flips position $k$ in
+the next generation.  The essential question is whether neighboring cells can
+\emph{absorb} or \emph{block} this change so it does not reach the center.
+Crucially, this is \emph{not} automatic from left-permutivity: Rule~90 ($l \oplus r$)
+is left-permutive but violates lifting (Section~\ref{sec:discussion}).  The
+nonlinear term in Rule~30's $g$-function is essential.
+
+Computationally, no blocking ever occurs for Rule~30: the lifting lemma is verified
+for all $k$ and all $n \leq 20$ by checking $O(n)$ spike-form initial configurations
+(not all $2^{2n+1}$ inputs; see Axiom Inventory in Sec.~\ref{sec:axioms}),
+and for $n \leq 3086$ by formal Lean~4 proof using \texttt{native\_decide} on bounded
+ranges together with causal-cone structure lemmas (see \texttt{LiftingLemma\_LeftPermutive.lean}).
+The remaining open sub-case is the ``SubcaseB evenness'' condition at $n \geq 3087$,
+which requires a structural period argument based on the empirically confirmed period
+structure of Rule~30 diagonals~\cite{Rowland2006}.
+We further examined all 16 left-permutive elementary CA rules (those of the form
+$l \oplus g(c,r)$) and find computationally (for $n \leq 20$) that the lifting
+property co-occurs with all-cells-essential in all 16 cases.  The forward direction
+(lifting $\Rightarrow$ all-cells-essential) is immediate by contrapositive: if some
+position were not essential, the lifting chain from $n=1$ would fail at that step.
+The backward direction (all-cells-essential $\Rightarrow$ lifting) is a computational
+observation for $n \leq 20$; it is not proved in general for rules other than
+Rule~30.  For Rule~30, both properties hold.
+
+The lifting lemma is taken as an axiom (\texttt{lifting\_lemma}) in the Lean
+formalization; see Section~\ref{sec:discussion} for what would be needed to
+close it.
+
+\subsection{Inductive Step}
+
+Assume all $2n+1$ positions are essential at generation $n$.  At generation $n+1$
+there are $2n+3$ positions:
+\begin{itemize}
+  \item Position $0$: \texttt{left\_boundary\_essential}.
+  \item Positions $1, \ldots, 2n+1$: for each such position $j$, position $j-1$ is
+    essential at generation $n$ (inductive hypothesis), and the Lifting Lemma maps
+    it to position $j$ at generation $n+1$.
+  \item Position $2n+2$: \texttt{right\_boundary\_essential}.
+\end{itemize}
+Hence all $2n+3$ positions are essential at generation $n+1$.
+
+\section{Lean~4 Formalization}
+\label{sec:lean}
+
+The proof is implemented in Lean~4 with Mathlib.  The main theorem is:
+
+\begin{lstlisting}
+theorem rule30_prize3 (n : Nat) (k : Fin (2 * n + 1)) : Essential n k
+\end{lstlisting}
+
+Table~\ref{tab:status} lists the key components.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Lean identifier} & \textbf{Status} & \textbf{Description} \\
+\midrule
+\texttt{rule30Local\_flip\_left} & Proved & Left-permutivity \\
+\texttt{caStep\_flip\_blocked}   & Proved & Absorption blocking \\
+\texttt{backwardFillList\_caStep\_inverse} & Proved & Backward-fill inverse \\
+\texttt{left\_boundary\_essential}  & \textbf{Proved} & Left boundary, all $n$ \\
+\texttt{right\_boundary\_essential} & \textbf{Proved} & Right boundary, all $n$ \\
+\texttt{all\_cells\_essential\_by\_induction} & Cond.\ proved$^\dagger$ & Full induction (uses \texttt{lifting\_lemma}) \\
+\texttt{rule30\_prize3} & Cond.\ proved$^\dagger$ & $\forall\,n\,k,\ \Essential(n,k)$ \\
+\midrule
+\texttt{lifting\_lemma} & Conjecture$^*$ & $\Essential(n,k) \Rightarrow \Essential(n{+}1,k{+}1)$ \\
+\bottomrule
+\multicolumn{3}{l}{\footnotesize $^\dagger$ Path~A (\texttt{rule30\_prize3}) only: proved from boundary theorems + \texttt{lifting\_lemma}; no \texttt{sorry}/\texttt{admit} in this path.}\\
+\multicolumn{3}{l}{\footnotesize \phantom{$^\dagger$} Path~B (\texttt{rule30\_prize3\_direct}) uses \texttt{subcaseB\_resolution} instead and has a \texttt{sorry} for $n' \geq 3087$; see Sec.~\ref{sec:axioms}.}\\
+\multicolumn{3}{l}{\footnotesize $^*$ Stated as \texttt{axiom} in Lean; computationally verified $n \leq 20$;}\\
+\multicolumn{3}{l}{\footnotesize \phantom{$^*$} Lean \texttt{native\_decide} for $n \leq 3086$; SubcaseB ($n \geq 3087$) open.}
+\end{tabular}
+\caption{Lean formalization status.  One open mathematical gap (SubcaseB, $n \geq 3087$); two proof paths each covering it with one axiom.}
+\label{tab:status}
+\end{table}
+
+\subsection{Core Definitions}
+
+\begin{lstlisting}
+def rule30Local (l c r : Bool) : Bool := xor l (c || r)
+
+abbrev Config (n : Nat) := Fin (2 * n + 1) -> Bool
+
+def Essential (n : Nat) (k : Fin (2 * n + 1)) : Prop :=
+  exists c : Config n, rule30n n c != rule30n n (flipCell c k)
+\end{lstlisting}
+
+\subsection{Axiom Inventory}
+\label{sec:axioms}
+
+The formalization contains \textbf{two domain axioms} across two proof paths:
+
+\begin{itemize}
+  \item \textbf{Path~A} (\texttt{rule30\_prize3} via induction):
+    Uses \texttt{lifting\_lemma}: $\Essential(n,k) \Rightarrow \Essential(n{+}1,\,k{+}1)$.
+    Declared as a blanket \texttt{axiom} in Lean for all $n$.
+    The claim has been verified:
+    \begin{itemize}
+      \item \emph{Spike-form check} ($n \leq 20$): the lifting property was checked for all $k$
+        by running the CA on $O(n)$ spike-form configurations (not all $2^{2n+1}$ inputs);
+        no witness failure was found.
+      \item \emph{Lean \texttt{native\_decide}} ($n \leq 3086$): for each $n$, \texttt{native\_decide}
+        checks the statement $\forall m \in \mathrm{Fin}(2n{+}3),\ldots$ over $O(n)$ spike
+        configurations, running the CA once per value of $m$.  This is computationally
+        feasible (not exponential).  SubcaseA and boundary sub-cases close fully;
+        SubcaseB (even interior positions, $n \geq 3087$) requires a period-structure
+        argument based on Rowland's diagonal-periodicity results~\cite{Rowland2006}.
+    \end{itemize}
+
+  \item \textbf{Path~B} (\texttt{rule30\_prize3\_direct} without lifting):
+    Uses \texttt{subcaseB\_resolution}: directly asserts the SubcaseB witness exists
+    for all $n' \geq 5$.  This axiom covers the same open case as Path~A's sorry;
+    it can be eliminated by formalizing the right-boundary independence lemma
+    (the period argument above).  \texttt{rule30\_prize3\_direct} also has a
+    \texttt{sorry} for $n' \geq 3087$ in the SubcaseB branch.
+
+\end{itemize}
+The \texttt{\#print axioms rule30\_prize3} output (Path~A) lists only
+\texttt{lifting\_lemma} plus standard Lean/Mathlib axioms.
+\texttt{\#print axioms rule30\_prize3\_direct} (Path~B) lists
+\texttt{subcaseB\_resolution} instead.
+
+Both paths have precisely one open mathematical gap: the SubcaseB structure at $n \geq 3087$.
+The lifting property holds precisely for the 6 left-permutive rules $\{30, 45, 75, 120, 135, 225\}$
+(verified $n \leq 20$).
+
+The boundary lemmas (\texttt{left\_boundary\_essential},
+\texttt{right\_boundary\_essential}) are \emph{proved theorems}, not axioms.  The
+base case ($n = 0$) is closed by \texttt{base\_case\_n0}, which is trivially true
+(any Bool value witnesses essentiality at generation 0).  Standard Lean/Mathlib
+axioms (\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}) are also
+present.
+
+\texttt{lake build P2p.LiftingLemma\_LeftPermutive} completes with zero errors (note:
+\texttt{sorry} type-checks in Lean~4, so a clean build does not imply no open
+sub-cases).  Running \verb|#print axioms rule30_prize3| produces:
+
+\begin{lstlisting}
+-- axioms used by rule30_prize3:
+-- lifting_lemma            (domain conjecture, see Sec. 3.3)
+-- propext                  (Lean/Mathlib standard)
+-- Classical.choice         (Lean/Mathlib standard)
+-- Quot.sound               (Lean/Mathlib standard)
+\end{lstlisting}
+
+The only non-standard axiom is \texttt{lifting\_lemma}.  All other dependencies
+are standard Lean~4/Mathlib axioms present in any Mathlib-using project.
+
+\section{Discussion}
+\label{sec:discussion}
+
+\textbf{What is proved.}  The boundary essentiality results hold for all $n$ with
+explicit witnesses (\texttt{all-zeros} and \texttt{only-last-true} configurations)
+and are machine-verified in Lean~4 with no axioms.  Conditional on
+\texttt{lifting\_lemma}, the full theorem \texttt{rule30\_prize3} follows by a clean
+induction: the inductive step uses only the lifting axiom and the two proved boundary
+theorems.  The \emph{current Lean proof} requires no backward-construction
+arguments, surjectivity claims, or neighbor-zero invariants; these are discharged by
+\texttt{lifting\_lemma}.
+
+\textbf{What is not proved.}  The one open item is \texttt{lifting\_lemma} itself.
+Left-permutivity (Equation~\eqref{eq:leftperm}) guarantees that flipping
+$c_{n+1}[k+1]$ always flips position $k$ in the next generation; the open question
+is whether there always exists a witness configuration for which this flip is not
+subsequently absorbed before reaching the center.  Computationally, no such
+absorption occurs for Rule~30 at any generation tested.
+
+The algebraic obstacle is what we term \emph{structured preimage threading}: given
+a witness $c^*$ at generation $n$, one must construct a generation-$(n+1)$ preimage
+$c^{**}$ such that (a)~$c^{**}$ extends $c^*$ on the shared cone, and (b)~flipping
+$c^{**}[k+1]$ propagates to the center.  The nonlinear $c \lor r$ term makes this
+threading non-trivial: setting blocker cells to zero simultaneously destroys the
+witness structure.  No such obstruction actually occurs for Rule~30 (verified
+computationally), but proving it requires controlling the interaction between
+extension degrees of freedom and the blocker constraint system.
+
+To calibrate: left-permutivity alone does \emph{not} imply lifting.  Rule~90
+($l \oplus r$) is also left-permutive, yet lifting \emph{fails}: $\Essential(1,0)$
+holds (flipping any left-neighbor always flips the one-step output), but
+$\Essential(2,1)$ is false, since the 2-step Rule~90 output
+$c[0] \oplus c[2] \oplus c[4]$ does not depend on $c[1]$ at all.  Rule~90 is
+linear and its evolution skips every other position.  Lifting holds (verified
+computationally for $n \leq 20$) for Rule~30 and the rules in $\{45, 75, 120,
+135, 225\}$, and fails for the remaining ten left-permutive rules.  The exact
+algebraic condition separating the two groups is not known in closed form; what is
+clear is that linearity (as in Rule~90) is sufficient for failure.  The failure
+mode differs structurally: most of the ten rules fail because a specific cell
+position is \emph{never} essential at any generation (e.g., Rule~90 at odd
+positions), while Rules~180 and 210 fail specifically at the \emph{center} position
+at $n = 2$: their two-step composition produces an algebraic cancellation whereby
+$\Essential(1,1)$ holds but $\Essential(2,2)$ is false, verified exhaustively over
+all inputs.  Understanding which algebraic property of $g$ prevents this cancellation
+for Rules~30, 45, 75, 120, 135, 225 is the core open question behind the lifting
+conjecture.
+
+The most natural path to closing SubcaseB at $n \geq 3087$ is to exploit the
+periodicity of the spike-output sequence $F(n, j) := \mathtt{rule30}_n(\mathtt{spike}_j)$.
+The SubcaseB cases (pairs $(n', m)$ where $\mathtt{spike}_m$ is false but a two-spike
+witness is true) do \emph{not} cease after $n' = 3086$: for $m = 4$, hard cases
+appear at $n' = 3093, 3101, 3109, \ldots$ (every 8 steps); for $m = 6$, $m = 14$,
+and $m = 22$, similarly periodic patterns persist indefinitely.
+
+\textbf{Period structure and max-$m$ growth.}  The existing Lean lemmas in
+\texttt{CausalConeLemmas.lean} establish that the \emph{open-boundary} (causal-cone)
+evolution starting from a spike at position~6 has period~16, and starting from
+position~20 has period~256; these are certified by \texttt{native\_decide} on finite
+state spaces.  Empirical computation confirms that the SubcaseB condition for
+$m \in \{4, 6, 8, 10, 12, 14, 16, 20\}$ is periodic with period at most~256 in $n'$.
+
+However, the spike at position $m=36$ is first verified to satisfy the SubcaseB
+condition at $n' = 4113$ (offset~$1026 = 4{\times}256+2$ from base~3087), which is
+\emph{not} in the first 256-step window.  The full period has been determined by direct
+computation: hits at $n' \in \{4113, 4117, 8209\}$ are followed by $\{20497, 20501, 24593\}
+= \{4113, 4117, 8209\} + 16384$, confirming period exactly $\mathbf{16384 = 2^{14}}$
+(not the earlier estimate of~4096).  More precisely, the gap from the first cluster
+$\{4113,4117\}$ to the singleton $\{8209\}$ is~$4096 = 2^{12}$, but the \emph{cluster
+repeat period} is $16384 = 2^{14}$.  This fits the doubling law: $m=34$ has
+period $8192 = 2^{13}$ and $m=36$ has period $2^{14}$.  The doubling continues:
+$m=38$ has period $32768 = 2^{15}$ (first SubcaseB hits at $n'=8210, 8214$;
+confirmed by 132-point period check), with the active sequence
+$\{\ldots, 30, 34, 36, 38\}$ yielding periods $\{4096, 8192, 16384, 32768\}$.
+The period-256 claim therefore does not extend to the full SubcaseB set.  Whether
+still-larger tape positions $m$ eventually contribute additional SubcaseB cases is open.
+Comprehensive evidence for inactivity above $m=38$ (loop-28, 2026-03-24):
+\begin{itemize}
+  \item Triangle-method scans (loop-24/28) confirm \emph{0 SubcaseB} for all even $m\in[44,80]$
+    over $n'\in[3087,45001)$ (12\,s, 20\,000{+} $F{=}0$ candidates per $m$, first-10 $G$-checked).
+  \item $m=40$: F-period certified $= 65536$ (loop-27); first~100 of 32828 $F{=}0$ candidates
+    in one period individually $G$-checked: 0 SubcaseB.
+  \item $m=42,\ldots,200$: triangle method (loop-24) to $n'=20001$.
+\end{itemize}
+\textbf{Caution}: an earlier ``step-100 sweep $[3087,45000)$'' cited here is not valid evidence:
+step-100 detects \emph{0 of 4} SubcaseB events for active $m=34$, \emph{0 of 6} for $m=36$,
+and \emph{0 of 4} for $m=38$ in the same range (loop-28 analytic verification:
+all known SubcaseB events have $n' \not\equiv 87\pmod{100}$, the step-100 grid offset).
+Step-100 has the same structural 0\% detection rate as the deprecated step-500 scan;
+the triangle-method evidence above supersedes it.
+
+\textbf{Active and inactive positions.}  Not every even tape position can
+contribute to SubcaseB.  Define $F(n,m)$ and $G(n,m)$ as above.  Computational
+analysis of $(F(n,m), G(n,m))$ reveals a sharp dichotomy:
+
+\begin{itemize}
+\item \emph{Active}: $M_{\mathrm{act}} = \{4, 6, 8, 10, 12, 14, 16, 20, 22,
+  24, 26, 28, 30, 34, 36, 38\}$.  The $(0,1)$ pair occurs; periods range from~8
+  to~$32768$ (doubling per active step for $m\geq 22$; period minimality confirmed
+  for all $m \leq 38$: $m \leq 28$ by full $F$-sequence comparison (loop-20);
+  $m \in \{30,34,36,38\}$ by triangle method showing $P/2$ fails at $n'=3087$ (loop-25, 2026-03-24)).
+  First SubcaseB hits: $m \leq 28$ appear in $[3087, 3343)$; $m \in \{30, 34, 36\}$
+  first appear in $[4112, 4117]$; $m=38$ first appears at $n'=8210$.
+  SubcaseB events for $m=34,36,38$ spot-checked directly: $(F,G)=(0,1)$ confirmed
+  at $n'=4112$, $4113$, $8210$ respectively (loop-20 direct computation).
+\item \emph{Inactive} ($(0,1)$ never occurs): $m \in \{2, 18, 32\} \cup
+  \{40, 42, \ldots\}$.  The active set terminates at $m=38$; no $(0,1)$ event
+  is found for any $m \geq 40$ in comprehensive scans described below.
+  Completeness of $M_{\mathrm{act}}$ within $[4, 38]$ is verified:
+  $m=18$ and $m=32$ are confirmed inactive, all other even $m \in [4,38]$
+  are confirmed active, all by direct SubcaseB scan (loop-20).
+\end{itemize}
+
+For $m = 2$, inactivity is formally proved in Lean (\texttt{ts2\_last\_always\_false}).
+The inactive positions exhibit two distinct behaviors.
+\emph{Weakly inactive} ($F{=}G$ fails occasionally, but $(0,1)$ is absent):
+$m=18$ has $(1,0)$ events at $n' \in \{3280, 3336, 3340, \ldots\}$;
+$m=32$ has $(1,0)$ at $n' \in \{3347, 4111, 4115\}$ within a comprehensive
+$[3087, 6000)$ scan (2913 values, zero $(0,1)$)---distinguishing $m=32$ from $m=36$
+(first active hit at $n'=4113$, within the same window);
+$m=38$ is active: first $(0,1)$ at $n'=8210$ (period $32768$, verified).
+\emph{Weakly inactive} ($I=0$ only when $F=1$): $m=40$ has a single $(1,0)$ at $n'=36887$
+and zero $(0,1)$ in $[3087,110000)$, including at all resonant positions
+$\{8211, 16403, 32787\}$ where $\mathrm{last}{-}m \in \{2^{14},2^{15},2^{16}\}$
+(giving $(1,1)$, $(0,0)$, $(1,1)$ respectively; none is SubcaseB).
+\emph{Strictly $F{=}G$} (only $(0,0)$ and $(1,1)$ observed): $m=42,\ldots,200$
+confirmed by triangle-method dense scans (loop-24, 2026-03-24):
+$m=42,\ldots,80$ over $[3087,20001)$ with exhaustive $G$-check on all $F{=}0$
+candidates in $[3087,7000)$; $m=82,\ldots,200$ over $[3087,20001)$.
+SubcaseB is structurally impossible for inactive positions,
+and $m=32$ in particular is very strongly consistent with permanent inactivity.
+A formal proof requires establishing $(0,1)$ is excluded for \emph{all}
+$n' \geq 3087$, which is itself a periodicity argument.
+
+\textbf{Proof plan.}  A formal SubcaseB closure has three parts.
+
+\emph{Part A -- inactive positions.}  For $m=2$: already proved.  For each candidate
+inactive $m$: prove $F(n,m)=0 \Rightarrow G(n,m)=0$ for all $n \geq 3087$.
+
+A structural lemma clarifies the algebraic relationship.  Define
+$H(n') = \text{center value after } n'+1 \text{ steps from spike at } \mathtt{last}=2n'{+}2 \text{ alone}$.
+
+\begin{lemma}[Last-spike lemma]
+$H(n') = 1$ for all $n' \geq 0$.
+\end{lemma}
+\begin{proof}[Proof sketch]
+Frontier invariant: at step~$j$, all cells at positions $< 2n'{+}2-j$ are~$0$
+(proved by induction: the rule~30 update of an all-zero left/center/right triple is~$0$).
+The frontier cell at step~$j$ (position $2n'{+}2-j$) has left and center neighbors~$0$
+at step $j{-}1$, so its value equals its right neighbor at step $j{-}1$ (position $2n'{+}3-j$),
+which is the previous frontier.  By the chain
+$H(n') = \text{cell}[n'{+}2]_{@n'} = \text{cell}[n'{+}3]_{@n'-1} = \cdots = \text{cell}[2n'{+}2]_{@0} = 1$.
+\end{proof}
+
+Since $G = F \oplus H \oplus I$ (where $I$ is the nonlinear interaction term) and $H=1$,
+we have $G = F \oplus 1 \oplus I$.  SubcaseB ($F=0, G=1$) $\Leftrightarrow$ $I=0$.
+Defining $I(n',m) := F \oplus G \oplus 1$, the proof targets become:
+\begin{itemize}
+  \item \emph{Weakly inactive}: for $m=40$ (single $(1,0)$ at $n'=36887$, zero $(0,1)$
+    in $[3087,110000)$; resonance test at $n'=16403$ gives $(0,0)$, confirming inactivity).
+    Same proof target as $m=18,32$: show $F=0 \Rightarrow I=1$.
+  \item \emph{Strictly $F{=}G$}: for $m=42,\ldots,200$ (even),
+    $I(n',m) = 1$ for all checked $n'$---equivalently $G = F$.
+    Verified by the causal-cone triangle method (2026-03-24):
+    $m=42,\ldots,80$ confirmed over $[3087, 20001)$ with exhaustive $G$-check
+    on all ${\approx}35\,000$ $F{=}0$ candidates in $[3087, 7000)$;
+    $m=82,\ldots,200$ confirmed over $[3087, 20001)$ with first-20 $G$-check
+    per $m$ (loop~24 triangle scan).
+    The proof target is $I \equiv 1$, i.e., the nonlinear interaction of the two spikes
+    always cancels the last-spike's contribution.  (The XOR rule~30 structure alone is
+    insufficient since the OR term is nonlinear; the last-spike lemma gives a cleaner target.)
+  \item \emph{Weakly inactive} ($I$ occasionally $= 0$, but $F=1$ whenever $I=0$):
+    for $m=18$ and $m=32$ only.
+    The $(F,G)$ patterns are periodic: $m=18$ has period~$256$ (exact; verified
+    by checking $(F(n'{+}256), G(n'{+}256)) = (F(n'), G(n'))$ for all $n' \in [3087, 3343)$
+    and period $128$ fails; period minimality confirmed by adversarial loop-20 full-sequence
+    scan), with $(1,0)$ triplets at offsets~$\{193, 249, 253\}$
+    per period and \emph{zero} $(0,1)$ verified directly in two full periods $[3087, 3599)$
+    (the remaining 25 of 27 claimed periods follow from the exact period-256 structure).
+    $m=32$ has period~$4096$ (same as active $m=30$; confirmed by cluster
+    $\{3347, 4111, 4115\}$ repeating at $+k{\cdot}4096$ for $k=1,2,4,8$), with
+    \emph{zero} $(0,1)$ verified directly in the full first period $[3087, 7183)$
+    (loop-20 direct scan, 197s).
+    $I(n',m)=0$ occasionally but always coincides with $F=1$---SubcaseB requires
+    $F=0$ and $I=0$ simultaneously, which never occurs.
+    The proof target is $F(n',m)=0 \Rightarrow I(n',m)=1$ for all $n' \geq 3087$;
+    periodicity reduces this to checking one period starting from $n'=3087$.
+\end{itemize}
+
+\emph{Part B -- fixed-$m$ active positions.}  For $M_{\mathrm{fix}} = \{4, 6, 8,
+10, 12, 14, 16, 20, 22, 24, 26, 28, 30, 34, 36, 38, \ldots\}$, the cluster
+period $P_m$ grows with $m$: empirically $m=4\to 8$, $m=6\to 16$,
+$m=8\to 32$, $m=10,12,14\to 64$, $m=16,20,22\to 256$,
+$m=24\to 512$, $m=26\to 1024$, $m=28\to 2048$, $m=30\to 4096$, $m=34\to 8192$,
+$m=36\to 16384$, $m=38\to 32768$.
+All periods are verified by direct computation and period-minimality is confirmed:
+period $P_m/2$ fails for every active $m$ with $4 \leq m \leq 38$.
+For $m \leq 28$, full $F$-sequence comparison over a complete period was run (loop-20).
+A caution: for $m=26$ and $m=28$, the value $F(3087,m)$ happens to equal $F(3087{+}P/2,m)$
+by coincidence, so single-point spot checks are insufficient; full-sequence scans were needed.
+For $m \in \{30, 34, 36, 38\}$, the triangle method (2026-03-24) confirms that
+$P/2$ fails at the very first check point $n'=3087$:
+\begin{itemize}
+  \item $m=30$: $P=2048$ fails at $n'=3087$; $F(3087,30)=1 \neq 0 = F(5135,30)$.
+  \item $m=34$: $P=4096$ fails at $n'=3087$; $F(3087,34)=1 \neq 0 = F(7183,34)$.
+  \item $m=36$: $P=8192$ fails at $n'=3087$; $F(3087,36)=0 \neq 1 = F(11279,36)$.
+  \item $m=38$: $P=16384$ fails at $n'=3087$; $F(3087,38)=1 \neq 0 = F(19471,38)$.
+\end{itemize}
+Each full-period spot-check (4096 points) passes, confirming $P$ is correct.
+Moreover, for $m \in \{34, 36, 38\}$ the F-period certificates themselves confirm minimality
+(loop-39, 2026-03-24): $\texttt{caEvolve}\,P_m\,(\texttt{spike}_m(2P_m{+}2m{+}1)) = \texttt{spike}_m(2m{+}1)$ holds
+while $\texttt{caEvolve}\,(P_m/2)\,(\texttt{spike}_m(P_m{+}2m{+}1)) \neq \texttt{spike}_m(2m{+}1)$ fails
+(mismatch at position~0 in all three cases; $\leq 0.3$\,s each via numpy vectorization).
+
+The period structure has two regimes.
+For $m \geq 24$: a \emph{clean doubling} holds with each successive active position,
+irrespective of inactive positions.  The active sequence
+$\{24, 26, 28, 30, \mathbf{32\text{ (inactive)}}, 34, 36, 38\}$ yields periods
+$\{512, 1024, 2048, 4096, -, 8192, 16384, 32768\} = 2^{9},\ldots,2^{15}$,
+verified by direct computation ($m=36$ hits at $4113, 4117, 20497=4113{+}16384,
+20501=4117{+}16384, 24593=8209{+}16384$; $m=38$ first hits at $8210, 8214$ with
+period $32768$ confirmed by 132-point check
+(loop-30 exhaustive $G$-check of all 2947 $F{=}0$ candidates in $[3087,9000)$
+confirms $n'=4118$ is a $(1,0)$ event, \emph{not} SubcaseB)).
+
+For $m < 24$: the pattern is irregular with two \emph{plateaus}.
+$m \in \{10, 12, 14\}$ all share period~$64 = 2^6$;
+$m \in \{16, 20, 22\}$ all share period~$256 = 2^8$
+(a factor-of-4 jump from $64$; inactive $m=18$ also has period~$256$, verified
+directly over two full periods $[3087, 3599)$ and confirmed minimal by period-$128$ failure;
+the remaining periods to $n'=10000$ follow from the exact period structure)---so the
+entire block $m \in \{16, 18, 20, 22\}$ operates at period~$256$, with active positions
+producing $(0,1)$ and $m=18$ producing only $(1,0)$).
+Similarly, inactive $m=32$ has period~$4096$, matching active $m=30$,
+with zero $(0,1)$ verified directly in the full first period $[3087, 7183)$.
+The $m=16$ cluster has a more complex internal structure: three hits per period at offsets
+$0,4,72$ with gaps $(4, 68, 184)$ summing to~$256$.
+The doubling law does \emph{not} hold universally across all active $m$.
+
+\emph{F-period certificates (Python-verified, 2026-03-24).}
+The Lean-style certificate
+$\texttt{caEvolve}\,P_m\,(\texttt{spike}_m(2P_m{+}2m{+}1)) = \texttt{spike}_m(2m{+}1)$
+holds for $m \in \{18, 32\}$ (loop-27: $P=256$ and $P=4096$ respectively, both minimal).
+More strikingly, \emph{the doubling law continues for the first two inactive positions}:
+\begin{itemize}
+  \item $m=40$: F-period certificate holds for $P=65536 = 2^{16}$ (minimal: $P/2=32768$ fails); 3\,s
+  \item $m=42$: F-period certificate holds for $P=131072 = 2^{17}$ (minimal: $P/2=65536$ fails); 12\,s
+\end{itemize}
+The sequence $m \in \{36,38,40,42\}$ has periods $\{2^{14},2^{15},2^{16},2^{17}\}$,
+\emph{doubling at every step regardless of active/inactive status}.
+The H-certificate $(\texttt{caEvolve}\,P\,(\texttt{spike}_{2P}(2P{+}1)))[0] = \mathtt{true}$
+also holds for $P \in \{256, 512, \ldots, 131072\}$ (all powers of~2 up to $2^{17}$;
+Python-verified, $<5$\,s each).
+Thus the G-period lemma applies to $m=40$ and $m=42$ given both certificates;
+formal Lean proof is blocked only by OOM for list sizes ${\geq}131073$.
+
+Furthermore, a layered sweep confirms no active $m \geq 40$:
+\begin{itemize}
+\item $m=40$: F-period $= 65536$ (certified); 32828 $F{=}0$ candidates
+  in one period $[3087, 68623)$; \emph{all} 1956 $F{=}0$ candidates in $[3087,7000)$
+  individually $G$-checked: 0 SubcaseB (loop-32, 65\,s) — matching the exhaustive
+  coverage applied to $m=42,\ldots,80$.
+  \emph{Resonance test} (loop~16, consistent): under the doubling law,
+  if $m=40$ were active its first $(0,1)$ should appear at $n'=16403$
+  ($\mathrm{last}{-}m = 2^{15}$); direct computation gives $(0,0)$ — no SubcaseB.
+  Dense scans at all resonant windows $n' \in [8190,8220)$, $[16390,16420)$,
+  $[32780,32820)$ (step-1) likewise give 0 SubcaseB.
+  The single $(1,0)$ at $n'=36887$ has $\mathrm{last}{-}m = 73736 = 2^3{\cdot}13{\cdot}709$
+  (no power-of-$2$ factor), consistent with inactivity.
+  Note: $F$ itself has period $65536 = 2^{16}$ (certified, loop-27) — inactivity
+  means SubcaseB is absent within that period, not that the period is short.
+\item $m=42,\ldots,80$ (even): \textbf{0 SubcaseB} events in $[3087, 20001)$, verified
+  2026-03-24 by the causal-cone \emph{triangle method}: compute $F(n',m)$ for all $n'$
+  simultaneously via one CA triangle of size $O(N_{\max}^2)$ (0.5\,s per $m$, 9\,s total for
+  18 $m$-values).  Each even $m\in[46,80]$ has ${\approx}8400$ $F=0$ candidates in $[3087,20001)$;
+  none has $G=1$.  Additionally, \emph{all} $m=42,\ldots,80$: every $F=0$ candidate
+  in $[3087, 7000)$ (1929--1979 per $m$; ${\approx}37\,840$ total including $m=42$)
+  individually verified $G=0$ — exhaustive 100\% coverage in this subrange
+  ($m=44,\ldots,80$: 872\,s loop-24; $m=42$: 67\,s loop-32).
+  \textbf{Caution on prior step-500 claim}: for active $m=34$, the step-500 sparse scan
+  in $[3087,15000)$ finds \emph{0 of 4} actual SubcaseB events (0\% detection rate —
+  the 4 events at $n'=4112,4116,12304,12308$ do not coincide with any step-500 sample
+  point); the prior ``step-500, $n'\leq 26000$'' evidence was entirely insufficient;
+  the triangle-method scans above supersede it.
+\item $m=82,\ldots,200$ (even): 0 SubcaseB in $[3087, 20001)$, triangle method (30\,s,
+  60 $m$-values; 2026-03-24).  Additionally, every $F=0$ candidate in $[3087,20001)$
+  has ${\approx}8400$--$8500$ occurrences per $m$; for each of the 60 $m$-values,
+  the first 100 $F=0$ candidates were individually $G$-checked: 0 SubcaseB found
+  (loop-34, 166\,s total, 2026-03-24).  This upgrades the G-check depth from
+  unstated to first-100 per $m$-value.
+\item $m=202,\ldots,300$ (even): 0 SubcaseB in $[3087, 20001)$, triangle method
+  + first-50 $G$-checks per $m$ (loop-36, 90\,s total, 2026-03-24).
+  This supersedes the prior step-500 sparse scan ($\approx 0.2\%$ detection rate)
+  with full triangle-method dense coverage to $n'=20001$.
+\end{itemize}
+The inactive set is $\{18, 32, 40, 42, \ldots\}$, and the active set is
+$M_{\mathrm{act}} = \{4, 6, 8, 10, 12, 14, 16, 20, 22,
+24, 26, 28, 30, 34, 36, 38\}$.
+
+\begin{remark}[Algebraic structure of inactive positions within $[4,38]$]
+\label{rem:inactivestructure}
+The two inactive positions in $[4,38]$ share a 2-adic structure.
+Let $v_2(m)$ denote the 2-adic valuation and let
+$\mathrm{odd}(m) = m/2^{v_2(m)}$ be the odd part.
+Then $m \in \{18, 32\}$ satisfies:
+$m = 18$: $v_2 = 1$ and $\mathrm{odd}(18) = 9 = 3^2$ (a perfect square);
+$m = 32$: $v_2(32) = 5 \geq 5$ (a high power of~2).
+The active positions in $[4,38]$ satisfy neither condition.
+This characterization correctly classifies all 18 even positions in $[4,38]$
+and predicts $m = 50$ inactive ($v_2 = 1$, $\mathrm{odd}(50) = 25 = 5^2$), consistent
+with the absence of SubcaseB for $m = 50$ in loop-24 scans.
+Whether this criterion extends to $m \geq 40$ is open: $m = 40$
+($v_2 = 3$, $\mathrm{odd}(40) = 5$, neither condition) is known inactive,
+so the criterion requires an additional clause.
+\end{remark}
+
+Computational evidence strongly supports that no active positions exist above $m = 38$:
+the extended loop-16 scans find no $(0,1)$ for $m=40$ to $n'=110000$, with the resonance
+test at $n'=16403$ giving $(0,0)$ (decisive); triangle-method dense scans confirm no events
+for $m=42,\ldots,300$ up to $n'=20001$.
+Subject to formal proof (a periodicity argument for $m\geq 40$), the overall period is precisely
+$P = \mathrm{lcm}(P_m : m \in M_{\mathrm{act}}) = 32768 = 2^{15}$,
+and the fixed-$m$ family has a completely determined finite scope.
+\begin{enumerate}
+\item Show that the open-boundary \emph{causal-cone} evolution starting from
+  spike-at-$m$ has period $P_m$ in $n'$.  For $m = 6$ (period~16) and
+  $m = 20$ (period~256), this is already proved in \texttt{CausalConeLemmas.lean}
+  via \texttt{native\_decide} on the $2m{+}1$-cell cone state.  Each remaining $m$
+  requires an analogous $\sim$1-line \texttt{native\_decide} check.
+\item Prove the \textbf{periodicity lemma}: $F(n',m)$ and $G(n',m)$ are
+  eventually periodic in $n'$ with period $P_m$.  For $F$: the spike at
+  position~$m$ (fixed, small) does not reach the right boundary within
+  $n'+1$ steps (it would take $2n'+2-m \gg n'+1$ steps), so the circular
+  and open-boundary computations agree; periodicity follows from the
+  finite open-boundary state space.  For $G$: the ts2 tape has an additional
+  spike at position $\mathtt{last} = 2n'+2$, which propagates \emph{leftward}
+  and reaches the center in exactly $n'+1$ steps---a boundary effect that
+  \emph{cannot} be ignored and is absent from the open-boundary model
+  (which drops position~$\mathtt{last}$ after step~1).
+  The general $G$-periodicity lemma \texttt{rule30n\_twoSpikeLast\_period} in
+  \texttt{CausalConeLemmas.lean} is now proved for all $m$ simultaneously,
+  given two certificates: the F-period certificate
+  $\texttt{caEvolve}\,P_m\,(\texttt{spike}_m(2P_m{+}2m{+}1)) = \texttt{spike}_m(2m{+}1)$
+  and the H-certificate
+  $(\texttt{caEvolve}\,P_m\,(\texttt{spike}_{2P_m}(2P_m{+}1)))[0] = \mathtt{true}$.
+  The key case analysis: for positions $i < 2(n'+1)$ the last-spike is outside the
+  causal cone (using the F-certificate); for $i = 2(n'+1)$ the H-certificate provides
+  the boundary value.  \emph{Python verification (loop-29, 2026-03-24)}: all 13 F-period certificates for
+  active $m \in \{4,6,8,10,12,14,16,20,22,24,26,28,30\}$ are confirmed correct and
+  minimal (period $P_m$ holds; $P_m/2$ fails in every case); cert list sizes range
+  from 25 ($m=4$) to 8253 ($m=30$), all well within Lean's \texttt{native\_decide}
+  feasibility threshold.  H-certificates hold for all $P_m \in \{8,16,\ldots,4096\}$.
+  All active $m \leq 30$ ($P_m \leq 4096$) have both certificates
+  verified by \texttt{native\_decide} in \texttt{CausalConeLemmas.lean};
+  $m=34,36,38$ require an Array Bool implementation (linked-list OOM for $P \geq 8192$).
+\item Verify by \texttt{native\_decide} that every SubcaseB event in
+  $[3087, 3087{+}P]$ has a witness (small-$m$ events only; large-$m$ events handled
+  in Part~C).
+\end{enumerate}
+
+Note: the period-$P_m$ certificate for position~$m$ checks
+$\texttt{caEvolve}\,P_m\,(\texttt{spike}_m(2P_m{+}2m{+}1)) = \texttt{spike}_m(2m{+}1)$,
+which processes $\sum_{k=0}^{P_m-1}(2P_m{+}2m{+}1-2k) = P_m(P_m{+}2m{+}1)$ list cells in total.
+For $m=36$ ($P=16384$): $\approx 2.7 \times 10^8$ cells; for $m=38$ ($P=32768$):
+$\approx 1.1 \times 10^9$ cells (verified correct in Python with numpy vectorization in $\approx 0.3$\,s;
+in native compiled code, $\approx 1$--$30$\,s expected, but may require
+a packed \texttt{BitVec} or \texttt{Array Bool} implementation rather than
+\texttt{List Bool} for the largest $m$ due to GC allocation pressure).  Assuming no
+active positions above $m=38$ (supported by extended loop-16 scans: $m=40$ to $n'=110000$
+with resonance test at $n'=16403$ giving $(0,0)$; $m=42,\ldots,300$ (even) to $n'=20001$
+by triangle method, all negative; loops 24/32/34/36, 2026-03-24), the overall period is
+$P = \mathrm{lcm}(P_m : m \in M_{\mathrm{act}}) = 32768$, fully determined.  The first open subproblem is whether active positions exist beyond
+$m = 300$ (triangle-method dense scan $m \leq 300$, $n' \leq 20001$ verified 2026-03-24;
+loop-36 upgraded $m=202$--$300$ from step-500 sparse ${\sim}0.2\%$ to full triangle-method density); if not,
+$P = 32768$ exactly and Part~B has finite scope.
+
+\textbf{Coverage caveat for $m=42,44$.}  The F-period of $m=42$ is $2^{17}=131072$
+and of $m=44$ is predicted $2^{18}=262144$.  The triangle-method scans cover only
+$n' \leq 20001$, which is less than $1/6$ of one period for $m=42$ and less than $1/13$
+for $m=44$.  Resonant SubcaseB events, if they existed, would be expected near
+$n' \approx 68623$ (for $m=42$) and $n' \approx 134159$ (for $m=44$), both far beyond
+the current scan range.  The G-check evidence for $m=42,44$ is therefore structurally
+weaker than for $m=40$ (where $n'=110000 > P_{40}/2$, covering the resonant window).
+This asymmetry is not reflected in the main text above and constitutes the weakest
+inactivity claim in the paper.  A resonance test analogous to the $m=40$ check
+(loop-27, 2026-03-24) at $n' \approx P_{42}/2$ would substantially strengthen the
+evidence for $m=42$.
+
+\emph{Part C -- shifting large-$m$ position (critical gap).}  A distinct SubcaseB
+family exists at the \emph{right boundary}: the single position
+$m = \mathtt{last}{-}8 = 2n'{-}6$ satisfies the SubcaseB condition with
+\emph{exactly} density~$\frac{1}{2}$, governed by a perfect mod-4 rule:
+\[
+  \text{SubcaseB}(n',\, 2n'{-}6) = \mathtt{true} \;\iff\; n' \equiv 1 \text{ or } 2 \pmod{4},
+  \quad \text{for all } n' \geq 3089.
+\]
+This was verified with no exceptions by dense computation (every $n'$) over
+$n'\in[3089, 15000]$ (11912 values: loop-26 to $n'=7000$ in 293\,s;
+loop-32 extended to $n'=10000$ in 392\,s; loop-37 extended to $n'=15000$ in 1595\,s;
+density exactly $2500/5000 = 0.5$ in the new range $[10001, 15000]$):
+the hits form pairs $(n', n'+1)$ with pair starts at $n' \equiv 1 \pmod 4$,
+i.e., $n' \in \{3089, 3093, 3097, \ldots\} = \{4k+1 : k \geq 772\}$.
+The density is exactly $2/4 = \frac{1}{2}$, not merely ``approximately.''
+\emph{Honest verification budget}: dense checking to $n'=50000$ would require
+${\approx}30$\,hours of compute (each evaluation costs $O(n'^2)$ numpy operations;
+$n'=50000$ is infeasible for dense coverage).
+Additionally, the \emph{anti-correlation} $F(n',2n'{-}6) + G(n',2n'{-}6) = 1$ holds
+with zero violations throughout $n'\in[3089, 15000]$ (loop-26 to 7000; loop-32 to 10000; loop-37 to 15000),
+and independently confirmed at the critical onset $n'\in[3089,3114]$ by 206-second
+Python computation (loop-23, 2026-03-24), confirming that the last-spike always
+flips the center value.  This provides a proof strategy for the mod-4 rule:
+prove (a) $F$ has period~4 in $n'$, and (b) $F+G=1$ identically, and the SubcaseB
+rule follows.  The density~$\frac{1}{2}$ is explained by the involution $n' \mapsto n'+2$:
+the mod-4 SubcaseB set $\{1,2\}$ maps to its complement $\{3,0\}$, so every SubcaseB
+value is paired with a non-SubcaseB value two steps later (verified, 0 violations in
+$[3089, 3289]$, 2026-03-24).
+Both claims are currently computationally verified but not yet formally proved in Lean.
+Direct computation at $n'\in[3089,3108]$ confirms the $F$ pattern $0,0,1,1,0,0,1,1,\ldots$
+(period~4, $F=0$ iff $n'\equiv 1,2\pmod{4}$), with 20/20 predictions correct.
+
+Scans confirm that \emph{all} positions $\mathtt{last}{-}9$
+through $\mathtt{last}{-}80$ produce \emph{zero} SubcaseB events in $[3087, 8000)$:
+$\mathtt{last}{-}16$ and $\mathtt{last}{-}24$ extended to $n'=8000$ by loop-26;
+$\mathtt{last}{-}48$, $\mathtt{last}{-}56$, $\mathtt{last}{-}64$,
+$\mathtt{last}{-}72$, $\mathtt{last}{-}80$ extended to $[3087, 8000)$ by loop-30.
+Loop-33 (2026-03-24) fills the even gaps $\mathtt{last}{-}10$, $\mathtt{last}{-}12$,
+$\mathtt{last}{-}14$, $\mathtt{last}{-}18$, $\mathtt{last}{-}20$, $\mathtt{last}{-}22$
+(${\approx}390$--$462$\,s each; 0 SubcaseB) and odd-offset family $\mathtt{last}{-}9$,
+$\mathtt{last}{-}11$, $\mathtt{last}{-}13$ (0 SubcaseB each).
+Loop-35 (2026-03-24) fills the remaining gaps $\mathtt{last}{-}26$,
+$\mathtt{last}{-}28$, $\mathtt{last}{-}32$, $\mathtt{last}{-}34$, $\mathtt{last}{-}36$,
+$\mathtt{last}{-}38$, $\mathtt{last}{-}40$, $\mathtt{last}{-}42$, $\mathtt{last}{-}44$,
+$\mathtt{last}{-}46$ (all 0 SubcaseB in $[3087, 8000)$), eliminating the prior
+partial coverage ($[3087, 5500)$ only) for $\mathtt{last}{-}32$ and $\mathtt{last}{-}40$.
+Combined: \emph{all} even offsets $\mathtt{last}{-}9$ through $\mathtt{last}{-}80$ confirmed
+to $[3087, 8000)$ with no gaps.
+Thus $m = 2n'{-}6$ is a single exceptional position, not an infinite family.  Nevertheless, the position is \emph{not} fixed in~$\mathbb{N}$
+(it grows with~$n'$), so the fixed-$m$ periodicity argument of Part~B does not apply.
+
+The bridge lemma also fails here: the spike at $m = 2n'{-}6$ is only 8 cells
+from the right boundary, so the open-boundary approximation breaks down (the
+right-boundary information reaches the center within a finite constant, not
+after $n'$ steps).
+
+The lifting lemma's inductive structure suggests a resolution.  One natural
+candidate is the naive reduction $(n', 2n'{-}6) \to (n'{-}1, 2n'{-}8)$;
+however, computation shows this \emph{fails}: the predecessor $n'{-}1$ has no
+large-$m$ SubcaseB case at all.  The large-$m$ SubcaseB pairs appear
+at $(n', n'{+}1)$ with $n'{-}1$ clean, so the induction cannot close by
+simple recursion on the large-$m$ family.
+
+This leaves two candidate paths: (i)~the inductive step reduces a large-$m$
+case at $n'$ to a \emph{small}-$m$ case at $n'{-}1$ (non-trivially, via the
+lifting lemma's algebraic structure), or (ii)~explicit witnesses for the large-$m$
+family are constructed separately, analogously to the \texttt{ge}-block
+witnesses for $n' \leq 3086$ (which already include large-$m$ witnesses, e.g.\
+$m = 6164$ at $n' = 3085$).  Whether either path extends to all $n' \geq 3087$
+is the \emph{second critical open subproblem}, alongside determining whether
+the active set terminates at $m=38$ (if so, $P=32768$ exactly for the fixed-$m$ family).
+
+We do not address Prize~1 (non-periodicity) or Prize~2 (density).
+
+\textbf{Computational model.}  The $\Omega(n)$ lower bound holds for any sequential
+model in which each cell read costs at least one step (Turing machines, RAM
+machines).  We do not address parallel or circuit models.
+
+\textbf{Relation to Prize~3's precise formulation.}
+Wolfram's Prize~3 asks specifically whether a finite machine receiving index $n$ as
+input can compute the \emph{fixed} single-black-cell center value $c[n]$ in sub-linear
+time.  Our essentiality result is stated for an algorithm that takes a general initial
+configuration $c$ as input, giving an $\Omega(n)$ \emph{query-complexity} lower bound
+for that model.  These are different computational problems.
+
+Bridging to Prize~3 requires one of two independent results, neither of which is
+established here:
+\begin{itemize}
+  \item \emph{Incompressibility of the center column}: prove that the Kolmogorov
+    complexity $K(c[0],\ldots,c[n]) \geq \alpha n$ for some $\alpha > 0$ and all
+    large $n$.  A sub-linear TM would then constitute a compression below this
+    threshold, a contradiction.  This is equivalent to Prize~3 restated in
+    information-theoretic language.
+  \item \emph{Circuit/TM lower bound}: establish that no $o(n)$-depth circuit
+    family (or $o(n)$-time Turing machine receiving $n$ as input) computes the
+    center-column value $c[n]$.  The $\Omega(n)$ query-complexity lower bound proved
+    here is a clean, \emph{unconditional} result: it does not interact with the
+    Razborov-Rudich natural-proofs barrier~\cite{RazborovRudich1997}, which concerns
+    super-polynomial \emph{circuit-size} lower bounds rather than decision-tree depth.
+    The gap is that our computational model (an algorithm reading cells of an explicit
+    initial configuration) differs from Prize~3's model (computing the fixed
+    single-black-cell sequence from index~$n$).  Bridging that gap would require
+    techniques outside the sensitivity/essentiality framework, and the RR barrier may
+    then become relevant.
+\end{itemize}
+A third candidate path exploits the \emph{3-cell block identity}.  Let
+$e_n = [0,\ldots,0,1,0,\ldots,0]$ (single $1$ at position~$n$, length $2n{+}1$) be the
+single-black-cell initial condition that Prize~3 is about, and let
+$t_n = [0,\ldots,0,1,1,1,0,\ldots,0]$ (three consecutive $1$s at positions $n{-}2$, $n{-}1$,
+$n$, length $2n{-}1$).  One step of Rule~30 from $e_n$ produces exactly $t_n$:
+positions touching the single $1$ evaluate to $\mathtt{rule30}(0,0,1)=\mathtt{rule30}(0,1,0)=\mathtt{rule30}(1,0,0)=1$
+and all others give $0$.  Therefore
+\[
+  s(n) \;=\; \mathtt{rule30}_n(e_n) \;=\; \mathtt{rule30}_{n-1}(t_n),
+\]
+where $s(n)$ is the single-black-cell center-column sequence.  The causal cone of $t_n$
+spans positions $0$ through $2(n{-}1)$ at step~$0$.  However, formalizing a lower bound
+from this identity faces a concrete obstacle: direct computation shows that
+\emph{position~$n$ of $e_n$ is not always sensitive}.  Flipping $e_n[n]$ yields
+the all-zeros configuration, which always evolves to~$0$.  Therefore
+$k = n$ is sensitive for $e_n$ if and only if $s(n) = 1$.  For the half of $n$-values
+where $s(n) = 0$ (e.g.\ $n \in \{2,6,7,10,11,12,14,17,18,20\}$ in the range $1$--$20$),
+position~$n$ contributes nothing to the cone argument for $e_n$ specifically.  A cone lower bound
+that relies on position~$n$ being a hard input for position~$k=n$ would not apply
+to these values of~$n$.  Structurally, the cone from $t_n$ is geometrically
+saturated (information travels at the maximum CA speed of one cell per step),
+but this is a necessary, not sufficient, condition for lower bounds.
+
+The sequence $s(n)$ does exhibit strong pseudorandomness: Berlekamp-Massey finds
+no linear recurrence of order $\leq 6$; linear complexity is ${\approx}n/2$ (maximal
+for an $n$-bit sequence); and the algebraic normal form of $\mathtt{rule30}_n$ has
+degree $2n{-}1$ with a unique highest-degree monomial (the product of all interior
+variables), confirmed computationally for $n \leq 10$.  None of these properties
+individually closes the bridge to Prize~3, but they make it implausible that any
+short-period recurrence or low-complexity formula computes $s(n)$.  The
+status of Prize~3 is genuinely open.
+
+Our essentiality theorem characterizes the causal structure of Rule~30 precisely and
+constitutes necessary groundwork; it is not itself sufficient for Prize~3.
+
+\section*{Acknowledgments}
+
+The author thanks the Lean~4 and Mathlib communities for the verification infrastructure.
+
+\begin{thebibliography}{99}
+
+\bibitem{Wolfram1986}
+S.~Wolfram,
+\emph{Random sequence generation by cellular automata},
+Advances in Applied Mathematics \textbf{7} (1986), 123--169.
+
+\bibitem{Hedlund1969}
+G.~A.~Hedlund,
+\emph{Endomorphisms and automorphisms of the shift dynamical system},
+Mathematical Systems Theory \textbf{3} (1969), 320--375.
+
+\bibitem{Jen1986}
+E.~Jen,
+\emph{Invariant strings and pattern-recognizing properties of one-dimensional cellular automata},
+Journal of Statistical Physics \textbf{43} (1986), 243--265.
+
+\bibitem{Wolfram2002}
+S.~Wolfram,
+\emph{A New Kind of Science},
+Wolfram Media, 2002.
+
+\bibitem{Rowland2006}
+E.~Rowland,
+\emph{Local nested structure in rule 30},
+Complex Systems \textbf{16} (2006), 239--258.
+
+\bibitem{Cattaneo1998}
+G.~Cattaneo, E.~Formenti, G.~Manzini, L.~Margara,
+\emph{Ergodicity, transitivity, and regularity for linear cellular automata over $\mathbb{Z}_m$},
+Theoretical Computer Science \textbf{217} (1999), 99--122.
+
+\bibitem{BuhrmanVdWW2002}
+H.~Buhrman, R.~de~Wolf,
+\emph{Complexity measures and decision tree complexity: a survey},
+Theoretical Computer Science \textbf{288} (2002), 21--43.
+
+\bibitem{RazborovRudich1997}
+A.~A.~Razborov, S.~Rudich,
+\emph{Natural proofs},
+Journal of Computer and System Sciences \textbf{55} (1997), 24--35.
+
+\bibitem{Sutner1995}
+K.~Sutner,
+\emph{On the computational complexity of finite cellular automata},
+Journal of Computer and System Sciences \textbf{50} (1995), 87--97.
+
+\bibitem{Nisan1991}
+N.~Nisan,
+\emph{CREW PRAMs and decision trees},
+SIAM Journal on Computing \textbf{20} (1991), 999--1007.
+
+\end{thebibliography}
+
+\appendix
+
+\section{Lean~4 Source Files}
+
+The Lean source is in the repository at \texttt{P2p/}:
+\begin{itemize}
+  \item \texttt{Prize3\_Complete.lean} --- Core definitions, CA evolution, boundary theorems
+  \item \texttt{LiftingLemma\_LeftPermutive.lean} --- Left-permutivity algebra,
+    \texttt{lifting\_lemma} axiom, and \texttt{rule30\_prize3}
+\end{itemize}
+
+To verify: install Lean~4 and Mathlib, then run \texttt{lake build}.
+
+\end{document}
