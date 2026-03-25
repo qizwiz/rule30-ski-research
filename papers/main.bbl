@@ -1,0 +1,49 @@
+\begin{thebibliography}{}
+
+\bibitem[Koh and Liang, 2017]{koh_2017}
+Koh, P.~W. and Liang, P. (2017).
+\newblock Understanding black-box predictions via influence functions.
+\newblock pages 1885--1894.
+
+\bibitem[Mordvintsev et~al., 2020]{mordvintsev_2020}
+Mordvintsev, A., Randazzo, E., Niklasson, E., and Levin, M. (2020).
+\newblock Growing neural cellular automata.
+\newblock {\em Distill}.
+
+\bibitem[Moura and Ullrich, 2021]{moura_2021}
+Moura, L.~d. and Ullrich, S. (2021).
+\newblock The {Lean 4} theorem prover and programming language.
+\newblock pages 625--635.
+
+\bibitem[Natal and Al-saadi, 2024]{natal_2024}
+Natal, J. and Al-saadi, O. (2024).
+\newblock Fast simulation of cellular automata by self-composition.
+\newblock {\em arXiv preprint arXiv:2409.07065}.
+\newblock Preprint.
+
+\bibitem[Nisan, 1991]{nisan_1991}
+Nisan, N. (1991).
+\newblock {CREW PRAMs} and decision trees.
+\newblock {\em SIAM Journal on Computing}, 20(6):999--1007.
+
+\bibitem[Tishby and Schwartz-Ziv, 2015]{tishby_2015}
+Tishby, N. and Schwartz-Ziv, R. (2015).
+\newblock Deep learning and the information bottleneck principle.
+\newblock {\em arXiv preprint arXiv:1503.02406}.
+
+\bibitem[von Neumann, 1966]{von_neumann_1966}
+von Neumann, J. (1966).
+\newblock {\em Theory of Self-Reproducing Automata}.
+\newblock University of Illinois Press.
+
+\bibitem[Wolfram, 1983]{wolfram_1983}
+Wolfram, S. (1983).
+\newblock Statistical mechanics of cellular automata.
+\newblock {\em Reviews of Modern Physics}, 55(3):601--644.
+
+\bibitem[Wolfram, 2002]{wolfram_2002}
+Wolfram, S. (2002).
+\newblock {\em A New Kind of Science}.
+\newblock Wolfram Media, Champaign, IL.
+
+\end{thebibliography}
