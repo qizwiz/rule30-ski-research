@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+# proof-gate: Von Neumann gate for proof agents.
+#
+# Invariant enforced: every merge to master must strictly decrease
+# the proof obligation count (sorrys + axioms) in Lean source files.
+#
+# Usage:
+#   proof-gate start <task>   -- create isolated worktree, print path
+#   proof-gate check          -- count obligations in this tree vs master
+#   proof-gate finish         -- verify build + obligations, merge if gate passes
+#
+# The gate is:
+#   1. lake build P2p.SubcaseBPeriod exits 0 (no errors)
+#   2. obligations_after < obligations_before
+#   3. no new axioms beyond the two known ones
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"   # absolute path to p2p/
+GIT_ROOT="$(git -C "$PROJECT_ROOT" rev-parse --show-toplevel)"
+LEAN_SOURCES=("P2p/SubcaseBPeriod.lean" "P2p/CA_Array.lean")
+KNOWN_AXIOMS="subcaseB_m4_ge3087\|subcaseB_resolution_ge3087"
+
+# Count real proof obligations in a project directory.
+# Counts: sorry (outside line-comments) + axiom declarations.
+count_obligations() {
+  local root="$1"
+  local total=0
+  for f in "${LEAN_SOURCES[@]}"; do
+    local path="$root/$f"
+    [[ -f "$path" ]] || continue
+    # awk always exits 0 and prints an integer — no grep exit-code issues
+    # Match only lines that ARE a sorry tactic (indented sorry, or := sorry, or by sorry)
+    # This correctly ignores sorry in comments, strings, and compound words like sorry'd
+    local s a
+    s=$(awk '
+      /^[[:space:]]*sorry[[:space:]]*(--.*)?$/ ||
+      /[[:space:]]sorry[[:space:]]*(--.*)?$/ ||
+      /:=[[:space:]]*sorry[[:space:]]*(--.*)?$/ { count++ }
+      END { print count+0 }
+    ' "$path")
+    a=$(awk '/^axiom /{n++} END{print n+0}' "$path")
+    total=$(( total + s + a ))
+  done
+  echo "$total"
+}
+
+cmd="${1:-}"
+
+case "$cmd" in
+  start)
+    task="${2:?Usage: proof-gate start <task-name>}"
+    branch="proof/$task"
+    wt_path="$GIT_ROOT/../p2p-worktrees/$task"
+    mkdir -p "$(dirname "$wt_path")"
+    # Worktree is created at the GIT_ROOT level (since that's the actual repo)
+    # but we point the agent at the project subdirectory inside it
+    git -C "$GIT_ROOT" worktree add -b "$branch" "$wt_path" master
+    agent_root="$wt_path/$( realpath --relative-to="$GIT_ROOT" "$PROJECT_ROOT" )"
+    echo "WORKTREE:   $wt_path"
+    echo "WORK HERE:  $agent_root"
+    echo "BRANCH:     $branch"
+    echo "OBLIGATIONS_ON_MASTER: $(count_obligations "$PROJECT_ROOT")"
+    echo ""
+    echo "When done: cd $agent_root && ../../scripts/proof-gate finish"
+    ;;
+
+  check)
+    echo "OBLIGATIONS_HERE:   $(count_obligations "$PROJECT_ROOT")"
+    # On master: reset to master in a subshell to compare? Too expensive.
+    # Instead just report current and let the agent decide.
+    grep -n '^axiom \|[^-]\bsorry\b' \
+      "${LEAN_SOURCES[@]/#/$PROJECT_ROOT/}" 2>/dev/null \
+      | grep -v '#.*sorry\|--.*sorry' || echo "(none found)"
+    ;;
+
+  finish)
+    branch="$(git -C "$PROJECT_ROOT" rev-parse --abbrev-ref HEAD)"
+    before="$(git -C "$GIT_ROOT" show master:"$( realpath --relative-to="$GIT_ROOT" "$PROJECT_ROOT/P2p/SubcaseBPeriod.lean" )" \
+              | grep -v '^\s*--' | grep -c '\bsorry\b' || echo 0)"
+    before_ax="$(git -C "$GIT_ROOT" show master:"$( realpath --relative-to="$GIT_ROOT" "$PROJECT_ROOT/P2p/SubcaseBPeriod.lean" )" \
+              | grep -c '^axiom ' || echo 0)"
+    before=$(( before + before_ax ))
+    after="$(count_obligations "$PROJECT_ROOT")"
+
+    echo "=== proof-gate ==="
+    echo "branch:  $branch"
+    echo "before:  $before obligations (master)"
+    echo "after:   $after obligations (this worktree)"
+
+    # Gate 1: obligations must strictly decrease
+    if [[ "$after" -ge "$before" ]]; then
+      echo "GATE FAIL: $before → $after (must decrease)"
+      exit 1
+    fi
+
+    # Gate 2: build must pass with 0 errors
+    echo "Running lake build P2p.SubcaseBPeriod ..."
+    error_count=0
+    (cd "$PROJECT_ROOT" && lake build P2p.SubcaseBPeriod 2>&1 | tee /tmp/proof-gate-build.log) || true
+    error_count=$(grep -c '^.*error:' /tmp/proof-gate-build.log 2>/dev/null || echo 0)
+    if [[ "$error_count" -gt 0 ]]; then
+      echo "GATE FAIL: $error_count build errors (see /tmp/proof-gate-build.log)"
+      exit 1
+    fi
+
+    # Gate 3: no unexpected new axioms
+    new_axioms="$(grep -h '^axiom ' \
+      "${LEAN_SOURCES[@]/#/$PROJECT_ROOT/}" 2>/dev/null \
+      | grep -v "$KNOWN_AXIOMS" || true)"
+    if [[ -n "$new_axioms" ]]; then
+      echo "GATE FAIL: unexpected axioms introduced:"
+      echo "$new_axioms"
+      exit 1
+    fi
+
+    echo "GATE PASS: $before → $after obligations"
+    git -C "$GIT_ROOT" merge --no-ff "$branch" \
+      -m "proof: $branch ($before→$after obligations)"
+    git -C "$GIT_ROOT" worktree remove "$(git -C "$PROJECT_ROOT" rev-parse --show-toplevel)" --force 2>/dev/null || true
+    echo "Done. master now at $(count_obligations "$PROJECT_ROOT") obligations."
+    ;;
+
+  *)
+    echo "Usage: proof-gate {start <task> | check | finish}"
+    exit 1
+    ;;
+esac
