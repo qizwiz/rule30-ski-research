@@ -5417,3 +5417,30 @@ k=0,1,2 in range [3087,5200).
 - 23 positions need algebraic proof (level 3+: linearity corridor, same structure as m=22)
 
 **Script**: `scripts/witness_map.py`
+
+### m=4 Witness Hierarchy: Irregular (NOT Periodic) Structure (loop65)
+
+Direct computation reveals the min_w structure is irregular even at "level 1":
+
+```
+n'=1029  (mod4096=1029): min_w=30
+n'=5125  (mod4096=1029): min_w=30  ← consistent, period 4096 works here
+n'=3077  (mod4096=3077): min_w=34  ← CLAUDE.md claimed 30, actually 34
+n'=7173  (mod4096=3077): min_w=52  ← period 4096 breaks! 34→52 jump
+n'=4101  (mod4096=5):    min_w=44
+n'=8197  (mod4096=5):    min_w=34  ← lower than 4101! non-monotone
+n'=12293 (mod4096=5):    min_w=40
+```
+
+**Key finding**: min_w(n') is NOT periodic even at level 1. The value oscillates
+non-monotonically within each period-4096 class. This is the "infinite self-similar
+hierarchy" — native_decide certificates cannot cover it mechanically.
+
+**Spike(30) full-config period**: 4096 (verified). But is_sensitive(30, 4, n') is
+False for n'=3077, 4101, 7173 etc. — the sensitivity structure is not period-4096.
+
+**Implication for algebraic proof**: The linearity corridor proof (D-field approach)
+must work for ALL n'≥3087 with n'≡5 mod 8 universally, not just "level 3+". 
+The CLAUDE.md "levels 0-2 mechanical, level 3+ algebraic" picture was oversimplified.
+Levels 0 (w≤22) are mechanical via period-1024 structure.
+Level 1+ requires the algebraic proof.
