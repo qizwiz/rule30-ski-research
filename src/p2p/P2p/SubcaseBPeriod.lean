@@ -2347,11 +2347,24 @@ theorem subcaseB_m22_ge3087_proved (n' : Nat) (hn' : 3087 ≤ n')
             have hl_mod : l % 2 = 0 ∨ l % 2 = 1 := by omega
             rcases hl_mod with hl0 | hl1
             · -- l ≡ 0 (even): n' = 35598 + 65536*s
-              -- The witness function is 2-automatic (min_w grows with 2-adic valuation of s).
-              -- No single (w, P) full-config cert covers all s; requires linearity corridor proof.
-              -- See research/findings.md for the 4-lemma approach:
-              --   nl_zero_when_both_zero, hcone_left_edge, f_center_prev_zero, d_leftbound
-              sorry
+              -- Use w=6, P=256: twoSpike(6,22) full-config period=256 (VERIFIED), tiny certs.
+              -- 35598 = 270 + 138*256, and 65536 = 256*256, so n' = 270 + (138+256*s)*256.
+              -- Base sensitivity at n''=270: F=false, H=true (tape size 541, 271 steps).
+              obtain ⟨s, hls⟩ : ∃ s, l = 2 * s := ⟨l / 2, by omega⟩
+              use spikeConfig 6 n'
+              refine ⟨spikeConfig_odd_false 6 (by decide) n', ?_⟩
+              rw [rule30n_spikeConfig_eq 6 n', rule30n_flipCell_spikeConfig_eq' 6 n' m (by omega) (by omega)]
+              simp only [hm22]
+              have h_F : caEvolve 256 (spikeAtList 6 (2*256+2*6+1)) = spikeAtList 6 (2*6+1) := by
+                native_decide
+              have h_H : caEvolve 256 (twoSpikeList 6 22 (2*256+2*(max 6 22)+1)) =
+                         twoSpikeList 6 22 (2*(max 6 22)+1) := by
+                have : max 6 22 = 22 := by decide
+                rw [this]; native_decide
+              have h_base : (caEvolve 271 (spikeAtList 6 541)).getD 0 false ≠
+                            (caEvolve 271 (twoSpikeList 6 22 541)).getD 0 false := by native_decide
+              rw [show n'+1 = 270+1+(138+256*s)*256 from by omega]
+              exact sensitivity_transfer 6 22 256 270 (138+256*s) (by omega) h_F h_H h_base
             · -- l ≡ 1 (odd): l = 2*t+1, so n' = 2830 + 65536*(t+1), use w=32, P=65536
               -- Python (shrinking CA) verified: spike(32) P=65536 PASS, twoSpike(32,22) PASS,
               -- base sensitivity n''=2830 w=32: F=false≠H=true ✓

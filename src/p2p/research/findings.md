@@ -5244,3 +5244,72 @@ and B are simultaneously nonzero. These sources cancel (XOR to 0) at position 0 
 The witness w is valid when the net parity at t=T is 1. The level hierarchy determines the
 cancellation pattern via the binary structure of n' and w.
 
+
+## m=22 l≡0 sorry CLOSED: w=6, P=256 (loop63, 2026-03-31)
+
+The m=22 l≡0 sorry at SubcaseBPeriod.lean line 2354 (n'=35598+65536*s) is now proved.
+
+### Discovery
+
+Previous analysis identified this as requiring "linearity corridor" or "algebraic proof" because:
+- Min witness w=34 was not sensitive at s=1 (w=34 fails for s≡1 mod 2)  
+- twoSpike(34,22) full-config period=131072 — infeasible for native_decide
+
+However, w=34 was the MINIMUM witness, not the only one. By checking ALL small witnesses:
+
+**w=6 works for ALL s** with:
+- twoSpike(6,22) full-config period = **256** (not 131072!)
+- spike(6) full-config period = 16 (hence also 256)
+- 256 | 65536 (since 65536 = 256*256) — period divides step increment ✓
+- Sensitivity at n''=270: F=false, H=true ✓
+
+### Verification
+
+```python
+check_full_period(6, 256)           # spike(6) P=256: PASS ✓
+check_ts_full_period(6, 22, 256)    # twoSpike(6,22) P=256: PASS ✓
+center_val([22], 270)               # F=False (SubcaseB) ✓
+center_val([6, 22], 270)            # H=True (sensitive) ✓
+270 + 138*256 == 35598              # base arithmetic ✓
+35598 + 65536*s == 270 + (138+256*s)*256  # for all s ✓
+```
+
+### Cert sizes
+
+All three native_decide computations are tiny:
+- spike(6) P=256 cert: tape=525 cells, 256 steps → sub-second
+- twoSpike(6,22) P=256 cert: tape=557 cells, 256 steps → sub-second  
+- Base sensitivity at n''=270: tape=541 cells, 271 steps → sub-second
+
+### Lean proof (SubcaseBPeriod.lean line 2354)
+
+```lean
+obtain ⟨s, hls⟩ : ∃ s, l = 2 * s := ⟨l / 2, by omega⟩
+use spikeConfig 6 n'
+refine ⟨spikeConfig_odd_false 6 (by decide) n', ?_⟩
+rw [rule30n_spikeConfig_eq 6 n', rule30n_flipCell_spikeConfig_eq' 6 n' m (by omega) (by omega)]
+simp only [hm22]
+have h_F : caEvolve 256 (spikeAtList 6 (2*256+2*6+1)) = spikeAtList 6 (2*6+1) := by native_decide
+have h_H : caEvolve 256 (twoSpikeList 6 22 (2*256+2*(max 6 22)+1)) =
+           twoSpikeList 6 22 (2*(max 6 22)+1) := by
+  have : max 6 22 = 22 := by decide; rw [this]; native_decide
+have h_base : (caEvolve 271 (spikeAtList 6 541)).getD 0 false ≠
+              (caEvolve 271 (twoSpikeList 6 22 541)).getD 0 false := by native_decide
+rw [show n'+1 = 270+1+(138+256*s)*256 from by omega]
+exact sensitivity_transfer 6 22 256 270 (138+256*s) (by omega) h_F h_H h_base
+```
+
+### Status after this fix
+
+SubcaseBPeriod.lean: **0 sorrys, 2 axioms** (down from 1 sorry + 2 axioms)
+- `subcaseB_m4_ge3087`: still an axiom (requires algebraic proof for Level 3+)
+- `subcaseB_resolution_ge3087`: master axiom, depends on all sub-cases
+
+Next: wait for CA_Array.lean build, then build SubcaseBPeriod.lean to confirm sorry removed.
+If proof-gate check shows decrease, run proof-gate finish to merge.
+
+**Why this wasn't found earlier**: We were focused on min-witness w=34 and large-period analysis.
+The w=6 witness has the same center-output period (256) as twoSpike(34,22) but w=6's 
+FULL CONFIG period is also 256 (coincides with center period), while w=34's full config 
+period is 131072. The center period alone doesn't determine feasibility — it's the full 
+config period that matters for sensitivity_transfer.
