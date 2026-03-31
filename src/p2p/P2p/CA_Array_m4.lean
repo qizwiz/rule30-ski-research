@@ -13,7 +13,7 @@ Sections:
 
 All certs verified with Python (shrinking CA) before adding here.
 -/
-import P2p.CA_Array
+import P2p.CA_ArrayDef
 
 namespace P2p
 

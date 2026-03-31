@@ -18,24 +18,25 @@ Do exactly ONE unit of meaningful work, then commit it. Do not stop to ask quest
   - l≡1 sub-case IS proved: w=32, P=65536, base n''=2830.
   - l≡0: 2-automatic witness — s≡even→w=34, s≡1mod4→w=40, s≡3mod4→w=42 (from C tool data s=0..6)
 - **Two axioms remain**: `subcaseB_m4_ge3087` (line ~980) and `subcaseB_resolution_ge3087` (master)
-- **CA_Array_m4.lean created (loop59)**: NEW file with Sections 12-14 — j=42 (w=32 P=4096), Level 1 (w=30 P=4096), Level 2 (w=34 P=16384). Imports P2p.CA_Array.
-- **SubcaseBPeriod.lean**: now imports P2p.CA_Array_m4 (added loop59).
-- **CA_Array build status**: Previous build (started 2:47 AM) for original CA_Array.lean (Sections 1-11) may still be running or just finished. Then start CA_Array_m4 build.
+- **CA_Array_m4.lean created (loop59)**: NEW file (imports P2p.CA_ArrayDef) with Sections 12-14:
+  - j=42: w=32, P=4096; Level 1: w=30, P=4096 (bases 5125, 7173); Level 2: w=34, P=16384 (bases 4101, 8197, 12293)
+- **SubcaseBPeriod.lean**: imports P2p.CA_Array_m4 (added loop59).
+- **CA_Array_m4 build**: STARTED (loop59) — check with `ps aux | grep "lake build" | grep -v grep`
+- **CA_Array build**: also running for original CA_Array.lean (Sections 1-11, started 2:47 AM).
 - **Branch**: `autoresearch/mar20` — changes accumulate here before proof-gate merges to master
 
-**m=4 hierarchy (loop59 state)**: All finite-level gaps have certs in CA_Array.lean.
-  - Sections 12-14 added: j=42 (w=32 P=4096), Level 1 (w=30 P=4096), Level 2 (w=34 P=16384)
-  - Level 3+ (≡5 mod 16384, first n'=16389): still needs investigation (linearity corridor or bounded?)
+**m=4 hierarchy (loop59 state)**: All finite-level gaps have certs in CA_Array_m4.lean.
+  - Sections 12-14: j=42 (w=32 P=4096), Level 1 (w=30 P=4096), Level 2 (w=34 P=16384)
+  - Level 3+ (≡5 mod 16384, first n'=16389): still needs investigation
 
 ## Pick ONE task from this priority order
 
-1. **Start CA_Array_m4 build** (FIRST PRIORITY — do this AFTER CA_Array build finishes):
-   - Check if old CA_Array build (PID 83361 or check ps) is done: `ps aux | grep "lake build" | grep -v grep`
-   - If original CA_Array build is still running, WAIT for it to finish (writes .olean we need)
-   - Once CA_Array.olean exists: `ls -la .lake/build/lib/lean/P2p/CA_Array.olean`
-   - Then start: `nohup lake build P2p.CA_Array_m4 > /tmp/ca_array_m4_build.log 2>&1 &`
-   - This should be FAST (~5-15 min) since Sections 12-14 have P≤16384 (vs P=65536 in Section 11)
-   - Commit status update
+1. **Check CA_Array_m4 build** (FIRST PRIORITY):
+   - `ps aux | grep "lake build" | grep -v grep` — check if build is still running
+   - `ls -t /tmp/ca_array_m4_build*.log | head -1 | xargs tail -5` — check log
+   - If finished cleanly (log shows `Built P2p.CA_Array_m4`): proceed to SubcaseBPeriod build
+   - If FAILED: check log for errors and fix
+   - Expected duration: ~5-30 min (native_decide for P=4096/16384 is much faster than P=65536)
 
 2. **If CA_Array build just finished cleanly** (tail log shows `Built P2p.CA_Array`):
    - Run: `nohup lake build P2p.SubcaseBPeriod > /tmp/subcaseb_build.log 2>&1 &`
