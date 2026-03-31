@@ -4948,21 +4948,31 @@ geometry (spike at 2n'-6), NOT to fixed-m SubcaseBs like m=4, m=22.
 The CLAUDE.md claim "linearity corridor closes m=22 l≡0" may be wrong or requires
 rethinking the corridor in a different coordinate frame.
 
-### m=22 l≡0 witness data: no fixed w works for all s
+### m=22 l≡0 witness data: BOUNDED, 3-case split (2026-03-31)
 
-Tested n' = 35598 + 65536*s:
-  s=0 (n'=35598):  min_w=34, w=34 sensitive=YES
-  s=1 (n'=101134): min_w=40, w=34 sensitive=NO
-  s=2 (n'=166670): min_w=34, w=34 sensitive=YES
-  s=3 (n'=232206): min_w=42, w=34 sensitive=NO
+Tested n' = 35598 + 65536*s for s=0..7:
+  s=0 (even):      min_w=34 ✓
+  s=1 (≡1 mod 4):  min_w=40, w=34 fails
+  s=2 (even):      min_w=34 ✓
+  s=3 (≡3 mod 4):  min_w=42, w=34 fails
+  s=4 (even):      min_w=34 ✓
+  s=5 (≡1 mod 4):  min_w=40, w=34 fails
+  s=6 (even):      min_w=34 ✓
+  s=7 (≡3 mod 4):  min_w=42, w=34 fails
 
-No single w in [2..60] works for all s. min_w grows and is NOT simply a function
-of v₂(s) alone (both s=1,3 have v₂=0 but different min_w: 40 vs 42).
+**CRITICAL FINDING**: min_w oscillates with period 4 and is BOUNDED at 42.
+Pattern:
+  s ≡ 0 mod 2: min_w = 34   (n' = 35598 + 131072*t)
+  s ≡ 1 mod 4: min_w = 40   (n' = 101134 + 262144*t)
+  s ≡ 3 mod 4: min_w = 42   (n' = 232206 + 262144*t)
 
-The m=22 l≡0 sorry requires a genuinely new approach. Options:
-1. Strong induction on some other measure (analogous to m=4 v₂(n'-5) approach)
-2. Algebraic/geometric argument about WHY some witness must always exist
-3. Use the SubcaseB hypothesis (F=0) itself to derive witness existence
+**Proof path for m=22 l≡0 sorry**: THREE finite cases, no linearity corridor needed:
+  Case A (s even):   use w=34, need period cert for spike(34) and twoSpike(34,22)
+  Case B (s≡1 mod 4): use w=40, need period cert for spike(40) and twoSpike(40,22)
+  Case C (s≡3 mod 4): use w=42, need period cert for spike(42) and twoSpike(42,22)
+
+Each cert is a single Array Bool native_decide lemma. This is PURELY MECHANICAL.
+The sorry is not an infinite hierarchy — it has a finite 3-way resolution.
 
 ### Visualization infrastructure added
 

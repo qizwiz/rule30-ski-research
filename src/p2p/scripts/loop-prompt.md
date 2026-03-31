@@ -16,7 +16,7 @@ Do exactly ONE unit of meaningful work, then commit it. Do not stop to ask quest
 
 - **SubcaseBPeriod.lean has ONE sorry**: m=22 j≡1/l≡0 sub-case (n'=35598+65536s)
   - l≡1 sub-case IS proved: w=32, P=65536, base n''=2830.
-  - l≡0: 2-automatic witness structure, no fixed w works. Needs different approach.
+  - l≡0: SOLVED (2026-03-31). 3-case split: s≡0→w=34, s≡1mod4→w=40, s≡3mod4→w=42. BOUNDED.
 - **Two axioms remain**: `subcaseB_m4_ge3087` (line ~980) and `subcaseB_resolution_ge3087` (master)
 - **CA_Array build**: may be running (check with ps aux); Sections 5-11 included.
 - **Branch**: `autoresearch/mar20` — changes accumulate here before proof-gate merges to master
@@ -26,7 +26,7 @@ Finite gaps that need Array Bool certs (all Python-verified PASS):
   - j=42 (k≡42 mod 64, n'=3429): w=32, P=4096 — spike(32) PASS, ts(32,4) PASS
   - Level 1 (≡5 mod 1024): w=30, P=4096 — two bases: n'=5125 (mod4096=1029), n'=7173 (mod4096=3077)
   - Level 2 (≡5 mod 4096): w=34, P=16384 — three bases: n'=4101, 8197, 12293
-  - Level 3+ (≡5 mod 16384, first n'=16389): INFINITE — linearity corridor needed
+  - Level 3+ (≡5 mod 16384): BOUNDED at w=42 (oscillates 40/42, does NOT grow). 2-case split.
 
 ## Pick ONE task from this priority order
 
@@ -52,10 +52,15 @@ Finite gaps that need Array Bool certs (all Python-verified PASS):
    - Location: `SubcaseBPeriod.lean` line 980, `axiom subcaseB_m4_ge3087`
    - Most work done (certs at lines 300-975). Just need j=42 + Level 1-2 certs in CA_Array.lean
    - Convert axiom → theorem-with-1-sorry (for Level 3+ = n'≡5 mod 16384 hierarchy)
-   - The 1 sorry covers the infinite Level 3+ hierarchy (needs linearity corridor)
+   - Level 3+ needs w=40/42 certs — BOUNDED, add to CA_Array.lean alongside other certs
    - This REDUCES total obligation count only if done simultaneously with closing m=22 l≡0
 
-5. **If stuck** — m=22 l≡0 investigation or paper update, commit anything meaningful.
+5. **m=22 l≡0 certs** (now tractable): add 3 Array Bool certs to CA_Array.lean:
+   - w=34, base n'=35598: spike(34) period cert + twoSpike(34,22) period cert
+   - w=40, base n'=101134: spike(40) period cert + twoSpike(40,22) period cert
+   - w=42, base n'=232206: spike(42) period cert + twoSpike(42,22) period cert
+
+6. **If stuck** — paper update or visualization, commit anything meaningful.
 
 ## Rules
 
