@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# loop: one autonomous research iteration for Wolfram Prize 3 / Rule 30
+#
+# Designed to be run by launchd. Each invocation does one unit of work and commits.
+# The proof-gate ensures no backward progress (sorry count never increases on master).
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+LOG_DIR="$PROJECT_ROOT/runtime"
+mkdir -p "$LOG_DIR"
+
+TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+LOG_FILE="$LOG_DIR/$TIMESTAMP-loop.log"
+LOCK_FILE="$LOG_DIR/loop.lock"
+
+# --- Lock: only one iteration at a time ---
+if ! (set -C; echo $$ > "$LOCK_FILE") 2>/dev/null; then
+  existing_pid="$(cat "$LOCK_FILE" 2>/dev/null || echo '?')"
+  echo "[$TIMESTAMP] loop already running (PID $existing_pid), skipping" >> "$LOG_DIR/loop-runner.log"
+  exit 0
+fi
+trap 'rm -f "$LOCK_FILE"' EXIT
+
+echo "[$TIMESTAMP] starting loop iteration" | tee -a "$LOG_DIR/loop-runner.log"
+
+# --- Run one iteration ---
+cd "$PROJECT_ROOT"
+/Users/jonathanhill/.local/bin/claude \
+  --dangerously-skip-permissions \
+  --print \
+  --max-budget-usd 3 \
+  < "$SCRIPT_DIR/loop-prompt.md" \
+  > "$LOG_FILE" 2>&1
+
+EXIT_CODE=$?
+echo "[$TIMESTAMP] claude exited $EXIT_CODE" | tee -a "$LOG_DIR/loop-runner.log"
+echo "[$TIMESTAMP] log: $LOG_FILE" | tee -a "$LOG_DIR/loop-runner.log"
+
+# Append last few lines of output to runner log for quick inspection
+echo "--- last output ---" >> "$LOG_DIR/loop-runner.log"
+tail -5 "$LOG_FILE" >> "$LOG_DIR/loop-runner.log"
+echo "---" >> "$LOG_DIR/loop-runner.log"
+
+exit $EXIT_CODE
