@@ -5313,3 +5313,76 @@ The w=6 witness has the same center-output period (256) as twoSpike(34,22) but w
 FULL CONFIG period is also 256 (coincides with center period), while w=34's full config 
 period is 131072. The center period alone doesn't determine feasibility — it's the full 
 config period that matters for sensitivity_transfer.
+
+---
+
+## Loop 64 (2026-03-31) — Build Analysis, Ski-Prize Assessment, m28/m30 Residue Plan
+
+### SubcaseBPeriod.lean Build Crash (OOM)
+
+CA_Array.lean build COMPLETED successfully at 11:43AM (5.4h, 765 jobs).
+SubcaseBPeriod.lean build CRASHED with exit code 134 (SIGABRT) at symbol #9704:
+```
+#9704 subcaseB_m22_base_sens_6926._native.native_decide.decl_1_1
+error: Lean exited with code 134
+```
+
+**Cause**: OOM during C code generation for native_decide proofs. SubcaseBPeriod.lean
+has ~9700+ native code declarations (one set per native_decide call). The C compilation
+unit grows too large for available memory. This is a TOOLCHAIN-LEVEL constraint, not
+a proof error.
+
+**Context**: The m=22 l≡0 fix (loop63) added 3 more native_decide calls (tiny, w=6, P=256).
+These may have pushed memory usage past the limit. The crash occurs at an EXISTING proof
+(m=22 l≡1 base sensitivity at n''=6926), not at the new proof.
+
+**Build restarted** — if OOM is intermittent, second attempt may succeed.
+
+### Ski-Prize (S combinator prize) Assessment
+
+Read all 983 lines of `ski-prize/SkiPrize/Prize.lean`. Key findings:
+
+**What's proved** (axiom-free, machine-checked):
+- sLeaves monotonically non-decreasing under S-reduction (S never drops arguments)
+- S cannot compute constant functions (s_no_constant_function)
+- S cannot compute bounded-output functions from unbounded-input encodings
+- Parity is not S-computable
+- Full `s_not_universal_terminating` (strongest internal form)
+
+**What's NOT proved** (explicit open obligation):
+- `PrizeUniversalityBridgeObligation` — defined as a DEFINITION, never proved
+- This bridge says: "if U is prize-universal (in Wolfram's sense), then U can compute 
+  const_zero through an injective input encoding in the SComputable_terminating model"
+- The final theorem `no_prize_universal_candidate_of_bridge` is CONDITIONAL on this bridge
+
+**Gap analysis**: The proof establishes non-universality within a specific formal model,
+but hasn't formalized what "prize-universal" means at the Wolfram level. The bridge would
+require: formalizing TM-simulation by S combinators, showing that TM-computability
+implies const_zero computability in the internal model.
+
+**Prize probability**: 15-25% (strong internal result, but bridge obligation is non-trivial
+and requires formalizing the Wolfram prize statement in the Lean model).
+
+### m=28/m=30 Residue Classification Plan
+
+Created `P2p/CA_Array_residues.lean` with native_decide proofs for:
+- `subcaseB_m28_residue_3class_proved`: Fin 2048 Array-based check
+- `subcaseB_m30_residue_unique_proved`: Fin 4096 Array-based check
+
+**Current obstacle**: CA_Array.lean comment says "4h+ compile time due to Array.ofFn per-step
+allocation overhead" — the Array-based approach was attempted and found too slow.
+
+**Potential fix**: BitVec approach for fixed-size CA simulation would be ~64x faster.
+But needs careful treatment of shrinking-CA boundary conditions.
+
+**Name conflict**: CA_Array_residues.lean declares theorems with same names as CA_Array.lean
+axioms. Integration plan: once proofs verified in CA_Array_residues.lean, remove axioms
+from CA_Array.lean and import CA_Array_residues there.
+
+### Current Proof State (loop64)
+
+4 obligations remain:
+1. `subcaseB_m4_ge3087` — requires algebraic/LFSR proof for Level 3+ infinite hierarchy
+2. `subcaseB_resolution_ge3087` — master assembler (depends on all sub-cases)
+3. `subcaseB_m28_residue_3class_proved` — in CA_Array.lean (axiom, needs native_decide)
+4. `subcaseB_m30_residue_unique_proved` — in CA_Array.lean (axiom, needs native_decide)

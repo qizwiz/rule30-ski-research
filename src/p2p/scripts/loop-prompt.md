@@ -12,14 +12,20 @@ Do exactly ONE unit of meaningful work, then commit it. Do not stop to ask quest
 4. Check if a CA_Array build is running: `ps aux | grep "lake build" | grep -v grep`
 5. Check the latest build log: `ls -t /tmp/ca_array_build*.log 2>/dev/null | head -1 | xargs tail -5 2>/dev/null`
 
-## Current state (as of 2026-03-31, loop63)
+## Current state (as of 2026-03-31, loop64)
 
 - **SubcaseBPeriod.lean has ZERO sorrys** (loop63 closed last one!)
   - m=22 l≡0 CLOSED: w=6, P=256 (twoSpike(6,22) period=256, tiny certs, base n''=270)
-  - **Two axioms remain**: `subcaseB_m4_ge3087` (line ~981) and `subcaseB_resolution_ge3087` (master)
-- **CA_Array.lean**: STILL BUILDING (PID 51309, started 8:22AM, ~3h elapsed as of loop63).
-  - Build MUST complete before SubcaseBPeriod.lean can be verified
-  - NOTE: There was a duplicate build race (PIDs 8760/8897 killed in loop63); only PID 51309 remains
+  - **Two axioms remain in SubcaseBPeriod**: `subcaseB_m4_ge3087` (line ~981) and `subcaseB_resolution_ge3087` (master)
+- **CA_Array.lean**: BUILD COMPLETE (11:43AM, 765 jobs, 5.4h). .olean exists.
+  - **Two axioms remain in CA_Array**: `subcaseB_m28_residue_3class_proved` and `subcaseB_m30_residue_unique_proved`
+  - These require native_decide but Array.ofFn overhead was previously too slow (4h+); see CA_Array_residues.lean for plan
+- **SubcaseBPeriod.lean build**: CRASHED once (exit 134, OOM at symbol #9704 during C generation)
+  - Restarted (loop64); may be intermittent OOM. If crash repeats, need to split native_decide proofs.
+  - Build log: /tmp/subcaseb_build2.log
+- **CA_Array_residues.lean**: NEW FILE (loop64) with native_decide proofs for m28/m30 residues
+  - Has name conflicts with CA_Array.lean axioms — do NOT import both from SubcaseBPeriod.lean
+  - Integration plan: verify proof compiles, then remove axioms from CA_Array.lean, import residues
 - **Branch**: `autoresearch/mar20` — changes accumulate here before proof-gate merges to master
 
 **m=4 SubcaseB axiom** (still open, requires algebraic proof):
@@ -31,19 +37,24 @@ Do exactly ONE unit of meaningful work, then commit it. Do not stop to ask quest
 
 ## Pick ONE task from this priority order
 
-1. **Wait for CA_Array build, then build SubcaseBPeriod** (FIRST PRIORITY):
-   - Check: `ps aux | grep "lean\|lake" | grep -v grep | awk '{print $2,$9,$11}'`
-   - If CA_Array.lean lean process (PID 51309) is gone: CA_Array built, SubcaseBPeriod will auto-build via lake (PID 51147)
-   - If SubcaseBPeriod build appears in `tail /tmp/subcaseb_build.log`: wait for it to finish
-   - If SubcaseBPeriod finishes: run `scripts/proof-gate check`
-   - If obligation count decreased vs master: run `scripts/proof-gate finish`
-   - **DO NOT start a new lake build** — PID 51147 is already the SubcaseBPeriod build
+1. **Check SubcaseBPeriod build status** (FIRST PRIORITY):
+   - Check: `ps aux | grep "lean\|lake" | grep -v grep`
+   - Build log: `tail /tmp/subcaseb_build2.log`
+   - If succeeded (olean exists): run `scripts/proof-gate check`
+   - If crashed AGAIN (exit 134): split the SubcaseBPeriod.lean file or reduce native_decide count
+   - If still running: move to task 2 or 3 while waiting
 
 2. **If SubcaseBPeriod build finished cleanly**:
    - Run `scripts/proof-gate check` to confirm obligation count
    - If count decreased vs master, run `scripts/proof-gate finish`
 
-3. **Algebraic approach for m=4 Level 3+** (ONE axiom needs this):
+3. **Verify CA_Array_residues.lean proof** (m28/m30 residue classification):
+   - `nohup lake build P2p.CA_Array_residues > /tmp/ca_residues_build.log 2>&1 &`
+   - Monitor: `tail /tmp/ca_residues_build.log`
+   - If builds in < 30min: approach works; plan integration with CA_Array.lean
+   - If hangs 4h+: Array.ofFn too slow; need BitVec approach or algebraic proof
+
+4. **Algebraic approach for m=4 Level 3+** (ONE axiom needs this):
    - Linearity corridor proof needs adaptation for SubcaseB geometry
    - For twoSpike(w, m=4): D = interaction(spike-at-w, spike-at-4)
    - Key question: at step T-1, is spike-at-4 zero at positions {center, center+1}?
@@ -63,7 +74,7 @@ Do exactly ONE unit of meaningful work, then commit it. Do not stop to ask quest
 - Before starting a new `lake build`: `pkill -f "lake build" 2>/dev/null; sleep 2; pkill -f "[l]ean.*CA_Array" 2>/dev/null`
 - Never run `lake build` and wait for it — start it in background: `nohup lake build ... > /tmp/build.log 2>&1 &`
 - Use type holes (`?_`) not `sorry` when probing Lean goals
-- Commit at the end with format: `loop<N>: <what you did>` where N = last loop number + 1
+- Commit at the end with format: `loop<N>: <what you did>` where N = 65 (loop64 was this session)
 - Keep commits small and honest — one thing done well beats three things half-done
 - The `claude` binary is at `/Users/jonathanhill/.local/bin/claude`
 
