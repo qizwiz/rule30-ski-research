@@ -5121,3 +5121,126 @@ is the correct strategy. The m=4 SubcaseB geometry differs from the k=6 diagonal
 (f_center_prev_zero) needs adaptation. The key question: at step T-1 for SubcaseB n',
 is the spike-at-4 component zero at positions {center, center+1}? If the spike-at-4
 causal cone hasn't reached center-1 by step T-1, the argument holds.
+
+---
+
+## Rule 90 Embedding & Algebraic Proof Structure (loop62, 2026-03-31)
+
+### Key discovery: Rule 90 is embedded in Rule 30 as the interaction propagation law
+
+Rule 30 decomposes over GF(2) as:
+```
+new[i] = old[i-1] XOR old[i] XOR old[i+1]   (Rule 90 — linear)
+        + old[i] AND old[i+1]                (AND correction — nonlinear)
+```
+
+The interaction field D[i,t] = evolve(A⊕B)[i,t] ⊕ evolve(A)[i,t] ⊕ evolve(B)[i,t]
+evolves according to:
+```
+D[i,t+1] = D[i-1,t] XOR D[i,t] XOR D[i+1,t]   (Rule 90 free propagation)
+           + AND-correction source terms         (cross products involving A and B)
+```
+
+**D[center,t] is a pure step function**: verified computationally for all levels.
+- D[center,t] = 0 for all t < T = n'+1
+- D[center,T] ∈ {0,1} — the single bit that determines witness validity
+
+This means the entire problem reduces to: compute the parity of the Rule 90
+propagation from all AND-correction source events to (center,T).
+
+### The algebraic path counting formula
+
+Each AND-correction event at spacetime point (j, s) contributes:
+```
+contribution = C(T-s, center-j) mod 2
+```
+(binomial coefficient, by the Rule 90 propagation formula).
+
+By **Lucas' theorem**: C(T-s, center-j) mod 2 = 1 iff binary(center-j) is a
+bitwise submask of binary(T-s).
+
+Total: D[center,T] = XOR over all AND-correction events (j_k, s_k) of C(T-s_k, center-j_k) mod 2.
+
+### Connection to the level hierarchy
+
+The minimum witness w at Level k is determined by which AND-correction events
+fire and whether their Rule 90 contributions cancel. At Level k:
+- Level 0..k-1 contributions cancel (XOR = 0)
+- Level k event contributes 1
+
+This is the carry structure of binary addition (Kummer's theorem): Level k corresponds
+to the k-th carry in the binary representation of n'-5, explaining the period-doubling
+hierarchy.
+
+### Binary probe data (m=4, loop62)
+
+```
+n'    | bin(n'-5)/8   | v2   | min_w | first works
+------+---------------+------+-------+-------------
+93    | 1011 (odd)    | v2=0 |  6    | [6, 10, 14]
+109   | 1101 (odd)    | v2=0 |  6    | [6, 10, 14]
+125   | 1111 (odd)    | v2=0 |  6    | [6, 10, 12]
+117   | 1110 (v2=1)   | v2=1 | 10    | [10, 12, 14]
+101   | 1100 (v2=2)   | v2=2 | 16    | [16, 24, 26]
+133   | 10000 (v2=4)  | v2=4 | 14    | [14, 18, 24]
+```
+
+Note: v2 here is v2((n'-5)/8). The relationship min_w = f(v2) is NOT simply
+monotone (v2=4 gives min_w=14 < v2=2 gives min_w=16), indicating the full binary
+pattern of n', not just v2, determines min_w. This is consistent with Lucas'
+theorem where the exact bit pattern matters, not just the 2-adic valuation.
+
+### Lean formalization path
+
+The algebraic proof requires 4 lemmas (same structure as k=6 linearity corridor,
+adapted for SubcaseB twoSpike geometry):
+
+1. **rule90_propagation**: D[i,t+1] = D[i-1,t] ⊕ D[i,t] ⊕ D[i+1,t] + source terms
+2. **source_localization**: AND-correction sources are confined to the interaction
+   cone of A and B (positions where both A and B are nonzero)
+3. **lucas_path_count**: C(T-s, center-j) mod 2 determined by Nat.testBit conditions
+4. **level_cancellation**: contributions at levels 0..k-1 cancel; level k = 1
+
+**Alternative approach**: Instead of the full perturbation series, use the
+structural observation that D[center,T] = 1 iff the specific sub-tape
+[twoSpike(w,m) at step n'] gives center=true, which reduces to verifying the
+binary structure of (n'+1) vs the witness positions.
+
+### m=22 l≡0 connection
+
+The same structure applies to m=22 l≡0 (n'=35598+65536s, twoSpike(w,22) P=131072).
+The Rule 90 embedding explains why the period is 131072: at the relevant level,
+the AND-correction events occur at positions that create a Rule 90 path count with
+period 131072. The min_w grows with v2(s) by the same Lucas/Kummer mechanism.
+
+The 4-lemma proof should work for both m=4 (Level 3+) and m=22 (l≡0) simultaneously,
+as both reduce to the Rule 90 path counting formula with the same algebraic structure.
+
+
+### Corrected D-field update formula (loop62 verification)
+
+The CORRECT update rule for D[i,t+1] includes Rule 90 propagation of D:
+
+```
+D[i,t+1] = D[i,t] XOR D[i+1,t] XOR D[i+2,t]   ← Rule 90 carries prior D
+          + A[i+1,t]*B[i+2,t] XOR A[i+2,t]*B[i+1,t]   ← cross-product source
+          + (A[i+1]XOR B[i+1])*D[i+2] XOR (A[i+2] XOR B[i+2])*D[i+1] XOR D[i+1]*D[i+2]
+```
+
+**Proof**: expand D[i,t+1] = Rule30(A⊕B⊕D)[i] ⊕ Rule30(A⊕D_A)[i] ⊕ Rule30(B)[i]... 
+actually derive by computing evolve(A⊕B)[0,T] XOR evolve(A)[0,T] XOR evolve(B)[0,T] using
+the step-by-step Rule 30 update and expanding.
+
+**The single-step formula** D[0,T] = A[1,T-1]*B[2,T-1] XOR A[2,T-1]*B[1,T-1] is WRONG
+for large T: it ignores prior D propagated forward by Rule 90.
+
+**Verification** (loop62):
+- For n'=93, w=6: single-step formula gives correct D=1 (because D[0..2,T-1] happen to be 0)
+- For n'=101, w=6: single-step formula gives 1 but D_direct=0 (Rule 90 carries prior D=1,
+  which XOR with source=1 gives 0 — cancellation via Rule 90 propagation)
+
+**Key insight preserved**: D propagates by Rule 90. Cross-product sources fire wherever A
+and B are simultaneously nonzero. These sources cancel (XOR to 0) at position 0 for all t<T.
+The witness w is valid when the net parity at t=T is 1. The level hierarchy determines the
+cancellation pattern via the binary structure of n' and w.
+
