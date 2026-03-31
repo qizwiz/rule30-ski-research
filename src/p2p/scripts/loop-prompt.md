@@ -12,6 +12,38 @@ Do exactly ONE unit of meaningful work, then commit it. Do not stop to ask quest
 4. Check if a CA_Array build is running: `ps aux | grep "lake build" | grep -v grep`
 5. Check the latest build log: `ls -t /tmp/ca_array_build*.log 2>/dev/null | head -1 | xargs tail -5 2>/dev/null`
 
+## LEAN GOAL PROBE TOOL (new in loop65)
+
+To query Lean goals interactively WITHOUT running a full lake build:
+
+```bash
+cat > /tmp/probe.lean << 'EOF'
+import P2p.CausalConeLemmas
+import P2p.Prize3_Complete
+namespace P2p
+-- your test here, with ?_ holes
+example : YOUR_CLAIM := by
+  YOUR_TACTIC
+  ?_
+end P2p
+EOF
+lake env lean /tmp/probe.lean 2>&1 | grep -A 30 "unsolved goals\|⊢"
+```
+
+This runs in ~15 seconds (uses cached .olean), prints exact Lean goals.
+Use it to: probe tactic progress, check if a lemma closes a goal, explore `exact?`/`apply?` results.
+
+## Current state (as of 2026-03-31, loop65)
+
+- **SubcaseBM4Sketch.lean**: type-holed proof skeleton committed. Key goals exposed.
+- **lake env lean probe tool**: working — use for interactive goal inspection
+- **Emacs lean4-mode**: installed (~/.emacs.d/lean4-mode), daemon running. `emacsclient -c` for interactive use.
+- **twoSpike(6,4) period=8**: VERIFIED (shrinking CA). spike(6) period=16.
+  - sensitivity_transfer with w=6, P=16 covers n'≡13 mod 16.
+  - n'≡5 mod 16 (= n'=3093 base): w=6 NOT sensitive there. Need different witness.
+- **Witness map (in progress)**: Python script computing min_w for all firing residues mod 512.
+  If all residues covered by w≤32 with known periods, m=4 axiom is MECHANICAL (no algebra needed).
+
 ## Current state (as of 2026-03-31, loop64)
 
 - **SubcaseBPeriod.lean has ZERO sorrys** (loop63 closed last one!)
