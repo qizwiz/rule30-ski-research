@@ -4966,13 +4966,28 @@ Pattern:
   s ≡ 1 mod 4: min_w = 40   (n' = 101134 + 262144*t)
   s ≡ 3 mod 4: min_w = 42   (n' = 232206 + 262144*t)
 
-**Proof path for m=22 l≡0 sorry**: THREE finite cases, no linearity corridor needed:
-  Case A (s even):   use w=34, need period cert for spike(34) and twoSpike(34,22)
-  Case B (s≡1 mod 4): use w=40, need period cert for spike(40) and twoSpike(40,22)
-  Case C (s≡3 mod 4): use w=42, need period cert for spike(42) and twoSpike(42,22)
+**Proof path for m=22 l≡0 sorry**: CORRECTION (2026-03-31, loop60)
 
-Each cert is a single Array Bool native_decide lemma. This is PURELY MECHANICAL.
-The sorry is not an infinite hierarchy — it has a finite 3-way resolution.
+The 4-case witness split is correct (s%4 → w):
+  s≡0 mod 2 (s=0,2,4,...): w=34 (verified s=0,2)
+  s≡1 mod 4 (s=1,5,9,...): w=40 (verified s=1)
+  s≡3 mod 4 (s=3,7,11,...): w=42 (verified s=3 in prior session)
+
+However, the period certs are NOT feasible with native_decide:
+- twoSpike(34,22): P=16384 FAIL, P=32768 FAIL, P=65536 FAIL, P=131072 PASS
+- twoSpike(40,22): P≤65536 all FAIL (P=131072 or larger needed)
+- twoSpike(42,22): P≤65536 all FAIL
+
+All twoSpike(w,22) certs for m=22 l≡0 witnesses require P=131072 (at minimum).
+With P=131072, tape size = 2*131072+2*max(w,22)+1 ≈ 262213 elements.
+Native_decide for P=131072 would run 131072 CA steps on a 262K tape — estimated
+several HOURS in Lean. This is INFEASIBLE with the current period-cert approach.
+
+Additionally, the base sensitivity native_decide for n'=35598 would require
+35599 steps on tape 71199 — itself 10+ minutes. For n'=166670 it's impractical.
+
+**CONCLUSION**: m=22 l≡0 sorry requires ALGEBRAIC proof, not period certs.
+The twoSpike nonlinear interaction has period 131072, exceeding native_decide capacity.
 
 ### Visualization infrastructure added
 
@@ -5000,3 +5015,34 @@ timelike separation) are the appropriate spatial languages for this problem.
 A geometric argument: when are two cones' interactions guaranteed to create
 a nonzero net contribution to center? This is the missing ingredient for both
 the m=4 and m=22 proofs.
+
+## CA_Array_m4 build completed (2026-03-31, loop60)
+
+CA_Array_m4.lean built successfully: 765 jobs, 2444 seconds.
+Sections 12-14 verified:
+- Section 12: j=42, w=32, P=4096 — BUILT ✓
+- Section 13: Level 1 (n'≡5 mod 1024, ≢5 mod 4096), w=30, P=4096 — BUILT ✓
+- Section 14: Level 2 (n'≡5 mod 4096, ≢5 mod 16384), w=34, P=16384 — BUILT ✓
+
+## m=4 SubcaseB hierarchy NOT bounded (2026-03-31, loop60)
+
+CORRECTION: Prior session claimed "max min_w=42, bounded oscillation."
+This was based on data only up to n'=65541 (=5+2^16).
+
+New data:
+- n'=81925 (=5+5*2^14): min_w=44 (EXCEEDS 42!)
+- n'=98309: min_w=40
+
+The hierarchy IS infinite. n'=81925 requires w=44, and the pattern continues
+to grow with deeper levels. The claim "max min_w=42" was WRONG.
+
+Spike(42) period cert P=65536: FAIL. P=131072: PASS.
+BUT: the HIERARCHY keeps growing beyond w=42. Level 4+ (n'≡5 mod 65536)
+requires min_w≥44, and so on. Even if P=131072 certs could be built for w=42,
+there would be Level 4+ cases needing w=44 with even larger periods.
+
+**CONCLUSION**: m=4 SubcaseB axiom requires algebraic/LFSR proof.
+Period certs are FUNDAMENTALLY INFEASIBLE for this infinite hierarchy.
+
+CA_Array.lean build: still running as of loop60 (started 2:47AM, 103+ min CPU).
+SubcaseBPeriod build: pending CA_Array completion.

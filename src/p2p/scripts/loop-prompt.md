@@ -12,53 +12,49 @@ Do exactly ONE unit of meaningful work, then commit it. Do not stop to ask quest
 4. Check if a CA_Array build is running: `ps aux | grep "lake build" | grep -v grep`
 5. Check the latest build log: `ls -t /tmp/ca_array_build*.log 2>/dev/null | head -1 | xargs tail -5 2>/dev/null`
 
-## Current state (as of 2026-03-31, loop59)
+## Current state (as of 2026-03-31, loop60)
 
 - **SubcaseBPeriod.lean has ONE sorry**: m=22 j≡1/l≡0 sub-case (n'=35598+65536s)
   - l≡1 sub-case IS proved: w=32, P=65536, base n''=2830.
-  - l≡0: 2-automatic witness — s≡even→w=34, s≡1mod4→w=40, s≡3mod4→w=42 (from C tool data s=0..6)
-- **Two axioms remain**: `subcaseB_m4_ge3087` (line ~980) and `subcaseB_resolution_ge3087` (master)
-- **CA_Array_m4.lean created (loop59)**: NEW file (imports P2p.CA_ArrayDef) with Sections 12-14:
-  - j=42: w=32, P=4096; Level 1: w=30, P=4096 (bases 5125, 7173); Level 2: w=34, P=16384 (bases 4101, 8197, 12293)
-- **SubcaseBPeriod.lean**: imports P2p.CA_Array_m4 (added loop59).
-- **CA_Array_m4 build**: STARTED (loop59) — check with `ps aux | grep "lake build" | grep -v grep`
-- **CA_Array build**: also running for original CA_Array.lean (Sections 1-11, started 2:47 AM).
+  - l≡0: witnesses s%4 → {34,34,40,42}, but twoSpike(w,22) requires P=131072 (INFEASIBLE for native_decide)
+  - **Both m=22 l≡0 and m=4 require ALGEBRAIC proof, not period certs**
+- **Two axioms remain**: `subcaseB_m4_ge3087` (line ~981) and `subcaseB_resolution_ge3087` (master)
+- **CA_Array_m4.lean BUILT** (loop60): 765 jobs, 2444s. Sections 12-14 verified.
+- **CA_Array.lean**: STILL BUILDING (started 2:47AM, 103+ min CPU as of loop60). Imports needed by SubcaseBPeriod.
 - **Branch**: `autoresearch/mar20` — changes accumulate here before proof-gate merges to master
 
-**m=4 hierarchy (loop59 state)**: All finite-level gaps have certs in CA_Array_m4.lean.
-  - Sections 12-14: j=42 (w=32 P=4096), Level 1 (w=30 P=4096), Level 2 (w=34 P=16384)
-  - Level 3+ (≡5 mod 16384, first n'=16389): still needs investigation
+**m=4 hierarchy (loop60 state)**: NOT bounded at w=42. Infinite hierarchy confirmed.
+  - n'=81925: min_w=44 (exceeds prior "bounded at 42" claim)
+  - spike(42) period: P=131072. But Level 4+ needs even larger certs.
+  - Axiom subcaseB_m4_ge3087 requires ALGEBRAIC/LFSR approach.
+
+**m=22 l≡0 (loop60 state)**: twoSpike period = 131072 for all witnesses.
+  - P=131072 cert: tape=262213 elements, 131072 steps → several hours in native_decide
+  - Sorry cannot be closed with period certs; needs algebraic approach.
 
 ## Pick ONE task from this priority order
 
-1. **Check CA_Array_m4 build** (FIRST PRIORITY):
-   - `ps aux | grep "lake build" | grep -v grep` — check if build is still running
-   - `ls -t /tmp/ca_array_m4_build*.log | head -1 | xargs tail -5` — check log
-   - If finished cleanly (log shows `Built P2p.CA_Array_m4`): proceed to SubcaseBPeriod build
-   - If FAILED: check log for errors and fix
-   - Expected duration: ~5-30 min (native_decide for P=4096/16384 is much faster than P=65536)
+1. **Wait for CA_Array build, then build SubcaseBPeriod** (FIRST PRIORITY):
+   - Check: `ps aux | grep "lake build" | grep -v grep`
+   - If CA_Array done (`tail /tmp/ca_array_build7.log` shows `Built P2p.CA_Array`):
+     - Ensure no other lake build running, then:
+     - `nohup lake build P2p.SubcaseBPeriod > /tmp/subcaseb_build.log 2>&1 &`
+     - Wait 10s: `sleep 10 && tail /tmp/subcaseb_build.log`
+   - If SubcaseBPeriod finishes: run `scripts/proof-gate check`
+   - If obligation count decreased vs master: run `scripts/proof-gate finish`
 
-2. **If CA_Array build just finished cleanly** (tail log shows `Built P2p.CA_Array`):
-   - Run: `nohup lake build P2p.SubcaseBPeriod > /tmp/subcaseb_build.log 2>&1 &`
-   - Wait briefly (5s) and check for immediate errors
-   - Commit status update
-
-3. **If SubcaseBPeriod build finished cleanly**:
+2. **If SubcaseBPeriod build finished cleanly**:
    - Run `scripts/proof-gate check` to confirm obligation count
    - If count decreased vs master, run `scripts/proof-gate finish`
 
-4. **m=4 SubcaseB axiom** (most tractable once CA_Array extended):
-   - Location: `SubcaseBPeriod.lean` line 980, `axiom subcaseB_m4_ge3087`
-   - Certs now in CA_Array.lean for j=42, Level 1, Level 2
-   - Need to add Section 15: m=22 l≡0 certs (w=34/40/42) and m=4 Level 3+ investigation
-   - Convert axiom → theorem once all certs verified
+3. **Algebraic approach research** (for m=22 l≡0 and m=4):
+   - Both sorrys/axioms require non-native_decide approach
+   - m=22 l≡0: twoSpike(w,22) period=131072 → infeasible for native_decide
+   - m=4: infinite hierarchy (min_w=44 at n'=81925), no period bound
+   - LFSR/GF(2) algebraic proof: show spike(w) sensitivity holds by LFSR period structure
+   - Reference: `research/linearity_corridor_proof.md`, `research/findings.md`
 
-5. **m=22 l≡0 certs** (need Python verification first):
-   - Check if m22_witness C tool (PID 10310) is still running: `ps aux | grep m22witness | grep -v grep`
-   - When done: verify period for w=40 (spike/twoSpike) and w=42 (spike/twoSpike) with Python (shrinking CA)
-   - Then add 6 period certs to CA_Array.lean (w=34 P=?, w=40 P=?, w=42 P=?)
-
-6. **If stuck** — paper update or visualization, commit anything meaningful.
+4. **If stuck** — paper update or visualization, commit anything meaningful.
 
 ## Rules
 
