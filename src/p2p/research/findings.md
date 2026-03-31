@@ -4755,11 +4755,26 @@ rw [show n'+1 = 2830+1+((1+l)*8)*4096 from by omega]
 exact sensitivity_transfer 32 22 4096 2830 ((1+l)*8) (by omega) h_F h_H subcaseB_m22_base_sens_2830_w32
 ```
 
-### Status (DONE 2026-03-31)
-- loop57 committed: added P=4096 certs to CA_Array.lean + P=65536 for l≡1 case
-- Sorry at SubcaseBPeriod.lean:2351 replaced with sensitivity_transfer proof
-- SubcaseBPeriod.lean now has ZERO actual sorry tactics
-- CA_Array build running (PID 1141, started 1:31 AM 2026-03-31)
+### Status (CORRECTED 2026-03-31 session 2) — THIS SECTION WAS WRONG
+The P=4096 analysis above is INCORRECT. The Python script that verified P=4096 was buggy
+(used fixed-size/periodic CA, not shrinking CA). With correct shrinking CA:
+- spike(32) P=4096: the tape 2*4096+65=8257 → 65 does NOT return to clean spike at w=32
+- twoSpike(32,22) P=4096: same, FAIL
+
+**Corrected state:**
+- **l≡1 case IS proved**: w=32, P=65536 (shrinking CA verifies PASS for both spike(32) and
+  twoSpike(32,22)); base sensitivity at n''=2830 is PASS. Proof: sensitivity_transfer 32 22 65536
+  2830 (t+1) ... covers n'=68366+65536t.
+- **l≡0 case IS STILL SORRY**: n'=35598+65536s. Min witness at n'=35598 is w=34 (not w=32!).
+  w=34 covers EVEN-s sub-class (n'=35598+131072*t): spike(34) P=131072 PASS,
+  twoSpike(34,22) P=131072 PASS, sensitivity verified for t=0,1,2. But ODD-s sub-class
+  (n'=101134+131072*t) has no single w covering all t — w=52 fails at t=3.
+  ODD-s sub-class requires linearity corridor.
+
+**File split architecture (2026-03-31):**
+- CA_ArrayDef.lean: pre-compiles definitions (built in 10s)
+- CA_Array.lean: Sections 5-11 with native_decide; Section 11 has P=65536 certs for w=32
+- SubcaseBPeriod.lean: 1 sorry (l≡0), 2 axioms (m=4, resolution)
 
 ---
 
@@ -4819,3 +4834,112 @@ This means the "obvious" witness c_n = twoSpikeLastList m=4 FAILS:
   rule30n(twoSpikeLastList) = 1 AND rule30n(flipCell at m=4) = center(spike_last) = 1
   → both equal 1, not sensitive.
 The witness must use a genuinely different even position w ≠ last.
+
+### Corrected hierarchy + verified certs (2026-03-31, loop58)
+
+**j=42 case (n'=3429, k≡42 mod 64)**: confirmed minimum w=32. Period certs VERIFIED:
+- spike(32) P=4096: PASS (tape 8257→65)
+- twoSpike(32,4) P=4096: PASS (tape 8257→65)
+- Base sensitivity n'=3429, w=32: F=1, H=0 → SENSITIVE ✓
+- n'=3429+k*4096 for k=0,1,2: all SENSITIVE ✓
+These certs need to be added to CA_Array.lean as Array Bool native_decide lemmas.
+This is a FINITE gap — just needs implementation work.
+
+**Corrected witness tree (exact periods verified):**
+
+| Hierarchy level | n' residue class | Witness | Period | Full-config cert |
+|----------------|-----------------|---------|--------|-----------------|
+| j=1 all odd k  | ≡13 mod 16      | w=6     | P=16   | ✓ exists (ts46_p16) |
+| j=0,10,30 mod 64 | see notes     | w=16    | P=512  | ✓ exists (ts164_p512) |
+| j=2,6,8,... mod 16 | multiple   | w=12    | P=128  | ✓ exists (ts412_p128) |
+| j=4 mod 8      | ≡53 mod 64      | w=10    | P=64   | ✓ exists (ts104_p64) |
+| j=14,26,... mod 32 | multiple   | w=18    | P=256  | ✓ exists (ts184_p256) |
+| j=32 mod 64    | ≡21 mod 64 (part) | w=18  | P=256  | ✓ exists |
+| j=62 mod 128   | ≡517 mod 1024   | w=22    | P=1024 | ✓ exists (ts224_p1024) |
+| **j=42 mod 64** | **≡357 mod 512** | **w=32** | **P=4096** | **MISSING — needs Array Bool** |
+| Level 1a: ≡1029 mod 4096 | base n'=5125 | w=30 | P=4096 | MISSING |
+| Level 1b: ≡3077 mod 4096 | base n'=7173 | w=30 | P=4096 | MISSING |
+| Level 2: ≡{4101,8197,12293} mod 16384 | w=34 | P=16384 | MISSING |
+| Level 3+: ≡5 mod 16384 | w≈42+? | P=? | MISSING (infinite) |
+
+**Key correction**: spike(30) P=2048 FAILS; actual period is P=4096.
+spike(30) P=4096 PASS, twoSpike(30,4) P=4096 PASS — these cover Level 1.
+
+**Coverage gap analysis** — all k≥0 where n'=3093+k*8:
+- All ODD k: covered (j=1 with w=6, P=16) ✓
+- Even k: binary telescoping covers all EXCEPT:
+  1. k≡42 mod 64 (j=42): needs w=32, P=4096 Array Bool cert
+  2. k≡126 mod 128 with k≢62 mod 128: infinite hierarchy (linearity corridor needed)
+
+Note: the j=62 cert (w=22, P=1024) covers k≡62 mod 128, NOT k≡126 mod 128.
+The first uncovered k in the Level-1 hierarchy is k=126 (n'=4101).
+
+**Path to partial closure of subcaseB_m4_ge3087:**
+1. Add j=42 Array Bool certs to CA_Array.lean (finite, implementable) → closes 1/64 of residues
+2. Add Level 1 certs (w=30, P=4096 for bases n'=5125 and n'=7173) to CA_Array.lean
+3. Add Level 2 certs (w=34, P=16384 for bases n'=4101, 8197, 12293) to CA_Array.lean
+4. Level 3+ requires linearity corridor (infinite hierarchy)
+
+Converting axiom→theorem-with-sorry would increase total obligation count unless Level 3+
+sorry resolves in parallel. Best strategy: close ALL finite levels before converting axiom.
+
+---
+
+## Session 2026-03-31 — Visualization + Linearity Corridor Corrections
+
+### Key correction: f_center_prev_zero does NOT hold for fixed m
+
+The proof document `research/linearity_corridor_proof.md` claims lemma 3:
+  "F_{n'}[n'+1] = 0 for all n' ≥ 4 (for spike at 2n'-6)"
+
+This claim holds ONLY when the spike position scales with n' as 2n'-6. For FIXED
+spike position m=22, F[center][T-1] is frequently nonzero (verified n'=22..100).
+
+Implication: the linearity corridor proof as written applies to the RELATIVE-POSITION
+geometry (spike at 2n'-6), NOT to fixed-m SubcaseBs like m=4, m=22.
+
+The CLAUDE.md claim "linearity corridor closes m=22 l≡0" may be wrong or requires
+rethinking the corridor in a different coordinate frame.
+
+### m=22 l≡0 witness data: no fixed w works for all s
+
+Tested n' = 35598 + 65536*s:
+  s=0 (n'=35598):  min_w=34, w=34 sensitive=YES
+  s=1 (n'=101134): min_w=40, w=34 sensitive=NO
+  s=2 (n'=166670): min_w=34, w=34 sensitive=YES
+  s=3 (n'=232206): min_w=42, w=34 sensitive=NO
+
+No single w in [2..60] works for all s. min_w grows and is NOT simply a function
+of v₂(s) alone (both s=1,3 have v₂=0 but different min_w: 40 vs 42).
+
+The m=22 l≡0 sorry requires a genuinely new approach. Options:
+1. Strong induction on some other measure (analogous to m=4 v₂(n'-5) approach)
+2. Algebraic/geometric argument about WHY some witness must always exist
+3. Use the SubcaseB hypothesis (F=0) itself to derive witness existence
+
+### Visualization infrastructure added
+
+Script: `scripts/visualize_subcase.py`
+Generates: F-tape spacetime, G-tape spacetime, D-field (interaction error) for any (n', m, w)
+Output: `research/figures/`
+
+Example: subcase_geometry_m22_n270.png shows:
+- Left: F-cone from spike(22) propagating left through n'=270 steps
+- Middle: G-tape = twoSpike(22, last) showing two converging cones
+- Right: D-field for (spike(4), spike(22)) — solid red wedge hitting center (D[c,T]=1)
+
+The D-field visualization is the key diagnostic for understanding when witnesses work.
+For large n', the D-field develops cancellations at center, making the witness fail.
+
+### Spatial language needed
+
+The underlying geometry is CAUSAL SET theory: events (i,t) in spacetime connected
+by the Rule 30 left-permutive propagation (rightward causal cone). The D-field
+is the nonlinear coupling between two causal cones. Proving D[center,T]=0 or ≠0
+requires understanding the lattice path structure of the interaction region.
+
+Wolfram Language (natural for CAs) and causet notation (causal shadow, light cone,
+timelike separation) are the appropriate spatial languages for this problem.
+A geometric argument: when are two cones' interactions guaranteed to create
+a nonzero net contribution to center? This is the missing ingredient for both
+the m=4 and m=22 proofs.
