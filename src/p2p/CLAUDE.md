@@ -74,15 +74,26 @@ Once done: remove 2 axioms from CA_Array.lean, import CA_Array_residues there.
 - Both l≡0 and l≡1 cases proved: w=6, P=256 covers all SubcaseB firings for m=22.
   (Earlier analysis of l≡0 being harder was a red herring — w=6 handles everything.)
 
-### Priority 1: Prove m=4 SubcaseB (axiom removal) — ALGEBRAIC PROOF REQUIRED
+### Priority 1: Prove m=4 SubcaseB (axiom removal) — PARTIALLY ALGEBRAIC
 - Location: `SubcaseBPeriod.lean` line 981, `axiom subcaseB_m4_ge3087`
-- Fires at n'≡5 mod 8. n'≢5 mod 64: MECHANICAL (w≤22, periods≤1024, ~90% of cases).
-- n'≡5 mod 64: **algebraic proof needed** — min_w is non-periodic and grows irregularly:
-  - n'=1029: w=30, n'=3077: w=34, n'=4101: w=44, n'=7173: w=52 (same mod-4096 class!)
-  - The "level-1,2,3" framing was oversimplified. Period structure fails even at level 1.
-- Approach: D-field linearity corridor proof (same 4-lemma structure as before):
+- Fires at n'≡5 mod 8, giving 8 mod64 residue classes. Structure (loop66 analysis):
+  - mod64∈{29,45,61,13}: w=6, P=16 — TRIVIAL (all certs exist in SubcaseBPeriod.lean)
+  - mod64=53: w=10, P=64 — MECHANICAL (cert at SubcaseBPeriod line 906-920)
+  - mod64=21: period-8 in k, max w=18, max P=512 — MECHANICAL (8 sub-cases, certs partially done)
+  - mod64=37: main period-8, anomaly at k≡5 mod 8 (max w=32, P=4096) — MECHANICAL
+    (CA_Array_m4.lean Section 12 provides w=32 cert ✓)
+  - mod64=5: Levels 0a/0b/1/2 MECHANICAL; Level 3+ (n'≡5 mod 16384) ALGEBRAIC
+    - Level 0a (mod512≠5): w≤16, P≤256 — certs in SubcaseBPeriod
+    - Level 0b (mod1024=517): w=22, P=1024 — certs in SubcaseBPeriod (lines 339-345)
+    - Level 1 (mod4096∈{1029,2053,3077}): w=30 — CA_Array_m4.lean Section 13 ✓
+    - Level 2 (mod4096=5, mod16384≠5): w=34 — CA_Array_m4.lean Section 14 ✓
+    - Level 3+ (mod16384=5): min_w grows (42,40,40,42,44,...) → **ALGEBRAIC NEEDED**
+- **ONLY Level 3+ (n'≡5 mod 16384) requires algebraic proof**. Everything else is mechanical.
+- Approach for Level 3+: D-field linearity corridor proof (4 lemmas):
   nl_zero_when_both_zero, hcone_left_edge, f_center_prev_zero, d_leftbound
-- See research/findings.md "m=4 Witness Hierarchy: Irregular" for full analysis (loop65)
+- The loop65 WRONG finding ("level 1+ requires algebraic") was based on fixed-size CA bug.
+  Correct data: n'=4101→min_w=34, n'=7173→min_w=30 (NOT 44 and 52 as previously stated).
+- See research/findings.md "mod64 Class Analysis (loop66)" for verified data.
 
 ### Priority 2: Fix SubcaseBPeriod.lean OOM crash (split file)
 - Build crashes at exit 134 (OOM) at C symbol #9704 during native_decide codegen

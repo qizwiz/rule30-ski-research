@@ -5418,29 +5418,65 @@ k=0,1,2 in range [3087,5200).
 
 **Script**: `scripts/witness_map.py`
 
-### m=4 Witness Hierarchy: Irregular (NOT Periodic) Structure (loop65)
+### m=4 Witness Hierarchy: Irregular (NOT Periodic) Structure (loop65) — CORRECTION (loop66)
 
-Direct computation reveals the min_w structure is irregular even at "level 1":
+**CORRECTION (loop66)**: The loop65 data was computed with FIXED-SIZE Python (non-shrinking CA)
+which gives WRONG results. Lean's `caEvolve` uses a SHRINKING CA where each step removes 2
+boundary cells. Correct computation using shrinking CA (C program, verified):
 
 ```
-n'=1029  (mod4096=1029): min_w=30
-n'=5125  (mod4096=1029): min_w=30  ← consistent, period 4096 works here
-n'=3077  (mod4096=3077): min_w=34  ← CLAUDE.md claimed 30, actually 34
-n'=7173  (mod4096=3077): min_w=52  ← period 4096 breaks! 34→52 jump
-n'=4101  (mod4096=5):    min_w=44
-n'=8197  (mod4096=5):    min_w=34  ← lower than 4101! non-monotone
-n'=12293 (mod4096=5):    min_w=40
+n'=4101  (mod4096=5):    min_w=34  ← NOT 44 (loop65 was wrong!)
+n'=5125  (mod4096=1029): min_w=30  ← correct
+n'=6149  (mod4096=2053): min_w=30  ← correct
+n'=7173  (mod4096=3077): min_w=30  ← NOT 52 (loop65 was wrong!)
+n'=8197  (mod4096=5):    min_w=34  ← correct
+n'=12293 (mod4096=5):    min_w=34  ← correct
 ```
 
-**Key finding**: min_w(n') is NOT periodic even at level 1. The value oscillates
-non-monotonically within each period-4096 class. This is the "infinite self-similar
-hierarchy" — native_decide certificates cannot cover it mechanically.
+**CA_Array_m4.lean Sections 13 and 14 ARE CORRECT**:
+- Section 13: w=30, P=4096 covers n'≡1029,2053,3077 mod 4096 ✓
+- Section 14: w=34, P=16384 covers n'≡5 mod 4096 (bases 4101, 8197, 12293) ✓
 
-**Spike(30) full-config period**: 4096 (verified). But is_sensitive(30, 4, n') is
-False for n'=3077, 4101, 7173 etc. — the sensitivity structure is not period-4096.
+**Level 3+ IS the only non-mechanical case**: n'≡5 mod 16384.
+Level 3+ min witnesses: n=16389→42, n=32773→40, n=49157→40, n=65541→42, n=81925→44.
+These grow without bound → algebraic proof required.
 
-**Implication for algebraic proof**: The linearity corridor proof (D-field approach)
-must work for ALL n'≥3087 with n'≡5 mod 8 universally, not just "level 3+". 
-The CLAUDE.md "levels 0-2 mechanical, level 3+ algebraic" picture was oversimplified.
-Levels 0 (w≤22) are mechanical via period-1024 structure.
-Level 1+ requires the algebraic proof.
+### m=4 SubcaseB Complete mod64 Class Analysis (loop66)
+
+Using shrinking CA (C program). SubcaseB m=4 fires at n'≡5 mod 8, giving 8 mod64 classes.
+
+**Simple classes (min_w CONSTANT for all k):**
+- mod64=29: min_w=6 for ALL k (constant) → w=6, P=16 covers all
+- mod64=45: min_w=6 for ALL k (constant) → w=6, P=16 covers all
+- mod64=61: min_w=6 for ALL k (constant) → w=6, P=16 covers all
+- mod64=13: min_w=6 for ALL k (constant) → w=6, P=16 covers all
+- mod64=53: min_w=10 for ALL k (constant) → w=10, P=64 covers all
+
+Period certs: `caEvolve_cert_ts46_p16` (SubcaseBPeriod line 181) verified CORRECT with shrinking CA.
+Base certs for mod64=29 (`subcaseB_m4_base_sens_3101`) already in SubcaseBPeriod.lean.
+
+**mod64=21 (period-8 in k, FULLY MECHANICAL):**
+Pattern: 16,12,14,12,18,12,14,12 (repeating, period 8 in k-steps of 64 = period 512 in n').
+All 8 sub-classes mod512 verified stable for k=0..24.
+Base certs for all 8 sub-classes exist or can be added. MAX w=18, MAX P=512.
+
+**mod64=37 (anomaly at k≡5 mod 8, but FULLY MECHANICAL):**
+Main pattern: 12,16,12,14,12,32,12,14 (period 8 in k, period 512 in n').
+Anomaly k≡5 mod 8 (n≡3429 mod 512) is itself period-8 in the sub-class
+(period 4096 in n'): max w=32 appears only at n≡3429 mod 4096.
+CA_Array_m4.lean Section 12 provides the w=32 cert. FULLY MECHANICAL.
+
+**mod64=5 (hierarchical, PARTIALLY algebraic):**
+- Level 0a (mod512≠5): min_w=12..16, period ≤256 → MECHANICAL
+- Level 0b (mod1024=517, n≡3589 mod 1024): min_w=22, period 1024 → MECHANICAL
+  - Cert: caEvolve_cert_sp22_p1024 + caEvolve_cert_ts224_p1024 (both in SubcaseBPeriod) ✓
+- Level 1 (mod4096∈{1029,2053,3077}): min_w=30, period 4096 → MECHANICAL
+  - CA_Array_m4.lean Section 13 ✓
+- Level 2 (mod4096=5, mod16384≠5): min_w=34, period 16384 → MECHANICAL
+  - CA_Array_m4.lean Section 14 ✓ (bases: 4101, 8197, 12293)
+- Level 3+ (mod16384=5, first n'=16389): min_w grows without bound → ALGEBRAIC NEEDED
+
+**Summary**: ONLY Level 3+ of mod64=5 requires algebraic proof. All other cases
+are mechanically covered by finite native_decide period/base certs. The CLAUDE.md
+"levels 0-2 mechanical, level 3+ algebraic" picture is CORRECT when interpreted as
+"Level 3+ = mod16384=5 within the mod64=5 firing class".

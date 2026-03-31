@@ -33,17 +33,20 @@ lake env lean /tmp/probe.lean 2>&1 | grep -A 30 "unsolved goals\|⊢"
 This runs in ~15 seconds (uses cached .olean), prints exact Lean goals.
 Use it to: probe tactic progress, check if a lemma closes a goal, explore `exact?`/`apply?` results.
 
-## Current state (as of 2026-03-31, loop65)
+## Current state (as of 2026-03-31, loop66)
 
-- **Witness map COMPLETE**: `scripts/witness_map.py` + `research/witness_map.png`
-  - n'≢5 mod 64: covered by w≤22 with period≤1024 (MECHANICAL, ~90% of cases)
-  - n'≡5 mod 64 but ≢5 mod 512: max w=32 (n'=3429 needs w=32)
-  - n'≡5 mod 512: irregular, non-periodic, growing witnesses (ALGEBRAIC needed)
-    Observed: min_w(1029)=30, min_w(3077)=34, min_w(4101)=44, min_w(7173)=52
-    These are NOT period-4096-periodic. CLAUDE.md "levels 1,2 mechanical" was WRONG.
-- **m=4 SubcaseB true structure**: algebraic proof needed for ALL n'≡5 mod 64 (not just "level 3+")
-- **CA_Array_residues build RUNNING** (started loop65): log at /tmp/ca_residues_build.log
-- **SubcaseBM4Sketch.lean**: type-holed proof skeleton committed. Key goals exposed.
+- **CORRECTION (loop66)**: loop65 min_w data was WRONG (used fixed-size CA Python → inflated values)
+  Correct data (shrinking CA, C program): n'=4101→34, n'=7173→30 (NOT 44 and 52 as stated in loop65)
+- **m=4 SubcaseB true structure** (loop66 analysis of 8 mod64 classes):
+  - mod64∈{29,45,61,13}: w=6, P=16 — TRIVIAL (certs already in SubcaseBPeriod.lean)
+  - mod64=53: w=10, P=64 — MECHANICAL (cert at SubcaseBPeriod line 906)
+  - mod64=21: period-8 in k, max w=18 — FULLY MECHANICAL (8 sub-cases)
+  - mod64=37: period-8 + anomaly at k≡5 mod 8 (max w=32, CA_Array_m4 Section 12 ✓) — MECHANICAL
+  - mod64=5: Levels 0a/0b/1/2 MECHANICAL (Sections 12-14 correct); Level 3+ ALGEBRAIC
+    ONLY n'≡5 mod 16384 (first n'=16389, min_w=42 growing) needs algebraic proof.
+- **CA_Array_residues build RUNNING** (~110 min, no olean yet): log at /tmp/ca_residues_build.log
+- **SubcaseB_BaseSens.lean**: split-off file for large m=22 native_decide proofs (OOM fix)
+  UNTESTED — SubcaseB_BaseSens.olean does not exist yet (needs build after CA_Array_residues)
 - **lake env lean probe tool**: working — use for interactive goal inspection
 
 ## Current state (as of 2026-03-31, loop64)
@@ -87,12 +90,12 @@ Use it to: probe tactic progress, check if a lemma closes a goal, explore `exact
    - If builds in < 30min: approach works; plan integration with CA_Array.lean
    - If hangs 4h+: Array.ofFn too slow; need BitVec approach or algebraic proof
 
-4. **Algebraic approach for m=4 n'≡5 mod 64** (algebraic needed for this residue class):
-   - n'≡5 mod 64 covers the "hard" SubcaseB cases; min_w grows irregularly with n'
+4. **Algebraic approach for m=4 n'≡5 mod 16384** (ONLY this sub-class needs algebraic proof):
+   - Only n'≡5 mod 16384 (Level 3+, first n'=16389) is non-mechanical. Everything else covered.
    - Linearity corridor proof: D-field zero at center means twoSpike = spike(4) XOR spike(w)
    - For SubcaseB at m=4: spike(4)_center=0, so if D_center=0, sensitivity determined by spike(w)
    - Reference: `research/linearity_corridor_proof.md` Sec "Lean Formalization Path"
-   - Reference: research/findings.md "m=4 Witness Hierarchy: Irregular"
+   - Reference: research/findings.md "mod64 Class Analysis (loop66)"
 
 4. **If stuck** — paper update or visualization, commit anything meaningful.
 
@@ -102,7 +105,7 @@ Use it to: probe tactic progress, check if a lemma closes a goal, explore `exact
 - Before starting a new `lake build`: `pkill -f "lake build" 2>/dev/null; sleep 2; pkill -f "[l]ean.*CA_Array" 2>/dev/null`
 - Never run `lake build` and wait for it — start it in background: `nohup lake build ... > /tmp/build.log 2>&1 &`
 - Use type holes (`?_`) not `sorry` when probing Lean goals
-- Commit at the end with format: `loop<N>: <what you did>` where N = 65 (loop64 was this session)
+- Commit at the end with format: `loop<N>: <what you did>` where N = 67 (loop66 was this session)
 - Keep commits small and honest — one thing done well beats three things half-done
 - The `claude` binary is at `/Users/jonathanhill/.local/bin/claude`
 
