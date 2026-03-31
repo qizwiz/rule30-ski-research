@@ -12,11 +12,14 @@ Do exactly ONE unit of meaningful work, then commit it. Do not stop to ask quest
 4. Check if a CA_Array build is running: `ps aux | grep "lake build" | grep -v grep`
 5. Check the latest build log: `ls -t /tmp/ca_array_build*.log 2>/dev/null | head -1 | xargs tail -5 2>/dev/null`
 
-## Current state (as of loop57)
+## Current state (as of 2026-03-31)
 
-- **SubcaseBPeriod.lean has ZERO actual sorry tactics** — all closed via sensitivity_transfer
-- **Two axioms remain**: `subcaseB_m4_ge3087` (line 980) and `subcaseB_resolution_ge3087` (master)
-- **CA_Array build**: may be running; check before starting a new one
+- **SubcaseBPeriod.lean has ONE sorry**: m=22 j≡1/l≡0 sub-case (n'=35598+65536s, linearity corridor needed)
+  - l≡1 sub-case IS proved: w=32, P=65536, base n''=2830. Loop57 claim of "zero sorrys" was wrong
+    (earlier Python cert check used fixed-size CA, not shrinking — gave false FAIL; corrected)
+  - loop57 P=4096 cert for l≡0 was mathematically wrong (w=32 not sensitive at n'=35598)
+- **Two axioms remain**: `subcaseB_m4_ge3087` (line ~980) and `subcaseB_resolution_ge3087` (master)
+- **CA_Array build**: may be running (check with ps aux); Sections 5-11 included. P=65536 certs verified.
 - **Branch**: `autoresearch/mar20` — changes accumulate here before proof-gate merges to master
 
 ## Pick ONE task from this priority order

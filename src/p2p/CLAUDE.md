@@ -56,7 +56,7 @@ subcaseB_resolution_ge3087  (master, needs ALL below)
 ├── subcaseB_m14_ge3087_proved       ✓ proved
 ├── subcaseB_m16_ge3087_proved       ✓ proved
 ├── subcaseB_m20_ge3087_proved       ✓ proved
-├── subcaseB_m22_ge3087_proved       ✓ proved (loop57: w=32/P=4096 for l≡0, w=32/P=65536 for l≡1)
+├── subcaseB_m22_ge3087_proved       ← SORRY (l≡0 sub-case only: n'=35598+65536s, linearity corridor needed)
 ├── subcaseB_m24_ge3087_proved       ✓ proved
 ├── subcaseB_m26_ge3087_proved       ✓ proved
 ├── subcaseB_m28_ge3087_proved       ✓ proved (via CA_Array.lean native_decide)
@@ -69,10 +69,14 @@ come from `P2p/CA_Array.lean` which must compile (build is running, takes ~1 hou
 
 ## RANKED TASK LIST
 
-### Priority 1 (DONE loop57): ✓ m=22 sorry CLOSED
-- l≡0 case: w=32, P=4096, n''=2830; n'+1=2831+(8+16s)*4096 covers n'=35598+65536s
-- l≡1 case: w=32, P=65536, n''=2830; n'+1=2831+(t+1)*65536 covers n'=68366+65536t
-- SubcaseBPeriod.lean now has ZERO actual sorry tactics
+### Priority 1: Close m=22 l≡0 sorry (linearity corridor)
+- l≡1 case ✓ proved (pending CA_Array.lean build): w=32, P=65536, n''=2830
+  Python (shrinking CA) verified: spike(32) P=65536 PASS, twoSpike(32,22) PASS, base sens PASS.
+  Earlier "FAIL" was due to a buggy Python script using fixed-size (not shrinking) CA.
+- l≡0 case SORRY: n'=35598+65536s. Min witness at n'=35598 is w=34 (w=32 not sensitive).
+  Witnesses are 2-automatic (min w grows with v2(s)).
+  Requires linearity corridor proof (same structure as m=4 axiom):
+  4 lemmas: nl_zero_when_both_zero, hcone_left_edge, f_center_prev_zero, d_leftbound
 
 ### Priority 1: Prove m=4 SubcaseB (axiom removal)
 - Location: `SubcaseBPeriod.lean` line 815, `axiom subcaseB_m4_ge3087`

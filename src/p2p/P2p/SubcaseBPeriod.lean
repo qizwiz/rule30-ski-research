@@ -2345,21 +2345,15 @@ theorem subcaseB_m22_ge3087_proved (n' : Nat) (hn' : 3087 ≤ n')
             obtain ⟨l, hjl⟩ : ∃ l, j = 2 * l + 1 := ⟨j / 2, by omega⟩
             have hl_mod : l % 2 = 0 ∨ l % 2 = 1 := by omega
             rcases hl_mod with hl0 | hl1
-            · -- l ≡ 0 (even): l = 2*s, n' = 35598 + 65536*s, use w=32, P=4096
-              obtain ⟨s, hls⟩ : ∃ s, l = 2 * s := ⟨l / 2, by omega⟩
-              use spikeConfig 32 n'
-              refine ⟨spikeConfig_odd_false 32 (by decide) n', ?_⟩
-              rw [rule30n_spikeConfig_eq 32 n', rule30n_flipCell_spikeConfig_eq' 32 n' m (by omega) (by omega)]
-              simp only [hm22]
-              have h_F : caEvolve 4096 (spikeAtList 32 (2*4096+2*32+1)) = spikeAtList 32 (2*32+1) :=
-                caEvolve_cert_spike32_p4096
-              have h_H : caEvolve 4096 (twoSpikeList 32 22 (2*4096+2*(max 32 22)+1)) =
-                         twoSpikeList 32 22 (2*(max 32 22)+1) := by
-                have : max 32 22 = 32 := by decide
-                rw [this]; exact caEvolve_cert_ts3222_p4096
-              rw [show n'+1 = 2830+1+(8+16*s)*4096 from by omega]
-              exact sensitivity_transfer 32 22 4096 2830 (8+16*s) (by omega) h_F h_H subcaseB_m22_base_sens_2830_w32
+            · -- l ≡ 0 (even): n' = 35598 + 65536*s
+              -- The witness function is 2-automatic (min_w grows with 2-adic valuation of s).
+              -- No single (w, P) full-config cert covers all s; requires linearity corridor proof.
+              -- See research/findings.md for the 4-lemma approach:
+              --   nl_zero_when_both_zero, hcone_left_edge, f_center_prev_zero, d_leftbound
+              sorry
             · -- l ≡ 1 (odd): l = 2*t+1, so n' = 2830 + 65536*(t+1), use w=32, P=65536
+              -- Python (shrinking CA) verified: spike(32) P=65536 PASS, twoSpike(32,22) PASS,
+              -- base sensitivity n''=2830 w=32: F=false≠H=true ✓
               obtain ⟨t, hlt⟩ : ∃ t, l = 2 * t + 1 := ⟨l / 2, by omega⟩
               use spikeConfig 32 n'
               refine ⟨spikeConfig_odd_false 32 (by decide) n', ?_⟩
