@@ -49,14 +49,14 @@ then there exists a valid witness c proving sensitivity at m.
 ```
 subcaseB_resolution_ge3087  (master, needs ALL below)
 ├── subcaseB_m4_ge3087_proved        ← AXIOM (line 815)
-├── subcaseB_m6_ge3087_proved        ← IN PROGRESS (proof written, build running)
+├── subcaseB_m6_ge3087_proved        ← WRITTEN (proof in SubcaseBPeriod.lean; unverified: build OOMs)
 ├── subcaseB_m8_ge3087_proved        ✓ proved
 ├── subcaseB_m10_ge3087_proved       ✓ proved
 ├── subcaseB_m12_ge3087_proved       ✓ proved
 ├── subcaseB_m14_ge3087_proved       ✓ proved
 ├── subcaseB_m16_ge3087_proved       ✓ proved
 ├── subcaseB_m20_ge3087_proved       ✓ proved
-├── subcaseB_m22_ge3087_proved       ← SORRY (l≡0 sub-case only: n'=35598+65536s, linearity corridor needed)
+├── subcaseB_m22_ge3087_proved       ✓ proved (loop63: w=6, P=256 covers all cases)
 ├── subcaseB_m24_ge3087_proved       ✓ proved
 ├── subcaseB_m26_ge3087_proved       ✓ proved
 ├── subcaseB_m28_ge3087_proved       ✓ proved (via CA_Array.lean native_decide)
@@ -65,33 +65,31 @@ subcaseB_resolution_ge3087  (master, needs ALL below)
 ```
 
 **Also needed:** `subcaseB_m28_residue_3class_proved` and `subcaseB_m30_residue_unique_proved`
-come from `P2p/CA_Array.lean` which must compile (build is running, takes ~1 hour).
+proved in `P2p/CA_Array_residues.lean` (build running, log /tmp/ca_residues_build.log).
+Once done: remove 2 axioms from CA_Array.lean, import CA_Array_residues there.
 
 ## RANKED TASK LIST
 
-### Priority 1: Close m=22 l≡0 sorry (linearity corridor)
-- l≡1 case ✓ proved (pending CA_Array.lean build): w=32, P=65536, n''=2830
-  Python (shrinking CA) verified: spike(32) P=65536 PASS, twoSpike(32,22) PASS, base sens PASS.
-  Earlier "FAIL" was due to a buggy Python script using fixed-size (not shrinking) CA.
-- l≡0 case SORRY: n'=35598+65536s. Min witness at n'=35598 is w=34 (w=32 not sensitive).
-  Witnesses are 2-automatic (min w grows with v2(s)).
-  Requires linearity corridor proof (same structure as m=4 axiom):
-  4 lemmas: nl_zero_when_both_zero, hcone_left_edge, f_center_prev_zero, d_leftbound
+### Priority 1: ✓ m=22 CLOSED (loop63)
+- Both l≡0 and l≡1 cases proved: w=6, P=256 covers all SubcaseB firings for m=22.
+  (Earlier analysis of l≡0 being harder was a red herring — w=6 handles everything.)
 
-### Priority 1: Prove m=4 SubcaseB (axiom removal)
-- Location: `SubcaseBPeriod.lean` line 815, `axiom subcaseB_m4_ge3087`
-- Structure: fires at n'≡5 mod 8; after reducing to n''=3093 mod 8, need k≥0 for n'=3093+k*8
-- Most residue classes covered by existing certs (see SubcaseBPeriod.lean lines 300-975)
-- **Gaps requiring new Array Bool certs** (verified 2026-03-31):
-  - j=42 (k≡42 mod 64, n'=3429): w=32, P=4096. spike(32) P=4096 PASS, ts(32,4) P=4096 PASS
-  - Level 1 (≡5 mod 1024): w=30, P=4096. Two bases: n'=5125 (mod4096=1029), n'=7173 (mod4096=3077)
-  - Level 2 (≡5 mod 4096): w=34, P=16384. Three bases: n'=4101, 8197, 12293
-  - Level 3+ (≡5 mod 16384, first n'=16389): INFINITE hierarchy → linearity corridor needed
-- **NOT MECHANICAL**: levels 3+ require linearity corridor, same as m=22 l≡0
-- All certs at levels 0-2 need to be added to CA_Array.lean (Array Bool native_decide)
-- Once CA_Array.lean extended: convert axiom → theorem-with-1-sorry (for level 3+)
+### Priority 1: Prove m=4 SubcaseB (axiom removal) — ALGEBRAIC PROOF REQUIRED
+- Location: `SubcaseBPeriod.lean` line 981, `axiom subcaseB_m4_ge3087`
+- Fires at n'≡5 mod 8. n'≢5 mod 64: MECHANICAL (w≤22, periods≤1024, ~90% of cases).
+- n'≡5 mod 64: **algebraic proof needed** — min_w is non-periodic and grows irregularly:
+  - n'=1029: w=30, n'=3077: w=34, n'=4101: w=44, n'=7173: w=52 (same mod-4096 class!)
+  - The "level-1,2,3" framing was oversimplified. Period structure fails even at level 1.
+- Approach: D-field linearity corridor proof (same 4-lemma structure as before):
+  nl_zero_when_both_zero, hcone_left_edge, f_center_prev_zero, d_leftbound
+- See research/findings.md "m=4 Witness Hierarchy: Irregular" for full analysis (loop65)
 
-### Priority 3: ✓ m=6 SubcaseB proof WRITTEN (build running to verify)
+### Priority 2: Fix SubcaseBPeriod.lean OOM crash (split file)
+- Build crashes at exit 134 (OOM) at C symbol #9704 during native_decide codegen
+- The file has ~9700+ C symbols; need to split into ≥2 files before symbol #9704
+- Once split: rebuild, verify m=6 proof compiles, check proof-gate count
+
+### Priority 3: ✓ CA_Array_residues build RUNNING
 - Location: `SubcaseBPeriod.lean` — 8-witness telescoping proof inserted 2026-03-27
 - Structure: fires at n' ≡ {6,10} mod 16 (roughly); witnesses w=2, w=8
 - twoSpike(2,6) period ≤ 16, twoSpike(8,6) period ≤ 32
