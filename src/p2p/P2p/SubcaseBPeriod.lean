@@ -973,12 +973,33 @@ lemma subcaseB_m4_base_sens_3589 :
     (caEvolve 3590 (spikeAtList 22 7181)).getD 0 false ≠
     (caEvolve 3590 (twoSpikeList 22 4 7181)).getD 0 false := by native_decide
 
--- n'=3429, w=32 (j=42): deferred — requires Array Bool cert for twoSpike(32,4) P=4096
+-- n'=3429, w=32 (j=42, mod64=37 anomaly): provided by CA_Array_m4.lean Section 12
+-- CA_Array_m4.subcaseB_m4_base_sens_3429_w32 covers this case.
+
+-- n'=3117, w=6 (j=3, mod64=45): covers j=3,19,35,51 via P=16
+set_option maxHeartbeats 4000000000 in
+lemma subcaseB_m4_base_sens_3117 :
+    (caEvolve 3118 (spikeAtList 6 6237)).getD 0 false ≠
+    (caEvolve 3118 (twoSpikeList 6 4 6237)).getD 0 false := by native_decide
+
+-- n'=3133, w=6 (j=5, mod64=61): covers j=5,21,37,53 via P=16
+set_option maxHeartbeats 4000000000 in
+lemma subcaseB_m4_base_sens_3133 :
+    (caEvolve 3134 (spikeAtList 6 6269)).getD 0 false ≠
+    (caEvolve 3134 (twoSpikeList 6 4 6269)).getD 0 false := by native_decide
+
+-- n'=3149, w=6 (j=7, mod64=13): covers j=7,23,39,55 via P=16
+set_option maxHeartbeats 4000000000 in
+lemma subcaseB_m4_base_sens_3149 :
+    (caEvolve 3150 (spikeAtList 6 6301)).getD 0 false ≠
+    (caEvolve 3150 (twoSpikeList 6 4 6301)).getD 0 false := by native_decide
 
 /-- SubcaseB resolution for m=4, n' ≥ 3087.
-    Witnesses exist for each firing position (computationally verified for n'≤3597).
-    The ≡21 mod 64 class needs w=16 (period ~512), ≡37 mod 64 needs w=12 or larger.
-    Full proof requires multi-witness case split over Fin 512; deferred as axiom. -/
+    Loop66 analysis: mod64∈{13,29,45,61} use w=6 P=16; mod64=53 uses w=10 P=64;
+    mod64=21 uses w∈{12,16,18} with multiple periods; mod64=37 uses w=12 (P=128)
+    plus w=32 (P=4096) for anomaly class; mod64=5 is hierarchical (Level 0-3+).
+    ONLY Level 3+ (n'≡5 mod 16384) requires algebraic proof (D-field linearity).
+    All other cases mechanical via sensitivity_transfer + existing certs. -/
 axiom subcaseB_m4_ge3087 (n' : Nat) (hn' : 3087 ≤ n')
     (m : Fin (2 * (n' + 1) + 1)) (hm4 : m.val = 4)
     (hcase : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>

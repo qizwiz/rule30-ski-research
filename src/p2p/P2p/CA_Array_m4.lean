@@ -86,13 +86,15 @@ SECTION 13: PERIOD CERTS FOR m=4 SubcaseB Level 1 case: w=30, P=4096
 
 spike(30) full-config period divides 4096.
 twoSpike(30,4) full-config period divides 4096.
-Coverage: n'=5125+4096*t and n'=7173+4096*t (two residue classes mod 4096).
+Coverage: n'=5125+4096*t, n'=6149+4096*t, n'=7173+4096*t (three residue classes mod 4096).
+Residues mod 4096: {1029, 2053, 3077} = {5+1024k : k=1,2,3}.
 Sizes: N_in = 2*4096+2*30+1 = 8253, N_out = 2*30+1 = 61.
 
-Verified by Python (shrinking CA):
+Verified by C (shrinking CA):
   caEvolveN(4096, spike(30, 8253)) → spike(30, 61) ✓
   caEvolveN(4096, twoSpike(30,4,8253)) → twoSpike(30,4,61) ✓
   caEvolveN(5126, spike(30,10253))[0]=false ≠ caEvolveN(5126,twoSpike(30,4,10253))[0]=true ✓
+  caEvolveN(6150, spike(30,12301))[0]=false ≠ caEvolveN(6150,twoSpike(30,4,12301))[0]=true ✓
   caEvolveN(7174, spike(30,14349))[0]=false ≠ caEvolveN(7174,twoSpike(30,4,14349))[0]=true ✓
 ================================================================================
 -/
@@ -120,7 +122,15 @@ lemma caEvolveArr_m4_base_sens_5125_w30 :
     (caEvolveArr 5126 (twoSpikeArr 30 4 10253)).toList.getD 0 false := by
   native_decide
 
--- Base sensitivity: w=30 at n''=7173 (Level 1 base 2, mod4096=3077)
+-- Base sensitivity: w=30 at n''=6149 (Level 1 base 2, mod4096=2053)
+-- n_steps=6150, tape=2*6150+1=12301
+set_option maxHeartbeats 4000000000 in
+lemma caEvolveArr_m4_base_sens_6149_w30 :
+    (caEvolveArr 6150 (spikeArr 30 12301)).toList.getD 0 false ≠
+    (caEvolveArr 6150 (twoSpikeArr 30 4 12301)).toList.getD 0 false := by
+  native_decide
+
+-- Base sensitivity: w=30 at n''=7173 (Level 1 base 3, mod4096=3077)
 -- n_steps=7174, tape=2*7174+1=14349
 set_option maxHeartbeats 4000000000 in
 lemma caEvolveArr_m4_base_sens_7173_w30 :
@@ -150,7 +160,15 @@ theorem subcaseB_m4_base_sens_5125_w30 :
   rwa [caEvolveArr_toList_eq, spikeArr_toList_eq,
        caEvolveArr_toList_eq, twoSpikeArr_toList_eq] at h
 
-/-- Base sensitivity: w=30 at n''=7173 (Level 1 base 2), List Bool form -/
+/-- Base sensitivity: w=30 at n''=6149 (Level 1 base 2, mod4096=2053), List Bool form -/
+theorem subcaseB_m4_base_sens_6149_w30 :
+    (caEvolve 6150 (spikeAtList 30 12301)).getD 0 false ≠
+    (caEvolve 6150 (twoSpikeList 30 4 12301)).getD 0 false := by
+  have h := caEvolveArr_m4_base_sens_6149_w30
+  rwa [caEvolveArr_toList_eq, spikeArr_toList_eq,
+       caEvolveArr_toList_eq, twoSpikeArr_toList_eq] at h
+
+/-- Base sensitivity: w=30 at n''=7173 (Level 1 base 3, mod4096=3077), List Bool form -/
 theorem subcaseB_m4_base_sens_7173_w30 :
     (caEvolve 7174 (spikeAtList 30 14349)).getD 0 false ≠
     (caEvolve 7174 (twoSpikeList 30 4 14349)).getD 0 false := by
