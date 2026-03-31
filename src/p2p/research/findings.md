@@ -4835,6 +4835,35 @@ This means the "obvious" witness c_n = twoSpikeLastList m=4 FAILS:
   → both equal 1, not sensitive.
 The witness must use a genuinely different even position w ≠ last.
 
+### m=4 witness hierarchy: complete map up to n'=50000 (2026-03-31)
+
+From C tool exhaustive scan [3087, 50000], all SubcaseB firings at m=4:
+
+**min_w distribution:**
+| min_w | v₂(n'-5) range | n' examples | Count |
+|-------|---------------|-------------|-------|
+| ≤30   | 3..11         | most firings | ~majority |
+| 34    | 12, 13        | 4101,8197,12293,20485,24581,28677,36869,40965,45061 | 9 |
+| 40    | 14, 15        | 32773(v₂=15), 49157(v₂=14) | 2 |
+| 42    | 14            | 16389(v₂=14) | 1 |
+
+**Key observation**: min_w is NOT monotone in v₂(n'-5). At v₂=14:
+  n'=16389=5+2^14 → min_w=42  (pure power of 2)
+  n'=49157=5+3·2^14 → min_w=40  (mixed: 3·2^14)
+
+**Pure-power-of-2 sub-sequence** (n'=5+2^k):
+  k=12: n'=4101 → min_w=34
+  k=13: n'=8197 → min_w=34
+  k=14: n'=16389 → min_w=42
+  k=15: n'=32773 → min_w=40
+  k=16: n'=65541 → TBD (needs larger C tool)
+
+The pure powers are the "hardest" representatives at each tier. Growth appears sub-linear.
+If the sequence min_w(5+2^k) is bounded, the hierarchy terminates and finite Lean proof exists.
+If unbounded, need algebraic (LFSR/linearity) argument for high tiers.
+
+**Next step**: measure k=16 (n'=65541, tape 131085 cells, within C tool capacity).
+
 ### Corrected hierarchy + verified certs (2026-03-31, loop58)
 
 **j=42 case (n'=3429, k≡42 mod 64)**: confirmed minimum w=32. Period certs VERIFIED:

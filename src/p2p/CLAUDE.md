@@ -80,10 +80,16 @@ come from `P2p/CA_Array.lean` which must compile (build is running, takes ~1 hou
 
 ### Priority 1: Prove m=4 SubcaseB (axiom removal)
 - Location: `SubcaseBPeriod.lean` line 815, `axiom subcaseB_m4_ge3087`
-- Structure: 32 firings per 256-period window, all n' ≡ 5 mod 8
-- All witnesses have even w ≤ 16 with twoSpike periods ≤ 512
-- Approach: period-cert sensitivity_transfer with multiple base cases
-- This is MECHANICAL — no theoretical gaps, just needs implementation
+- Structure: fires at n'≡5 mod 8; after reducing to n''=3093 mod 8, need k≥0 for n'=3093+k*8
+- Most residue classes covered by existing certs (see SubcaseBPeriod.lean lines 300-975)
+- **Gaps requiring new Array Bool certs** (verified 2026-03-31):
+  - j=42 (k≡42 mod 64, n'=3429): w=32, P=4096. spike(32) P=4096 PASS, ts(32,4) P=4096 PASS
+  - Level 1 (≡5 mod 1024): w=30, P=4096. Two bases: n'=5125 (mod4096=1029), n'=7173 (mod4096=3077)
+  - Level 2 (≡5 mod 4096): w=34, P=16384. Three bases: n'=4101, 8197, 12293
+  - Level 3+ (≡5 mod 16384, first n'=16389): INFINITE hierarchy → linearity corridor needed
+- **NOT MECHANICAL**: levels 3+ require linearity corridor, same as m=22 l≡0
+- All certs at levels 0-2 need to be added to CA_Array.lean (Array Bool native_decide)
+- Once CA_Array.lean extended: convert axiom → theorem-with-1-sorry (for level 3+)
 
 ### Priority 3: ✓ m=6 SubcaseB proof WRITTEN (build running to verify)
 - Location: `SubcaseBPeriod.lean` — 8-witness telescoping proof inserted 2026-03-27
