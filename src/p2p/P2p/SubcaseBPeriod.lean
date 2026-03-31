@@ -39,6 +39,7 @@ Status: THEOREM SKELETON with documented sorry obligations:
 import P2p.Prize3_Complete
 import P2p.CausalConeLemmas
 import P2p.CA_Array
+import P2p.CA_Array_m4
 import Mathlib.Tactic.Ring
 
 set_option maxHeartbeats 800000000

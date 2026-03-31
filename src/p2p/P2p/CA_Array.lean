@@ -370,3 +370,4 @@ theorem subcaseB_m22_base_sens_2830_w32 :
   have h := caEvolveArr_m22_base_sens_2830_w32
   rwa [caEvolveArr_toList_eq, spikeArr_toList_eq,
        caEvolveArr_toList_eq, twoSpikeArr_toList_eq] at h
+

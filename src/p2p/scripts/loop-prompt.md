@@ -12,53 +12,50 @@ Do exactly ONE unit of meaningful work, then commit it. Do not stop to ask quest
 4. Check if a CA_Array build is running: `ps aux | grep "lake build" | grep -v grep`
 5. Check the latest build log: `ls -t /tmp/ca_array_build*.log 2>/dev/null | head -1 | xargs tail -5 2>/dev/null`
 
-## Current state (as of 2026-03-31, loop58)
+## Current state (as of 2026-03-31, loop59)
 
 - **SubcaseBPeriod.lean has ONE sorry**: m=22 j≡1/l≡0 sub-case (n'=35598+65536s)
   - l≡1 sub-case IS proved: w=32, P=65536, base n''=2830.
-  - l≡0: SOLVED (2026-03-31). 3-case split: s≡0→w=34, s≡1mod4→w=40, s≡3mod4→w=42. BOUNDED.
+  - l≡0: 2-automatic witness — s≡even→w=34, s≡1mod4→w=40, s≡3mod4→w=42 (from C tool data s=0..6)
 - **Two axioms remain**: `subcaseB_m4_ge3087` (line ~980) and `subcaseB_resolution_ge3087` (master)
-- **CA_Array build**: may be running (check with ps aux); Sections 5-11 included.
+- **CA_Array_m4.lean created (loop59)**: NEW file with Sections 12-14 — j=42 (w=32 P=4096), Level 1 (w=30 P=4096), Level 2 (w=34 P=16384). Imports P2p.CA_Array.
+- **SubcaseBPeriod.lean**: now imports P2p.CA_Array_m4 (added loop59).
+- **CA_Array build status**: Previous build (started 2:47 AM) for original CA_Array.lean (Sections 1-11) may still be running or just finished. Then start CA_Array_m4 build.
 - **Branch**: `autoresearch/mar20` — changes accumulate here before proof-gate merges to master
 
-**m=4 hierarchy (loop58 findings)**: Most residue classes covered by existing certs.
-Finite gaps that need Array Bool certs (all Python-verified PASS):
-  - j=42 (k≡42 mod 64, n'=3429): w=32, P=4096 — spike(32) PASS, ts(32,4) PASS
-  - Level 1 (≡5 mod 1024): w=30, P=4096 — two bases: n'=5125 (mod4096=1029), n'=7173 (mod4096=3077)
-  - Level 2 (≡5 mod 4096): w=34, P=16384 — three bases: n'=4101, 8197, 12293
-  - Level 3+ (≡5 mod 16384): BOUNDED at w=42 (oscillates 40/42, does NOT grow). 2-case split.
+**m=4 hierarchy (loop59 state)**: All finite-level gaps have certs in CA_Array.lean.
+  - Sections 12-14 added: j=42 (w=32 P=4096), Level 1 (w=30 P=4096), Level 2 (w=34 P=16384)
+  - Level 3+ (≡5 mod 16384, first n'=16389): still needs investigation (linearity corridor or bounded?)
 
 ## Pick ONE task from this priority order
 
-1. **If a CA_Array build is running** — check its tail log. If still running, work on:
-   - **Add j=42 + Level 1 + Level 2 certs to CA_Array.lean** (see loop58 findings):
-     These are Array Bool native_decide lemmas, same pattern as existing sections.
-     Template: `lemma caEvolveArr_cert_sp32_p4096 : (caEvolveArr 4096 (spikeArr 32 8257)).toList = (spikeArr 32 65).toList := by native_decide`
-     Add Sections 12-14 to CA_Array.lean for j=42, Level 1, Level 2.
-     DO NOT restart the current build; edit CA_Array.lean and restart AFTER current build finishes.
+1. **Start CA_Array_m4 build** (FIRST PRIORITY — do this AFTER CA_Array build finishes):
+   - Check if old CA_Array build (PID 83361 or check ps) is done: `ps aux | grep "lake build" | grep -v grep`
+   - If original CA_Array build is still running, WAIT for it to finish (writes .olean we need)
+   - Once CA_Array.olean exists: `ls -la .lake/build/lib/lean/P2p/CA_Array.olean`
+   - Then start: `nohup lake build P2p.CA_Array_m4 > /tmp/ca_array_m4_build.log 2>&1 &`
+   - This should be FAST (~5-15 min) since Sections 12-14 have P≤16384 (vs P=65536 in Section 11)
+   - Commit status update
 
 2. **If CA_Array build just finished cleanly** (tail log shows `Built P2p.CA_Array`):
    - Run: `nohup lake build P2p.SubcaseBPeriod > /tmp/subcaseb_build.log 2>&1 &`
    - Wait briefly (5s) and check for immediate errors
    - Commit status update
-   - Then add j=42 + Level 1 + Level 2 certs to CA_Array.lean and rebuild
 
 3. **If SubcaseBPeriod build finished cleanly**:
    - Run `scripts/proof-gate check` to confirm obligation count
    - If count decreased vs master, run `scripts/proof-gate finish`
-   - Then add CA_Array.lean certs
 
 4. **m=4 SubcaseB axiom** (most tractable once CA_Array extended):
    - Location: `SubcaseBPeriod.lean` line 980, `axiom subcaseB_m4_ge3087`
-   - Most work done (certs at lines 300-975). Just need j=42 + Level 1-2 certs in CA_Array.lean
-   - Convert axiom → theorem-with-1-sorry (for Level 3+ = n'≡5 mod 16384 hierarchy)
-   - Level 3+ needs w=40/42 certs — BOUNDED, add to CA_Array.lean alongside other certs
-   - This REDUCES total obligation count only if done simultaneously with closing m=22 l≡0
+   - Certs now in CA_Array.lean for j=42, Level 1, Level 2
+   - Need to add Section 15: m=22 l≡0 certs (w=34/40/42) and m=4 Level 3+ investigation
+   - Convert axiom → theorem once all certs verified
 
-5. **m=22 l≡0 certs** (now tractable): add 3 Array Bool certs to CA_Array.lean:
-   - w=34, base n'=35598: spike(34) period cert + twoSpike(34,22) period cert
-   - w=40, base n'=101134: spike(40) period cert + twoSpike(40,22) period cert
-   - w=42, base n'=232206: spike(42) period cert + twoSpike(42,22) period cert
+5. **m=22 l≡0 certs** (need Python verification first):
+   - Check if m22_witness C tool (PID 10310) is still running: `ps aux | grep m22witness | grep -v grep`
+   - When done: verify period for w=40 (spike/twoSpike) and w=42 (spike/twoSpike) with Python (shrinking CA)
+   - Then add 6 period certs to CA_Array.lean (w=34 P=?, w=40 P=?, w=42 P=?)
 
 6. **If stuck** — paper update or visualization, commit anything meaningful.
 
