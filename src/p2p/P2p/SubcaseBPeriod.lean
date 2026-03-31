@@ -40,6 +40,7 @@ import P2p.Prize3_Complete
 import P2p.CausalConeLemmas
 import P2p.CA_Array
 import P2p.CA_Array_m4
+import P2p.SubcaseB_BaseSens
 import Mathlib.Tactic.Ring
 
 set_option maxHeartbeats 800000000
@@ -2086,40 +2087,9 @@ lemma subcaseB_m22_base_sens_15118_w26 :
     (caEvolve 15119 (twoSpikeList 26 22 30239)).getD 0 false :=
   CA_Array.subcaseB_m22_base_sens_15118_w26
 
--- Base sensitivity: w=5 at n''=6926 (step=6927, tape=13855)
-set_option maxHeartbeats 4000000000 in
-lemma subcaseB_m22_base_sens_6926 :
-    (caEvolve 6927 (spikeAtList 5 13855)).getD 0 false ≠
-    (caEvolve 6927 (twoSpikeList 5 22 13855)).getD 0 false := by native_decide
-
--- Base sensitivity: w=4 at n''=3342 (step=3343, tape=6687)
-set_option maxHeartbeats 4000000000 in
-lemma subcaseB_m22_base_sens_3342 :
-    (caEvolve 3343 (spikeAtList 4 6687)).getD 0 false ≠
-    (caEvolve 3343 (twoSpikeList 4 22 6687)).getD 0 false := by native_decide
-
--- Base sensitivity: w=2 at n''=3598 (step=3599, tape=7199)
-set_option maxHeartbeats 4000000000 in
-lemma subcaseB_m22_base_sens_3598 :
-    (caEvolve 3599 (spikeAtList 2 7199)).getD 0 false ≠
-    (caEvolve 3599 (twoSpikeList 2 22 7199)).getD 0 false := by native_decide
-
--- Base sensitivity: w=2 at n''=4110 (step=4111, tape=8223)
-set_option maxHeartbeats 4000000000 in
-lemma subcaseB_m22_base_sens_4110 :
-    (caEvolve 4111 (spikeAtList 2 8223)).getD 0 false ≠
-    (caEvolve 4111 (twoSpikeList 2 22 8223)).getD 0 false := by native_decide
-
--- Base sensitivity: w=12 at n''=3854 (step=3855, tape=7711)
-set_option maxHeartbeats 4000000000 in
-lemma subcaseB_m22_base_sens_3854 :
-    (caEvolve 3855 (spikeAtList 12 7711)).getD 0 false ≠
-    (caEvolve 3855 (twoSpikeList 12 22 7711)).getD 0 false := by native_decide
-
--- Base sensitivity: w=18 at n''=782 (step=783, tape=1567); n'=782+4096=4878 by period transfer
-lemma subcaseB_m22_base_sens_782 :
-    (caEvolve 783 (spikeAtList 18 1567)).getD 0 false ≠
-    (caEvolve 783 (twoSpikeList 18 22 1567)).getD 0 false := by native_decide
+-- Base sensitivity proofs for m=22 (subcaseB_m22_base_sens_6926/3342/3598/4110/3854/782)
+-- moved to SubcaseB_BaseSens.lean to avoid OOM during C code generation in this file
+-- (tape sizes 6687–13855 caused symbol #9704 OOM when compiled together with this file)
 
 -- F_22 and G_{22,last} fire at 4 positions in [22, 1046).
 -- j.val+22 ∈ {270, 526, 782, 1038}. Tapes ≤ 2093, fast for native_decide.
