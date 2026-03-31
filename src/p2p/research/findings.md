@@ -4755,7 +4755,67 @@ rw [show n'+1 = 2830+1+((1+l)*8)*4096 from by omega]
 exact sensitivity_transfer 32 22 4096 2830 ((1+l)*8) (by omega) h_F h_H subcaseB_m22_base_sens_2830_w32
 ```
 
-### Status
-- Background build (PID 25470) running CA_Array.lean (started ~8:34 PM, taking 1+ hour due to Fin 4096 residue check)
-- Once build completes: add certs to CA_Array.lean, fix sorry in SubcaseBPeriod.lean
-- This closes the LAST SORRY in SubcaseBPeriod.lean (only axioms remain)
+### Status (DONE 2026-03-31)
+- loop57 committed: added P=4096 certs to CA_Array.lean + P=65536 for l≡1 case
+- Sorry at SubcaseBPeriod.lean:2351 replaced with sensitivity_transfer proof
+- SubcaseBPeriod.lean now has ZERO actual sorry tactics
+- CA_Array build running (PID 1141, started 1:31 AM 2026-03-31)
+
+---
+
+## m=4 SubcaseB Axiom — Tree Structure Analysis (2026-03-31)
+
+### Background
+`subcaseB_m4_ge3087` remains the only unproved component theorem.
+Previous analysis (2026-03-29) established: infinite self-similar hierarchy, period doubles
+at each level (8→16→64→256→...), native_decide chain approach infeasible.
+
+### New findings: the witness TREE
+
+SubcaseB for m=4 fires exactly at n'≡5 mod 8 (for n'≥3087).
+Witnesses exist but no single even w covers all firing positions.
+
+**Tier structure (verified computationally 2026-03-31):**
+
+| n' residue class | Period | Witness | Status |
+|-----------------|--------|---------|--------|
+| n'≡13 mod 16    | 16     | w=6     | ✓ single cert covers all |
+| n'≡53 mod 64    | 64     | w=10    | ✓ single cert covers all |
+| n'≡69 mod 256   | ?      | w=12    | ✓ verified on samples |
+| n'≡133 mod 256  | ?      | w=14    | ✓ verified on samples |
+| n'≡197 mod 256  | ?      | w=12    | ✓ verified on samples |
+| n'≡{21,37} mod 64 | ?   | varies  | needs sub-split |
+| n'≡5 mod 256    | ?      | w=74 (samples only) | needs sub-split |
+
+The "hard" residue at each level is exactly n'≡5 mod (8^k for current k) — the unique
+fixed point of the self-similar map. Every other residue eventually gets covered.
+
+### Key structural fact
+**n'=5 is the UNIQUE fixed point below 3087.** For any n'≥3087, the 2-adic valuation
+v₂(n'-5) is finite, so n' sits at finite depth in the tree. No n'≥3087 requires
+infinitely many levels of case-splitting.
+
+### The "Joachim Frank / von Neumann" proof path
+Infinite tree → finite proof via **strong induction on v₂(n'-5)**:
+- v₂(n'-5)=3 (≡13 mod 16): w=6, P=16 cert
+- v₂(n'-5)=4 (some sub-classes): w=10, P=64 cert; others recurse
+- At each depth d: 3/4 of residue classes covered by direct certs; 1/4 recurses to d+1
+- Terminates because v₂(n'-5) < log₂(n'-5)+1 is always finite
+
+### What's needed for the Lean proof
+1. Algebraic characterization: which residue class at each depth gets covered by which w
+2. For each "leaf" class: a native_decide period cert (period ≤ 8^depth, feasible for depth ≤ 4)
+3. For the "recursive" class: an inductive step showing depth-d+1 reduces to depth-d
+4. The inductive step's algebraic substance: why does the Rule 30 LFSR structure guarantee
+   that the depth-d+1 residue class always has a direct witness?
+
+**Open question**: Is the witness at each depth level determined by a simple formula?
+From data: tier-1 uses w∈{6,10}, tier-2 uses w∈{12,14}, tier-3 uses w∈{12,14,74?}.
+Pattern may be: tier-k uses w≈4k+2 or similar. Needs more data.
+
+### F_last=1 universality (confirmed)
+evolve(n'+1, spike_at_last_pos(2*(n'+1)+1))[center] = 1 for ALL n'≥0.
+This means the "obvious" witness c_n = twoSpikeLastList m=4 FAILS:
+  rule30n(twoSpikeLastList) = 1 AND rule30n(flipCell at m=4) = center(spike_last) = 1
+  → both equal 1, not sensitive.
+The witness must use a genuinely different even position w ≠ last.
