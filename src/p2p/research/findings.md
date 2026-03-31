@@ -5386,3 +5386,34 @@ from CA_Array.lean and import CA_Array_residues there.
 2. `subcaseB_resolution_ge3087` — master assembler (depends on all sub-cases)
 3. `subcaseB_m28_residue_3class_proved` — in CA_Array.lean (axiom, needs native_decide)
 4. `subcaseB_m30_residue_unique_proved` — in CA_Array.lean (axiom, needs native_decide)
+
+### SubcaseB m=4 Witness Map (loop65)
+
+Generated `research/witness_map.png` — min witness w vs firing position n' for m=4.
+
+**Period-structure computation**: Precomputed sensitive residues mod P_w using small base
+tapes (size 2*(P_w+w)+1) for w=6..22, P=16..1024. Then looked up residues for n' in
+[3087, 5200). Fast (< 2s).
+
+**Key results** from witness distribution:
+- w=10: 66 positions (most common)
+- w=12: 50 positions  
+- w=14: 56 positions
+- w=16: 25 positions
+- w=18: 21 positions
+- w=20: 13 positions
+- w=22:  8 positions
+- w=30:  2 positions (n'≡5 mod 1024: n'=4101, 5125)
+- w≥38: 23 positions (level 3+ — need algebraic proof: n'≡5 mod 16384)
+
+**Structure observed**: Clear periodic banding in the graph. The n'≡5 mod 64 (red dots)
+show highest w values. The n'≡13,29,45,61 mod 64 cluster at w=10-12. Level-1 spikes
+(w=30) at n'=4101, 5125, ... (every 1024). Level 3+ (w≥38) at n'=4101+k*16384 where
+k=0,1,2 in range [3087,5200).
+
+**Proof implication**: 
+- ~239/264 positions in [3087,5200) covered by native_decide certs w=10..22 (mechanical)
+- 2 positions need w=30 cert (level 1: CA_Array cert at period 4096)
+- 23 positions need algebraic proof (level 3+: linearity corridor, same structure as m=22)
+
+**Script**: `scripts/witness_map.py`
