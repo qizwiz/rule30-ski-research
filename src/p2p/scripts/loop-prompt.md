@@ -12,45 +12,38 @@ Do exactly ONE unit of meaningful work, then commit it. Do not stop to ask quest
 4. Check if a CA_Array build is running: `ps aux | grep "lake build" | grep -v grep`
 5. Check the latest build log: `ls -t /tmp/ca_array_build*.log 2>/dev/null | head -1 | xargs tail -5 2>/dev/null`
 
-## Current state (as of 2026-03-31, loop61)
+## Current state (as of 2026-03-31, loop63)
 
-- **SubcaseBPeriod.lean has ONE sorry**: m=22 j≡1/l≡0 sub-case (n'=35598+65536s)
-  - l≡1 sub-case IS proved: w=32, P=65536, base n''=2830.
-  - l≡0: twoSpike(w,22) has period=131072 for all witnesses → INFEASIBLE for native_decide
-  - **Both m=22 l≡0 and m=4 require ALGEBRAIC proof, not period certs**
-- **Two axioms remain**: `subcaseB_m4_ge3087` (line ~981) and `subcaseB_resolution_ge3087` (master)
-- **CA_Array_m4.lean BUILT** (loop60): 765 jobs, 2444s. Sections 12-14 verified (Levels 0-2).
-- **CA_Array.lean**: STILL BUILDING (started 2:47AM, 165+ min CPU as of loop61). Imports needed by SubcaseBPeriod.
+- **SubcaseBPeriod.lean has ZERO sorrys** (loop63 closed last one!)
+  - m=22 l≡0 CLOSED: w=6, P=256 (twoSpike(6,22) period=256, tiny certs, base n''=270)
+  - **Two axioms remain**: `subcaseB_m4_ge3087` (line ~981) and `subcaseB_resolution_ge3087` (master)
+- **CA_Array.lean**: STILL BUILDING (PID 51309, started 8:22AM, ~3h elapsed as of loop63).
+  - Build MUST complete before SubcaseBPeriod.lean can be verified
+  - NOTE: There was a duplicate build race (PIDs 8760/8897 killed in loop63); only PID 51309 remains
 - **Branch**: `autoresearch/mar20` — changes accumulate here before proof-gate merges to master
 
-**m=4 hierarchy (loop61 confirmed)**: Level 3+ fully requires algebraic proof.
-  - Confirmed period data: spike(40)=65536, spike(42)=131072, twoSpike(42,4)=131072
-  - Level 3 sensitivity: w=40 covers n'≡{32773,49157} mod 131072; w=42 covers n'≡{16389,65541} mod 131072
-  - n'≡{81925,98309,114693} mod 131072 need w≥44 → tape 262K+, even larger than Section 11
-  - ALL Level 3+ cases: native_decide infeasible (tape sizes 131K-262K+, 65536-131072+ steps)
-  - Sections 12-14 in CA_Array_m4.lean close ALL levels up to Level 2. Level 3+ is the algebraic boundary.
-  - See research/findings.md "m=4 Level 3 Period Measurements (loop61)" for full data.
-
-**m=22 l≡0 (loop61 state)**: twoSpike(w,22) period=131072 for all witnesses.
-  - Same scale issue: P=131072 cert requires tape=262K elements → infeasible
-  - Algebraic approach needed: linearity corridor adapted for SubcaseB m=22 geometry.
+**m=4 SubcaseB axiom** (still open, requires algebraic proof):
+  - Level 3+ has unbounded min_w hierarchy; no single (w, P) cert covers all cases
+  - Algebraic/LFSR/linearity corridor proof needed
+  - Loop63 research: D-field propagates by Rule 90 from AND cross-product sources (verified)
+  - 4-lemma structure: nl_zero_when_both_zero, hcone_left_edge, f_center_prev_zero, d_leftbound
+  - See research/findings.md "Rule 90 Embedding & Algebraic Proof Structure (loop62)"
 
 ## Pick ONE task from this priority order
 
 1. **Wait for CA_Array build, then build SubcaseBPeriod** (FIRST PRIORITY):
-   - Check: `ps aux | grep "lake build" | grep -v grep`
-   - If CA_Array done (`tail /tmp/ca_array_build7.log` shows `Built P2p.CA_Array`):
-     - Ensure no other lake build running, then:
-     - `nohup lake build P2p.SubcaseBPeriod > /tmp/subcaseb_build.log 2>&1 &`
-     - Wait 10s: `sleep 10 && tail /tmp/subcaseb_build.log`
+   - Check: `ps aux | grep "lean\|lake" | grep -v grep | awk '{print $2,$9,$11}'`
+   - If CA_Array.lean lean process (PID 51309) is gone: CA_Array built, SubcaseBPeriod will auto-build via lake (PID 51147)
+   - If SubcaseBPeriod build appears in `tail /tmp/subcaseb_build.log`: wait for it to finish
    - If SubcaseBPeriod finishes: run `scripts/proof-gate check`
    - If obligation count decreased vs master: run `scripts/proof-gate finish`
+   - **DO NOT start a new lake build** — PID 51147 is already the SubcaseBPeriod build
 
 2. **If SubcaseBPeriod build finished cleanly**:
    - Run `scripts/proof-gate check` to confirm obligation count
    - If count decreased vs master, run `scripts/proof-gate finish`
 
-3. **Algebraic approach for m=4 Level 3+** (both sorrys need this):
+3. **Algebraic approach for m=4 Level 3+** (ONE axiom needs this):
    - Linearity corridor proof needs adaptation for SubcaseB geometry
    - For twoSpike(w, m=4): D = interaction(spike-at-w, spike-at-4)
    - Key question: at step T-1, is spike-at-4 zero at positions {center, center+1}?
