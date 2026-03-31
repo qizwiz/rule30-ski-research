@@ -4862,7 +4862,25 @@ The pure powers are the "hardest" representatives at each tier. Growth appears s
 If the sequence min_w(5+2^k) is bounded, the hierarchy terminates and finite Lean proof exists.
 If unbounded, need algebraic (LFSR/linearity) argument for high tiers.
 
-**Next step**: measure k=16 (n'=65541, tape 131085 cells, within C tool capacity).
+**k=16 measured (2026-03-31)**: n'=65541=5+2^16 → min_w=42 ← SAME AS k=14
+
+**Pure-power-of-2 sequence n'=5+2^k, k=12..16:**
+  k=12: min_w=34  |  k=13: min_w=34  |  k=14: min_w=42  |  k=15: min_w=40  |  k=16: min_w=42
+
+**Critical finding**: min_w OSCILLATES between 40-42 for k≥14. NOT GROWING.
+The hierarchy appears BOUNDED at max min_w = 42 for all n'≥3087.
+
+**Proof implication**: A FINITE Lean proof may be possible using w=42 at the deepest tiers,
+without linearity corridor or algebraic machinery. Need:
+1. Period of spike(42): likely P_42 = 2^something (check native_decide for small P)
+2. Period of twoSpike(42, 4): similarly
+3. Base sensitivity at n'=16389 and n'=65541 with w=42: both confirmed by C tool
+4. sensitivity_transfer proves all n'=5+2^k for k≥14 from these two base cases
+
+If P_42 divides 2^17=131072, then:
+  - n'≡5+2^14 mod 2^15 tier: base n'=16389, cert uses P=131072 (tape 2*131072+2*42+1=262229 cells)
+  - This IS native_decide feasible with Array Bool implementation
+  - Two such certs (for the two residues mod 2^17 in the oscillation) close the infinite hierarchy
 
 ### Corrected hierarchy + verified certs (2026-03-31, loop58)
 
