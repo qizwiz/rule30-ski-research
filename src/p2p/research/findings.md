@@ -5060,29 +5060,45 @@ SubcaseBPeriod build: pending CA_Array completion.
 | spike(42) | 131072 (2^17) | 131072 exactly (65536 fails) | 262229 |
 | twoSpike(42,4) | 131072 | 131072 exactly (65536 fails) | 262229 |
 
-### Level 3 sensitivity matrix (n'≡5 mod 16384, first 4 of 7 classes mod 131072)
+### Level 3 sensitivity matrix (n'≡5 mod 16384, all 7 classes mod 131072) — COMPLETE
 
-| n' | w=38 | w=40 | w=42 | w=44 |
-|----|------|------|------|------|
-| 16389 | no | no | **S** | no |
-| 32773 | no | **S** | S | no |
-| 49157 | no | **S** | S | no |
-| 65541 | no | no | **S** | S |
-| 81925 | ? | ? | ? | ? (min_w=44 confirmed by loop60 C scan) |
-| 98309 | ? | ? | ? | ? |
-| 114693 | ? | ? | ? | ? |
+| n' | w=38 | w=40 | w=42 | w=44 | Min w |
+|----|------|------|------|------|-------|
+| 16389 | . | . | **S** | . | 42 |
+| 32773 | . | **S** | S | . | 40 |
+| 49157 | . | **S** | S | . | 40 |
+| 65541 | . | . | **S** | S | 42 |
+| 81925 | . | . | . | **S** | 44 |
+| 98309 | . | **S** | . | S | 40 |
+| 114693 | . | **S** | . | S | 40 |
 
-(S = sensitive, boldface = minimum w)
+(S = sensitive, boldface = minimum w; all 7 classes verified, loop61)
 
-**Classes 32773, 49157**: w=40 sensitive; spike(40) P=65536, twoSpike(40,4) P=65536.
-Cert tape = 131153 elements, 65536 steps → **same scale as stuck Section 11**.
-native_decide for these is borderline infeasible (estimate 4-5 hours like Section 11).
+**w=40 covers 4 of 7 classes**: {32773, 49157, 98309, 114693} mod 131072.
+**w=42 covers 2 of 7 classes**: {16389, 65541} mod 131072.
+**w=44 covers 1 class**: {81925} mod 131072 (only option among w≤44).
 
-**Classes 16389, 65541**: w=42 sensitive; spike(42) P=131072, twoSpike(42,4) P=131072.
-Cert tape = 262229 elements, 131072 steps → **4× larger than Section 11**.
-native_decide INFEASIBLE (estimate 20+ hours).
+**Surprising finding**: w=40 does NOT cover n'≡{98309,114693} directly for period argument —
+it IS sensitive there, but since spike(40) P=65536 and these residues differ from 32773,49157
+by 65536 (exactly P), sensitivity_transfer with base 32773 and P=65536 would cover 32773+65536=98309
+and 49157+65536=114693. So just TWO sensitivity_transfer calls (bases 32773 and 49157)
+cover all FOUR w=40 classes.
 
-**Classes 81925, 98309, 114693**: need w≥44 with even larger periods.
+**Similarly**: base 16389, P=131072 covers 16389+131072k (includes 16389).
+But 65541 = 16389 + 49152 = 16389 + 3*16384. Is 65541-16389=49152 divisible by P=131072? No.
+So 65541 needs a SEPARATE sensitivity_transfer base cert.
+
+**Coverage summary for Level 3 with w=40 and w=42**:
+- w=40, base n'=32773, P=65536: covers n'≡32773 and n'≡98309 mod 131072 ← 1 base cert covers 2 classes
+- w=40, base n'=49157, P=65536: covers n'≡49157 and n'≡114693 mod 131072 ← 1 base cert covers 2 classes
+- w=42, base n'=16389, P=131072: covers n'≡16389 mod 131072 only
+- w=42, base n'=65541, P=131072: covers n'≡65541 mod 131072 only
+- n'≡81925 mod 131072: needs w=44, period unknown
+
+**All certs infeasible for native_decide**:
+- w=40 P=65536: tape 131153 cells, 65536 steps ≈ same as Section 11 (5.5h build)
+- w=42 P=131072: tape 262229 cells, 131072 steps ≈ 4× Section 11
+- w=44 with unknown P: even larger
 
 ### Conclusion: Level 3+ fully requires algebraic proof
 
