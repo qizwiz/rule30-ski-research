@@ -2339,9 +2339,40 @@ theorem subcaseB_m22_ge3087_proved (n' : Nat) (hn' : 3087 ≤ n')
             rw [show n'+1 = 19214+1+l*32768 from by omega]
             exact sensitivity_transfer 30 22 32768 19214 l (by omega) h_F h_H subcaseB_m22_base_sens_19214_w30
           · -- j ≡ 1 mod 2: n' = 35598 + 32768*(j/2)
-            -- OPEN: twoSpike(34,22) period=131072; further split hits period cascade.
-            -- Linearity corridor structural proof needed for full closure.
-            sorry
+            -- Split by (j/2) mod 2 = l mod 2:
+            --   l even: n' = 35598 + 65536*(l/2) — period cascade, linearity corridor needed
+            --   l odd:  n' = 2830 + 65536*(t+1)  — use w=32, P=65536 ✓
+            obtain ⟨l, hjl⟩ : ∃ l, j = 2 * l + 1 := ⟨j / 2, by omega⟩
+            have hl_mod : l % 2 = 0 ∨ l % 2 = 1 := by omega
+            rcases hl_mod with hl0 | hl1
+            · -- l ≡ 0 (even): l = 2*s, n' = 35598 + 65536*s, use w=32, P=4096
+              obtain ⟨s, hls⟩ : ∃ s, l = 2 * s := ⟨l / 2, by omega⟩
+              use spikeConfig 32 n'
+              refine ⟨spikeConfig_odd_false 32 (by decide) n', ?_⟩
+              rw [rule30n_spikeConfig_eq 32 n', rule30n_flipCell_spikeConfig_eq' 32 n' m (by omega) (by omega)]
+              simp only [hm22]
+              have h_F : caEvolve 4096 (spikeAtList 32 (2*4096+2*32+1)) = spikeAtList 32 (2*32+1) :=
+                caEvolve_cert_spike32_p4096
+              have h_H : caEvolve 4096 (twoSpikeList 32 22 (2*4096+2*(max 32 22)+1)) =
+                         twoSpikeList 32 22 (2*(max 32 22)+1) := by
+                have : max 32 22 = 32 := by decide
+                rw [this]; exact caEvolve_cert_ts3222_p4096
+              rw [show n'+1 = 2830+1+(8+16*s)*4096 from by omega]
+              exact sensitivity_transfer 32 22 4096 2830 (8+16*s) (by omega) h_F h_H subcaseB_m22_base_sens_2830_w32
+            · -- l ≡ 1 (odd): l = 2*t+1, so n' = 2830 + 65536*(t+1), use w=32, P=65536
+              obtain ⟨t, hlt⟩ : ∃ t, l = 2 * t + 1 := ⟨l / 2, by omega⟩
+              use spikeConfig 32 n'
+              refine ⟨spikeConfig_odd_false 32 (by decide) n', ?_⟩
+              rw [rule30n_spikeConfig_eq 32 n', rule30n_flipCell_spikeConfig_eq' 32 n' m (by omega) (by omega)]
+              simp only [hm22]
+              have h_F : caEvolve 65536 (spikeAtList 32 (2*65536+2*32+1)) = spikeAtList 32 (2*32+1) :=
+                caEvolve_cert_spike32_p65536
+              have h_H : caEvolve 65536 (twoSpikeList 32 22 (2*65536+2*(max 32 22)+1)) =
+                         twoSpikeList 32 22 (2*(max 32 22)+1) := by
+                have : max 32 22 = 32 := by decide
+                rw [this]; exact caEvolve_cert_ts3222_p65536
+              rw [show n'+1 = 2830+1+(t+1)*65536 from by omega]
+              exact sensitivity_transfer 32 22 65536 2830 (t+1) (by omega) h_F h_H subcaseB_m22_base_sens_2830_w32
   · -- n''=4110, residue 14, witness w=2, P=1024
     use spikeConfig 2 n'
     refine ⟨spikeConfig_odd_false 2 (by decide) n', ?_⟩
