@@ -5046,3 +5046,62 @@ Period certs are FUNDAMENTALLY INFEASIBLE for this infinite hierarchy.
 
 CA_Array.lean build: still running as of loop60 (started 2:47AM, 103+ min CPU).
 SubcaseBPeriod build: pending CA_Array completion.
+
+---
+
+## m=4 Level 3 Period Measurements (loop61, 2026-03-31)
+
+### Confirmed period data (C tool, shrinking CA semantics)
+
+| Config | Period divides | Minimal period | Tape size at cert |
+|--------|---------------|----------------|------------------|
+| spike(40) | 65536 (2^16) | 65536 exactly (32768 fails) | 131153 |
+| twoSpike(40,4) | 65536 | ≤65536 | 131153 |
+| spike(42) | 131072 (2^17) | 131072 exactly (65536 fails) | 262229 |
+| twoSpike(42,4) | 131072 | 131072 exactly (65536 fails) | 262229 |
+
+### Level 3 sensitivity matrix (n'≡5 mod 16384, first 4 of 7 classes mod 131072)
+
+| n' | w=38 | w=40 | w=42 | w=44 |
+|----|------|------|------|------|
+| 16389 | no | no | **S** | no |
+| 32773 | no | **S** | S | no |
+| 49157 | no | **S** | S | no |
+| 65541 | no | no | **S** | S |
+| 81925 | ? | ? | ? | ? (min_w=44 confirmed by loop60 C scan) |
+| 98309 | ? | ? | ? | ? |
+| 114693 | ? | ? | ? | ? |
+
+(S = sensitive, boldface = minimum w)
+
+**Classes 32773, 49157**: w=40 sensitive; spike(40) P=65536, twoSpike(40,4) P=65536.
+Cert tape = 131153 elements, 65536 steps → **same scale as stuck Section 11**.
+native_decide for these is borderline infeasible (estimate 4-5 hours like Section 11).
+
+**Classes 16389, 65541**: w=42 sensitive; spike(42) P=131072, twoSpike(42,4) P=131072.
+Cert tape = 262229 elements, 131072 steps → **4× larger than Section 11**.
+native_decide INFEASIBLE (estimate 20+ hours).
+
+**Classes 81925, 98309, 114693**: need w≥44 with even larger periods.
+
+### Conclusion: Level 3+ fully requires algebraic proof
+
+The hierarchy for m=4 SubcaseB is:
+- Level 0: j=42 cert (w=32, P=4096) → CA_Array_m4.lean Section 12 ✓ built
+- Level 1: w=30, P=4096 → CA_Array_m4.lean Section 13 ✓ built
+- Level 2: w=34, P=16384 → CA_Array_m4.lean Section 14 ✓ built
+- Level 3a (w=40, P=65536): tape 131K, same scale as stuck Section 11 → borderline infeasible
+- Level 3b (w=42, P=131072): tape 262K, 4× Section 11 → infeasible
+- Level 3c+: w≥44, larger periods → infeasible
+
+The CA_Array_m4.lean Sections 12-14 cover all finite levels up to and including Level 2.
+ALL remaining cases (Level 3+) require algebraic/LFSR proof. Native_decide is fundamentally
+infeasible due to exponentially growing tape sizes.
+
+**Algebraic path**: The 4-lemma linearity corridor approach (nl_zero_when_both_zero,
+hcone_left_edge, f_center_prev_zero adapted to twoSpike, d_leftbound for SubcaseB geometry)
+is the correct strategy. The m=4 SubcaseB geometry differs from the k=6 diagonal case
+(spikes start at positions m=4 and w, not at fixed relative positions), so lemma 3
+(f_center_prev_zero) needs adaptation. The key question: at step T-1 for SubcaseB n',
+is the spike-at-4 component zero at positions {center, center+1}? If the spike-at-4
+causal cone hasn't reached center-1 by step T-1, the argument holds.
