@@ -4785,6 +4785,16 @@ does not divide 65536. Requires algebraic proof (linearity corridor or LFSR argu
 Alternatively: extract n'≡35598 mod 131072 for an algebraic sub-case and further split
 odd multiples recursively — but this creates an infinite regress identical to m=4 Level 3+.
 
+**Anti-diagonal structural witness FAILS (loop73, 2026-04-01):**
+Tested: does c=spike_{2n'-6} (anti-diagonal position) witness SubcaseB for n'=35598, m=22?
+Anti-diagonal position: 2*35598-6 = 71190 (even, valid as spikeConfig_odd_false).
+Computed (Python, shrinking CA, tape 71199, steps 35599):
+  center({71190}) = 0  ✓ (anti-diagonal zero, as expected)
+  center({71190, 22}) = 0  ✗ (should be 1 for witness to work)
+Conclusion: c=spike_{71190} is NOT sensitive to m=22 at n'=35598.
+The "universal anti-diagonal structural witness" approach (adversarial_loop72_antidiag_witness.py)
+does NOT close the n'=35598+65536s sorry. Research script at /tmp/check_35598_antidiag.py.
+
 **File split architecture (2026-03-31):**
 - CA_ArrayDef.lean: pre-compiles definitions (built in 10s)
 - CA_Array.lean: Sections 5-11 with native_decide; Section 11 has P=65536 certs for w=32
