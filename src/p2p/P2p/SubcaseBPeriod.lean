@@ -1024,6 +1024,34 @@ theorem subcaseB_m4_mod16_13_witness (n' : Nat) (hn' : 3087 ≤ n') (hmod : n' %
   rw [show n' + 1 = 3101 + 1 + k * 16 from by omega]
   exact sensitivity_transfer 6 4 16 3101 k (by omega) h_F_cert h_H_cert h_base
 
+/-- SubcaseB sensitivity for m=4, n'≡53 mod 64, n'≥3087.
+    Witness: w=10, Period: 64.
+    Covers mod64=53 (all n'≡53 mod 64 ≥ 3087).
+    First firing: n'=3125 (3125 mod 64 = 53).
+    Period-64 certs: caEvolve_cert_m10_p64, caEvolve_cert_ts104_p64.
+    Base sensitivity: subcaseB_m4_base_sens_3125. -/
+theorem subcaseB_m4_mod64_53_witness (n' : Nat) (hn' : 3087 ≤ n') (hmod : n' % 64 = 53)
+    (m : Fin (2 * (n' + 1) + 1)) (hm4 : m.val = 4) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  use spikeConfig 10 n'
+  refine ⟨spikeConfig_odd_false 10 (by decide) n', ?_⟩
+  rw [rule30n_spikeConfig_eq 10 n', rule30n_flipCell_spikeConfig_eq' 10 n' m (by omega) (by omega)]
+  simp only [hm4]
+  have h_F_cert : caEvolve 64 (spikeAtList 10 (2*64+2*10+1)) = spikeAtList 10 (2*10+1) :=
+    caEvolve_cert_m10_p64
+  have h_H_cert : caEvolve 64 (twoSpikeList 10 4 (2*64+2*(max 10 4)+1)) =
+                  twoSpikeList 10 4 (2*(max 10 4)+1) := by
+    have hmax : max 10 4 = 10 := by decide
+    rw [hmax]; exact caEvolve_cert_ts104_p64
+  have h_base : (caEvolve 3126 (spikeAtList 10 6253)).getD 0 false ≠
+                (caEvolve 3126 (twoSpikeList 10 4 6253)).getD 0 false :=
+    subcaseB_m4_base_sens_3125
+  obtain ⟨k, hn'_eq⟩ : ∃ k, n' = 3125 + k * 64 := ⟨(n' - 3125) / 64, by omega⟩
+  rw [show n' + 1 = 3125 + 1 + k * 64 from by omega]
+  exact sensitivity_transfer 10 4 64 3125 k (by omega) h_F_cert h_H_cert h_base
+
 /-- SubcaseB resolution for m=4, n' ≥ 3087.
     Loop66 analysis: mod64∈{13,29,45,61} use w=6 P=16; mod64=53 uses w=10 P=64;
     mod64=21 uses w∈{12,16,18} with multiple periods; mod64=37 uses w=12 (P=128)
