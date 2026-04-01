@@ -881,8 +881,11 @@ lemma subcaseB_m4_unique_in_period (n'' : Nat) (hn''_lo : 3087 ≤ n'') (hn''_hi
       (caEvolve (3087 + j.val + 1) (twoSpikeLastList 4 (2*(3087+j.val+1)+1))).getD 0 false = true →
       3087 + j.val = 3093 := by native_decide
   have hj_bound : n'' - 3087 < 8 := by omega
-  have h_eq : 3087 + (n'' - 3087) = n'' := Nat.add_sub_cancel' (by omega)
-  have hj_eq := h ⟨n'' - 3087, hj_bound⟩ (h_eq ▸ hcase'') (h_eq ▸ hts'')
+  have hcase_c : (caEvolve (3087 + (n'' - 3087) + 1) (spikeAtList 4 (2 * (3087 + (n'' - 3087) + 1) + 1))).getD 0 false = false := by
+    convert hcase'' using 5 <;> omega
+  have hts_c : (caEvolve (3087 + (n'' - 3087) + 1) (twoSpikeLastList 4 (2 * (3087 + (n'' - 3087) + 1) + 1))).getD 0 false = true := by
+    convert hts'' using 5 <;> omega
+  have hj_eq := h ⟨n'' - 3087, hj_bound⟩ hcase_c hts_c
   omega
 
 -- Base sensitivity cert for m=4, w=6 at n'=3101 (≡29 mod 64): verified correct
@@ -3638,7 +3641,7 @@ private lemma rm_twoSpike_mod4_2 (n' : Nat) (hn' : 6 ≤ n') (hmod4 : n' % 4 = 2
     have hj : n' = 4 * ((n' - 2) / 4) + 2 := by omega
     have hjge : 1 ≤ (n' - 2) / 4 := by omega
     obtain ⟨hA, _⟩ := h ((n' - 2) / 4) hjge
-    convert hA using 3 <;> omega
+    convert hA using 6 <;> omega
   intro j hj
   induction j with
   | zero => omega
@@ -4067,7 +4070,7 @@ private lemma rm_spike_mod4_0_true (n' : Nat) (hn' : 3087 ≤ n') (hmod4 : n' % 
     have hk : n' = 4 * (n' / 4) := by omega
     have hkge : 1 ≤ n' / 4 := by omega
     obtain ⟨hA, _⟩ := h (n' / 4) hkge
-    convert hA using 3 <;> omega
+    convert hA using 6 <;> omega
   intro k hk
   induction k with
   | zero => omega
@@ -4118,7 +4121,7 @@ private lemma rm_twoSpike_mod4_3_false (n' : Nat) (hn' : 3087 ≤ n') (hmod4 : n
     -- n' = 4*k+3, k = (n'-3)/4
     have hk : n' = 4 * ((n' - 3) / 4) + 3 := by omega
     obtain ⟨hA, _⟩ := h ((n' - 3) / 4)
-    convert hA using 3 <;> omega
+    convert hA using 6 <;> omega
   intro k
   induction k with
   | zero =>
@@ -4616,7 +4619,7 @@ private lemma rm_mod4_1_witness (n' : Nat) (hn' : 3087 ≤ n') (hmod4 : n' % 4 =
     convert this using 2 <;> omega
   -- Prove twoSpike → False: D(k)
   have htwo_false : (caEvolve (n' + 1) (twoSpikeList w m.val (2 * (n' + 1) + 1))).getD 0 false = false := by
-    rw [hN_eq, hT, hw_eq, hm_eq]
+    rw [hm_eq, hN_eq, hT, hw_eq]
     -- caEvolve(4k+2)(twoSpike(8k-8, 8k-4, 8k+5))
     -- = caEvolve(4k-10)(caEvolve 12 (twoSpike(8k-8, 8k-4, 8k+5)))  [caEvolve_add: 4k+2 = (4k-10)+12]
     -- = caEvolve(4k-10)(ts5E(8k-19))                                [twoSpike_to_ts5E at M=8k+5]
