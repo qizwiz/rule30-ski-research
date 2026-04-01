@@ -994,6 +994,36 @@ lemma subcaseB_m4_base_sens_3149 :
     (caEvolve 3150 (spikeAtList 6 6301)).getD 0 false ≠
     (caEvolve 3150 (twoSpikeList 6 4 6301)).getD 0 false := by native_decide
 
+/-- SubcaseB sensitivity for m=4, n'≡13 mod 16, n'≥3087.
+    Witness: w=6, Period: 16.
+    Covers mod64 classes {13,29,45,61}: these are exactly n'≡13 mod 16.
+    First firing: n'=3101 (j=1, 3101%64=29). Period-16 witness valid by:
+      spike(6) period = 16 (caEvolve_cert_m6_p16)
+      twoSpike(6,4) period = 16 (via twoSpike(4,6)_p16 + twoSpikeList_comm)
+      base sensitivity at n''=3101 (subcaseB_m4_base_sens_3101). -/
+theorem subcaseB_m4_mod16_13_witness (n' : Nat) (hn' : 3087 ≤ n') (hmod : n' % 16 = 13)
+    (m : Fin (2 * (n' + 1) + 1)) (hm4 : m.val = 4) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  use spikeConfig 6 n'
+  refine ⟨spikeConfig_odd_false 6 (by decide) n', ?_⟩
+  rw [rule30n_spikeConfig_eq 6 n', rule30n_flipCell_spikeConfig_eq' 6 n' m (by omega) (by omega)]
+  simp only [hm4]
+  have h_F_cert : caEvolve 16 (spikeAtList 6 (2*16+2*6+1)) = spikeAtList 6 (2*6+1) :=
+    caEvolve_cert_m6_p16
+  have h_H_cert : caEvolve 16 (twoSpikeList 6 4 (2*16+2*(max 6 4)+1)) =
+                  twoSpikeList 6 4 (2*(max 6 4)+1) := by
+    have hmax : max 6 4 = 6 := by decide
+    rw [hmax, twoSpikeList_comm 6 4, twoSpikeList_comm 6 4]
+    exact caEvolve_cert_ts46_p16
+  have h_base : (caEvolve 3102 (spikeAtList 6 6205)).getD 0 false ≠
+                (caEvolve 3102 (twoSpikeList 6 4 6205)).getD 0 false := by
+    rw [twoSpikeList_comm 6 4]; exact subcaseB_m4_base_sens_3101
+  obtain ⟨k, hn'_eq⟩ : ∃ k, n' = 3101 + k * 16 := ⟨(n' - 3101) / 16, by omega⟩
+  rw [show n' + 1 = 3101 + 1 + k * 16 from by omega]
+  exact sensitivity_transfer 6 4 16 3101 k (by omega) h_F_cert h_H_cert h_base
+
 /-- SubcaseB resolution for m=4, n' ≥ 3087.
     Loop66 analysis: mod64∈{13,29,45,61} use w=6 P=16; mod64=53 uses w=10 P=64;
     mod64=21 uses w∈{12,16,18} with multiple periods; mod64=37 uses w=12 (P=128)
