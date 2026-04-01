@@ -879,12 +879,14 @@ lemma subcaseB_m4_unique_in_period (n'' : Nat) (hn''_lo : 3087 ≤ n'') (hn''_hi
   have h : ∀ j : Fin 8,
       (caEvolve (3087 + j.val + 1) (spikeAtList 4 (2*(3087+j.val+1)+1))).getD 0 false = false →
       (caEvolve (3087 + j.val + 1) (twoSpikeLastList 4 (2*(3087+j.val+1)+1))).getD 0 false = true →
-      3087 + j.val = 3093 := by native_decide
+      3087 + j.val = 3093 := by
+    set_option maxRecDepth 4096 in native_decide
   have hj_bound : n'' - 3087 < 8 := by omega
+  have hN_eq : 3087 + (n'' - 3087) = n'' := by omega
   have hcase_c : (caEvolve (3087 + (n'' - 3087) + 1) (spikeAtList 4 (2 * (3087 + (n'' - 3087) + 1) + 1))).getD 0 false = false := by
-    convert hcase'' using 5 <;> omega
+    rw [hN_eq]; exact hcase''
   have hts_c : (caEvolve (3087 + (n'' - 3087) + 1) (twoSpikeLastList 4 (2 * (3087 + (n'' - 3087) + 1) + 1))).getD 0 false = true := by
-    convert hts'' using 5 <;> omega
+    rw [hN_eq]; exact hts''
   have hj_eq := h ⟨n'' - 3087, hj_bound⟩ hcase_c hts_c
   omega
 
@@ -3640,8 +3642,12 @@ private lemma rm_twoSpike_mod4_2 (n' : Nat) (hn' : 6 ≤ n') (hmod4 : n' % 4 = 2
     -- n' = 4*j+2 for j = (n'-2)/4
     have hj : n' = 4 * ((n' - 2) / 4) + 2 := by omega
     have hjge : 1 ≤ (n' - 2) / 4 := by omega
-    obtain ⟨hA, _⟩ := h ((n' - 2) / 4) hjge
-    convert hA using 6 <;> omega
+    set k := (n' - 2) / 4 with hk_def
+    obtain ⟨hA, _⟩ := h k hjge
+    rw [show n' + 1 = 4 * k + 3 from by omega,
+        show 2 * (n' + 1) - 8 = 8 * k - 2 from by omega,
+        show 2 * (n' + 1) + 1 = 8 * k + 7 from by omega]
+    exact hA
   intro j hj
   induction j with
   | zero => omega
@@ -4069,8 +4075,12 @@ private lemma rm_spike_mod4_0_true (n' : Nat) (hn' : 3087 ≤ n') (hmod4 : n' % 
        (caEvolve (4 * k + 1) (ts4ConfigList (8 * k + 3))).getD 0 false = true) by
     have hk : n' = 4 * (n' / 4) := by omega
     have hkge : 1 ≤ n' / 4 := by omega
-    obtain ⟨hA, _⟩ := h (n' / 4) hkge
-    convert hA using 6 <;> omega
+    set k := n' / 4 with hk_def
+    obtain ⟨hA, _⟩ := h k hkge
+    rw [show n' + 1 = 4 * k + 1 from by omega,
+        show 2 * (n' + 1) - 8 = 8 * k - 6 from by omega,
+        show 2 * (n' + 1) + 1 = 8 * k + 3 from by omega]
+    exact hA
   intro k hk
   induction k with
   | zero => omega
@@ -4120,8 +4130,13 @@ private lemma rm_twoSpike_mod4_3_false (n' : Nat) (hn' : 3087 ≤ n') (hmod4 : n
        (caEvolve (4 * (k + 1)) (ts3ConfigList (8 * k + 9))).getD 0 false = false) by
     -- n' = 4*k+3, k = (n'-3)/4
     have hk : n' = 4 * ((n' - 3) / 4) + 3 := by omega
-    obtain ⟨hA, _⟩ := h ((n' - 3) / 4)
-    convert hA using 6 <;> omega
+    set k := (n' - 3) / 4 with hk_def
+    obtain ⟨hA, _⟩ := h k
+    rw [show 4 * (k + 1) = n' + 1 from by omega,
+        show 8 * k = 2 * (n' + 1) - 8 - 3 from by omega,
+        show 8 * k + 8 = 2 * (n' + 1) - 3 from by omega,
+        show 8 * k + 9 = 2 * (n' + 1) - 2 from by omega] at hA
+    exact hA
   intro k
   induction k with
   | zero =>
@@ -4619,7 +4634,7 @@ private lemma rm_mod4_1_witness (n' : Nat) (hn' : 3087 ≤ n') (hmod4 : n' % 4 =
     convert this using 2 <;> omega
   -- Prove twoSpike → False: D(k)
   have htwo_false : (caEvolve (n' + 1) (twoSpikeList w m.val (2 * (n' + 1) + 1))).getD 0 false = false := by
-    rw [hm_eq, hN_eq, hT, hw_eq]
+    simp only [hm_eq, hN_eq, hT, hw_eq]
     -- caEvolve(4k+2)(twoSpike(8k-8, 8k-4, 8k+5))
     -- = caEvolve(4k-10)(caEvolve 12 (twoSpike(8k-8, 8k-4, 8k+5)))  [caEvolve_add: 4k+2 = (4k-10)+12]
     -- = caEvolve(4k-10)(ts5E(8k-19))                                [twoSpike_to_ts5E at M=8k+5]
