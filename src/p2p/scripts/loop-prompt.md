@@ -4,10 +4,42 @@ You are an autonomous research agent working on the Wolfram Prize 3 proof in /Us
 
 Do exactly ONE unit of meaningful work, then commit it. Do not stop to ask questions. Do not leave the repo in a broken state. Always end with a git commit.
 
+---
+
+## ⚠️ SELF-MODIFICATION RULES (read before anything else)
+
+This file is self-modifying. You MAY update the TRACK A and TRACK B sections below
+when you have concrete evidence. You MUST follow these safeguards:
+
+**ALLOWED updates:**
+- Mark a lemma/task as `✓ DONE` with the loop number that closed it
+- Mark an approach as `✗ REFUTED` with the reason (cite evidence: script output, Lean error, etc.)
+- Add a new exploration task to Track B when data suggests it
+- Promote a Track B finding to Track A if it opens a proof path
+- Update the "CURRENT STATE" section with new obligation counts or build status
+
+**FORBIDDEN updates:**
+- Never remove the `## ⚠️ SELF-MODIFICATION RULES` section
+- Never remove the `## BUILD RULES` section
+- Never remove the `## DECISION LOGIC` section
+- Never change the COMMIT FORMAT
+- Never update without a concrete reason (no speculative reshuffling)
+- Never claim something is ✓ DONE unless `scripts/proof-gate check` confirms the count dropped
+  OR the Lean probe returns clean output with no errors
+
+**HOW TO UPDATE:**
+1. Make your code/proof change first
+2. Run verification (proof-gate check, lean probe, or Python output)
+3. THEN edit this file to reflect what you learned
+4. Stage BOTH the proof change AND the loop-prompt change in the same commit
+5. Add `[prompt updated: reason]` to the commit message
+
+---
+
 ## Before you start
 
 1. Read CLAUDE.md — ranked task list and current state.
-2. Run `scripts/proof-gate check` to see obligation count and locations.
+2. Run `scripts/proof-gate check` — note the count.
 3. Run `git log --oneline -8` — don't repeat recent work.
 4. Check running builds: `ps aux | grep "lake build" | grep -v grep`
 5. Check rule30_meta output: `tail -5 /tmp/rule30_meta_output.txt 2>/dev/null`
@@ -26,141 +58,140 @@ EOF
 lake env lean /tmp/probe.lean 2>&1 | grep -A 20 "unsolved goals\|⊢\|error"
 ```
 
-## CURRENT STATE (loop79, 2026-04-01)
+---
 
-**5 obligations**:
-1. `subcaseB_m4_ge3087` — axiom, main target (line 1139 SubcaseBPeriod.lean)
-2. `subcaseB_resolution_ge3087` — master axiom (assembles sub-cases; closes when #1 closes)
-3. `subcaseB_m22_l0_sorry` — line 2417 SubcaseBPeriod.lean (m=22 algebraic barrier)
-4. `subcaseB_m28_residue_3class_proved` — axiom CA_Array.lean (CA_Array_residues building)
-5. `subcaseB_m30_residue_unique_proved` — axiom CA_Array.lean (CA_Array_residues building)
+## CURRENT STATE (auto-updated by loop)
 
-**Recent loop progress**: loops 77/78/80 proved 3 mechanical m=4 mod64 sub-cases.
-**The loop must now ALTERNATE between two tracks:**
+**Obligations**: 5 (as of loop80)
+- `subcaseB_m4_ge3087` — axiom, line 1139 SubcaseBPeriod.lean — MAIN TARGET
+- `subcaseB_resolution_ge3087` — master axiom, line 4893 — closes when m4 closes
+- `subcaseB_m22_l0_sorry` — line 2417 — algebraic barrier (P=131072, infeasible native_decide)
+- `subcaseB_m28_residue_3class_proved` — CA_Array.lean axiom — CA_Array_residues building
+- `subcaseB_m30_residue_unique_proved` — CA_Array.lean axiom — CA_Array_residues building
+
+**Build status**:
+- SubcaseBPeriod.lean: ✓ clean olean (build9, loop72)
+- CA_Array.lean: ✓ clean olean
+- CA_Array_residues.lean: BUILDING at /tmp/ca_residues_build.log
+
+**Recent work**: loops 77/78/80 proved 3 mechanical m=4 mod64 sub-cases (mod16=13, mod64=53, mod64=21)
 
 ---
 
 ## TRACK A: LINEARITY CORRIDOR (known proof path for m=4 axiom)
 
-The algebraic proof of `subcaseB_m4_ge3087` decomposes into 4 Lean lemmas.
-**WARNING**: The corridor was designed for the right-boundary family (m=2n'-6).
-`f_center_prev_zero` does NOT hold for fixed m directly — it needs adaptation.
-Treat all 4 lemmas as targets to attempt, not guarantees to close.
+**⚠️ CAVEAT**: Corridor was designed for right-boundary family (m=2n'-6).
+`f_center_prev_zero` does NOT hold for fixed m directly — needs adaptation.
+Proceed but treat each lemma as a target to attempt, not a guarantee.
 
-### Lemma A1: nl_zero_when_both_zero (TRIVIAL — try first)
+### A1: nl_zero_when_both_zero — STATUS: OPEN
 
 ```lean
 lemma nl_zero_when_both_zero (a' b' : Bool) :
     (false || false) ^^ (a' || b') ^^ ((false ^^ a') || (false ^^ b')) = false := by
   cases a' <;> cases b' <;> decide
 ```
+Pure truth-table. Try it with the probe tool first, then add to SubcaseBPeriod.lean.
 
-Add to SubcaseBPeriod.lean or new LinearityCorridor.lean. Probe it first.
+### A2: hcone_left_edge — STATUS: OPEN
 
-### Lemma A2: hcone_left_edge (MEDIUM)
+Spike at `2*(n'+1)` after `n'` steps can't reach position `n'+1` (causality).
+Check CausalConeLemmas.lean for an existing zero-outside-cone lemma first.
+May follow directly from `causal_cone_zero` or similar.
 
-Spike at position `2*(n'+1)` after `n'` steps can't reach position `n'+1` (causality).
-Check if CausalConeLemmas.lean already has a zero-outside-cone lemma.
-If yes, hcone_left_edge may follow directly.
+### A3: f_center_prev_zero — STATUS: OPEN (hard, needs adaptation for fixed m)
 
-### Lemma A3: f_center_prev_zero (HARD — anti-diagonal)
+R30(7-t, t) = 0 for all t in infinite Rule 30 from spike at 0.
+Computationally verified t=0..2000. Unique zero anti-diagonal among k=0..12.
 
-R30(7-t, t) = 0 for ALL t in infinite Rule 30 from spike at 0.
-Verified computationally t=0..2000. Unique zero anti-diagonal among k=0..12.
+Step 1: Python-verify the finite-tape formulation matches:
+`(caEvolve (t+1) (spikeAtList 0 (2*(t+1)+20))).getD (7-t) false = false`
 
-**Approach**: Try native_decide for finite t ≤ 150 on appropriately-sized finite tape.
-This gets a partial Lean theorem even if the full induction is hard.
+Step 2: native_decide for t ≤ 100 as a finite stepping stone.
 
-```python
-# First verify the finite formulation matches:
-# (caEvolve (t+1) (spikeAtList 0 (2*(t+1)+20))).getD (7-t) false = false
-# Run this Python check before writing Lean:
-```
+Step 3: Full induction (hard — parity argument applies to Rule 90 but Rule 30 needs more).
 
-### Lemma A4: d_leftbound (HARD — D-field support)
+### A4: d_leftbound — STATUS: OPEN (hard)
 
 D-field min support ≥ center+2 at step T-1.
-D first appears at step 4 at position ≥ 2n'-2.
-Drift ≤ 1 per step → min_support at T-1 ≥ 2n'-2-(T-5) = n'+3-5 = ... verify arithmetic.
-Python-verify this bound before attempting Lean.
+Python-verify the bound before attempting Lean: check n'=8..100 that D[center+1]_{T-1}=0.
 
 ---
 
-## TRACK B: EXPLORATION (open questions, may reveal new proof angles)
+## TRACK B: EXPLORATION
 
-**Why explore?** The corridor may need adaptation. Exploration finds either a better
-path or confirms the corridor is the only one. Run one exploration task per 2 loop iterations.
+Run one Track B task for every 2 Track A tasks. Rotate through open items.
 
-### B1: D-field structure at Level 3+ (mod16384=5, the hard m=4 case)
+### B1: D-field at Level 3+ (mod16384=5) — STATUS: OPEN
 
-The rule30_meta.py is running (PID varies, output at /tmp/rule30_meta_output.txt).
-If it has output: extract D-field patterns at specific Level 3+ positions.
-If NOT done: write a FOCUSED Python script that only checks n'≡5 mod 16384 positions
-(e.g., n'=16389, 32773, 49157) and asks: what is the MINIMUM w at each? Is there a pattern?
+rule30_meta.py running at PID unknown, output /tmp/rule30_meta_output.txt.
+If output exists: extract D-field patterns at Level 3+ positions.
+If NOT done: write focused Python for ONLY n'≡5 mod 16384 positions (n'=16389, 32773, 49157):
+- What is min_w at each?
+- What is the D-field SHAPE (not just center value) at T-1?
+- Does the D-field have a period at these positions?
 
-```python
-# Quick Level 3+ probe (runs in minutes, not hours):
-for n_prime in [16389, 32773, 49157, 65541]:
-    # find min_w at this specific n'
-    # compare with prediction min_w ~ 2.5*log2(n')
-```
+### B2: Witness LFSR — STATUS: OPEN
 
-### B2: Witness LFSR analysis
+For n' in SubcaseB positions (5,13,21,...), does w=6 witness? → binary sequence.
+Run BM on that sequence. Compare LC with F-sequence LC=5.
+Does the witness-existence sequence have the SAME connection polynomial as the F-sequence?
+If yes: witnesses are algebraically tied to F=0, not independent → proof leverage.
 
-The SEQUENCE of which w values are witnesses at fixed n' (varying mod residue) has structure.
-Run BM on the indicator sequence: for n' = 5, 13, 21, ..., 3093, ..., is_witness(n', w=6)?
-What is the linear complexity? Does it match L=5 (the m=4 LFSR entry)?
+### B3: Prize 2 connection — STATUS: OPEN
 
-```python
-# Compute: for n' in SubcaseB positions, does w=6 witness? → binary sequence
-# BM that sequence → compare with F-sequence LC=5
-```
+Wolfram Prize 2: density of black cells in Rule 30 center column → 1/2.
+Our result: F(n', m=4) = 0 exactly half the time (F-sequence density = 1/2).
+Question: is the Prize 2 center-column sequence the SAME as our F-sequence?
+Compute: center-column value of standard Rule 30 (spike initial condition, step n).
+Compare with F(n, 4). Are they equal? If so, we may have already proved Prize 2.
 
-### B3: Prize 1+2+3 connection
+### B4: m=22 algebraic angle — STATUS: OPEN
 
-Prize 1 (non-periodic center column) + Prize 2 (density → 1/2) + Prize 3 (Ω(n) complexity).
-We know: F-sequence density = 1/2 exactly (proved). Does this connect to Prize 2?
-Wolfram Prize 2: "Prove that the density of black cells in Rule 30 center column → 1/2."
-Our F-sequence result says: F(n', m=4) = 0 exactly half the time. Is that Prize 2?
-Investigate: is Prize 2 about the SAME sequence as our F-sequence, or something different?
-
-```python
-# Compute actual center-column density for rule30 from standard spike initial condition
-# Compare with F-sequence density
-# Are these the same object?
-```
-
-### B4: m=22 l≡0 sorry — algebraic angle
-
-m=22 sorry at line 2417 needs P=131072 period certs (infeasible with native_decide).
-Alternative: can we use the LFSR structure of twoSpike(34,22) directly?
-BM on the twoSpike(34,22) center-output sequence → connection polynomial → algebraic period cert.
-If connection poly has degree D, period ≤ 2^D. If D is small, algebraic cert is feasible.
+twoSpike(34, 22) needs P=131072 — infeasible with native_decide.
+Run BM on twoSpike(34,22) center-output sequence to find connection polynomial.
+If degree D is small (say ≤ 20), an algebraic period cert is feasible.
+Compare with twoSpike(40,22) and twoSpike(42,22).
 
 ---
 
-## DECISION LOGIC FOR THIS LOOP
+## DECISION LOGIC
 
-Look at `git log --oneline -3`:
-- If last 2 commits were Track A → do Track B this time
-- If last commit was Track B → do Track A this time
-- If CA_Array_residues build just finished → integrate it FIRST (closes 2 free obligations)
-- If rule30_meta.py has output → read it and commit the findings to research/findings.md
+Check `git log --oneline -3`:
+- If last ≥2 commits were Track A → do Track B this iteration
+- If last commit was Track B → do Track A this iteration
+- **ALWAYS first**: if CA_Array_residues build finished → integrate immediately (closes 2 free obligations)
+- **ALWAYS first**: if rule30_meta.py has new output → read it, update findings.md, commit
 
-## BUILD RULES
+---
 
-- NEVER wait for a build interactively — always background: `nohup lake build ... > /tmp/build.log 2>&1 &`
-- NEVER start parallel builds — check first with `ps aux | grep "lake build"`
-- CA_Array.lean has a clean olean — do NOT rebuild unless integrating CA_Array_residues
-- SubcaseBPeriod.lean has a clean olean — do NOT rebuild unless adding new lemmas
+## BUILD RULES (protected — never modify)
 
-## COMMIT FORMAT
+- NEVER wait for a build — background only: `nohup lake build ... > /tmp/build.log 2>&1 &`
+- NEVER start parallel builds — check `ps aux | grep "lake build"` first
+- CA_Array.lean has clean olean — do NOT rebuild unless integrating CA_Array_residues
+- SubcaseBPeriod.lean has clean olean — do NOT rebuild unless adding proved lemmas
 
-`loop<N>: <track>: <what you did>`
+---
+
+## COMMIT FORMAT (protected — never modify)
+
+`loop<N>: <track>: <what you did> [prompt updated: <reason>]`
+
+The `[prompt updated: reason]` suffix is ONLY added when this file was also changed.
 
 Examples:
-- `loop81: corridor: prove nl_zero_when_both_zero`
-- `loop82: explore: D-field Level3+ min_w scan confirms log(n') growth`
+- `loop81: corridor: prove nl_zero_when_both_zero [prompt updated: A1 marked done]`
+- `loop82: explore: D-field Level3+ min_w scan [prompt updated: B1 finding added]`
 - `loop83: corridor: native_decide f_center_prev_zero t≤100`
 
 Always increment N from the last commit's loop number.
+
+---
+
+## SELF-MODIFICATION CHANGELOG
+
+| Loop | Change | Reason |
+|------|--------|--------|
+| 79   | Created Track A + Track B structure | Session: corridor + exploration both needed |
+| 79   | Added self-modification rules | User instruction: loop should improve itself |
