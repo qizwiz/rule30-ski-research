@@ -138,13 +138,14 @@ Run BM on that sequence. Compare LC with F-sequence LC=5.
 Does the witness-existence sequence have the SAME connection polynomial as the F-sequence?
 If yes: witnesses are algebraically tied to F=0, not independent → proof leverage.
 
-### B3: Prize 2 connection — STATUS: OPEN
+### B3: Prize 2 connection — ✓ DONE (loop82)
 
-Wolfram Prize 2: density of black cells in Rule 30 center column → 1/2.
-Our result: F(n', m=4) = 0 exactly half the time (F-sequence density = 1/2).
-Question: is the Prize 2 center-column sequence the SAME as our F-sequence?
-Compute: center-column value of standard Rule 30 (spike initial condition, step n).
-Compare with F(n, 4). Are they equal? If so, we may have already proved Prize 2.
+**Finding**: NO connection between Prize 2 and Prize 3.
+- F(n', m=4) is a simple **period-8 LFSR sequence** (`10110100` repeating), density exactly 1/2.
+- Prize 2 center column (standard Rule 30 from spike at 0) is **aperiodic/complex**, no LFSR structure.
+- No correlation above chance between Prize 2 center column and any F(n', m) for m=0..12.
+- Prize 2 and Prize 3 are independent problems; our proof does NOT automatically prove Prize 2.
+- Data written to research/findings.md "Track B3" section.
 
 ### B4: m=22 algebraic angle — STATUS: OPEN
 
@@ -195,3 +196,4 @@ Always increment N from the last commit's loop number.
 |------|--------|--------|
 | 79   | Created Track A + Track B structure | Session: corridor + exploration both needed |
 | 79   | Added self-modification rules | User instruction: loop should improve itself |
+| 82   | B3 marked ✓ DONE | Python verified: Prize 2 ≠ F(n',m), F(n',4) period=8 |

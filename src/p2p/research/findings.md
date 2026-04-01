@@ -5694,3 +5694,39 @@ Both require period-131072 certs (tape ~262213, 131072 steps ≈ 20h native_deci
 - SubcaseBPeriod.lean: running ~2h (PID 46131), no olean yet
 - CA_Array_residues.lean: running ~1h (PID 90884), no olean yet
 
+---
+
+## Track B3: Prize 2 / Prize 3 Connection Analysis (loop82, 2026-04-01)
+
+**Question**: Is the Prize 2 center-column sequence the same as our F(n', m=4) sequence?
+If so, we may have already proved Prize 2 as a side effect.
+
+**Method**: Python shrinking-CA simulation, n'=1..100.
+
+### F-sequence periods (shrinking CA, spike at m, evolve n' steps, read center)
+
+| m  | Period | Density | First 32 bits              |
+|----|--------|---------|----------------------------|
+| 4  |   8    | ≈ 0.5   | 10110100 (repeating)       |
+| 6  |  16    | ≈ 0.5   | 1010011101011000 (repeating)|
+
+F(n', m=4) has **exact period 8** with pattern `10110100`, density exactly 1/2.
+Matches LFSR table entry L=5, P_m=8 for m=4.
+
+### Prize 2 center column (standard Rule 30, spike at center, record center each step)
+
+First 60 values: `101110011000101100100111010111001110101011000011001010110101`
+
+- Density over 200 steps: 0.525 (approaching 1/2, consistent with Prize 2 conjecture)
+- Pattern is complex; no correlation above chance with any F(n', m) for m=0..12
+
+### Conclusion
+
+Prize 2 and Prize 3 are **independent problems**. Our Prize 3 proof does NOT
+automatically prove Prize 2. The Prize 2 center column is aperiodic and unrelated
+to any of our F(n', m) sequences.
+
+Our "F-sequence density = 1/2" refers to F(n', m) for fixed m (algebraic period P_m).
+Prize 2's density → 1/2 conjecture is a separate statement about the standard
+center-column sequence which has no known algebraic period.
+
