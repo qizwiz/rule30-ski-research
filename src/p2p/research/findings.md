@@ -5585,3 +5585,35 @@ The ALGEBRAIC BARRIER remains: no finite witness set covers all k.
    Fix: reorder to `rw [hm_eq, hN_eq, hT, hw_eq]` — eliminate `↑m` first.
 
 Build6 started after these fixes; no errors in first 10 min.
+
+### m=22 n'=35598+65536*s witness structure (loop75, 2026-04-01)
+
+**Context**: The sorry at SubcaseBPeriod.lean:2280 covers n'=35598+65536*s (m=22).
+Previous loops documented the cascade structure. This loop verified the exact sub-class split.
+
+**Verified by C shrinking-CA program** (exact, not Python estimates):
+
+| n' | w | F(w) | H(w,22) | Witness? |
+|----|---|------|---------|---------|
+| 35598  | 34 | 0 | 1 | YES (s≡0, t=0) |
+| 166670 | 34 | 0 | 1 | YES (s≡0, t=1) |  
+| 101134 | 40 | 1 | 0 | YES (s≡1, t=0) |
+
+**Sub-class structure**:
+- s≡0 mod 2 (n'=35598+131072*t): **w=34 is stable witness** (confirmed at t=0 and t=1)
+- s≡1 mod 2 (n'=101134+131072*t): **w=40 witnesses at t=0** (t=1 not yet checked)
+
+**Mechanical closure requirements**:
+- `caEvolve_cert_spike34_p131072`: tape=262213, P=131072 → ~20h native_decide (infeasible)
+- `caEvolve_cert_ts3422_p131072`: same scale
+- `subcaseB_m22_base_sens_35598_w34`: tape=71199, 35599 steps (feasible)
+- `caEvolve_cert_spike40_p131072`: tape=262213 → ~20h native_decide (infeasible)
+- `caEvolve_cert_ts4022_p131072`: same scale
+- `subcaseB_m22_base_sens_101134_w40`: tape=202271, 101135 steps (borderline feasible)
+
+**Conclusion**: The period-131072 certs are too large for native_decide. The ALGEBRAIC
+PROOF (linearity corridor) remains the practical path for closing this sorry.
+
+**For future loops**: If someone adds a period-131072 cert infrastructure (e.g., using
+LFSR-based algebraic period certificates instead of native_decide), both sub-classes
+could be closed mechanically without going algebraic.

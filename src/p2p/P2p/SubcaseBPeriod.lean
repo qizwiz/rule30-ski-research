@@ -2270,13 +2270,14 @@ theorem subcaseB_m22_ge3087_proved (n' : Nat) (hn' : 3087 ≤ n')
             have hl_mod : l % 2 = 0 ∨ l % 2 = 1 := by omega
             rcases hl_mod with hl0 | hl1
             · -- l ≡ 0 (even): n' = 35598 + 65536*s
-              -- Use w=6, P=256: twoSpike(6,22) full-config period=256 (VERIFIED), tiny certs.
-              -- 35598 = 270 + 138*256, and 65536 = 256*256, so n' = 270 + (138+256*s)*256.
-              -- Base sensitivity at n''=270: F=false, H=true (tape size 541, 271 steps).
+              -- Structure (verified by C shrinking-CA, loop75):
+              --   s≡0 mod 2 (n'=35598+131072*t): w=34 witnesses. F=0,H=1 at n'=35598 AND n'=166670.
+              --   s≡1 mod 2 (n'=101134+131072*t): w=40 witnesses. F=1,H=0 at n'=101134.
+              -- Mechanical closure requires period-131072 certs for spike(34), twoSpike(34,22),
+              -- spike(40), twoSpike(40,22) — each needing CA on tape ~262213, ~20h native_decide.
+              -- Also base sensitivity certs: n''=35598 (tape 71199) and n''=101134 (tape 202271).
+              -- ALGEBRAIC PROOF (linearity corridor) is the practical path.
               obtain ⟨s, hls⟩ : ∃ s, l = 2 * s := ⟨l / 2, by omega⟩
-              -- TODO: n'=35598+65536*s needs algebraic (linearity corridor) proof.
-              -- The w=6, n''=270 base sensitivity is FALSE (native_decide confirmed).
-              -- No existing mechanical cert covers this residue class.
               sorry
             · -- l ≡ 1 (odd): l = 2*t+1, so n' = 2830 + 65536*(t+1), use w=32, P=65536
               -- Python (shrinking CA) verified: spike(32) P=65536 PASS, twoSpike(32,22) PASS,
