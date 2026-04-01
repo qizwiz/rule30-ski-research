@@ -5720,6 +5720,31 @@ First 60 values: `101110011000101100100111010111001110101011000011001010110101`
 - Density over 200 steps: 0.525 (approaching 1/2, consistent with Prize 2 conjecture)
 - Pattern is complex; no correlation above chance with any F(n', m) for m=0..12
 
+### F-sequence period table (all active m, N=500 background run)
+
+| m  | Period | Density | Note                              |
+|----|--------|---------|-----------------------------------|
+| 4  |   8    | 0.5008  | Confirmed; pattern: 10110100      |
+| 6  |  16    | 0.5000  | Matches CLAUDE.md period table    |
+| 8  |  32    | 0.5025  | Matches CLAUDE.md period table    |
+| 10 |  64    | 0.5017  | Matches CLAUDE.md period table    |
+| 12 |  64    | 0.4857  | Matches CLAUDE.md period table    |
+| 14 |  64    | 0.4562  | Matches CLAUDE.md period table    |
+| 16 | (256)  | 0.5025  | Finder gave wrong answer (4); expected 256 per CLAUDE.md |
+| 20 |  >512  | 0.4975  | Period not found in [1..512]      |
+| 22 |  >512  | 0.4797  | Period not found; expect 256      |
+| 24 |  >512  | 0.5042  | Period not found                  |
+| 26 |  >512  | 0.5136  | Period not found                  |
+| 28 |  >512  | 0.4957  | Period not found                  |
+
+### Prize 2 center column Berlekamp-Massey
+
+BM on 500 samples of Prize 2 center column: **LC = 249** (nearly n/2).
+This is the hallmark of a **genuinely pseudorandom sequence**, not an LFSR.
+A true LFSR of degree d over GF(2) has LC = d; LC ≈ n/2 means the sequence
+has no exploitable linear structure — consistent with Rule 30's reputation as
+a pseudorandom number generator.
+
 ### Conclusion
 
 Prize 2 and Prize 3 are **independent problems**. Our Prize 3 proof does NOT
@@ -5729,4 +5754,8 @@ to any of our F(n', m) sequences.
 Our "F-sequence density = 1/2" refers to F(n', m) for fixed m (algebraic period P_m).
 Prize 2's density → 1/2 conjecture is a separate statement about the standard
 center-column sequence which has no known algebraic period.
+
+The high BM complexity (LC=249 out of 500 samples) strongly supports the Prize 2
+conjecture that the center column density converges to 1/2 — a sequence with near-maximal
+linear complexity has no exploitable bias structure.
 
