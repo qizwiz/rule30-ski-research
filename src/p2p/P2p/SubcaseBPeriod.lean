@@ -4129,9 +4129,9 @@ private lemma rm_twoSpike_mod4_3_false (n' : Nat) (hn' : 3087 ≤ n') (hmod4 : n
     set k := (n' - 3) / 4 with hk_def
     obtain ⟨hA, _⟩ := h k
     rw [show 4 * (k + 1) = n' + 1 from by omega,
-        show 8 * k = 2 * (n' + 1) - 8 from by omega,
+        show 8 * k + 9 = 2 * (n' + 1) + 1 from by omega,
         show 8 * k + 8 = 2 * (n' + 1) from by omega,
-        show 8 * k + 9 = 2 * (n' + 1) + 1 from by omega] at hA
+        show 8 * k = 2 * (n' + 1) - 8 from by omega] at hA
     exact hA
   intro k
   induction k with
