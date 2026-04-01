@@ -5622,3 +5622,75 @@ could be closed mechanically without going algebraic.
 at n'=35598, NO period P dividing 65536 exists for the (spike(w), twoSpike(w,22)) pair.
 Checked via C program: w=34,36,...,200 — none found. This is the definitive algebraic
 barrier: there is NO mechanical witness that avoids the period-131072 (or larger) cert problem.
+
+## Loop 76 (2026-04-01) — Loop63 claim refuted; m=22 sorry algebraic barrier confirmed
+
+### Refutation of loop63 "w=6, P=256 closes m=22 l≡0 sorry"
+
+Loop63 claimed the sorry at SubcaseBPeriod.lean:2281 (n'=35598+65536*s, m=22) was closed
+using w=6, P=256 with base n''=270. **This claim is FALSE.**
+
+**Verification (Python shrinking-CA)**:
+```
+n''=270, w=6, m=22:
+  F(270, w=6) = True
+  H(270, w=6, m=22) = True
+  sensitive = False  ← NOT a witness
+```
+
+The sorry at line 2281 is still open. The loop63 "proof" would have failed `native_decide`
+for the base sensitivity cert at n''=270.
+
+**Root cause of loop63 error**: The loop63 finding claimed base n''=270 gives F=false, H=true.
+This was wrong — both are True. The arithmetic `270+138*256=35598` is correct, but n''=270
+does not satisfy `spike(6) center ≠ twoSpike(6,22) center`.
+
+### Why n'' ≡ 14 (mod 256) is never sensitive for (w=6, m=22)
+
+The sensitivity sequence for w=6, m=22 contains no n'' ≡ 14 (mod 256):
+- n''=14: F=True, H=True (not sensitive)
+- n''=270: F=True, H=True (not sensitive)
+- n''=526: F=True, H=True (not sensitive)
+- All n''=14+k*256 checked: consistently F=H=True (not sensitive)
+
+Since n'=35598+65536*s has n'≡14 (mod 256), using P=256 with any w that has full-config
+period 256 is impossible for this residue class.
+
+**The first sensitive base cases (w=6, m=22)**: n''∈{24,25,26,27,28,29,32,37,40,42,...}
+None of these are ≡14 (mod 256). The sensitivity orbit of (w=6, m=22) at period 256
+does not include 14.
+
+### Algebraic barrier confirmation
+
+The loop75b exhaustive search was correct: no w in [0,200] with period dividing 65536
+gives sensitivity at n'=35598. This is because:
+- Any w with full-config period P|65536 implies sensitivity is periodic with period P
+- n'=35598≡14 (mod 256)≡270 (mod 512)≡... and none of these residues are sensitive for
+  any (w, m=22) pair we've found
+
+**Minimum witnesses (verified by C shrinking-CA, loop75)**:
+- s≡0 mod 2 (n'=35598+131072*t): w=34 works (F=0, H=1 at n'=35598 and n'=166670)
+- s≡1 mod 2 (n'=101134+131072*t): w=40 works (F=1, H=0 at n'=101134)
+
+Both require period-131072 certs (tape ~262213, 131072 steps ≈ 20h native_decide each).
+
+### Current state of SubcaseBPeriod.lean sorry
+
+**The sorry at line 2281 is a genuine algebraic barrier** requiring either:
+1. Period-131072 native_decide certs (~20h each — currently infeasible)
+2. LFSR/algebraic periodicity proof that spike(34) and twoSpike(34,22) center outputs
+   are periodic with period 131072 (provable from GF(2) polynomial structure)
+3. Linearity corridor proof adapted for fixed-m twoSpike geometry
+
+**Proof-gate state**: 5 obligations (proof-gate check confirmed 2026-04-01)
+- SubcaseBPeriod.lean:1003 — axiom subcaseB_m4_ge3087
+- SubcaseBPeriod.lean:2281 — sorry (m=22 n'=35598+65536*s)
+- SubcaseBPeriod.lean:4757 — axiom subcaseB_resolution_ge3087
+- CA_Array.lean:41 — axiom subcaseB_m28_residue_3class_proved
+- CA_Array.lean:49 — axiom subcaseB_m30_residue_unique_proved
+
+### Active builds (2026-04-01 04:00 AM)
+
+- SubcaseBPeriod.lean: running ~2h (PID 46131), no olean yet
+- CA_Array_residues.lean: running ~1h (PID 90884), no olean yet
+

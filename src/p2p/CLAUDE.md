@@ -56,7 +56,7 @@ subcaseB_resolution_ge3087  (master, needs ALL below)
 ├── subcaseB_m14_ge3087_proved       ✓ proved
 ├── subcaseB_m16_ge3087_proved       ✓ proved
 ├── subcaseB_m20_ge3087_proved       ✓ proved
-├── subcaseB_m22_ge3087_proved       ✓ proved (loop63: w=6, P=256 covers all cases)
+├── subcaseB_m22_ge3087_proved       ← SORRY (line 2281: n'=35598+65536*s algebraic barrier; loop63 claim was WRONG)
 ├── subcaseB_m24_ge3087_proved       ✓ proved
 ├── subcaseB_m26_ge3087_proved       ✓ proved
 ├── subcaseB_m28_ge3087_proved       ✓ proved (via CA_Array.lean native_decide)
@@ -70,9 +70,11 @@ Once done: remove 2 axioms from CA_Array.lean, import CA_Array_residues there.
 
 ## RANKED TASK LIST
 
-### Priority 1: ✓ m=22 CLOSED (loop63)
-- Both l≡0 and l≡1 cases proved: w=6, P=256 covers all SubcaseB firings for m=22.
-  (Earlier analysis of l≡0 being harder was a red herring — w=6 handles everything.)
+### Priority 1: m=22 SORRY OPEN (loop63 claim was WRONG)
+- l≡1 case proved (w=32, P=65536). l≡0 case (n'=35598+65536*s) still sorry'd.
+- loop63 claimed w=6, P=256 works — REFUTED by loop76. n''=270 is NOT sensitive for (w=6,m=22).
+- True witnesses: w=34 for s≡0 mod 2, w=40 for s≡1 mod 2. Both need period-131072 certs (~20h).
+- **ONLY PATH**: algebraic/LFSR proof that these center-output sequences have period 131072.
 
 ### Priority 1: Prove m=4 SubcaseB (axiom removal) — PARTIALLY ALGEBRAIC
 - Location: `SubcaseBPeriod.lean` line 981, `axiom subcaseB_m4_ge3087`
