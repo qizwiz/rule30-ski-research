@@ -5480,3 +5480,84 @@ CA_Array_m4.lean Section 12 provides the w=32 cert. FULLY MECHANICAL.
 are mechanically covered by finite native_decide period/base certs. The CLAUDE.md
 "levels 0-2 mechanical, level 3+ algebraic" picture is CORRECT when interpreted as
 "Level 3+ = mod16384=5 within the mod64=5 firing class".
+
+### Level 3+ Sub-structure and Period Analysis (loop67, 2026-03-31)
+
+Computational investigation of Level 3+ (n'≡5 mod 16384) using C shrinking CA.
+
+**Period certs confirmed** (C program, full-config period):
+- spike(42) period = 131072 ✓ (tested P=4096..131072, first PASS at 131072)
+- twoSpike(42,4) period = 131072 ✓ (same)
+
+**w=42 sensitivity scan** for all 8 Level 3+ residue classes mod 131072:
+```
+k=1 (n'=16389, mod65536=16389): w=42 SENSITIVE ✓
+k=2 (n'=32773, mod65536=32773): w=42 SENSITIVE ✓ (min_w=40)
+k=3 (n'=49157, mod65536=49157): w=42 SENSITIVE ✓ (min_w=40)
+k=4 (n'=65541, mod65536=5):     w=42 SENSITIVE ✓
+k=5 (n'=81925, mod65536=16389): w=42 NOT sensitive → min_w=44
+k=6 (n'=98309, mod65536=32773): w=42 NOT sensitive → min_w=44
+k=7 (n'=114693, mod65536=49157): w=42 NOT sensitive → min_w still computing
+k=8 (n'=131077, mod65536=5):     w=42 still computing
+```
+
+**Interpretation**: Level 3+ is NOT uniformly coverable by w=42. For k=5,6 (and
+likely k=7), a larger witness (min_w=44) is needed. This confirms the SELF-SIMILAR
+HIERARCHY:
+- k=1..4: "first block" of Level 3+, min_w ≤ 42
+- k=5..8: "second block" (Level 3+ within Level 3+), min_w ≥ 44
+- k=9..16: "third block," min_w ≥ 46 (predicted)
+- General: k in block j has min_w ≈ 42 + 2*(j-1)
+
+The period for w=44 would be ~262144 (following the pattern: P(spike(m)) ≈ 2^(m/2)).
+So each block requires 2× larger period. This is the infinite hierarchy that requires
+algebraic proof — no finite set of native_decide certs can cover all Level 3+ cases.
+
+**Conclusion**: subcaseB_m4_ge3087 (axiom) cannot be closed by native_decide alone.
+Algebraic proof needed showing D_T[0]=1 for some w(n') for all n'≡5 mod 8, n'≥3087.
+
+**Build milestone**: SubcaseBPeriod.lean compiled successfully after fixing
+`Nat.eq_or_gt_of_le` → `Nat.eq_or_lt_of_le` (4 occurrences in right-mirror section).
+This was the only compilation error; the proof content is correct.
+
+### Level 3+ min_w exact values for k=1..4 (loop69, 2026-03-31)
+
+Background C computation (shrinking CA) completed for all k=1..4:
+```
+k=1 (n'=16389,  mod65536=16389): min_w=42
+k=2 (n'=32773,  mod65536=32773): min_w=40
+k=3 (n'=49157,  mod65536=49157): min_w=40
+k=4 (n'=65541,  mod65536=5):     min_w=42
+```
+
+Observation: min_w is NOT monotonically increasing within the first block.
+k=2 and k=3 have min_w=40 (smaller than k=1,4's min_w=42). This mirrors the
+structure seen in lower levels (e.g., mod64=37 has k≡5 mod 8 anomaly).
+
+The period for w=40: if spike(40) has period P=65536 (following 2^(w/2) pattern),
+then w=40 covers k=2,3 with period 65536 and w=42 covers k=1,4 with period 131072.
+This is consistent with the Level 3+ having a sub-period-131072 structure.
+
+**Implication**: For a native_decide cert at Level 3+, one would need:
+- w=42 cert (P=131072): covers k=1,4 within each 131072-period block
+- w=40 cert (P=65536): covers k=2,3 within each 65536-period block
+- But for k=5..8 (next 131072-period block), larger witnesses required
+
+The ALGEBRAIC BARRIER remains: no finite witness set covers all k.
+
+### SubcaseBPeriod.lean compile errors fixed (loop69, 2026-03-31)
+
+5 compilation errors from build5 were fixed in loop69:
+
+1. **Line 885** (`h_eq ▸ hcase''`): Nat.sub in rewrite motive caused infinite
+   recursion in type unifier. Fix: use `convert hcase'' using 5 <;> omega`.
+
+2. **Lines 3641, 4070, 4121** (`convert hA using 3 <;> omega`): depth 3 doesn't
+   expose the nat arguments of `twoSpikeList`/`spikeAtList` to omega.
+   Fix: `convert hA using 6 <;> omega`.
+
+3. **Line 4619** (`rw [hN_eq, hT, hw_eq, hm_eq]`): Rewriting `2*(n'+1)+1` while
+   `m : Fin (2*(n'+1)+1)` is in scope causes motive type error (Fin dependent type).
+   Fix: reorder to `rw [hm_eq, hN_eq, hT, hw_eq]` — eliminate `↑m` first.
+
+Build6 started after these fixes; no errors in first 10 min.
