@@ -3641,8 +3641,8 @@ private lemma rm_twoSpike_mod4_2 (n' : Nat) (hn' : 6 ≤ n') (hmod4 : n' % 4 = 2
     set k := (n' - 2) / 4 with hk_def
     obtain ⟨hA, _⟩ := h k hjge
     rw [show n' + 1 = 4 * k + 3 from by omega,
-        show 2 * (n' + 1) - 8 = 8 * k - 2 from by omega,
-        show 2 * (n' + 1) + 1 = 8 * k + 7 from by omega]
+        show 2 * (4 * k + 3) - 8 = 8 * k - 2 from by omega,
+        show 2 * (4 * k + 3) + 1 = 8 * k + 7 from by omega]
     exact hA
   intro j hj
   induction j with
@@ -4074,8 +4074,8 @@ private lemma rm_spike_mod4_0_true (n' : Nat) (hn' : 3087 ≤ n') (hmod4 : n' % 
     set k := n' / 4 with hk_def
     obtain ⟨hA, _⟩ := h k hkge
     rw [show n' + 1 = 4 * k + 1 from by omega,
-        show 2 * (n' + 1) - 8 = 8 * k - 6 from by omega,
-        show 2 * (n' + 1) + 1 = 8 * k + 3 from by omega]
+        show 2 * (4 * k + 1) - 8 = 8 * k - 6 from by omega,
+        show 2 * (4 * k + 1) + 1 = 8 * k + 3 from by omega]
     exact hA
   intro k hk
   induction k with
@@ -4129,9 +4129,9 @@ private lemma rm_twoSpike_mod4_3_false (n' : Nat) (hn' : 3087 ≤ n') (hmod4 : n
     set k := (n' - 3) / 4 with hk_def
     obtain ⟨hA, _⟩ := h k
     rw [show 4 * (k + 1) = n' + 1 from by omega,
-        show 8 * k = 2 * (n' + 1) - 8 - 3 from by omega,
-        show 8 * k + 8 = 2 * (n' + 1) - 3 from by omega,
-        show 8 * k + 9 = 2 * (n' + 1) - 2 from by omega] at hA
+        show 8 * k = 2 * (n' + 1) - 8 from by omega,
+        show 8 * k + 8 = 2 * (n' + 1) from by omega,
+        show 8 * k + 9 = 2 * (n' + 1) + 1 from by omega] at hA
     exact hA
   intro k
   induction k with
@@ -4635,7 +4635,8 @@ private lemma rm_mod4_1_witness (n' : Nat) (hn' : 3087 ≤ n') (hmod4 : n' % 4 =
     -- = caEvolve(4k-10)(caEvolve 12 (twoSpike(8k-8, 8k-4, 8k+5)))  [caEvolve_add: 4k+2 = (4k-10)+12]
     -- = caEvolve(4k-10)(ts5E(8k-19))                                [twoSpike_to_ts5E at M=8k+5]
     -- = False                                                         [rm_ts5E_false]
-    rw [show 4 * k + 2 = (4 * k - 10) + 12 from by omega, caEvolve_add]
+    rw [show 4 * k + 2 = (4 * k - 10) + 12 from by omega, caEvolve_add,
+        show 2 * (4 * k - 10 + 12) + 1 = 8 * k + 5 from by omega]
     suffices heq : caEvolve 12 (twoSpikeList (8 * k - 8) (8 * k - 4) (8 * k + 5)) = ts5EList (8 * k - 19) by
       rw [heq]; exact rm_ts5E_false k hk_ge
     have := rm_twoSpike_to_ts5E_all (8 * k + 5) (by omega)
