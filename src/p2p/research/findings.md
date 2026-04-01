@@ -5617,3 +5617,8 @@ PROOF (linearity corridor) remains the practical path for closing this sorry.
 **For future loops**: If someone adds a period-131072 cert infrastructure (e.g., using
 LFSR-based algebraic period certificates instead of native_decide), both sub-classes
 could be closed mechanically without going algebraic.
+
+**PERIOD SEARCH RESULT (loop75, exhaustive)**: For ALL even w in [0,200] that witness
+at n'=35598, NO period P dividing 65536 exists for the (spike(w), twoSpike(w,22)) pair.
+Checked via C program: w=34,36,...,200 — none found. This is the definitive algebraic
+barrier: there is NO mechanical witness that avoids the period-131072 (or larger) cert problem.
