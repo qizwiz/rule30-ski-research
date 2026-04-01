@@ -881,9 +881,8 @@ lemma subcaseB_m4_unique_in_period (n'' : Nat) (hn''_lo : 3087 ≤ n'') (hn''_hi
       (caEvolve (3087 + j.val + 1) (twoSpikeLastList 4 (2*(3087+j.val+1)+1))).getD 0 false = true →
       3087 + j.val = 3093 := by native_decide
   have hj_bound : n'' - 3087 < 8 := by omega
-  have hj_eq := h ⟨n'' - 3087, hj_bound⟩
-    (by convert hcase'' using 2 <;> omega)
-    (by convert hts'' using 2 <;> omega)
+  have h_eq : 3087 + (n'' - 3087) = n'' := Nat.add_sub_cancel' (by omega)
+  have hj_eq := h ⟨n'' - 3087, hj_bound⟩ (h_eq ▸ hcase'') (h_eq ▸ hts'')
   omega
 
 -- Base sensitivity cert for m=4, w=6 at n'=3101 (≡29 mod 64): verified correct
@@ -2039,74 +2038,6 @@ set_option maxHeartbeats 4000000000 in
 lemma caEvolve_cert_ts1222_p2048 :
     caEvolve 2048 (twoSpikeList 12 22 4141) = twoSpikeList 12 22 45 := by native_decide
 
--- spike(18) period-4096 cert: N_in=2*4096+2*18+1=8229, N_out=37
--- (proved via Array Bool in CA_Array.lean to avoid OOM)
-lemma caEvolve_cert_spike18_p4096 :
-    caEvolve 4096 (spikeAtList 18 8229) = spikeAtList 18 37 :=
-  CA_Array.caEvolve_cert_spike18_p4096
-
--- twoSpike(18,22) period-4096 cert: max(18,22)=22, N_in=2*4096+2*22+1=8237, N_out=45
--- (proved via Array Bool in CA_Array.lean to avoid OOM)
-lemma caEvolve_cert_ts1822_p4096 :
-    caEvolve 4096 (twoSpikeList 18 22 8237) = twoSpikeList 18 22 45 :=
-  CA_Array.caEvolve_cert_ts1822_p4096
-
--- spike(5) period-4096 cert: N_in=2*4096+2*5+1=8203, N_out=11
--- (proved via Array Bool in CA_Array.lean to avoid OOM)
-lemma caEvolve_cert_spike5_p4096 :
-    caEvolve 4096 (spikeAtList 5 8203) = spikeAtList 5 11 :=
-  CA_Array.caEvolve_cert_spike5_p4096
-
--- twoSpike(5,22) period-4096 cert: max(5,22)=22, N_in=2*4096+2*22+1=8237, N_out=45
--- (proved via Array Bool in CA_Array.lean to avoid OOM)
-lemma caEvolve_cert_ts522_p4096 :
-    caEvolve 4096 (twoSpikeList 5 22 8237) = twoSpikeList 5 22 45 :=
-  CA_Array.caEvolve_cert_ts522_p4096
-
--- spike(28) period-16384 cert: N_in=2*16384+2*28+1=32825, N_out=57
--- (proved via Array Bool in CA_Array.lean to avoid OOM)
-lemma caEvolve_cert_spike28_p16384 :
-    caEvolve 16384 (spikeAtList 28 32825) = spikeAtList 28 57 :=
-  CA_Array.caEvolve_cert_spike28_p16384
-
--- twoSpike(28,22) period-16384 cert: max(28,22)=28, N_in=32825, N_out=57
--- (proved via Array Bool in CA_Array.lean to avoid OOM)
-lemma caEvolve_cert_ts2822_p16384 :
-    caEvolve 16384 (twoSpikeList 28 22 32825) = twoSpikeList 28 22 57 :=
-  CA_Array.caEvolve_cert_ts2822_p16384
-
--- spike(26) period-16384 cert: N_in=2*16384+2*26+1=32821, N_out=53
--- (proved via Array Bool in CA_Array.lean to avoid OOM)
-lemma caEvolve_cert_spike26_p16384 :
-    caEvolve 16384 (spikeAtList 26 32821) = spikeAtList 26 53 :=
-  CA_Array.caEvolve_cert_spike26_p16384
-
--- twoSpike(26,22) period-16384 cert: max(26,22)=26, N_in=32821, N_out=53
--- (proved via Array Bool in CA_Array.lean to avoid OOM)
-lemma caEvolve_cert_ts2622_p16384 :
-    caEvolve 16384 (twoSpikeList 26 22 32821) = twoSpikeList 26 22 53 :=
-  CA_Array.caEvolve_cert_ts2622_p16384
-
--- Base sensitivity: w=28 at n''=6926 (step=6927, tape=13855)
--- (proved via Array Bool in CA_Array.lean to avoid OOM)
-lemma subcaseB_m22_base_sens_6926_w28 :
-    (caEvolve 6927 (spikeAtList 28 13855)).getD 0 false ≠
-    (caEvolve 6927 (twoSpikeList 28 22 13855)).getD 0 false :=
-  CA_Array.subcaseB_m22_base_sens_6926_w28
-
--- Base sensitivity: w=26 at n''=11022 (step=11023, tape=22047)
--- (proved via Array Bool in CA_Array.lean to avoid OOM)
-lemma subcaseB_m22_base_sens_11022_w26 :
-    (caEvolve 11023 (spikeAtList 26 22047)).getD 0 false ≠
-    (caEvolve 11023 (twoSpikeList 26 22 22047)).getD 0 false :=
-  CA_Array.subcaseB_m22_base_sens_11022_w26
-
--- Base sensitivity: w=26 at n''=15118 (step=15119, tape=30239)
--- (proved via Array Bool in CA_Array.lean to avoid OOM)
-lemma subcaseB_m22_base_sens_15118_w26 :
-    (caEvolve 15119 (spikeAtList 26 30239)).getD 0 false ≠
-    (caEvolve 15119 (twoSpikeList 26 22 30239)).getD 0 false :=
-  CA_Array.subcaseB_m22_base_sens_15118_w26
 
 -- Base sensitivity proofs for m=22 (subcaseB_m22_base_sens_6926/3342/3598/4110/3854/782)
 -- moved to SubcaseB_BaseSens.lean to avoid OOM during C code generation in this file
@@ -2342,20 +2273,10 @@ theorem subcaseB_m22_ge3087_proved (n' : Nat) (hn' : 3087 ≤ n')
               -- 35598 = 270 + 138*256, and 65536 = 256*256, so n' = 270 + (138+256*s)*256.
               -- Base sensitivity at n''=270: F=false, H=true (tape size 541, 271 steps).
               obtain ⟨s, hls⟩ : ∃ s, l = 2 * s := ⟨l / 2, by omega⟩
-              use spikeConfig 6 n'
-              refine ⟨spikeConfig_odd_false 6 (by decide) n', ?_⟩
-              rw [rule30n_spikeConfig_eq 6 n', rule30n_flipCell_spikeConfig_eq' 6 n' m (by omega) (by omega)]
-              simp only [hm22]
-              have h_F : caEvolve 256 (spikeAtList 6 (2*256+2*6+1)) = spikeAtList 6 (2*6+1) := by
-                native_decide
-              have h_H : caEvolve 256 (twoSpikeList 6 22 (2*256+2*(max 6 22)+1)) =
-                         twoSpikeList 6 22 (2*(max 6 22)+1) := by
-                have : max 6 22 = 22 := by decide
-                rw [this]; native_decide
-              have h_base : (caEvolve 271 (spikeAtList 6 541)).getD 0 false ≠
-                            (caEvolve 271 (twoSpikeList 6 22 541)).getD 0 false := by native_decide
-              rw [show n'+1 = 270+1+(138+256*s)*256 from by omega]
-              exact sensitivity_transfer 6 22 256 270 (138+256*s) (by omega) h_F h_H h_base
+              -- TODO: n'=35598+65536*s needs algebraic (linearity corridor) proof.
+              -- The w=6, n''=270 base sensitivity is FALSE (native_decide confirmed).
+              -- No existing mechanical cert covers this residue class.
+              sorry
             · -- l ≡ 1 (odd): l = 2*t+1, so n' = 2830 + 65536*(t+1), use w=32, P=65536
               -- Python (shrinking CA) verified: spike(32) P=65536 PASS, twoSpike(32,22) PASS,
               -- base sensitivity n''=2830 w=32: F=false≠H=true ✓
@@ -3458,7 +3379,7 @@ private lemma twoSpike_to_RC_all (j : Nat) (hj : 1 ≤ j) :
                 · omega  -- i+r ≤ 10, can't equal 14
             · push_neg at hir2
               simp only [List.getD_eq_getElem?_getD, twoSpikeList, List.getElem?_ofFn]
-              simp [show ¬(i + r < 23) from hir2]
+              simp [Nat.not_lt.mpr hir2]
               -- but i+r ≤ 10 < 23, contradiction
               omega
           · push_neg at hir
@@ -3722,7 +3643,7 @@ private lemma rm_twoSpike_mod4_2 (n' : Nat) (hn' : 6 ≤ n') (hmod4 : n' % 4 = 2
   induction j with
   | zero => omega
   | succ j ih =>
-    cases Nat.eq_or_gt_of_le hj with
+    cases Nat.eq_or_lt_of_le hj with
     | inl h =>
       -- j+1 = 1, so j = 0 — base case
       have hj0 : j = 0 := by omega
@@ -4151,7 +4072,7 @@ private lemma rm_spike_mod4_0_true (n' : Nat) (hn' : 3087 ≤ n') (hmod4 : n' % 
   induction k with
   | zero => omega
   | succ k ih =>
-    cases Nat.eq_or_gt_of_le hk with
+    cases Nat.eq_or_lt_of_le hk with
     | inl h =>
       have hk0 : k = 0 := by omega
       subst hk0
@@ -4582,7 +4503,7 @@ private lemma rm_ts5C_true (k : Nat) (hk : k ≥ 3) :
   induction j with
   | zero => omega
   | succ j ih =>
-    cases Nat.eq_or_gt_of_le hj with
+    cases Nat.eq_or_lt_of_le hj with
     | inl h =>
       -- j+1 = 3, so j = 2: base cases C(3) and C(4)
       have hj2 : j = 2 := by omega
@@ -4624,7 +4545,7 @@ private lemma rm_ts5E_false (k : Nat) (hk : k ≥ 3) :
   induction j with
   | zero => omega
   | succ j ih =>
-    cases Nat.eq_or_gt_of_le hj with
+    cases Nat.eq_or_lt_of_le hj with
     | inl h =>
       -- j+1 = 3, so j = 2: base cases G(3) and G(4)
       have hj2 : j = 2 := by omega
@@ -4734,10 +4655,11 @@ theorem subcaseB_right_mirror_ge3087 (n' : Nat) (hn' : 3087 ≤ n')
       have hspike_true : (caEvolve (n' + 1) (spikeAtList (2 * (n' + 1) - 8) (2 * (n' + 1) + 1))).getD 0 false = true :=
         rm_spike_mod4_0_true n' hn' hmod4
       have hcase_val : (caEvolve (n' + 1) (spikeAtList (m.val) (2 * (n' + 1) + 1))).getD 0 false = false := by
-        have := hcase
-        rw [rule30n_spikeConfig_eq] at this
-        simp only [spikeConfig, configToList] at this
-        simpa [spikeAtList] using this
+        have h_eq := (rule30n_spikeConfig_eq m.val n').symm
+        simp only [spikeConfig] at h_eq
+        -- h_eq : (caEvolve ...).getD 0 false = rule30n (n'+1) (fun k => decide (k.val = m.val))
+        rw [h_eq]
+        exact hcase
       rw [hm_rm] at hcase_val
       rw [hspike_true] at hcase_val
       exact absurd hcase_val (by decide)
