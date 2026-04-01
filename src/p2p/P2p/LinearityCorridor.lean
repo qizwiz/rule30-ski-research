@@ -73,6 +73,8 @@ lemma hcone_left_edge (n' : Nat) (hn' : 2 ≤ n') :
   have hge : (spikeAtList (2*(n'+1)) (2*(n'+1)+1)).length ≥ 2 * n' := by omega
   have hlen_result : (caEvolve n' (spikeAtList (2*(n'+1)) (2*(n'+1)+1))).length = 3 := by
     rw [caEvolve_length_le n' _ hge, hlen_init]; omega
-  simp [List.getD_eq_getElem?_getD, List.getElem?_eq_none (by omega)]
+  rw [List.getD_eq_getElem?_getD]
+  rw [List.getElem?_eq_none (by omega)]
+  rfl
 
 end P2p
