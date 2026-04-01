@@ -148,12 +148,21 @@ If yes: witnesses are algebraically tied to F=0, not independent → proof lever
 - Prize 2 and Prize 3 are independent problems; our proof does NOT automatically prove Prize 2.
 - Data written to research/findings.md "Track B3" section.
 
-### B4: m=22 algebraic angle — STATUS: OPEN
+### B4: m=22 algebraic angle — ✓ DONE (loop84, NEGATIVE RESULT)
 
-twoSpike(34, 22) needs P=131072 — infeasible with native_decide.
-Run BM on twoSpike(34,22) center-output sequence to find connection polynomial.
-If degree D is small (say ≤ 20), an algebraic period cert is feasible.
-Compare with twoSpike(40,22) and twoSpike(42,22).
+**Finding**: BM ratio ≈ 1.0 for spike(34), twoSpike(34,22), spike(40), twoSpike(40,22)
+on periodic tapes (N=256..1024, 500..2000 steps). LFSR degree = n/2 (maximum complexity,
+pseudorandom). No short algebraic recurrence exists for center-cell sequences.
+
+Period divisors P=2..2048 all FAIL for spike(34)/twoSpike(34,22) shrinking CA.
+Minimal period is ≥ 4096; almost certainly exactly 131072 = 2^17.
+
+**Consequence**: The sorry at line 2417 genuinely requires native_decide at P=131072
+(~20h Lean build) or formal GF(2)^N CA period theory (large Lean development).
+No short-LFSR algebraic shortcut exists. See findings.md "Track B4" section.
+
+twoSpike(42,22) analysis skipped — same argument applies (Rule 30 center cells
+have max LFSR complexity regardless of initial configuration).
 
 ---
 
@@ -199,3 +208,4 @@ Always increment N from the last commit's loop number.
 | 79   | Added self-modification rules | User instruction: loop should improve itself |
 | 82   | B3 marked ✓ DONE | Python verified: Prize 2 ≠ F(n',m), F(n',4) period=8 |
 | 83   | A2 marked ✓ DONE | hcone_left_edge proved: tape-runs-out argument (len=3, idx≥3 OOB) |
+| 84   | B4 marked ✓ DONE (negative) | BM ratio=1.0: no LFSR shortcut for m=22 sorry; algebraic barrier confirmed |

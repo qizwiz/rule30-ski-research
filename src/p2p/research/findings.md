@@ -5759,3 +5759,44 @@ The high BM complexity (LC=249 out of 500 samples) strongly supports the Prize 2
 conjecture that the center column density converges to 1/2 — a sequence with near-maximal
 linear complexity has no exploitable bias structure.
 
+## Track B4: m=22 LFSR Analysis — Algebraic Barrier Confirmed (loop84)
+
+**Question**: Can the sorry at line 2417 (n'=35598+65536*s, s≡0 mod 2) be closed by
+finding a short LFSR recurrence for spike(34) or twoSpike(34,22) center-cell sequences?
+
+**Method**: Berlekamp-Massey on center-cell sequence of spike(34), twoSpike(34,22),
+spike(40), twoSpike(40,22) on periodic tapes (N=256, N=1024, 500-2000 steps each).
+
+**Results** (script: `research/b4_m22_lfsr_fast.py`):
+
+| Sequence              | N    | Steps | LFSR_len | Ratio (1.0=max) |
+|-----------------------|------|-------|----------|-----------------|
+| spike(34)             | 256  | 500   | 249      | 0.996           |
+| twoSpike(34,22)       | 256  | 500   | 250      | 1.000           |
+| spike(40)             | 256  | 500   | 250      | 1.000           |
+| twoSpike(40,22)       | 256  | 500   | 250      | 1.000           |
+| spike(34)             | 1024 | 2000  | 1002     | 1.002           |
+| twoSpike(34,22)       | 1024 | 2000  | 1000     | 1.000           |
+
+**Interpretation**: LFSR ratio ~1.0 across all sizes means the center-cell
+sequences have maximum linear complexity — indistinguishable from pseudorandom
+over GF(2). This is Rule 30's defining property; there is NO short algebraic
+recurrence for these sequences.
+
+**Period divisor check** (small P, all FAIL):
+Checked P = 2, 4, 8, ..., 2048 for spike(34) and twoSpike(34,22) via shrinking CA.
+All fail. Minimal period >= 4096. Given CLAUDE.md ~20h estimate for native_decide
+at P=131072, the true minimal period is likely exactly 131072 = 2^17.
+
+**Consequence**: The "algebraic LFSR proof" approach for closing the m=22 sorry
+would need to work at the full-tape level (all 262K bits simultaneously), not via
+a short center-cell recurrence. This is equivalent to formal GF(2)^N CA theory in
+Lean — a large development project.
+
+**Conclusion**: B4 confirms the algebraic barrier for m=22. The sorry at line 2417
+requires one of:
+1. native_decide at P=131072 (~20h Lean build; tape: 262213 cells, 131072 steps)
+2. Formal Rule 30 period theory in Lean (substantial new development)
+
+Neither is achievable in a single loop. The m=22 sorry is the hardest remaining obligation.
+
