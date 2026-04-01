@@ -5826,4 +5826,5 @@ checking P=2..8192 (all FAIL) via shrinking CA.
 - Loop76 refutation "n'=270 not sensitive" was wrong; the correct reason is period cert failure
 - The m=22 sorry requires w ≥ m=22; valid witnesses have w=34 (s≡0) or w=40 (s≡1)
 - Period cert for w≥m: target=just primary spike (secondary fully out of range) → cert is structurally sound
+- w=6 witnesses at only ~60% of n' ≡ 14 mod 256 positions (H alternates, no period); F=0 always
 
