@@ -5800,3 +5800,30 @@ requires one of:
 
 Neither is achievable in a single loop. The m=22 sorry is the hardest remaining obligation.
 
+### Addendum: Why loop63 was wrong — structural cert impossibility (loop85)
+
+Loop63 claimed: w=6, P=256 closes the m=22 l≡0 sorry. This was refuted by loop76
+which claimed "n'=270 is NOT sensitive for (w=6,m=22)". Python verification (loop85)
+shows loop76's sensitivity claim was ALSO WRONG:
+
+**n'=270, w=6, m=22: F=0, H=1 — IS sensitive.**
+
+The TRUE reason loop63 was wrong is the **twoSpike period cert**:
+
+For w=6, m=22 (w < m): max(w,m)=22, target size = 2*22+1=45.
+Secondary spike offset = 2*6+22=34; spike at positions [35..46].
+But tape size=45, so positions 45..46 are out of range → TRUNCATED to [35..44].
+
+The period cert requires: caEvolve P (full twoSpike) = twoSpikeList 6 22 45.
+But twoSpikeList 6 22 45 has a TRUNCATED secondary spike (10 cells instead of 12).
+This is a structurally inconsistent target: the initial tape has 12-cell secondary,
+the target has 10-cell. No Rule 30 period evolution can satisfy this — confirmed by
+checking P=2..8192 (all FAIL) via shrinking CA.
+
+**Corrected picture**:
+- w=6 base sensitivity: HOLDS at n'=270 (and likely at most n' ≡ 14 mod 256)
+- w=6 twoSpike(6,22) period cert: IMPOSSIBLE for any P (structural truncation)
+- Loop76 refutation "n'=270 not sensitive" was wrong; the correct reason is period cert failure
+- The m=22 sorry requires w ≥ m=22; valid witnesses have w=34 (s≡0) or w=40 (s≡1)
+- Period cert for w≥m: target=just primary spike (secondary fully out of range) → cert is structurally sound
+
