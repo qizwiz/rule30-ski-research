@@ -876,19 +876,15 @@ lemma subcaseB_m4_unique_in_period (n'' : Nat) (hn''_lo : 3087 ≤ n'') (hn''_hi
     (hcase'' : (caEvolve (n''+1) (spikeAtList 4 (2*(n''+1)+1))).getD 0 false = false)
     (hts'' : (caEvolve (n''+1) (twoSpikeLastList 4 (2*(n''+1)+1))).getD 0 false = true) :
     n'' = 3093 := by
-  have h : ∀ j : Fin 8,
-      (caEvolve (3087 + j.val + 1) (spikeAtList 4 (2*(3087+j.val+1)+1))).getD 0 false = false →
-      (caEvolve (3087 + j.val + 1) (twoSpikeLastList 4 (2*(3087+j.val+1)+1))).getD 0 false = true →
-      3087 + j.val = 3093 := by
+  -- Reformulate with Nat membership to avoid Fin type coercion and maxRecDepth issues
+  have h : ∀ n : Nat, n ∈ ([3087,3088,3089,3090,3091,3092,3093,3094] : List Nat) →
+      (caEvolve (n+1) (spikeAtList 4 (2*(n+1)+1))).getD 0 false = false →
+      (caEvolve (n+1) (twoSpikeLastList 4 (2*(n+1)+1))).getD 0 false = true →
+      n = 3093 := by
     set_option maxRecDepth 4096 in native_decide
-  have hj_bound : n'' - 3087 < 8 := by omega
-  have hN_eq : 3087 + (n'' - 3087) = n'' := by omega
-  have hcase_c : (caEvolve (3087 + (n'' - 3087) + 1) (spikeAtList 4 (2 * (3087 + (n'' - 3087) + 1) + 1))).getD 0 false = false := by
-    rw [hN_eq]; exact hcase''
-  have hts_c : (caEvolve (3087 + (n'' - 3087) + 1) (twoSpikeLastList 4 (2 * (3087 + (n'' - 3087) + 1) + 1))).getD 0 false = true := by
-    rw [hN_eq]; exact hts''
-  have hj_eq := h ⟨n'' - 3087, hj_bound⟩ hcase_c hts_c
-  omega
+  have hn''_mem : n'' ∈ ([3087,3088,3089,3090,3091,3092,3093,3094] : List Nat) := by
+    simp [List.mem_cons]; omega
+  exact h n'' hn''_mem hcase'' hts''
 
 -- Base sensitivity cert for m=4, w=6 at n'=3101 (≡29 mod 64): verified correct
 -- NOTE: uses twoSpikeList 4 6 (m_val first); use twoSpikeList_comm to convert for sensitivity_transfer
