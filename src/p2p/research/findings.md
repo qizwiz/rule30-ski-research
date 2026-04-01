@@ -4771,6 +4771,20 @@ The P=4096 analysis above is INCORRECT. The Python script that verified P=4096 w
   (n'=101134+131072*t) has no single w covering all t — w=52 fails at t=3.
   ODD-s sub-class requires linearity corridor.
 
+**Loop72 verification (2026-04-01):**
+- Re-confirmed via Python (shrinking CA): SubcaseB fires at n'=35598 (F_22=0, H_last=1)
+- Re-confirmed: min witness at n'=35598 is w=34; witnesses = {34,40,44,48,56} in w≤60
+- Re-confirmed: twoSpike(34,22) P=131072 PASS; P=8192,16384,32768,65536 all FAIL
+- Re-confirmed: twoSpike(40,44,48,56, 22) — none have periods dividing 65536
+- Script: research/m22_35598_witness.py
+
+**Proof path for l≡0:**
+The sorry at SubcaseBPeriod.lean:2280 (n'=35598+65536s) is NOT closable mechanically.
+All witnesses w∈{34,40,44,48,56} have twoSpike(w,22) period = 131072 or larger, which
+does not divide 65536. Requires algebraic proof (linearity corridor or LFSR argument).
+Alternatively: extract n'≡35598 mod 131072 for an algebraic sub-case and further split
+odd multiples recursively — but this creates an infinite regress identical to m=4 Level 3+.
+
 **File split architecture (2026-03-31):**
 - CA_ArrayDef.lean: pre-compiles definitions (built in 10s)
 - CA_Array.lean: Sections 5-11 with native_decide; Section 11 has P=65536 certs for w=32
