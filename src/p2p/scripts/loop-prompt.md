@@ -93,11 +93,12 @@ lemma nl_zero_when_both_zero (a' b' : Bool) :
 ```
 Pure truth-table. Try it with the probe tool first, then add to SubcaseBPeriod.lean.
 
-### A2: hcone_left_edge — STATUS: OPEN
+### A2: hcone_left_edge — ✓ DONE (loop83)
 
-Spike at `2*(n'+1)` after `n'` steps can't reach position `n'+1` (causality).
-Check CausalConeLemmas.lean for an existing zero-outside-cone lemma first.
-May follow directly from `causal_cone_zero` or similar.
+Proved in LinearityCorridor.lean. Key insight: after n' steps the tape
+(length 2*(n'+1)+1 = 2n'+3) has length exactly 3, so index n'+1 ≥ 3 is
+out of bounds → getD returns false. Uses caEvolve_length_le + omega.
+Holds for n' ≥ 2 (fails for n' = 1 which gives T=true).
 
 ### A3: f_center_prev_zero — STATUS: OPEN (hard, needs adaptation for fixed m)
 
@@ -197,3 +198,4 @@ Always increment N from the last commit's loop number.
 | 79   | Created Track A + Track B structure | Session: corridor + exploration both needed |
 | 79   | Added self-modification rules | User instruction: loop should improve itself |
 | 82   | B3 marked ✓ DONE | Python verified: Prize 2 ≠ F(n',m), F(n',4) period=8 |
+| 83   | A2 marked ✓ DONE | hcone_left_edge proved: tape-runs-out argument (len=3, idx≥3 OOB) |

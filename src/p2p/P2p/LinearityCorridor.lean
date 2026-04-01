@@ -54,4 +54,25 @@ lemma nl_zero_when_both_zero (a' b' : Bool) :
     (false || false) ^^ (a' || b') ^^ ((false ^^ a') || (false ^^ b')) = false := by
   cases a' <;> cases b' <;> decide
 
+/-!
+## Lemma 2: hcone_left_edge
+
+After n' steps from an H-spike at position 2*(n'+1) in a tape of length 2*(n'+1)+1,
+position n'+1 is false (for n' ≥ 2).
+
+Key: after n' steps the tape has length exactly 3, so index n'+1 ≥ 3 is out of bounds.
+This formalizes "the H-spike's left causal boundary hasn't reached center-1 by step T-1."
+-/
+
+/-- After n' steps from spikeAtList (2*(n'+1)) (2*(n'+1)+1), position n'+1 is false (n' ≥ 2).
+    Proof: the result tape has length exactly 3, so index n'+1 ≥ 3 is out of bounds. -/
+lemma hcone_left_edge (n' : Nat) (hn' : 2 ≤ n') :
+    (caEvolve n' (spikeAtList (2*(n'+1)) (2*(n'+1)+1))).getD (n'+1) false = false := by
+  have hlen_init : (spikeAtList (2*(n'+1)) (2*(n'+1)+1)).length = 2*(n'+1)+1 :=
+    spikeAtList_length _ _
+  have hge : (spikeAtList (2*(n'+1)) (2*(n'+1)+1)).length ≥ 2 * n' := by omega
+  have hlen_result : (caEvolve n' (spikeAtList (2*(n'+1)) (2*(n'+1)+1))).length = 3 := by
+    rw [caEvolve_length_le n' _ hge, hlen_init]; omega
+  simp [List.getD_eq_getElem?_getD, List.getElem?_eq_none (by omega)]
+
 end P2p
