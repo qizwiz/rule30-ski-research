@@ -6,170 +6,161 @@ Do exactly ONE unit of meaningful work, then commit it. Do not stop to ask quest
 
 ## Before you start
 
-1. Read CLAUDE.md — this is your North Star. It has the ranked task list.
-2. Run `scripts/proof-gate check` to see the current obligation count and where the sorrys/axioms are.
-3. Check `git log --oneline -5` to see what was done recently — don't repeat it.
-4. Check if a build is running: `ps aux | grep "lake build" | grep -v grep`
-5. Check the latest build log: `ls -t /tmp/ca_array_build*.log /tmp/ca_residues_build.log /tmp/subcaseb_build*.log 2>/dev/null | head -1 | xargs tail -5 2>/dev/null`
+1. Read CLAUDE.md — ranked task list and current state.
+2. Run `scripts/proof-gate check` to see obligation count and locations.
+3. Run `git log --oneline -8` — don't repeat recent work.
+4. Check running builds: `ps aux | grep "lake build" | grep -v grep`
+5. Check rule30_meta output: `tail -5 /tmp/rule30_meta_output.txt 2>/dev/null`
+6. Check CA_Array_residues: `tail -3 /tmp/ca_residues_build.log 2>/dev/null`
 
-## LEAN GOAL PROBE TOOL
-
-To query Lean goals interactively WITHOUT running a full lake build:
+## LEAN PROBE TOOL (fast, ~15s, no full build needed)
 
 ```bash
 cat > /tmp/probe.lean << 'EOF'
 import P2p.CausalConeLemmas
 import P2p.Prize3_Complete
 namespace P2p
--- your test here, with ?_ holes
-example : YOUR_CLAIM := by
-  YOUR_TACTIC
-  ?_
+example : YOUR_CLAIM := by ?_
 end P2p
 EOF
-lake env lean /tmp/probe.lean 2>&1 | grep -A 30 "unsolved goals\|⊢"
+lake env lean /tmp/probe.lean 2>&1 | grep -A 20 "unsolved goals\|⊢\|error"
 ```
 
-This runs in ~15 seconds (uses cached .olean). Use it to probe tactic progress.
+## CURRENT STATE (loop79, 2026-04-01)
 
-## Current state (as of 2026-04-01, loop79)
+**5 obligations**:
+1. `subcaseB_m4_ge3087` — axiom, main target (line 1139 SubcaseBPeriod.lean)
+2. `subcaseB_resolution_ge3087` — master axiom (assembles sub-cases; closes when #1 closes)
+3. `subcaseB_m22_l0_sorry` — line 2417 SubcaseBPeriod.lean (m=22 algebraic barrier)
+4. `subcaseB_m28_residue_3class_proved` — axiom CA_Array.lean (CA_Array_residues building)
+5. `subcaseB_m30_residue_unique_proved` — axiom CA_Array.lean (CA_Array_residues building)
 
-- **5 obligations remain** (down from ~50+):
-  1. `subcaseB_m4_ge3087` (axiom) — the algebraic case, MAIN TARGET
-  2. `subcaseB_resolution_ge3087` (master axiom) — assembles all sub-cases; will become theorem once (1) is closed
-  3. `subcaseB_m28_residue_3class_proved` (axiom in CA_Array.lean)
-  4. `subcaseB_m30_residue_unique_proved` (axiom in CA_Array.lean)
-  5. `subcaseB_right_mirror_ge3087` — follows from left-boundary symmetry
+**Recent loop progress**: loops 77/78/80 proved 3 mechanical m=4 mod64 sub-cases.
+**The loop must now ALTERNATE between two tracks:**
 
-- **SubcaseBPeriod.lean build9**: CLEAN OLEAN (succeeded ~5:30AM April 1)
-- **CA_Array_residues.lean build**: RUNNING at /tmp/ca_residues_build.log (closes obligations 3+4)
-- **CA_Array.lean**: CLEAN OLEAN (exists). Do NOT rebuild unless necessary.
+---
 
-## THE TARGET: Linearity corridor proof for subcaseB_m4_ge3087
+## TRACK A: LINEARITY CORRIDOR (known proof path for m=4 axiom)
 
 The algebraic proof of `subcaseB_m4_ge3087` decomposes into 4 Lean lemmas.
-**Work on these in order — each one builds on the previous.**
+**WARNING**: The corridor was designed for the right-boundary family (m=2n'-6).
+`f_center_prev_zero` does NOT hold for fixed m directly — it needs adaptation.
+Treat all 4 lemmas as targets to attempt, not guarantees to close.
 
-### Lemma 1: nl_zero_when_both_zero (TRIVIAL — do this first)
+### Lemma A1: nl_zero_when_both_zero (TRIVIAL — try first)
 
-**Statement**: `NL(0, 0, a', b') = 0` for all `a', b' : Bool`
-where `NL(l, c, l', c') = (l OR c) XOR (l' OR c') XOR ((l XOR l') OR (c XOR c'))`
-
-This is a pure truth-table check. Provable by `decide` in Lean.
-
-**File to add it to**: `P2p/SubcaseBPeriod.lean` (or a new `P2p/LinearityCorridor.lean`)
-
-**Lean sketch**:
 ```lean
 lemma nl_zero_when_both_zero (a' b' : Bool) :
     (false || false) ^^ (a' || b') ^^ ((false ^^ a') || (false ^^ b')) = false := by
   cases a' <;> cases b' <;> decide
 ```
 
-### Lemma 2: hcone_left_edge (MEDIUM — do this second)
+Add to SubcaseBPeriod.lean or new LinearityCorridor.lean. Probe it first.
 
-**Statement**: For any `n' ≥ 1`, the H-cone spike at position `2*(n'+1)`
-after `n'` steps cannot reach position `n'+1` (causality bound).
+### Lemma A2: hcone_left_edge (MEDIUM)
 
-Equivalently: `(caEvolve (n'+1) (spikeAtList (2*(n'+1)) (2*(n'+1)+1))).getD (n'+1) false = false`
+Spike at position `2*(n'+1)` after `n'` steps can't reach position `n'+1` (causality).
+Check if CausalConeLemmas.lean already has a zero-outside-cone lemma.
+If yes, hcone_left_edge may follow directly.
 
-Actually: H_{n'}[n'+1] = 0. The spike is at position 2n'+2 on a tape of size 2n'+3.
-After n' steps, causal cone reaches at most position 2n'+2 - n' = n'+2. So position n'+1 is
-just OUTSIDE the cone. This should follow from the general causal cone lemma in CausalConeLemmas.lean.
+### Lemma A3: f_center_prev_zero (HARD — anti-diagonal)
 
-Check if `CausalConeLemmas.lean` has a lemma about cells outside the cone always being 0.
+R30(7-t, t) = 0 for ALL t in infinite Rule 30 from spike at 0.
+Verified computationally t=0..2000. Unique zero anti-diagonal among k=0..12.
 
-### Lemma 3: f_center_prev_zero (HARD — anti-diagonal zero)
+**Approach**: Try native_decide for finite t ≤ 150 on appropriately-sized finite tape.
+This gets a partial Lean theorem even if the full induction is hard.
 
-**Statement**: In infinite Rule 30 from spike at position 0,
-the cell at position `7 - t` at time `t` is always 0:
-`∀ t : Nat, R30_infinite_spike0_at t (7 - t) = false`
-
-**Why it's true** (from findings.md):
-- Rule 90: anti-diagonal i+t=7 is odd → C(t, (7-2t)/2) = 0 mod 2 (fractional index)
-  Actually: R90(i,t) = 0 when i+t is odd (parity). i+t=7 always odd → R90=0.
-- Rule 30 = Rule 90 XOR correction term (c AND NOT r)
-- The correction term ALSO vanishes on anti-diagonal 7 by the cascade proof:
-  s[0]=1 always, s[1] period-2, s[2]=s[1], s[3] period-4;
-  the fold line hits s[2t-7] at time t at zero phase
-
-**Lean approach**:
-Option A (easy first step): native_decide for t ≤ 200 using finite tape.
-  - Translate to: `∀ t ≤ 200, (caEvolve (t+1) (spikeAtList 0 (2*t+1+20))).getD (7-t) false = false`
-  - Note: need tape large enough that boundary doesn't interfere
-
-Option B (algebraic): Prove R30(i,t) = 0 for i+t odd by induction on t.
-  - Base: R30(i,0) = (i=0). At t=0, only position 0 is 1. If i+0=7, i=7≠0, so R30=0. ✓
-  - Step: R30(i, t+1) = rule30(R30(i-1,t), R30(i,t), R30(i+1,t))
-    If i+t+1 is odd, then (i-1)+t, i+t, (i+1)+t have parities: (even, odd, even).
-    By induction: R30(i,t)=0 (i+t odd). R30(i-1,t) and R30(i+1,t) might be nonzero.
-    rule30(a, 0, b) = a XOR (0 OR b) = a XOR b
-    So R30(i,t+1) = R30(i-1,t) XOR R30(i+1,t)... which is NOT necessarily 0!
-    This means the anti-diagonal zero is NOT from simple parity — it's deeper.
-
-  Actually the parity argument works for POSITION parity (i.e., position i and time t having
-  opposite parities makes the cell 0). Let me verify:
-  - i+t=7 means if t is even, i is odd; if t is odd, i is even.
-  - rule30(l,c,r): if positions l,c,r alternate even/odd, does a parity argument apply?
-
-  The REAL approach: write a Python script to verify the induction base and extract the
-  pattern, then encode as native_decide proof for finite bound.
-
-**Try Option A first**: Write the native_decide verification for t ≤ 100, check it compiles.
-
-### Lemma 4: d_leftbound (HARD — support bound)
-
-**Statement**: The D-field's minimum support at time T-1 is ≥ center+2.
-Equivalently: `D[n'+1]_{T-1} = 0` and `D[n']_{T-1} = 0` where n' is the center index.
-
-This follows from: D first appears at step 4, at position ≥ 2n'-2. The drift per step is at
-most 1 cell toward center. After T-4 more steps, min_support ≥ 2n'-2 - (T-4) = 2n'-2 - n'-3 = n'-5.
-Wait — need to re-verify this bound. Check `research/findings.md` section "Causal cone D-field".
-
-## CA_Array_residues: check and integrate if done
-
-```bash
-tail -20 /tmp/ca_residues_build.log
-ls -la .lake/build/lib/P2p/CA_Array_residues.olean 2>/dev/null
+```python
+# First verify the finite formulation matches:
+# (caEvolve (t+1) (spikeAtList 0 (2*(t+1)+20))).getD (7-t) false = false
+# Run this Python check before writing Lean:
 ```
 
-If build succeeded:
-1. Verify the theorems it exports match what CA_Array.lean expects
-2. Add `import P2p.CA_Array_residues` to CA_Array.lean
-3. Remove the 2 axioms from CA_Array.lean (replace with the imported theorems)
-4. Rebuild CA_Array.lean to confirm
-5. Run proof-gate check
+### Lemma A4: d_leftbound (HARD — D-field support)
 
-## rule30_meta.py: check if done
+D-field min support ≥ center+2 at step T-1.
+D first appears at step 4 at position ≥ 2n'-2.
+Drift ≤ 1 per step → min_support at T-1 ≥ 2n'-2-(T-5) = n'+3-5 = ... verify arithmetic.
+Python-verify this bound before attempting Lean.
 
-```bash
-ls -la /tmp/rule30_meta.png && echo "done" || echo "still running"
+---
+
+## TRACK B: EXPLORATION (open questions, may reveal new proof angles)
+
+**Why explore?** The corridor may need adaptation. Exploration finds either a better
+path or confirms the corridor is the only one. Run one exploration task per 2 loop iterations.
+
+### B1: D-field structure at Level 3+ (mod16384=5, the hard m=4 case)
+
+The rule30_meta.py is running (PID varies, output at /tmp/rule30_meta_output.txt).
+If it has output: extract D-field patterns at specific Level 3+ positions.
+If NOT done: write a FOCUSED Python script that only checks n'≡5 mod 16384 positions
+(e.g., n'=16389, 32773, 49157) and asks: what is the MINIMUM w at each? Is there a pattern?
+
+```python
+# Quick Level 3+ probe (runs in minutes, not hours):
+for n_prime in [16389, 32773, 49157, 65541]:
+    # find min_w at this specific n'
+    # compare with prediction min_w ~ 2.5*log2(n')
 ```
 
-If done: read its output, extract any structural insight about the D-field pattern,
-update research/findings.md.
+### B2: Witness LFSR analysis
 
-## Priority order for this loop
+The SEQUENCE of which w values are witnesses at fixed n' (varying mod residue) has structure.
+Run BM on the indicator sequence: for n' = 5, 13, 21, ..., 3093, ..., is_witness(n', w=6)?
+What is the linear complexity? Does it match L=5 (the m=4 LFSR entry)?
 
-1. **Check CA_Array_residues build** — if done, integrate (closes 2 axioms)
-2. **Attempt nl_zero_when_both_zero** in Lean — trivial, just do it
-3. **Attempt hcone_left_edge** in Lean — check if CausalConeLemmas has what we need
-4. **Python verification of anti-diagonal zero for t ≤ 500** — confirm the claim,
-   understand WHICH cells neighboring the anti-diagonal are nonzero (this reveals
-   the induction structure)
-5. **Attempt f_center_prev_zero via native_decide** for finite t ≤ 100
-6. **Check rule30_meta.py** output if done
-7. **Paper/findings update** — document whatever you learn
+```python
+# Compute: for n' in SubcaseB positions, does w=6 witness? → binary sequence
+# BM that sequence → compare with F-sequence LC=5
+```
 
-## Rules
+### B3: Prize 1+2+3 connection
 
-- Always work in /Users/jonathanhill/src/p2p (never cd away permanently)
-- Before starting a new `lake build`: `pkill -f "lake build" 2>/dev/null; sleep 2`
-- Never run `lake build` and wait for it — start in background: `nohup lake build ... > /tmp/build.log 2>&1 &`
-- Use type holes (`?_`) not `sorry` when probing Lean goals
-- Commit at the end with format: `loop<N>: <what you did>` where N increments from 79
-- Keep commits small and honest
+Prize 1 (non-periodic center column) + Prize 2 (density → 1/2) + Prize 3 (Ω(n) complexity).
+We know: F-sequence density = 1/2 exactly (proved). Does this connect to Prize 2?
+Wolfram Prize 2: "Prove that the density of black cells in Rule 30 center column → 1/2."
+Our F-sequence result says: F(n', m=4) = 0 exactly half the time. Is that Prize 2?
+Investigate: is Prize 2 about the SAME sequence as our F-sequence, or something different?
 
-## End state
+```python
+# Compute actual center-column density for rule30 from standard spike initial condition
+# Compare with F-sequence density
+# Are these the same object?
+```
 
-Your final action must be a git commit. Output a one-line summary of what you did.
+### B4: m=22 l≡0 sorry — algebraic angle
+
+m=22 sorry at line 2417 needs P=131072 period certs (infeasible with native_decide).
+Alternative: can we use the LFSR structure of twoSpike(34,22) directly?
+BM on the twoSpike(34,22) center-output sequence → connection polynomial → algebraic period cert.
+If connection poly has degree D, period ≤ 2^D. If D is small, algebraic cert is feasible.
+
+---
+
+## DECISION LOGIC FOR THIS LOOP
+
+Look at `git log --oneline -3`:
+- If last 2 commits were Track A → do Track B this time
+- If last commit was Track B → do Track A this time
+- If CA_Array_residues build just finished → integrate it FIRST (closes 2 free obligations)
+- If rule30_meta.py has output → read it and commit the findings to research/findings.md
+
+## BUILD RULES
+
+- NEVER wait for a build interactively — always background: `nohup lake build ... > /tmp/build.log 2>&1 &`
+- NEVER start parallel builds — check first with `ps aux | grep "lake build"`
+- CA_Array.lean has a clean olean — do NOT rebuild unless integrating CA_Array_residues
+- SubcaseBPeriod.lean has a clean olean — do NOT rebuild unless adding new lemmas
+
+## COMMIT FORMAT
+
+`loop<N>: <track>: <what you did>`
+
+Examples:
+- `loop81: corridor: prove nl_zero_when_both_zero`
+- `loop82: explore: D-field Level3+ min_w scan confirms log(n') growth`
+- `loop83: corridor: native_decide f_center_prev_zero t≤100`
+
+Always increment N from the last commit's loop number.
