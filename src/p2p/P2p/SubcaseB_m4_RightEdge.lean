@@ -87,16 +87,175 @@ def rightEdgeSens (k m T : ℕ) : Prop :=
   rightEdgeF k T ≠ rightEdgeG k m T
 
 /-!
-## Period-8 axioms
+## Period-8 proof via caEvolve_agree + caStep absorption
 
-PROOF PATH: combined-pattern cert on ≤41 cell tapes (see consult output).
+Strategy: Split T = (T-5) + 5 and T+8 = (T-5) + 13.
+- rightEdgeF 10 T   = caEvolve (S-1) (caStep (caEvolve 5 (spikeAtList (2S) (2S+11))))[0]
+- rightEdgeF 10 (T+8) = caEvolve (S-1) (caStep (caEvolve 13 (spikeAtList (2S+16) (2S+27))))[0]
+where S = T-5.
+
+After 5 (resp. 13) steps, the two intermediate tapes of length 2S+1 agree on
+positions 0..2S-1 and differ only at position 2S. But position 2S-1 is true in both
+(native_decide certs). Since R30(a, true, c) = !a regardless of c, one caStep
+absorbs the difference, and the tapes agree everywhere after that.
 -/
 
-axiom rightEdgeF_period8_k10 (T : ℕ) (hT : 100 ≤ T) :
-    rightEdgeF 10 (T + 8) = rightEdgeF 10 T
+/-- Cert: position 2S-1 of caEvolve 5 (spikeAtList (2S) (2S+11)) = true.
+    By caEvolve_getD_shift, this = caEvolve 5 (spikeAtList 1 12) at position 0.
+    The drop-by-(2S-1) of spikeAtList (2S) (2S+11) has spike at position 1, length 12. -/
+private lemma rightEdge_ev5_pos2Sm1_cert :
+    (caEvolve 5 (spikeAtList 1 12)).getD 0 false = true := by native_decide
 
-axiom rightEdgeG_period8_k10 (T : ℕ) (hT : 100 ≤ T) :
-    rightEdgeG 10 4 (T + 8) = rightEdgeG 10 4 T
+private lemma rightEdge_ev5_pos2Sm1 (S : ℕ) (hS : 6 ≤ S) :
+    (caEvolve 5 (spikeAtList (2 * S) (2 * S + 11))).getD (2 * S - 1) false = true := by
+  rw [caEvolve_getD_shift 5 _ (2 * S - 1)]
+  apply (caEvolve_agree 5 _ (spikeAtList 1 12) (by
+    rw [List.length_drop, spikeAtList_length]; omega) (by
+    rw [spikeAtList_length]; omega) (fun j hj => ?_)).trans rightEdge_ev5_pos2Sm1_cert
+  rw [show ((spikeAtList (2 * S) (2 * S + 11)).drop (2 * S - 1)).getD j false =
+       (spikeAtList (2 * S) (2 * S + 11)).getD (2 * S - 1 + j) false from by
+    simp [List.getD_eq_getElem?_getD, List.getElem?_drop]]
+  rw [spikeAtList_getD (2 * S) (2 * S + 11) (2 * S - 1 + j) (by omega)]
+  rw [spikeAtList_getD 1 12 j (by omega)]
+  simp; omega
+
+/-- Cert: position 2S-1 of caEvolve 13 (spikeAtList (2S+16) (2S+27)) = true.
+    By caEvolve_getD_shift, this = caEvolve 13 (spikeAtList 17 28) at position 0. -/
+private lemma rightEdge_ev13_pos2Sm1_cert :
+    (caEvolve 13 (spikeAtList 17 28)).getD 0 false = true := by native_decide
+
+private lemma rightEdge_ev13_pos2Sm1 (S : ℕ) (hS : 6 ≤ S) :
+    (caEvolve 13 (spikeAtList (2 * S + 16) (2 * S + 27))).getD (2 * S - 1) false = true := by
+  rw [caEvolve_getD_shift 13 _ (2 * S - 1)]
+  have h := caEvolve_spikeAt_agree 13 (2 * S + 16) (2 * S + 27) 28 (2 * S - 1)
+    (by omega) (by omega)
+  rw [h]
+  exact rightEdge_ev13_pos2Sm1_cert
+
+/-- Helper: caEvolve k of a spike at position 2S+2k in a (2S+2k+11)-cell tape is false
+    at positions 0..2S-1. -/
+private lemma rightEdge_spike_evolve_false (k S i : ℕ) (hi : i ≤ 2 * S - 1) (hS : 1 ≤ S) :
+    (caEvolve k (spikeAtList (2 * S + 2 * k) (2 * S + 2 * k + 11))).getD i false = false := by
+  rw [caEvolve_getD_shift k _ i]
+  apply caEvolve_allFalse
+  exact spikeAtList_drop_allFalse (2 * S + 2 * k) (2 * S + 2 * k + 11) i (by omega)
+
+set_option maxHeartbeats 800000 in
+private lemma rightEdge_spike_evolve_pos2S_cert5 :
+    (caEvolve 5 (spikeAtList 10 21)).getD 0 false = true := by native_decide
+
+set_option maxHeartbeats 800000 in
+private lemma rightEdge_spike_evolve_pos2S_cert13 :
+    (caEvolve 13 (spikeAtList 26 37)).getD 0 false = true := by native_decide
+
+private lemma rightEdge_spike_evolve_pos2S_5 (S : ℕ) (hS : 6 ≤ S) :
+    (caEvolve 5 (spikeAtList (2 * S) (2 * S + 11))).getD (2 * S) false = true := by
+  rw [caEvolve_getD_shift 5 _ (2 * S)]
+  have h := caEvolve_spikeAt_agree 5 (2 * S) (2 * S + 11) 21 (2 * S) (by omega) (by omega)
+  rw [h]; exact rightEdge_spike_evolve_pos2S_cert5
+
+private lemma rightEdge_spike_evolve_pos2S_13 (S : ℕ) (hS : 6 ≤ S) :
+    (caEvolve 13 (spikeAtList (2 * S + 16) (2 * S + 27))).getD (2 * S) false = true := by
+  rw [caEvolve_getD_shift 13 _ (2 * S)]
+  have h := caEvolve_spikeAt_agree 13 (2 * S + 16) (2 * S + 27) 37 (2 * S) (by omega) (by omega)
+  rw [h]; exact rightEdge_spike_evolve_pos2S_cert13
+
+/-- Key: after one caStep, the intermediate tapes from T and T+8 agree everywhere.
+    Both length-2S+1 tapes agree on 0..2S-1. Position 2S-1 = true in both.
+    So R30(a, true, c) = !a is independent of c (position 2S), giving agreement at 2S-2.
+    Positions 0..2S-3 of caStep depend only on positions ≤ 2S-1 where tapes already agree. -/
+private lemma rightEdge_caStep_agree (S : ℕ) (hS : 6 ≤ S)
+    (l1 l2 : List Bool) (hlen1 : l1.length = 2 * S + 1) (hlen2 : l2.length = 2 * S + 1)
+    (hagree_low : ∀ i, i ≤ 2 * S - 1 → l1.getD i false = l2.getD i false)
+    (hb_true1 : l1.getD (2 * S - 1) false = true)
+    (hb_true2 : l2.getD (2 * S - 1) false = true) :
+    ∀ i, i < (caStepList l1).length → (caStepList l1).getD i false = (caStepList l2).getD i false := by
+  intro i hi
+  have hlen_step : (caStepList l1).length = 2 * S - 1 := by
+    rw [show (caStepList l1).length = l1.length - 2 from caStep_length l1 (by omega)]
+    omega
+  rw [hlen_step] at hi
+  rw [caStepList_getD_eq l1 i (by omega), caStepList_getD_eq l2 i (by omega)]
+  by_cases hi2 : i ≤ 2 * S - 3
+  · -- positions 0..2S-3: all three inputs i, i+1, i+2 are ≤ 2S-1
+    rw [hagree_low i (by omega), hagree_low (i + 1) (by omega), hagree_low (i + 2) (by omega)]
+  · -- position 2S-2: inputs are 2S-2, 2S-1, 2S
+    -- i = 2S-2
+    have hi_eq : i = 2 * S - 2 := by omega
+    rw [hi_eq]
+    -- R30(a, b, c) = a XOR (b OR c). With b = true: R30(a, true, c) = a XOR true = !a
+    rw [hagree_low (2 * S - 2) (by omega)]
+    -- b positions: both true
+    simp only [rule30Local]
+    rw [hb_true1, hb_true2]
+    -- Now: (l1[2S-2] XOR (true OR l1[2S])) = (l2[2S-2] XOR (true OR l2[2S]))
+    -- Since (true OR x) = true for any x:
+    simp [Bool.true_or]
+
+theorem rightEdgeF_period8_k10 (T : ℕ) (hT : 100 ≤ T) :
+    rightEdgeF 10 (T + 8) = rightEdgeF 10 T := by
+  simp only [rightEdgeF]
+  set S := T - 5 with hS_def
+  -- Rewrite tape parameters in terms of S
+  have h1 : 2 * (T + 8) - 10 = 2 * S + 16 := by omega
+  have h2 : 2 * (T + 8) + 1 = 2 * S + 27 := by omega
+  have h3 : 2 * T - 10 = 2 * S := by omega
+  have h4 : 2 * T + 1 = 2 * S + 11 := by omega
+  rw [h1, h2, h3, h4]
+  -- Split T+8 = (S+5) + 8 = S + 13 = (S-1) + 1 + 13 and T = S + 5 = (S-1) + 1 + 5
+  rw [show T + 8 = (S - 1) + 1 + 13 from by omega]
+  rw [show T = (S - 1) + 1 + 5 from by omega]
+  rw [caEvolve_add (S - 1 + 1) 13, caEvolve_add (S - 1 + 1) 5]
+  rw [show S - 1 + 1 = S - 1 + 1 from rfl]
+  rw [caEvolve_add (S - 1) 1, caEvolve_add (S - 1) 1]
+  -- Now both sides are caEvolve (S-1) (caEvolve 1 (caEvolve K tape_K))[0]
+  -- where K=13,tape_K for LHS and K=5,tape_T for RHS
+  -- caEvolve 1 = caStepList
+  simp only [caEvolve_succ, caEvolve_zero]
+  -- Apply caEvolve_agree (S-1) on the two caStep'd tapes
+  set tape1 := caEvolve 13 (spikeAtList (2 * S + 16) (2 * S + 27))
+  set tape2 := caEvolve 5 (spikeAtList (2 * S) (2 * S + 11))
+  have hlen1 : tape1.length = 2 * S + 1 := by
+    simp only [tape1]
+    have := caEvolve_length_le 13 (spikeAtList (2 * S + 16) (2 * S + 27))
+              (by rw [spikeAtList_length]; omega)
+    rw [spikeAtList_length] at this; omega
+  have hlen2 : tape2.length = 2 * S + 1 := by
+    simp only [tape2]
+    have := caEvolve_length_le 5 (spikeAtList (2 * S) (2 * S + 11))
+              (by rw [spikeAtList_length]; omega)
+    rw [spikeAtList_length] at this; omega
+  -- The caStep'd tapes agree everywhere
+  have hstep_agree : ∀ i, i < (caStepList tape1).length →
+      (caStepList tape1).getD i false = (caStepList tape2).getD i false := by
+    apply rightEdge_caStep_agree S (by omega) tape1 tape2 hlen1 hlen2
+    · -- Agreement on 0..2S-1
+      intro i hi
+      simp only [tape1, tape2]
+      by_cases hiS : i ≤ 2 * S - 1
+      · -- Both false at positions 0..2S-1
+        rw [rightEdge_spike_evolve_false 13 S i hiS (by omega)]
+        rw [rightEdge_spike_evolve_false 5 S i hiS (by omega)]
+      · omega
+    · exact rightEdge_ev13_pos2Sm1 S (by omega)
+    · exact rightEdge_ev5_pos2Sm1 S (by omega)
+  -- caStep'd tapes have length 2S-1
+  have hstep_len1 : (caStepList tape1).length = 2 * S - 1 := by
+    rw [show (caStepList tape1).length = tape1.length - 2 from caStep_length tape1 (by omega)]
+    omega
+  have hstep_len2 : (caStepList tape2).length = 2 * S - 1 := by
+    rw [show (caStepList tape2).length = tape2.length - 2 from caStep_length tape2 (by omega)]
+    omega
+  apply caEvolve_agree (S - 1)
+  · rw [hstep_len1]; omega
+  · rw [hstep_len2]; omega
+  · intro i hi
+    exact hstep_agree i (by rw [hstep_len1]; omega)
+
+-- G period-8: same structure, but with twoSpike (spikes at 4 and 2T-10)
+theorem rightEdgeG_period8_k10 (T : ℕ) (hT : 100 ≤ T) :
+    rightEdgeG 10 4 (T + 8) = rightEdgeG 10 4 T := by
+  sorry -- TODO: same decomposition as F, with twoSpike certs
 
 /-!
 ## Period-8 sensitivity propagation
