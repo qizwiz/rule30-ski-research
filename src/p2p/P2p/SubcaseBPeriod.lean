@@ -41,6 +41,7 @@ import P2p.CausalConeLemmas
 import P2p.CA_Array
 import P2p.CA_Array_m4
 import P2p.SubcaseB_BaseSens
+import P2p.SubcaseB_m4_RightEdge
 import Mathlib.Tactic.Ring
 
 set_option maxHeartbeats 800000000
@@ -444,6 +445,29 @@ lemma sensitivity_transfer (w m_val P n'' k : Nat) (hP : 0 < P)
     (caEvolve (n''+1+k*P) (twoSpikeList w m_val (2*(n''+1+k*P)+1))).getD 0 false := by
   rw [← spikeAt_iterated_period w P hP hF_cert n'' k]
   rw [← twoSpike_iterated_period w m_val P hP hH_cert n'' k]
+  exact h_sens
+
+/-- Sensitivity transfer with different periods for spike and twoSpike.
+    When PF divides PH (spike period divides twoSpike period),
+    we use PH as the common stride: spike side uses k*r steps of PF,
+    twoSpike side uses k steps of PH, where PH = r * PF. -/
+lemma sensitivity_transfer_div (w m_val PF PH n'' k r : Nat)
+    (hPF : 0 < PF) (hPH : 0 < PH)
+    (hrP : PH = r * PF)
+    (hF_cert : caEvolve PF (spikeAtList w (2*PF+2*w+1)) = spikeAtList w (2*w+1))
+    (hH_cert : caEvolve PH (twoSpikeList w m_val (2*PH+2*(max w m_val)+1)) =
+               twoSpikeList w m_val (2*(max w m_val)+1))
+    (h_sens : (caEvolve (n''+1) (spikeAtList w (2*(n''+1)+1))).getD 0 false ≠
+              (caEvolve (n''+1) (twoSpikeList w m_val (2*(n''+1)+1))).getD 0 false) :
+    (caEvolve (n''+1+k*PH) (spikeAtList w (2*(n''+1+k*PH)+1))).getD 0 false ≠
+    (caEvolve (n''+1+k*PH) (twoSpikeList w m_val (2*(n''+1+k*PH)+1))).getD 0 false := by
+  -- Spike side: k*PH = (k*r)*PF, use spikeAt_iterated_period with k*r steps
+  have hkP : k * PH = k * r * PF := by rw [hrP]; ring
+  rw [show n'' + 1 + k * PH = n'' + 1 + (k * r) * PF from by omega]
+  rw [← spikeAt_iterated_period w PF hPF hF_cert n'' (k * r)]
+  -- twoSpike side: use twoSpike_iterated_period with k steps of PH
+  rw [show n'' + 1 + k * r * PF = n'' + 1 + k * PH from by omega]
+  rw [← twoSpike_iterated_period w m_val PH hPH hH_cert n'' k]
   exact h_sens
 
 /-!
@@ -1443,7 +1467,7 @@ theorem subcaseB_m4_mod64_5_mechanical (n' : Nat) (hn' : 3087 ≤ n') (hmod : n'
     plus w=32 (P=4096) for anomaly class; mod64=5 is hierarchical (Level 0-3+).
     ONLY Level 3+ (n'≡5 mod 16384) requires algebraic proof (D-field linearity).
     All other cases mechanical via sensitivity_transfer + existing certs. -/
-axiom subcaseB_m4_ge3087 (n' : Nat) (hn' : 3087 ≤ n')
+theorem subcaseB_m4_ge3087 (n' : Nat) (hn' : 3087 ≤ n')
     (m : Fin (2 * (n' + 1) + 1)) (hm4 : m.val = 4)
     (hcase : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
                decide (k.val = m.val)) = false)
@@ -1451,7 +1475,8 @@ axiom subcaseB_m4_ge3087 (n' : Nat) (hn' : 3087 ≤ n')
              decide (k.val = m.val ∨ k.val = 2 * (n' + 1))) = true) :
     ∃ c_n : Config (n' + 1),
       (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
-      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m)
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) :=
+  subcaseB_m4_ge3087_from_rightedge n' hn' m hm4 hcase hts
 
 /-!
 ## SubcaseB resolution for m=6 (period 16) at n' ≥ 3087
