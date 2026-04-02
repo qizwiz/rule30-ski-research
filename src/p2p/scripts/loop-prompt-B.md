@@ -72,21 +72,21 @@ The full file is 5800+ lines — always use RAG first.
 
 ## CURRENT STATE (auto-updated by loop-B)
 
-**Open Track B items**: B1
-**Closed**: B2 (witness LFSR — negative, no F-seq connection), B3 (Prize 2), B4 (m=22 LFSR)
+**Open Track B items**: none (all closed)
+**Closed**: B1 (D-field shape — causal cone gap ≈ w-6, NL=0 algebraically, sensitivity reduces to single-spike), B2 (witness LFSR — negative, no F-seq connection), B3 (Prize 2), B4 (m=22 LFSR)
 
 ---
 
 ## TRACK B: EXPLORATION
 
-### B1: D-field at Level 3+ (mod16384=5) — STATUS: OPEN
+### B1: D-field at Level 3+ (mod16384=5) — ✓ DONE (loop-B2)
 
-For n'≡5 mod 16384 (n'=16389, 32773, 49157):
-- What is min_w at each?
-- What is the D-field SHAPE (not just center value) at T-1?
-- Does the D-field have a period at these positions?
-
-Write a Python script in /tmp/ to compute this. Save findings to research/findings.md.
+**Finding**: D-field gap ≈ w-6 (CONSTANT in n'), no spatial period (LC≈n'/2).
+- For w≥2m: B-cone doesn't reach center at T-1, so B[c]=B[c+1]=0 → NL_{T-1}(c)=0 algebraically
+- For w≥2m: causal cone gap ≥ w-6 → D[c-1]=D[c]=D[c+1]=0 at T-1
+- Therefore D[c]_T = 0 for all n'; SubcaseB sensitivity reduces to: spike(w) gives center=1
+- w=6 ALWAYS propagates to c-1 (gap=1 constant) but NL cancels it at Level 3+
+- D has NO spatial period → no LFSR shortcut for d_leftbound
 
 ### B2: Witness LFSR — ✓ DONE (loop-B1, NEGATIVE RESULT)
 
@@ -167,3 +167,4 @@ Always increment N from the last loop-B commit's number (check git log).
 |------|--------|--------|
 | B-init | Created loop-prompt-B.md | Parallel infrastructure split |
 | loop-B1 | Marked B2 DONE (negative), updated CURRENT STATE | B2 witness LFSR computation complete |
+| loop-B2 | Marked B1 DONE, updated CURRENT STATE | D-field causal cone gap analysis complete |

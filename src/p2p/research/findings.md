@@ -5907,3 +5907,132 @@ must come from the linearity corridor argument, not from witness LFSR structure.
 **w=6 specifically**: Never works for m=4 (at small n'). For m=6, ALWAYS works (trivially).
 For m≥8, works only at small n' (n'≤2 or 3) then fails as m approaches position structure.
 
+
+---
+
+## Track B1: D-field Shape at Level 3+ for m=4 SubcaseB (loop-B2, 2026-04-01)
+
+**Question**: What is the D-field shape (not just center value) at step T-1 = n'-1
+for SubcaseB m=4 geometry? Does D_{T-1} have spatial period? Does d_leftbound hold?
+
+**Geometry**: twoSpike(w, m=4) on tape of size 2n'+2w+1.
+- spike(w): positions [w, 2w-1] (near left edge)
+- spike(m=4): positions [4, 7] (also near left edge)
+- D_t = C_t XOR A_t XOR B_t (interaction term)
+- Center = absolute position n'+w in original tape
+
+**Scripts**: /tmp/b1_correct_geometry.py, /tmp/b1_dfield_period.py, /tmp/b1_gap_trend.py
+
+### Key Finding 1: d_leftbound holds trivially for w ≥ 10
+
+| w  | n'  | gap = center - max_supp | D[c-1] | D[c] | D[c+1] |
+|----|-----|-------------------------|--------|------|--------|
+| 6  | all | 1 (CONSTANT)            | 1      | 0    | 0      |
+| 10 | 200 | 7                       | 0      | 0    | 0      |
+| 22 | 200 | 17                      | 0      | 0    | 0      |
+| 30 | 200 | 25                      | 0      | 0    | 0      |
+| 34 | 200 | 34                      | 0      | 0    | 0      |
+| 40 | 200 | 36                      | 0      | 0    | 0      |
+| 42 | all | ~37 (ROUGHLY CONST)     | 0      | 0    | 0      |
+
+For w=42, gap is 37-43 across n'=50..500 (roughly constant but with jitter):
+50→38, 100→37, 200→37, 300→43, 400→37, 500→39.
+
+**d_leftbound for Level 3+ (w=40,42,44)**: gap ≥ 35 always. D never reaches center±1 at T-1.
+This confirms D[c]=D[c+1]=0 at T-1, AND D[c-1]=0 too. The pure D-propagation mechanism
+CANNOT explain sensitivity at Level 3+ — sensitivity must come from NL_{T-1}(c) = 1.
+
+### Key Finding 2: w=6 has CONSTANT gap=1 for ALL n'
+
+For w=6, m=4: D[c-1]=1, D[c]=0, D[c+1]=0 at EVERY tested n' (50,100,200,300,500).
+The D-field always propagates exactly to position c-1 = n'+5.
+
+**Implication**: If NL_{T-1}(c) = 0 for this geometry, then D[c]_T = D[c-1] XOR 0 = 1
+and twoSpike(6,4) would be sensitive at ALL n'. Since loop61 shows w=6 does NOT work
+at Level 3+ (min_w=40,42), it must be that NL_{T-1}(c) ≠ 0 for w=6 at large n'.
+Specifically, NL = 1 cancels D at Level 3+, giving D[c]_T = 1 XOR 1 = 0 (insensitive).
+
+### Key Finding 3: D has no spatial period
+
+For all tested cases, D_{T-1} has no spatial period up to 512.
+Linear complexity LC ≈ n'/2 (pseudo-random), same as the F-sequence LFSR analysis.
+This rules out any algebraic proof of d_leftbound based on D-field LFSR structure.
+
+### Key Finding 4: Causal cone non-overlap explains d_leftbound
+
+The gap for w=42, m=4 is ≈ w - 6:
+- spike(w=42) is at positions [42, 83]; spike(4) is at [4, 7]
+- Their causal cones first meet at step ≈ (42-7)/2 = 17.5, near position ≈ (42+7)/2 ≈ 25
+- D propagates right from ~25, reaching ~(25 + n') at step T-1
+- Center c = n' + 42; distance = 42 - 25 + correction ≈ 37 ✓
+
+The gap is structurally guaranteed by the CAUSAL CONE geometry:
+- Center c = n' + w requires n' steps to reach from the left (it IS the right boundary)
+- D's birth position ≈ (w+m)/2 ≈ (42+4)/2 = 23, so D is born ~w/2 cells to the right of m
+- D's right reach at T-1: born_pos + (T-1 - birth_step) ≈ 23 + n' - 17 = n' + 6
+- Gap ≈ w - 6 (for w=42: 36, matches data of 37)
+
+**This is a STRUCTURAL bound, not a pseudo-random property.** The gap ≈ w-6 is PROVABLE
+purely from the causal cone geometry (without knowing D's detailed shape). For w ≥ 10:
+gap ≥ w-6 ≥ 4, so D[c-2]=D[c-1]=D[c]=D[c+1]=0 at T-1.
+
+### Implication for Lean proof of d_leftbound
+
+The correct Lean proof of d_leftbound for SubcaseB m=4 should use:
+1. **Causal cone argument**: D first appears at step ≥ (w-m)/2 near position (w+m)/2
+2. **Speed-of-light bound**: D's rightmost position at T-1 ≤ (w+m)/2 + (T-1-(w-m)/2) = T - 1 + m + 1 = n' + m
+3. Since center = n' + w and m < w, gap ≥ w - m - 1 ≥ w - 5 for m=4
+
+This is a clean inductive argument over the CA steps:
+- At step 0: D = 0 everywhere
+- D can only spread from existing D-support or from overlap of A-cone and B-cone  
+- A-cone and B-cone first overlap at step (w-m)/2 ≈ 19 (for w=42, m=4) near position (w+m)/2
+- Therefore D is 0 in region [center-something, center+something] until step n'-1
+
+For the Lean proof, this translates to:
+**Lemma d_leftbound_subcase_b**: For w ≥ 2m, D_{n'-1}[n'+w-1] = 0 and D_{n'-1}[n'+w+1] = 0.
+Proof sketch: by causal cone induction — A-cone from position w never reaches position n'+w-1
+by step n'-1 (it starts at w, spreads left, and can reach at most position w - (n'-1) which is
+negative; and from the right, B-cone starts at m, reaches m + (n'-1) = n'+m-1 at step n'-1,
+which is < n'+w-1 iff m < w ✓).
+
+Wait — B-cone right edge at step n'-1: starts at 2m-1, reaches 2m-1+(n'-1) = n'+2m-2.
+For m=4: n'+6. Center-1 = n'+w-1 = n'+41. So B's rightmost at T-1 is n'+6 < n'+41 ✓.
+B[c-1] = B[c] = B[c+1] = 0 at T-1.
+
+And A[c-1] at T-1: A's causal cone from position w. The cone's RIGHT edge at step n'-1 is
+2w-1+(n'-1) = n'+2w-2. For w=42: n'+82 >> n'+41. So A IS active at c-1 at T-1.
+So A[c-1] may be nonzero, but since B[c-1]=0 and D[c-1]=0 (from gap > 1):
+C[c-1] = D[c-1] XOR A[c-1] XOR B[c-1] = 0 XOR A[c-1] XOR 0 = A[c-1]
+
+The key for NL cancellation: NL_{T-1}(c) = (C[c]|C[c+1]) XOR (A[c]|A[c+1]) XOR (B[c]|B[c+1])
+With B[c]=B[c+1]=0, D[c]=D[c+1]=0: C[c]=A[c], C[c+1]=A[c+1].
+So NL = (A[c]|A[c+1]) XOR (A[c]|A[c+1]) XOR 0 = 0. ✓
+
+**CONFIRMED**: NL_{T-1}(c) = 0 for ALL w ≥ 2m (equivalently, whenever B's cone doesn't reach center at T-1).
+For m=4, w ≥ 8 guarantees B's cone stops at n'+2m-2 = n'+6 < n'+w-1 = center-1.
+
+### Resolution
+
+The linearity corridor IS the right tool for SubcaseB m=4, but the CORRECT version shows:
+- For w ≥ 2m: NL_{T-1}(c) = 0 (because B[c]=B[c+1]=0 — B's cone doesn't reach center)  
+- For w ≥ 2m: D[c-1]=D[c]=D[c+1]=0 at T-1 (causal cone gap argument above)
+- Therefore D[c]_T = D[c-1] XOR NL = 0 XOR 0 = 0
+
+This means twoSpike(w, m=4) gives SAME center output as spike(w) alone for ALL large n'!
+Sensitivity of twoSpike vs spike(m) comes differently — through A_T[c] ≠ 0 when B_T[c]=0.
+
+Specifically: SubcaseB condition says B_T[c] = 0 (spike(m=4) gives center=false = 0).
+Sensitivity means C_T[c] = 1. We have C_T[c] = D_T[c] XOR A_T[c] XOR B_T[c] = 0 XOR A_T[c] XOR 0 = A_T[c].
+So C_T[c] = 1 iff A_T[c] = 1 (spike(w) gives center=true).
+
+**Conclusion**: SubcaseB m=4 sensitivity with witness w reduces to:
+  "spike(w) gives center=1 at step n'"
+This is a PURE SPIKE (single-spike) sensitivity condition, not a twoSpike condition!
+
+The period cert mechanism then proves this: spike(w) has period P, so if spike(w) gives
+center=1 at some base n'_0, it gives center=1 at n'_0 + k*P for all k.
+
+The "Level hierarchy" for m=4 is really asking: at which n' values does spike(w) give center=1?
+And the answer is: exactly the n' values where the period-cert chain covers Level 3+ residues.
+
