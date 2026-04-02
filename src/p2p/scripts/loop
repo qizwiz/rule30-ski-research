@@ -26,10 +26,11 @@ echo "[$TIMESTAMP] starting loop iteration" | tee -a "$LOG_DIR/loop-runner.log"
 
 # --- Run one iteration ---
 cd "$PROJECT_ROOT"
+export PATH="/Users/jonathanhill/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 /Users/jonathanhill/.local/bin/claude \
   --dangerously-skip-permissions \
   --print \
-  --max-budget-usd 3 \
+  --max-budget-usd 6 \
   < "$SCRIPT_DIR/loop-prompt.md" \
   > "$LOG_FILE" 2>&1
 
