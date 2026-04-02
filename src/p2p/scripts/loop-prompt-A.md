@@ -137,6 +137,20 @@ D[center+1] at step T-1:
 The linearity corridor approach was designed for right-boundary and does not transfer to m=4.
 m=4 Level 3+ needs a fundamentally different approach (LFSR/algebraic or new structural argument).
 
+### A5: subcaseB_m4_mod64_5_mechanical — ✓ DONE (loop-A89)
+
+Theorem covering ALL mechanical levels of mod64=5 (Levels 0a through 2), excluding Level 3+.
+Binary hierarchy case split on 2-adic valuation of n'-5:
+- mod128=69: w=12, P=128, base=3141 (4 mod512 classes)
+- mod256=133: w=18, P=256, base=3205 (2 mod512 classes)
+- mod512=261: w=16, P=512, base=3333 (1 class)
+- mod1024=517: w=22, P=1024, base=3589 (1 class)
+- mod4096∈{1029,2053,3077}: w=30, P=4096 via CA_Array_m4 (3 classes)
+- mod16384∈{4101,8197,12293}: w=34, P=16384 via CA_Array_m4 (3 classes)
+
+**Only Level 3+ (n'≡5 mod 16384) remains algebraic.** All 14 mechanical sub-cases proved.
+Once Level 3+ is solved, combine with mod16/53/21/37 theorems to close subcaseB_m4_ge3087.
+
 ---
 
 ## DECISION LOGIC
@@ -182,3 +196,4 @@ Always increment N from the last loop-A commit's number (check git log).
 | A86 | A1 marked done, A3 partial (t≤30 proved) | native_decide ∀ Fin 31 works |
 | A87 | A3 extended to t≤2000, A4 REFUTED for m=4 | Fin 2001 native_decide; D[c+1]≠0 for m=4 |
 | A88 | mod64=37 FULLY proved (no sorry) | 10-level cascading case split + 4 new base certs in CA_Array_m4 |
+| A89 | mod64=5 mechanical levels FULLY proved | 14 sub-cases (Levels 0a-2), only Level 3+ algebraic remains |
