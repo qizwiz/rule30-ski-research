@@ -58,8 +58,18 @@ lemma rule30n_flipCell_spikeConfigAt_eq (w n : ℕ) (m : Fin (2 * (n + 1) + 1))
     rule30n (n + 1) (flipCell (spikeConfigAt w n) m) =
     (caEvolve (n + 1) (twoSpikeList w m.val (2 * (n + 1) + 1))).getD 0 false := by
   simp only [rule30n]
-  unfold spikeConfigAt flipCell configToList twoSpikeList
-  sorry  -- Standard bridge: configToList of flipped spike = twoSpikeList
+  have hlist : configToList (flipCell (spikeConfigAt w n) m) =
+               twoSpikeList w m.val (2 * (n + 1) + 1) := by
+    apply List.ofFn_inj.mpr
+    funext i
+    show (if i = m then !decide (i.val = w) else decide (i.val = w)) =
+         decide (i.val = w ∨ i.val = m.val)
+    by_cases him : i = m
+    · subst him
+      simp [show i.val ≠ w from Ne.symm hwm]
+    · have hine : i.val ≠ m.val := fun h => him (Fin.ext h)
+      simp [him, hine]
+  rw [hlist]
 
 /-!
 ## Right-edge F/G definitions
