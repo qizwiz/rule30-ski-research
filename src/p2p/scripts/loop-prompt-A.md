@@ -119,19 +119,22 @@ lake env lean /tmp/probe.lean 2>&1 | grep -A 20 "unsolved goals\|⊢\|error"
 
 ## CURRENT STATE (auto-updated by loop-A)
 
-**Obligations**: 5 (as of loop80)
-- `subcaseB_m4_ge3087` — axiom, line 1139 SubcaseBPeriod.lean — MAIN TARGET
-- `subcaseB_resolution_ge3087` — master axiom, line 4893 — closes when m4 closes
-- `subcaseB_m22_l0_sorry` — line 2417 — algebraic barrier (P=131072, infeasible native_decide)
-- `subcaseB_m28_residue_3class_proved` — CA_Array.lean axiom — CA_Array_residues building
-- `subcaseB_m30_residue_unique_proved` — CA_Array.lean axiom — CA_Array_residues building
+**Obligations**: 5 (as of loop-A91)
+- `subcaseB_m4_ge3087` — axiom, line 1469 SubcaseBPeriod.lean — MAIN TARGET
+  - SubcaseB_m4_RightEdge.lean: 0 sorrys, 2 axioms (rightEdgeF/G_period8_k10)
+  - Right-edge approach WORKS but period-8 axioms need structural proof
+- `subcaseB_resolution_ge3087` — master axiom, line 5223 — closes when m4+m22 close
+- `subcaseB_m22_l0_sorry` — line 2747 — algebraic barrier (P=131072, infeasible native_decide)
+- `subcaseB_m28_residue_3class_proved` — CA_Array.lean axiom — CA_Array_residues BUILDING (PID 59371)
+- `subcaseB_m30_residue_unique_proved` — CA_Array.lean axiom — CA_Array_residues BUILDING (PID 59371)
 
 **Build status**:
-- SubcaseBPeriod.lean: ✓ clean olean (build9, loop72)
+- SubcaseBPeriod.lean: ✓ clean olean
+- SubcaseB_m4_RightEdge.lean: ✓ clean olean (2 axioms, 0 sorrys)
 - CA_Array.lean: ✓ clean olean
-- CA_Array_residues.lean: BUILDING at /tmp/ca_residues_build.log
+- CA_Array_residues.lean: BUILDING at /tmp/ca_residues_build.log (PID 59371, started ~11:26AM Apr 2)
 
-**Recent work**: loops 77/78/80 proved 3 mechanical m=4 mod64 sub-cases (mod16=13, mod64=53, mod64=21)
+**Recent work**: loops A89 proved mod64=5 mechanical levels; right-edge approach for m=4 (0 sorrys, 2 axioms)
 
 ---
 
@@ -188,6 +191,28 @@ Binary hierarchy case split on 2-adic valuation of n'-5:
 
 **Only Level 3+ (n'≡5 mod 16384) remains algebraic.** All 14 mechanical sub-cases proved.
 Once Level 3+ is solved, combine with mod16/53/21/37 theorems to close subcaseB_m4_ge3087.
+
+### A6: RIGHT-EDGE APPROACH — ACTIVE (loop-A91)
+
+**Alternative to Level 3+**: Instead of fixed-position witnesses with growing w,
+use right-edge witness at w=2T-10 (T=n'+1). This witness has PERIOD 8 in T.
+
+**File**: SubcaseB_m4_RightEdge.lean (268 lines, compiles clean)
+- 0 sorrys, 2 axioms: `rightEdgeF_period8_k10` and `rightEdgeG_period8_k10`
+- Main theorem `subcaseB_m4_ge3087_from_rightedge` matches axiom signature
+- hmod proof (n'≡5 mod 8) proved via native_decide + period-8 iteration
+
+**The 2 axioms state**: For k=10, the spike/twoSpike center outputs at step T
+with right-edge witness (w=2T-10) have period 8 in T. Python verified (scripts/verify_rightedge.py)
+using correct shrinking CA model (caStep reduces tape by 2/step).
+
+**Blocker**: Proving period-8 structurally. caEvolve_agree approach fails because
+after 8 steps the evolved tape and target disagree at positions within the causal cone.
+Need: either (a) a tighter causal cone argument, (b) algebraic/LFSR proof, or
+(c) native_decide on a large finite range + induction.
+
+**CRITICAL NOTE**: Lean's caStep/caEvolve is a SHRINKING CA (tape loses 2 cells/step).
+Standard fixed-size Rule 30 gives WRONG answers. Always use scripts/verify_rightedge.py.
 
 ---
 
@@ -255,3 +280,4 @@ Always increment N from the last loop-A commit's number (check git log).
 | A88 | mod64=37 FULLY proved (no sorry) | 10-level cascading case split + 4 new base certs in CA_Array_m4 |
 | A89 | mod64=5 mechanical levels FULLY proved | 14 sub-cases (Levels 0a-2), only Level 3+ algebraic remains |
 | A90 | WHEN STUCK section added; consult targets updated | Wire consult into loop for m4-level3 and m22-l0 blockers |
+| A91 | A6 right-edge approach documented; obligations updated | shrinking CA verified, period-8 axioms are the blocker |
