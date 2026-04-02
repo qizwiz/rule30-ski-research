@@ -61,18 +61,22 @@
 \maketitle
 
 \begin{abstract}
-We prove that every position in the width-$n$ light cone of Rule~30 is
-\emph{essential}: for each position~$k \in \{0,\ldots,2n\}$, there exists an initial
-configuration $c$ such that the $n$-step center-cell output changes when $c[k]$ is
-flipped.  Since every input cell is essential, any algorithm computing
-$\mathtt{rule30}_n(c)$ for general $c$ must read all $2n+1$ input cells in the worst
-case, giving an $\Omega(n)$ \emph{query-complexity} lower bound for the
-\emph{general-input} problem $\mathtt{rule30}_n(c)$.  This is related to
-Wolfram Prize~3 (which asks whether computing the $n$-th center-column value
-from the \emph{fixed} single-spike input $e_n$ requires $\Omega(n)$ effort),
-though the two problems differ: Prize~3's input is always $e_n$ and every
-cell of $e_n$ is immediately computable from $n$, so the connection requires
-an additional bridge argument, discussed in Section~\ref{sec:discussion}.
+\textbf{What this paper proves.}  We prove that every position in the width-$n$ light
+cone of Rule~30 is \emph{essential} for \emph{general} inputs: for each
+position~$k \in \{0,\ldots,2n\}$, there exists an initial configuration $c$ such that
+the $n$-step center-cell output changes when $c[k]$ is flipped.  Since every input cell
+is essential, any algorithm computing $\mathtt{rule30}_n(c)$ for an arbitrary
+$c$ must read all $2n+1$ input cells in the worst case, yielding an $\Omega(n)$
+\emph{query-complexity} lower bound for the \emph{general-input} problem.
+
+\textbf{What this paper does not prove.}  Wolfram Prize~3 asks a different question:
+does computing $s(n) = \mathtt{rule30}_n(e_n)$, the $n$-th center-column value from
+the \emph{fixed} single-spike input $e_n$, require $\Omega(n)$ effort on a Turing
+machine?  Because $e_n$ is always the same structured input and every cell of $e_n$ is
+immediately computable from $n$, an algorithm for the fixed-input problem need not
+``query'' any cell of $e_n$ at all.  Our query-complexity result therefore does not
+directly imply Prize~3; an additional bridge argument is needed, and two candidate
+paths are discussed in Section~\ref{sec:discussion}.
 
 The result is formalized in Lean~4.\footnote{Source:
 \url{https://github.com/qizwiz/rule30-ski-research/tree/autoresearch/mar20}}
@@ -1603,6 +1607,47 @@ All other sub-cases ($m \in \{6, 8, \ldots, 26\}$) are axiom-free.
 
 Our essentiality theorem characterizes the causal structure of Rule~30 precisely and
 constitutes necessary groundwork; it is not itself sufficient for Prize~3.
+
+\subsection*{Bridge to Prize~3: two proof paths}
+
+Prize~3 asks whether $s(n) = \mathtt{rule30}_n(e_n)$, computed from index $n$ alone,
+requires $\Omega(n)$ time on a Turing machine.  Our Theorem~1.3 gives $\Omega(n)$
+query complexity for \emph{general} inputs $c$; the gap is that an algorithm for the
+fixed-input problem need not ``query'' any cell of $e_n$, since every cell of $e_n$ is
+immediately computable from $n$.  Two paths could close this gap:
+
+\textbf{Path~1: Kolmogorov incompressibility.}  If the conditional Kolmogorov
+complexity $K(s(0)\cdots s(n) \mid n) = \Omega(n)$, then no program of length $o(n)$
+computes the first $n$ center-column values given $n$, and in particular no $o(n)$-step
+TM does.  This path requires proving that the center-column sequence resists
+compression---essentially that it carries $\Omega(1)$ bits of new information per step.
+Wolfram's empirical investigations and the density-$\frac{1}{2}$ result (computationally
+confirmed; Prize~2 open formally) support this, but no proof exists.
+
+\textbf{Path~2: Circuit complexity.}  If every Boolean circuit family computing
+$n \mapsto s(n)$ has size $\Omega(n)$, an $o(n)$-step TM would violate this by
+producing a sublinear-size implicit circuit, giving the lower bound.  Our
+block-sensitivity result ($\mathrm{bs}(\mathtt{rule30}_n) \geq n$) applies to the
+general-input function; connecting this to the circuit complexity of the single-valued
+sequence $n \mapsto s(n)$ requires a different argument.
+
+\textbf{Connection between the paths.}  Prize~1 (non-periodicity) and Prize~3 are
+related: if $s(n)$ were periodic with period $p$, a $O(\log n)$-time algorithm would
+exist.  Prize~1 being open means even the weakest form of Prize~3 is unresolved.
+Conversely, a proof of Prize~3 would imply Prize~1 as an immediate corollary.  The
+Kolmogorov path therefore also constitutes a strengthening of Prize~1's non-periodicity
+claim.
+
+\textbf{What the present work contributes toward the bridge.}  The all-cells-essential
+result establishes that Rule~30's dynamics are genuinely \emph{non-degenerate}: no
+initial cell is redundant, no causal pathway is short-circuited.  This is the
+structural fact that makes computational irreducibility plausible.  A formal connection
+would require either (a) an algebraic argument showing the center-column bits cannot
+satisfy a linear recurrence of degree $o(n)$ over $\mathrm{GF}(2)$ (our LFSR analysis
+shows the active-$m$ sequences have connection polynomials of degree $\Omega(m)$,
+suggesting the center column itself has high LFSR complexity), or (b) a direct appeal
+to the nonlinearity of Rule~30's OR gate, which prevents the kind of algebraic shortcut
+available in Rule~90.
 
 \section*{Acknowledgments}
 
