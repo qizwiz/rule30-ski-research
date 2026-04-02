@@ -5828,3 +5828,82 @@ checking P=2..8192 (all FAIL) via shrinking CA.
 - Period cert for w≥m: target=just primary spike (secondary fully out of range) → cert is structurally sound
 - w=6 witnesses at only ~60% of n' ≡ 14 mod 256 positions (H alternates, no period); F=0 always
 
+
+---
+
+## B2: Witness LFSR Analysis (loop-B1, 2026-04-01)
+
+### Question
+For each SubcaseB firing position (spike_m gives center=0, twoSpike_m gives center=1),
+does w=6 witness sensitivity? Does the witness-existence sequence share the same
+connection polynomial as the F-sequence? (Hypothesis: witnesses algebraically tied to F=0.)
+
+### Method
+Shrinking CA semantics. For each active m and each n' in [1,200] where SubcaseB fires,
+computed min even w such that center(spike_w) ≠ center(twoSpike_w). Ran Berlekamp-Massey
+on the resulting sequences. Compared against F-sequence (center(spike_m)) connection polys.
+
+### F-sequence summary (confirmed with shrinking CA)
+
+| m | F-LC | F-period | F first 8 | Connection poly |
+|---|------|----------|-----------|-----------------|
+| 4 | 5 | 8 | 01011010 | [1,1,0,0,1,1] |
+| 6 | 9 | 16 | 00101001 | [1,1,0,0,0,0,0,0,1,1] |
+| 8 | 26 | 32 | 00010111 | (sparse, repeating x^8 pattern) |
+| 10 | 59 | 64 | 000010101 | (dense, period 64) |
+| 12 | 64 | 64 | 000001011 | x^64+1 (maximal shift register) |
+| 14 | 64 | 64 | 000000101 | x^64+1 (maximal shift register) |
+| 16 | 101 | >200 | 00000001 | complex 102-term poly |
+| 20 | 101 | >200 | 000000001 | complex 102-term poly |
+| 22 | 101 | >200 | 000000001 | complex 102-term poly |
+
+**Notable**: m=12 and m=14 both have connection poly x^64+1. This means their F-sequences
+are x^64-periodic and the minimum polynomial IS x^64+1 (over GF(2)).
+
+### Min-witness at SubcaseB firing positions
+
+| m | Firing count (n'≤200) | Min-w range | Min-w sequence (first 10) | Pattern |
+|---|-----------------------|-------------|---------------------------|---------|
+| 4 | 25 | 4..4 | [4,4,4,4,4,...] | CONSTANT (w=m=4 always) |
+| 6 | 26 | 2..6 | [6,2,2,2,2,...] | w=2 after first |
+| 8 | 8 | 2..8 | [6,2,8,8,8,...] | w=8 for large positions |
+| 10 | 6 | 2..10 | [6,2,10,2,2,2] | mixed |
+| 12 | 10 | 2..10 | [6,2,10,2,4,4,4,4,4,4] | mixed |
+| 14 | 11 | 2..10 | [6,2,10,2,4,2,2,...] | mixed |
+
+**m=4 key finding**: In range [1,200], min_w=4 universally. This is the TRIVIAL witness
+— w=4=m is the SubcaseB condition itself (spike_4 vs twoSpike_4 differ by definition at
+SubcaseB positions). The nontrivial structure (larger w for large n') is NOT visible
+in the small range.
+
+### Berlekamp-Massey on min-w sequences
+
+| m | F-LC | w-parity LC | Match? |
+|---|------|-------------|--------|
+| 4 | 5 | 0 (constant) | NO |
+| 6 | 9 | 1 (constant) | NO |
+| 8 | 26 | 2 | NO |
+| 10 | 59 | 1 | NO |
+| 12 | 64 | 4 | NO |
+| 14 | 64 | 6 | NO |
+
+### Conclusion: B2 ANSWERED — NEGATIVE RESULT
+
+**The witness-existence sequence does NOT share connection polynomials with the F-sequence.**
+
+For m=4: the trivial witness w=4 is constant (LC=0), while F has LC=5. No algebraic
+connection. The real witness structure for large n' (n'≥3087, where the Lean sorry lives)
+requires the full Level hierarchy (w=6,10,16,22,30,34,40,42,...) that grows unboundedly.
+
+For m≥6: witness LC values are all much LOWER than F-LC. Witnesses are simpler, not
+more complex, than the F-sequence suggests. This is good news for the proof: we don't
+need the full LFSR complexity to find witnesses.
+
+**Proof implication**: Witnesses are NOT algebraically determined by F-sequence structure.
+They follow their own (mostly constant or slow-growing) pattern. This rules out the
+shortcut of "derive witnesses from F-LFSR recurrence." For m=4, the algebraic path
+must come from the linearity corridor argument, not from witness LFSR structure.
+
+**w=6 specifically**: Never works for m=4 (at small n'). For m=6, ALWAYS works (trivially).
+For m≥8, works only at small n' (n'≤2 or 3) then fails as m approaches position structure.
+

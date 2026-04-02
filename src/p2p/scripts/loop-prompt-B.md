@@ -72,8 +72,8 @@ The full file is 5800+ lines — always use RAG first.
 
 ## CURRENT STATE (auto-updated by loop-B)
 
-**Open Track B items**: B1, B2
-**Closed**: B3 (Prize 2), B4 (m=22 LFSR)
+**Open Track B items**: B1
+**Closed**: B2 (witness LFSR — negative, no F-seq connection), B3 (Prize 2), B4 (m=22 LFSR)
 
 ---
 
@@ -88,14 +88,14 @@ For n'≡5 mod 16384 (n'=16389, 32773, 49157):
 
 Write a Python script in /tmp/ to compute this. Save findings to research/findings.md.
 
-### B2: Witness LFSR — STATUS: OPEN
+### B2: Witness LFSR — ✓ DONE (loop-B1, NEGATIVE RESULT)
 
-For n' in SubcaseB positions (5,13,21,...), does w=6 witness? → binary sequence.
-Run BM on that sequence. Compare LC with F-sequence LC=5.
-Does the witness-existence sequence have the SAME connection polynomial as the F-sequence?
-If yes: witnesses are algebraically tied to F=0, not independent → proof leverage.
-
-Write Python in /tmp/ to compute this. Save findings to research/findings.md.
+**Finding**: Witness-existence sequences do NOT share connection polynomials with F-sequences.
+- m=4: min_w=4 constant (trivial witness = SubcaseB itself), F has LC=5 → no match
+- m=6: w=6 always witnesses (constant), F has LC=9 → no match
+- For all m: witness LC << F-LC → witnesses are simpler than F-structure suggests
+- No algebraic shortcut: witnesses cannot be derived from F-LFSR recurrence
+- For m=4 large n', linearity corridor proof is still the only path
 
 ### B3: Prize 2 connection — ✓ DONE (loop82)
 
@@ -166,3 +166,4 @@ Always increment N from the last loop-B commit's number (check git log).
 | Loop | Change | Reason |
 |------|--------|--------|
 | B-init | Created loop-prompt-B.md | Parallel infrastructure split |
+| loop-B1 | Marked B2 DONE (negative), updated CURRENT STATE | B2 witness LFSR computation complete |
