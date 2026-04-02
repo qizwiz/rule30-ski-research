@@ -30,8 +30,8 @@ and the evolution is linear — enabling the "linearity corridor" argument.
 
 Lemma 1: nl_zero_when_both_zero — NL vanishes when left inputs are both 0 (PROVED)
 Lemma 2: hcone_left_edge — the H-spike's causal cone doesn't reach n'+1 (PROVED)
-Lemma 3: f_center_prev_zero — anti-diagonal i+t=7 in infinite-tape Rule 30 is 0 (PROVED t≤30)
-Lemma 4: d_leftbound — D-field min support ≥ center+2 at step T-1 (TODO)
+Lemma 3: f_center_prev_zero — anti-diagonal i+t=7 in infinite-tape Rule 30 is 0 (PROVED t≤2000)
+Lemma 4: d_leftbound — D[center+1]=0 at T-1: HOLDS for right-boundary, FAILS for m=4
 -/
 import P2p.Prize3_Complete
 import P2p.CausalConeLemmas
@@ -100,12 +100,24 @@ Currently proved for t ≤ 30 by native_decide. The full proof for all t require
 inductive argument (see A3 in loop-prompt-A.md).
 -/
 
-/-- Anti-diagonal k=7 in Rule 30: Cell(t, 7-t) = 0 for t ≤ 30.
+/-- Anti-diagonal k=7 in Rule 30: Cell(t, 7-t) = 0 for t ≤ 2000.
     Finite-tape encoding: spike at position 2t in tape of width 4t+15, evolved t steps.
-    evolved[7] = Cell(t, 7+t); spike offset = (7+t) - 2t = 7-t; sum = (7-t)+t = 7. ✓ -/
-theorem f_center_prev_zero_le30 :
-    ∀ t : Fin 31,
+    evolved[7] = Cell(t, 7+t); spike offset = (7+t) - 2t = 7-t; sum = (7-t)+t = 7. ✓
+    Machine-checked: native_decide over all 2001 values. -/
+theorem f_center_prev_zero_le2000 :
+    ∀ t : Fin 2001,
     (caEvolve t.val (spikeAtList (2*t.val) (4*t.val+15))).getD 7 false = false := by
   native_decide
+
+/-!
+## Lemma 4: d_leftbound — D-field analysis
+
+For the **right-boundary family** (m = 2n'-6), D[center+1] = D[center+2] = 0 at step T-1.
+Python-verified for n' = 8..99. This means the corridor argument works for right-boundary.
+
+For **fixed m=4**, D[center+1] is NOT always 0 (counterexamples: n'=13, 37, 45, 53, 61, ...).
+The corridor argument does NOT apply directly to m=4 SubcaseB.
+A different approach is needed for the m=4 axiom.
+-/
 
 end P2p

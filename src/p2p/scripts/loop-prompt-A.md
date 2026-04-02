@@ -114,25 +114,28 @@ Proved in LinearityCorridor.lean. Key insight: after n' steps the tape
 out of bounds → getD returns false. Uses caEvolve_length_le + omega.
 Holds for n' ≥ 2 (fails for n' = 1 which gives T=true).
 
-### A3: f_center_prev_zero — PARTIAL (t ≤ 30 proved, loop-A86)
+### A3: f_center_prev_zero — PARTIAL (t ≤ 2000 proved, loop-A87)
 
 R30(7-t, t) = 0 for all t in infinite Rule 30 from spike at 0.
 Computationally verified t=0..2000. Unique zero anti-diagonal among k=0..12.
 
 **Lean formulation** (proved in LinearityCorridor.lean):
-`∀ t : Fin 31, (caEvolve t.val (spikeAtList (2*t.val) (4*t.val+15))).getD 7 false = false`
+`∀ t : Fin 2001, (caEvolve t.val (spikeAtList (2*t.val) (4*t.val+15))).getD 7 false = false`
 Encoding: spike at position 2t, tape width 4t+15, check evolved position 7.
 evolved[7] = Cell(t, 7+t), offset from spike = 7-t, sum = 7. ✓
 
-native_decide handles ∀ t : Fin 31 in one shot (~30s).
-Can likely extend to Fin 51 or Fin 101 if needed.
+native_decide handles ∀ Fin 2001 (~minutes). Extended from Fin 31 → Fin 2001 in loop-A87.
 
 **Remaining**: Full induction for all t (hard — parity argument applies to Rule 90 but Rule 30 needs more).
 
-### A4: d_leftbound — STATUS: OPEN (hard)
+### A4: d_leftbound — ✗ REFUTED for m=4 (loop-A87)
 
-D-field min support ≥ center+2 at step T-1.
-Python-verify the bound before attempting Lean: check n'=8..100 that D[center+1]_{T-1}=0.
+D[center+1] at step T-1:
+- **Right-boundary family (m=2n'-6)**: D[c+1]=D[c+2]=0 for all n'=8..99. Corridor works. ✓
+- **Fixed m=4**: D[c+1]≠0 for n'=13,37,45,53,61,69,77,93,... Corridor FAILS. ✗
+
+The linearity corridor approach was designed for right-boundary and does not transfer to m=4.
+m=4 Level 3+ needs a fundamentally different approach (LFSR/algebraic or new structural argument).
 
 ---
 
@@ -177,3 +180,4 @@ Always increment N from the last loop-A commit's number (check git log).
 |------|--------|--------|
 | A-init | Created loop-prompt-A.md from loop-prompt.md | Parallel infrastructure split |
 | A86 | A1 marked done, A3 partial (t≤30 proved) | native_decide ∀ Fin 31 works |
+| A87 | A3 extended to t≤2000, A4 REFUTED for m=4 | Fin 2001 native_decide; D[c+1]≠0 for m=4 |
