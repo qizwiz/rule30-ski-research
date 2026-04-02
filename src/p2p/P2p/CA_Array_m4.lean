@@ -178,6 +178,92 @@ theorem subcaseB_m4_base_sens_7173_w30 :
 
 /-
 ================================================================================
+SECTION 13b: BASE SENSITIVITY CERTS FOR m=4 mod64=37 ANOMALY (n'≡357 mod 512)
+(SubcaseBPeriod.lean: subcaseB_m4_mod64_37_witness, k≡5 mod 8 sub-case)
+
+Within n'≡357 mod 512:
+  j odd (n'≡869 mod 1024): w=22, P=1024. Base: n'=3941.
+  j=0 mod 8 (n'≡3429 mod 4096): w=32, P=4096. Base: n'=3429 (Section 12).
+  j=2,4,6 mod 8 (n'≡357 mod 1024, ≢3429 mod 4096): w=30, P=4096.
+    Bases: n'=4453 (mod4096=357), n'=5477 (mod4096=1381), n'=6501 (mod4096=2405).
+
+spike(22) P=1024 and twoSpike(22,4) P=1024 certs in SubcaseBPeriod.lean.
+spike(30) P=4096 and twoSpike(30,4) P=4096 certs in Section 13 above.
+
+Verified by C (shrinking CA):
+  n'=3941, w=22: spike=1, twoSpike=0 → SENSITIVE ✓
+  n'=4453, w=30: spike=1, twoSpike=0 → SENSITIVE ✓
+  n'=5477, w=30: spike=0, twoSpike=1 → SENSITIVE ✓
+  n'=6501, w=30: spike=0, twoSpike=1 → SENSITIVE ✓
+================================================================================
+-/
+
+-- Base sensitivity: w=22 at n''=3941 (mod64=37 anomaly, j-odd base)
+-- n_steps=3942, tape=2*3942+1=7885
+set_option maxHeartbeats 4000000000 in
+lemma caEvolveArr_m4_base_sens_3941_w22 :
+    (caEvolveArr 3942 (spikeArr 22 7885)).toList.getD 0 false ≠
+    (caEvolveArr 3942 (twoSpikeArr 22 4 7885)).toList.getD 0 false := by
+  native_decide
+
+/-- Base sensitivity: w=22 at n''=3941, List Bool form -/
+theorem subcaseB_m4_base_sens_3941_w22 :
+    (caEvolve 3942 (spikeAtList 22 7885)).getD 0 false ≠
+    (caEvolve 3942 (twoSpikeList 22 4 7885)).getD 0 false := by
+  have h := caEvolveArr_m4_base_sens_3941_w22
+  rwa [caEvolveArr_toList_eq, spikeArr_toList_eq,
+       caEvolveArr_toList_eq, twoSpikeArr_toList_eq] at h
+
+-- Base sensitivity: w=30 at n''=4453 (mod64=37 anomaly, j=2 mod 8, mod4096=357)
+-- n_steps=4454, tape=2*4454+1=8909
+set_option maxHeartbeats 4000000000 in
+lemma caEvolveArr_m4_base_sens_4453_w30 :
+    (caEvolveArr 4454 (spikeArr 30 8909)).toList.getD 0 false ≠
+    (caEvolveArr 4454 (twoSpikeArr 30 4 8909)).toList.getD 0 false := by
+  native_decide
+
+/-- Base sensitivity: w=30 at n''=4453, List Bool form -/
+theorem subcaseB_m4_base_sens_4453_w30 :
+    (caEvolve 4454 (spikeAtList 30 8909)).getD 0 false ≠
+    (caEvolve 4454 (twoSpikeList 30 4 8909)).getD 0 false := by
+  have h := caEvolveArr_m4_base_sens_4453_w30
+  rwa [caEvolveArr_toList_eq, spikeArr_toList_eq,
+       caEvolveArr_toList_eq, twoSpikeArr_toList_eq] at h
+
+-- Base sensitivity: w=30 at n''=5477 (mod64=37 anomaly, j=4 mod 8, mod4096=1381)
+-- n_steps=5478, tape=2*5478+1=10957
+set_option maxHeartbeats 4000000000 in
+lemma caEvolveArr_m4_base_sens_5477_w30 :
+    (caEvolveArr 5478 (spikeArr 30 10957)).toList.getD 0 false ≠
+    (caEvolveArr 5478 (twoSpikeArr 30 4 10957)).toList.getD 0 false := by
+  native_decide
+
+/-- Base sensitivity: w=30 at n''=5477, List Bool form -/
+theorem subcaseB_m4_base_sens_5477_w30 :
+    (caEvolve 5478 (spikeAtList 30 10957)).getD 0 false ≠
+    (caEvolve 5478 (twoSpikeList 30 4 10957)).getD 0 false := by
+  have h := caEvolveArr_m4_base_sens_5477_w30
+  rwa [caEvolveArr_toList_eq, spikeArr_toList_eq,
+       caEvolveArr_toList_eq, twoSpikeArr_toList_eq] at h
+
+-- Base sensitivity: w=30 at n''=6501 (mod64=37 anomaly, j=6 mod 8, mod4096=2405)
+-- n_steps=6502, tape=2*6502+1=13005
+set_option maxHeartbeats 4000000000 in
+lemma caEvolveArr_m4_base_sens_6501_w30 :
+    (caEvolveArr 6502 (spikeArr 30 13005)).toList.getD 0 false ≠
+    (caEvolveArr 6502 (twoSpikeArr 30 4 13005)).toList.getD 0 false := by
+  native_decide
+
+/-- Base sensitivity: w=30 at n''=6501, List Bool form -/
+theorem subcaseB_m4_base_sens_6501_w30 :
+    (caEvolve 6502 (spikeAtList 30 13005)).getD 0 false ≠
+    (caEvolve 6502 (twoSpikeList 30 4 13005)).getD 0 false := by
+  have h := caEvolveArr_m4_base_sens_6501_w30
+  rwa [caEvolveArr_toList_eq, spikeArr_toList_eq,
+       caEvolveArr_toList_eq, twoSpikeArr_toList_eq] at h
+
+/-
+================================================================================
 SECTION 14: PERIOD CERTS FOR m=4 SubcaseB Level 2 case: w=34, P=16384
 (SubcaseBPeriod.lean: subcaseB_m4_ge3087, n'≡5 mod 4096, ≢5 mod 16384 sub-case)
 

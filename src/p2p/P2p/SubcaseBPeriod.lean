@@ -1130,6 +1130,135 @@ theorem subcaseB_m4_mod64_21_witness (n' : Nat) (hn' : 3087 ≤ n') (hmod : n' %
         rw [show n' + 1 = 3093 + 1 + k * 512 from by omega]
         exact sensitivity_transfer 16 4 512 3093 k (by omega) h_F h_H subcaseB_m4_base_sens_3093
 
+/-- SubcaseB sensitivity for m=4, n'≡37 mod 64, n'≥3087.
+    Witness: period-8 pattern in k (where n'=3109+64*k):
+      k%8=0,2,4,6 (n'%128=37): w=12, P=128, base=3109
+      k%8=3,7 (n'%256=229): w=18, P=256, base=3301
+      k%8=1 (n'%512=101): w=16, P=512, base=3173
+      k%8=5 (n'%512=357): anomaly — hierarchical witnesses:
+        j odd (n'%1024=869): w=22, P=1024, base=3941
+        j=0 mod 8 (n'%4096=3429): w=32, P=4096, base=3429
+        j=2,4,6 mod 8 (n'%1024=357, %4096≠3429): w=30, P=4096, bases=4453,5477,6501
+    All cases fully covered by period certs + base sensitivity certs. -/
+theorem subcaseB_m4_mod64_37_witness (n' : Nat) (hn' : 3087 ≤ n') (hmod : n' % 64 = 37)
+    (m : Fin (2 * (n' + 1) + 1)) (hm4 : m.val = 4) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  by_cases h128 : n' % 128 = 37
+  · -- k even: n'≡37 mod 128, w=12, P=128, base=3109
+    use spikeConfig 12 n'
+    refine ⟨spikeConfig_odd_false 12 (by decide) n', ?_⟩
+    rw [rule30n_spikeConfig_eq 12 n', rule30n_flipCell_spikeConfig_eq' 12 n' m (by omega) (by omega)]
+    simp only [hm4]
+    have h_F : caEvolve 128 (spikeAtList 12 (2*128+2*12+1)) = spikeAtList 12 (2*12+1) :=
+      caEvolve_cert_sp12_p128
+    have h_H : caEvolve 128 (twoSpikeList 12 4 (2*128+2*(max 12 4)+1)) =
+               twoSpikeList 12 4 (2*(max 12 4)+1) := by
+      have hmax : max 12 4 = 12 := by decide
+      rw [hmax, twoSpikeList_comm 12 4, twoSpikeList_comm 12 4]
+      exact caEvolve_cert_ts412_p128
+    obtain ⟨k, hn'_eq⟩ : ∃ k, n' = 3109 + k * 128 := ⟨(n' - 3109) / 128, by omega⟩
+    rw [show n' + 1 = 3109 + 1 + k * 128 from by omega]
+    exact sensitivity_transfer 12 4 128 3109 k (by omega) h_F h_H subcaseB_m4_base_sens_3109
+  · -- n' % 128 = 101 (follows from hmod and h128)
+    have hn'128 : n' % 128 = 101 := by omega
+    by_cases h256 : n' % 256 = 229
+    · -- k≡3,7 mod 8: n'≡229 mod 256, w=18, P=256, base=3301
+      use spikeConfig 18 n'
+      refine ⟨spikeConfig_odd_false 18 (by decide) n', ?_⟩
+      rw [rule30n_spikeConfig_eq 18 n', rule30n_flipCell_spikeConfig_eq' 18 n' m (by omega) (by omega)]
+      simp only [hm4]
+      have h_F : caEvolve 256 (spikeAtList 18 (2*256+2*18+1)) = spikeAtList 18 (2*18+1) :=
+        caEvolve_cert_sp18_p256
+      have h_H : caEvolve 256 (twoSpikeList 18 4 (2*256+2*(max 18 4)+1)) =
+                 twoSpikeList 18 4 (2*(max 18 4)+1) := by
+        have hmax : max 18 4 = 18 := by decide
+        rw [hmax]; exact caEvolve_cert_ts184_p256
+      obtain ⟨k, hn'_eq⟩ : ∃ k, n' = 3301 + k * 256 := ⟨(n' - 3301) / 256, by omega⟩
+      rw [show n' + 1 = 3301 + 1 + k * 256 from by omega]
+      exact sensitivity_transfer 18 4 256 3301 k (by omega) h_F h_H subcaseB_m4_base_sens_3301
+    · -- n' % 256 = 101 (follows from hn'128 and h256)
+      have hn'256 : n' % 256 = 101 := by omega
+      by_cases h512 : n' % 512 = 357
+      · -- k≡5 mod 8: n'≡357 mod 512, anomaly — hierarchical witnesses
+        -- Sub-structure (period 8 in j, period 4096 in n'):
+        --   j odd (n'≡869 mod 1024): w=22, P=1024
+        --   j=0 mod 8 (n'≡3429 mod 4096): w=32, P=4096
+        --   j=2,4,6 mod 8 (n'≡357 mod 1024, ≢3429 mod 4096): w=30, P=4096
+        by_cases h1024 : n' % 1024 = 869
+        · -- j odd: w=22, P=1024, base=3941
+          use spikeConfig 22 n'
+          refine ⟨spikeConfig_odd_false 22 (by decide) n', ?_⟩
+          rw [rule30n_spikeConfig_eq 22 n', rule30n_flipCell_spikeConfig_eq' 22 n' m (by omega) (by omega)]
+          simp only [hm4]
+          have h_F : caEvolve 1024 (spikeAtList 22 (2*1024+2*22+1)) = spikeAtList 22 (2*22+1) :=
+            caEvolve_cert_sp22_p1024
+          have h_H : caEvolve 1024 (twoSpikeList 22 4 (2*1024+2*(max 22 4)+1)) =
+                     twoSpikeList 22 4 (2*(max 22 4)+1) := by
+            have hmax : max 22 4 = 22 := by decide
+            rw [hmax]; exact caEvolve_cert_ts224_p1024
+          obtain ⟨k, hn'_eq⟩ : ∃ k, n' = 3941 + k * 1024 := ⟨(n' - 3941) / 1024, by omega⟩
+          rw [show n' + 1 = 3941 + 1 + k * 1024 from by omega]
+          exact sensitivity_transfer 22 4 1024 3941 k (by omega) h_F h_H subcaseB_m4_base_sens_3941_w22
+        · -- j even: n'≡357 mod 1024
+          have hn'1024 : n' % 1024 = 357 := by omega
+          by_cases h4096 : n' % 4096 = 3429
+          · -- j=0 mod 8: w=32, P=4096, base=3429
+            use spikeConfig 32 n'
+            refine ⟨spikeConfig_odd_false 32 (by decide) n', ?_⟩
+            rw [rule30n_spikeConfig_eq 32 n', rule30n_flipCell_spikeConfig_eq' 32 n' m (by omega) (by omega)]
+            simp only [hm4]
+            have h_F : caEvolve 4096 (spikeAtList 32 (2*4096+2*32+1)) = spikeAtList 32 (2*32+1) :=
+              caEvolve_cert_spike32_p4096
+            have h_H : caEvolve 4096 (twoSpikeList 32 4 (2*4096+2*(max 32 4)+1)) =
+                       twoSpikeList 32 4 (2*(max 32 4)+1) := by
+              have hmax : max 32 4 = 32 := by decide
+              rw [hmax]; exact caEvolve_cert_ts324_p4096
+            obtain ⟨k, hn'_eq⟩ : ∃ k, n' = 3429 + k * 4096 := ⟨(n' - 3429) / 4096, by omega⟩
+            rw [show n' + 1 = 3429 + 1 + k * 4096 from by omega]
+            exact sensitivity_transfer 32 4 4096 3429 k (by omega) h_F h_H subcaseB_m4_base_sens_3429_w32
+          · -- j=2,4,6 mod 8: w=30, P=4096, three mod4096 classes
+            -- n'%4096 ∈ {357, 1381, 2405} (each differs by 1024)
+            use spikeConfig 30 n'
+            refine ⟨spikeConfig_odd_false 30 (by decide) n', ?_⟩
+            rw [rule30n_spikeConfig_eq 30 n', rule30n_flipCell_spikeConfig_eq' 30 n' m (by omega) (by omega)]
+            simp only [hm4]
+            have h_F : caEvolve 4096 (spikeAtList 30 (2*4096+2*30+1)) = spikeAtList 30 (2*30+1) :=
+              caEvolve_cert_spike30_p4096
+            have h_H : caEvolve 4096 (twoSpikeList 30 4 (2*4096+2*(max 30 4)+1)) =
+                       twoSpikeList 30 4 (2*(max 30 4)+1) := by
+              have hmax : max 30 4 = 30 := by decide
+              rw [hmax]; exact caEvolve_cert_ts304_p4096
+            by_cases h4096a : n' % 4096 = 357
+            · obtain ⟨k, hn'_eq⟩ : ∃ k, n' = 4453 + k * 4096 := ⟨(n' - 4453) / 4096, by omega⟩
+              rw [show n' + 1 = 4453 + 1 + k * 4096 from by omega]
+              exact sensitivity_transfer 30 4 4096 4453 k (by omega) h_F h_H subcaseB_m4_base_sens_4453_w30
+            · by_cases h4096b : n' % 4096 = 1381
+              · obtain ⟨k, hn'_eq⟩ : ∃ k, n' = 5477 + k * 4096 := ⟨(n' - 5477) / 4096, by omega⟩
+                rw [show n' + 1 = 5477 + 1 + k * 4096 from by omega]
+                exact sensitivity_transfer 30 4 4096 5477 k (by omega) h_F h_H subcaseB_m4_base_sens_5477_w30
+              · -- n' % 4096 = 2405 (last remaining class)
+                have h4096c : n' % 4096 = 2405 := by omega
+                obtain ⟨k, hn'_eq⟩ : ∃ k, n' = 6501 + k * 4096 := ⟨(n' - 6501) / 4096, by omega⟩
+                rw [show n' + 1 = 6501 + 1 + k * 4096 from by omega]
+                exact sensitivity_transfer 30 4 4096 6501 k (by omega) h_F h_H subcaseB_m4_base_sens_6501_w30
+      · -- n' % 512 = 101: k≡1 mod 8, w=16, P=512, base=3173
+        have hn'512 : n' % 512 = 101 := by omega
+        use spikeConfig 16 n'
+        refine ⟨spikeConfig_odd_false 16 (by decide) n', ?_⟩
+        rw [rule30n_spikeConfig_eq 16 n', rule30n_flipCell_spikeConfig_eq' 16 n' m (by omega) (by omega)]
+        simp only [hm4]
+        have h_F : caEvolve 512 (spikeAtList 16 (2*512+2*16+1)) = spikeAtList 16 (2*16+1) :=
+          caEvolve_cert_sp16_p512
+        have h_H : caEvolve 512 (twoSpikeList 16 4 (2*512+2*(max 16 4)+1)) =
+                   twoSpikeList 16 4 (2*(max 16 4)+1) := by
+          have hmax : max 16 4 = 16 := by decide
+          rw [hmax]; exact caEvolve_cert_ts164_p512
+        obtain ⟨k, hn'_eq⟩ : ∃ k, n' = 3173 + k * 512 := ⟨(n' - 3173) / 512, by omega⟩
+        rw [show n' + 1 = 3173 + 1 + k * 512 from by omega]
+        exact sensitivity_transfer 16 4 512 3173 k (by omega) h_F h_H subcaseB_m4_base_sens_3173
+
 /-- SubcaseB resolution for m=4, n' ≥ 3087.
     Loop66 analysis: mod64∈{13,29,45,61} use w=6 P=16; mod64=53 uses w=10 P=64;
     mod64=21 uses w∈{12,16,18} with multiple periods; mod64=37 uses w=12 (P=128)

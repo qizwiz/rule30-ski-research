@@ -181,3 +181,4 @@ Always increment N from the last loop-A commit's number (check git log).
 | A-init | Created loop-prompt-A.md from loop-prompt.md | Parallel infrastructure split |
 | A86 | A1 marked done, A3 partial (t≤30 proved) | native_decide ∀ Fin 31 works |
 | A87 | A3 extended to t≤2000, A4 REFUTED for m=4 | Fin 2001 native_decide; D[c+1]≠0 for m=4 |
+| A88 | mod64=37 FULLY proved (no sorry) | 10-level cascading case split + 4 new base certs in CA_Array_m4 |
