@@ -103,14 +103,9 @@ lake env lean /tmp/probe.lean 2>&1 | grep -A 20 "unsolved goals\|⊢\|error"
 `f_center_prev_zero` does NOT hold for fixed m directly — needs adaptation.
 Proceed but treat each lemma as a target to attempt, not a guarantee.
 
-### A1: nl_zero_when_both_zero — STATUS: OPEN
+### A1: nl_zero_when_both_zero — ✓ DONE (pre-loop83)
 
-```lean
-lemma nl_zero_when_both_zero (a' b' : Bool) :
-    (false || false) ^^ (a' || b') ^^ ((false ^^ a') || (false ^^ b')) = false := by
-  cases a' <;> cases b' <;> decide
-```
-Pure truth-table. Try it with the probe tool first, then add to SubcaseBPeriod.lean.
+Proved in LinearityCorridor.lean. Pure truth-table: `cases a' <;> cases b' <;> decide`.
 
 ### A2: hcone_left_edge — ✓ DONE (loop83)
 
@@ -119,17 +114,20 @@ Proved in LinearityCorridor.lean. Key insight: after n' steps the tape
 out of bounds → getD returns false. Uses caEvolve_length_le + omega.
 Holds for n' ≥ 2 (fails for n' = 1 which gives T=true).
 
-### A3: f_center_prev_zero — STATUS: OPEN (hard, needs adaptation for fixed m)
+### A3: f_center_prev_zero — PARTIAL (t ≤ 30 proved, loop-A86)
 
 R30(7-t, t) = 0 for all t in infinite Rule 30 from spike at 0.
 Computationally verified t=0..2000. Unique zero anti-diagonal among k=0..12.
 
-Step 1: Python-verify the finite-tape formulation matches:
-`(caEvolve (t+1) (spikeAtList 0 (2*(t+1)+20))).getD (7-t) false = false`
+**Lean formulation** (proved in LinearityCorridor.lean):
+`∀ t : Fin 31, (caEvolve t.val (spikeAtList (2*t.val) (4*t.val+15))).getD 7 false = false`
+Encoding: spike at position 2t, tape width 4t+15, check evolved position 7.
+evolved[7] = Cell(t, 7+t), offset from spike = 7-t, sum = 7. ✓
 
-Step 2: native_decide for t ≤ 100 as a finite stepping stone.
+native_decide handles ∀ t : Fin 31 in one shot (~30s).
+Can likely extend to Fin 51 or Fin 101 if needed.
 
-Step 3: Full induction (hard — parity argument applies to Rule 90 but Rule 30 needs more).
+**Remaining**: Full induction for all t (hard — parity argument applies to Rule 90 but Rule 30 needs more).
 
 ### A4: d_leftbound — STATUS: OPEN (hard)
 
@@ -178,3 +176,4 @@ Always increment N from the last loop-A commit's number (check git log).
 | Loop | Change | Reason |
 |------|--------|--------|
 | A-init | Created loop-prompt-A.md from loop-prompt.md | Parallel infrastructure split |
+| A86 | A1 marked done, A3 partial (t≤30 proved) | native_decide ∀ Fin 31 works |

@@ -29,11 +29,12 @@ and the evolution is linear — enabling the "linearity corridor" argument.
 ## The 4 Lean lemmas toward closing subcaseB_m4_ge3087 Level 3+
 
 Lemma 1: nl_zero_when_both_zero — NL vanishes when left inputs are both 0 (PROVED)
-Lemma 2: hcone_left_edge — the H-spike's causal cone doesn't reach n'+1 (TODO)
-Lemma 3: f_center_prev_zero — anti-diagonal i+t=7 in infinite-tape Rule 30 is 0 (TODO)
+Lemma 2: hcone_left_edge — the H-spike's causal cone doesn't reach n'+1 (PROVED)
+Lemma 3: f_center_prev_zero — anti-diagonal i+t=7 in infinite-tape Rule 30 is 0 (PROVED t≤30)
 Lemma 4: d_leftbound — D-field min support ≥ center+2 at step T-1 (TODO)
 -/
 import P2p.Prize3_Complete
+import P2p.CausalConeLemmas
 
 namespace P2p
 
@@ -76,5 +77,35 @@ lemma hcone_left_edge (n' : Nat) (hn' : 2 ≤ n') :
   rw [List.getD_eq_getElem?_getD]
   rw [List.getElem?_eq_none (by omega)]
   rfl
+
+/-!
+## Lemma 3: f_center_prev_zero (anti-diagonal k=7)
+
+The anti-diagonal x + t = 7 in Rule 30 from a single spike is identically zero:
+Cell(t, 7-t) = 0 for all t ≥ 0 (verified computationally for t = 0..2000).
+
+In the finite-tape caEvolve model:
+  Spike at position 2t in tape of width 4t+15, evolved t steps → position 7 is false.
+
+Proof: evolved[j] represents Cell(t, j+t). With spike at position 2t:
+  evolved[7] = Cell(t, 7+t) with spike offset 7+t - 2t = 7-t.
+  Anti-diagonal check: offset + time = (7-t) + t = 7 ✓
+
+For t ≤ 3, position 7-t > t so it's outside the right causal cone of the spike → trivially 0.
+For t ≥ 4, this is non-trivial (the position enters the causal cone).
+For t ≥ 8, 7-t < 0 so the position is to the left of the spike; the left causal cone
+of the spike grows as t, so these positions are well inside the cone.
+
+Currently proved for t ≤ 30 by native_decide. The full proof for all t requires an
+inductive argument (see A3 in loop-prompt-A.md).
+-/
+
+/-- Anti-diagonal k=7 in Rule 30: Cell(t, 7-t) = 0 for t ≤ 30.
+    Finite-tape encoding: spike at position 2t in tape of width 4t+15, evolved t steps.
+    evolved[7] = Cell(t, 7+t); spike offset = (7+t) - 2t = 7-t; sum = (7-t)+t = 7. ✓ -/
+theorem f_center_prev_zero_le30 :
+    ∀ t : Fin 31,
+    (caEvolve t.val (spikeAtList (2*t.val) (4*t.val+15))).getD 7 false = false := by
+  native_decide
 
 end P2p
