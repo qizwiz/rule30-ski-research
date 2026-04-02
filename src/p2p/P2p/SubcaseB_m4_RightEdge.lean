@@ -165,11 +165,82 @@ lemma rightEdge_witness (n' k : ℕ) (hk_even : k % 2 = 0)
   exact hsens
 
 /-!
-## Main theorem
+## Helper lemmas for hmod
+-/
 
-Note: hmod is sorry — SubcaseB for m=4 fires only at n' ≡ 5 mod 8 for n' ≥ 3087
-(verified by Python over [3087, 50000]). This can be closed by a native_decide
-check on [3087, 3094] combined with the period-8 argument for hcase/hts.
+/-- Bridge: rule30n of spike-at-4 config = caEvolve of spikeAtList. -/
+private lemma rule30n_spikeAt4_bridge (n' : Nat) :
+    rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) => decide (k.val = 4)) =
+    (caEvolve (n' + 1) (spikeAtList 4 (2 * (n' + 1) + 1))).getD 0 false := by
+  simp [rule30n, configToList, spikeAtList]
+
+/-- Bridge: rule30n of twoSpike(4, last) config = caEvolve of twoSpikeLastList. -/
+private lemma rule30n_twoSpikeLast4_bridge (n' : Nat) :
+    rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) => decide (k.val = 4 ∨ k.val = 2 * (n' + 1))) =
+    (caEvolve (n' + 1) (twoSpikeLastList 4 (2 * (n' + 1) + 1))).getD 0 false := by
+  simp [rule30n, configToList, twoSpikeLastList]
+
+/-- Period-8 iteration for spikeAt4 center value. -/
+private lemma spikeAt4_period8_iter (n j : ℕ) :
+    (caEvolve (n + 1) (spikeAtList 4 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + j * 8) + 1) (spikeAtList 4 (2 * ((n + j * 8) + 1) + 1))).getD 0 false := by
+  induction j with
+  | zero => simp
+  | succ j ih =>
+    have step := rule30n_spikeAt4_period8 (n + j * 8)
+    rw [show n + (j + 1) * 8 = n + j * 8 + 8 from by omega]
+    rw [show n + j * 8 + 8 + 1 = n + j * 8 + 1 + 8 from by omega]
+    exact ih.trans step
+
+/-- Period-8 iteration for twoSpikeLast4 center value. -/
+private lemma twoSpikeLast4_period8_iter (n j : ℕ) (hn : n ≥ 4) :
+    (caEvolve (n + 1) (twoSpikeLastList 4 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + j * 8) + 1) (twoSpikeLastList 4 (2 * ((n + j * 8) + 1) + 1))).getD 0 false := by
+  induction j with
+  | zero => simp
+  | succ j ih =>
+    have step := rule30n_twoSpikeLast4_period8 (n + j * 8) (by omega)
+    rw [show n + (j + 1) * 8 = n + j * 8 + 8 from by omega]
+    rw [show n + j * 8 + 8 + 1 = n + j * 8 + 1 + 8 from by omega]
+    exact ih.trans step
+
+-- SubcaseB for m=4 fires only at n' ≡ 5 mod 8 for n' ≥ 3087.
+-- Verified: for all 7 other residues r ∈ {0,1,2,3,4,6,7} in [3087,3094],
+-- either F(n')≠false or G(n')≠true, so both conditions cannot hold simultaneously.
+set_option maxHeartbeats 4000000000 in
+lemma subcaseB_m4_not_fires_other_residues :
+    ∀ r : Fin 8, r.val ≠ 6 →
+    ¬ ((caEvolve (3087 + r.val + 1) (spikeAtList 4 (2 * (3087 + r.val + 1) + 1))).getD 0 false = false ∧
+       (caEvolve (3087 + r.val + 1) (twoSpikeLastList 4 (2 * (3087 + r.val + 1) + 1))).getD 0 false = true) := by
+  native_decide
+
+/-- SubcaseB for m=4, given firing conditions, forces n' ≡ 5 mod 8. -/
+private lemma subcaseB_m4_hmod (n' : ℕ) (hn' : 3087 ≤ n')
+    (hcase : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) => decide (k.val = 4)) = false)
+    (hts : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+             decide (k.val = 4 ∨ k.val = 2 * (n' + 1))) = true) :
+    n' % 8 = 5 := by
+  rw [rule30n_spikeAt4_bridge] at hcase
+  rw [rule30n_twoSpikeLast4_bridge] at hts
+  set r := (n' - 3087) % 8
+  set q := (n' - 3087) / 8
+  have hn'_eq : n' = 3087 + r + q * 8 := by omega
+  have hr_lt : r < 8 := Nat.mod_lt _ (by omega)
+  have hF' : (caEvolve (3087 + r + 1) (spikeAtList 4 (2 * (3087 + r + 1) + 1))).getD 0 false = false := by
+    have eq := spikeAt4_period8_iter (3087 + r) q
+    rw [show 3087 + r + q * 8 = n' from by omega] at eq
+    rw [eq]; exact hcase
+  have hG' : (caEvolve (3087 + r + 1) (twoSpikeLastList 4 (2 * (3087 + r + 1) + 1))).getD 0 false = true := by
+    have eq := twoSpikeLast4_period8_iter (3087 + r) q (by omega)
+    rw [show 3087 + r + q * 8 = n' from by omega] at eq
+    rw [eq]; exact hts
+  have hr6 : r = 6 := by
+    by_contra hr_ne
+    exact subcaseB_m4_not_fires_other_residues ⟨r, by omega⟩ (by simpa) ⟨hF', hG'⟩
+  omega
+
+/-!
+## Main theorem
 -/
 
 theorem subcaseB_m4_ge3087_from_rightedge (n' : ℕ) (hn' : 3087 ≤ n')
@@ -181,8 +252,13 @@ theorem subcaseB_m4_ge3087_from_rightedge (n' : ℕ) (hn' : 3087 ≤ n')
     ∃ c_n : Config (n' + 1),
       (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
       rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
-  have hmod : n' % 8 = 5 := by
-    sorry  -- SubcaseB m=4 fires only at n'≡5 mod 8 for n'≥3087 (Python-verified)
+  -- Rewrite m.val to 4 using hm4
+  have hcase4 : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) => decide (k.val = 4)) = false := by
+    convert hcase using 2; ext k; rw [hm4]
+  have hts4 : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+               decide (k.val = 4 ∨ k.val = 2 * (n' + 1))) = true := by
+    convert hts using 2; ext k; rw [hm4]
+  have hmod : n' % 8 = 5 := subcaseB_m4_hmod n' hn' hcase4 hts4
   obtain ⟨j, hj⟩ : ∃ j, n' + 1 = 3094 + j * 8 := ⟨(n' + 1 - 3094) / 8, by omega⟩
   have hsens : rightEdgeSens 10 4 (n' + 1) := by
     nth_rewrite 1 [hj]
