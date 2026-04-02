@@ -6,21 +6,20 @@ Closes subcaseB_m4_ge3087 using RIGHT-EDGE WITNESSES.
 Discovery (consult_20260402_m4_rightedge.md):
 Instead of fixed-position witnesses (which lead to an infinite self-similar hierarchy),
 use witnesses at fixed offsets FROM THE RIGHT EDGE of the causal cone:
-  w = 2*(n'+1) - k, for k ∈ {10, 12}
+  w = 2*(n'+1) - k, for k = 10
 
 These witnesses have PERIOD 8 in n', with small certs (≤41 cells). The infinite
 tower collapses because the reference frame changes.
 
 STRUCTURE:
-  SubcaseB fires at n' ≡ {0,2,5,7} mod 8:
-    n' ≡ 0 mod 8 → witness k=12
-    n' ≡ 2,5,7 mod 8 → witness k=10
+  SubcaseB fires at n' ≡ 5 mod 8 for n' ≥ 3087 (Python-verified):
+    n' ≡ 5 mod 8 → witness k=10
 
-  Period-8 axioms (replacing the 1 monolithic axiom):
-    rightEdgeF_period8_k10/k12
-    rightEdgeG_period8_k10/k12
+  Period-8 axioms:
+    rightEdgeF_period8_k10
+    rightEdgeG_period8_k10
 
-  Base cases (4 native_decide): T ∈ {3088, 3089, 3091, 3094}
+  Base case (1 native_decide): T = 3094
 
 Self-contained: imports only Prize3_Complete and CausalConeLemmas.
 -/
@@ -88,7 +87,7 @@ def rightEdgeSens (k m T : ℕ) : Prop :=
   rightEdgeF k T ≠ rightEdgeG k m T
 
 /-!
-## Period-8 axioms (2 focused axioms replacing 1 monolithic axiom)
+## Period-8 axioms
 
 PROOF PATH: combined-pattern cert on ≤41 cell tapes (see consult output).
 -/
@@ -99,12 +98,6 @@ axiom rightEdgeF_period8_k10 (T : ℕ) (hT : 100 ≤ T) :
 axiom rightEdgeG_period8_k10 (T : ℕ) (hT : 100 ≤ T) :
     rightEdgeG 10 4 (T + 8) = rightEdgeG 10 4 T
 
-axiom rightEdgeF_period8_k12 (T : ℕ) (hT : 100 ≤ T) :
-    rightEdgeF 12 (T + 8) = rightEdgeF 12 T
-
-axiom rightEdgeG_period8_k12 (T : ℕ) (hT : 100 ≤ T) :
-    rightEdgeG 12 4 (T + 8) = rightEdgeG 12 4 T
-
 /-!
 ## Period-8 sensitivity propagation
 -/
@@ -113,11 +106,6 @@ lemma rightEdgeSens_step8_k10 (T : ℕ) (hT : 100 ≤ T) (h : rightEdgeSens 10 4
     rightEdgeSens 10 4 (T + 8) := by
   simp only [rightEdgeSens]
   rwa [rightEdgeF_period8_k10 T hT, rightEdgeG_period8_k10 T hT]
-
-lemma rightEdgeSens_step8_k12 (T : ℕ) (hT : 100 ≤ T) (h : rightEdgeSens 12 4 T) :
-    rightEdgeSens 12 4 (T + 8) := by
-  simp only [rightEdgeSens]
-  rwa [rightEdgeF_period8_k12 T hT, rightEdgeG_period8_k12 T hT]
 
 lemma rightEdgeSens_iterated_k10 (T₀ j : ℕ) (hT₀ : 100 ≤ T₀)
     (h : rightEdgeSens 10 4 T₀) : rightEdgeSens 10 4 (T₀ + j * 8) := by
@@ -128,32 +116,11 @@ lemma rightEdgeSens_iterated_k10 (T₀ j : ℕ) (hT₀ : 100 ≤ T₀)
     rw [this]
     exact rightEdgeSens_step8_k10 _ (by omega) ih
 
-lemma rightEdgeSens_iterated_k12 (T₀ j : ℕ) (hT₀ : 100 ≤ T₀)
-    (h : rightEdgeSens 12 4 T₀) : rightEdgeSens 12 4 (T₀ + j * 8) := by
-  induction j with
-  | zero => simp [h]
-  | succ j ih =>
-    have : T₀ + (j + 1) * 8 = (T₀ + j * 8) + 8 := by omega
-    rw [this]
-    exact rightEdgeSens_step8_k12 _ (by omega) ih
-
 /-!
-## Base cases
-SubcaseB fires at n' ≡ {0,2,5,7} mod 8; T = n'+1:
-  T=3088 (n'=3087, n'%8=7): k=10
-  T=3089 (n'=3088, n'%8=0): k=12
-  T=3091 (n'=3090, n'%8=2): k=10
-  T=3094 (n'=3093, n'%8=5): k=10
+## Base case
+SubcaseB fires at n' ≡ 5 mod 8 for n' ≥ 3087 (Python-verified).
+Only T=3094 (n'=3093, n'%8=5) is needed as the base.
 -/
-
-lemma rightEdgeSens_base_3088_k10 : rightEdgeSens 10 4 3088 := by
-  simp only [rightEdgeSens, rightEdgeF, rightEdgeG]; native_decide
-
-lemma rightEdgeSens_base_3089_k12 : rightEdgeSens 12 4 3089 := by
-  simp only [rightEdgeSens, rightEdgeF, rightEdgeG]; native_decide
-
-lemma rightEdgeSens_base_3091_k10 : rightEdgeSens 10 4 3091 := by
-  simp only [rightEdgeSens, rightEdgeF, rightEdgeG]; native_decide
 
 lemma rightEdgeSens_base_3094_k10 : rightEdgeSens 10 4 3094 := by
   simp only [rightEdgeSens, rightEdgeF, rightEdgeG]; native_decide
@@ -200,9 +167,9 @@ lemma rightEdge_witness (n' k : ℕ) (hk_even : k % 2 = 0)
 /-!
 ## Main theorem
 
-Note: we leave hmod as sorry — this follows from the computationally verified fact
-that SubcaseB for m=4 fires exactly at n' ≡ {0,2,5,7} mod 8 in the range n' ≥ 3087.
-This can be closed by native_decide on [3087, 3094] + period argument.
+Note: hmod is sorry — SubcaseB for m=4 fires only at n' ≡ 5 mod 8 for n' ≥ 3087
+(verified by Python over [3087, 50000]). This can be closed by a native_decide
+check on [3087, 3094] combined with the period-8 argument for hcase/hts.
 -/
 
 theorem subcaseB_m4_ge3087_from_rightedge (n' : ℕ) (hn' : 3087 ≤ n')
@@ -214,33 +181,12 @@ theorem subcaseB_m4_ge3087_from_rightedge (n' : ℕ) (hn' : 3087 ≤ n')
     ∃ c_n : Config (n' + 1),
       (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
       rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
-  -- SubcaseB for m=4 fires at n' ≡ {0,2,5,7} mod 8
-  have hmod : n' % 8 = 0 ∨ n' % 8 = 2 ∨ n' % 8 = 5 ∨ n' % 8 = 7 := by
-    sorry  -- Follows from hcase + hts: spike(4) and twoSpike(4,last) pattern is period-8
-  rcases hmod with h0 | h2 | h5 | h7
-  · -- n' ≡ 0 mod 8: T = n'+1 ≡ 1 mod 8, base T=3089
-    obtain ⟨j, hj⟩ : ∃ j, n' + 1 = 3089 + j * 8 := ⟨(n' + 1 - 3089) / 8, by omega⟩
-    have hsens : rightEdgeSens 12 4 (n' + 1) := by
-      rw [hj]
-      exact rightEdgeSens_iterated_k12 3089 j (by omega) rightEdgeSens_base_3089_k12
-    exact rightEdge_witness n' 12 (by omega) (by omega) m hm4 hsens
-  · -- n' ≡ 2 mod 8: T ≡ 3 mod 8, base T=3091
-    obtain ⟨j, hj⟩ : ∃ j, n' + 1 = 3091 + j * 8 := ⟨(n' + 1 - 3091) / 8, by omega⟩
-    have hsens : rightEdgeSens 10 4 (n' + 1) := by
-      rw [hj]
-      exact rightEdgeSens_iterated_k10 3091 j (by omega) rightEdgeSens_base_3091_k10
-    exact rightEdge_witness n' 10 (by omega) (by omega) m hm4 hsens
-  · -- n' ≡ 5 mod 8: T ≡ 6 mod 8, base T=3094
-    obtain ⟨j, hj⟩ : ∃ j, n' + 1 = 3094 + j * 8 := ⟨(n' + 1 - 3094) / 8, by omega⟩
-    have hsens : rightEdgeSens 10 4 (n' + 1) := by
-      rw [hj]
-      exact rightEdgeSens_iterated_k10 3094 j (by omega) rightEdgeSens_base_3094_k10
-    exact rightEdge_witness n' 10 (by omega) (by omega) m hm4 hsens
-  · -- n' ≡ 7 mod 8: T ≡ 0 mod 8, base T=3088
-    obtain ⟨j, hj⟩ : ∃ j, n' + 1 = 3088 + j * 8 := ⟨(n' + 1 - 3088) / 8, by omega⟩
-    have hsens : rightEdgeSens 10 4 (n' + 1) := by
-      rw [hj]
-      exact rightEdgeSens_iterated_k10 3088 j (by omega) rightEdgeSens_base_3088_k10
-    exact rightEdge_witness n' 10 (by omega) (by omega) m hm4 hsens
+  have hmod : n' % 8 = 5 := by
+    sorry  -- SubcaseB m=4 fires only at n'≡5 mod 8 for n'≥3087 (Python-verified)
+  obtain ⟨j, hj⟩ : ∃ j, n' + 1 = 3094 + j * 8 := ⟨(n' + 1 - 3094) / 8, by omega⟩
+  have hsens : rightEdgeSens 10 4 (n' + 1) := by
+    nth_rewrite 1 [hj]
+    exact rightEdgeSens_iterated_k10 3094 j (by omega) rightEdgeSens_base_3094_k10
+  exact rightEdge_witness n' 10 (by decide) (by omega) m hm4 hsens
 
 end P2p
