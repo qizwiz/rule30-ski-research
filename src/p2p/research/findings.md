@@ -6238,3 +6238,18 @@ spike-at-40 period is likely 32768 or 65536 (consistent with code using w=40, P=
 cert_H(40, 22, P) = False for P ≤ 16384 (unchecked at 32768, 65536, 131072).
 Same algebraic barrier applies.
 
+
+### Final confirmation: cert_H(34,22,131072) = **True**
+
+`caEvolve 131072 (twoSpikeList 34 22 262213) = twoSpikeList 34 22 69` — VERIFIED.
+
+**Complete cert picture for m=22 l≡0 sorry (s≡0 mod 2 case, w=34)**:
+- cert_F(34, 131072) = True (spike-at-34 period=8192 divides 131072) ← trivial from smaller cert
+- cert_H(34, 22, 131072) = True ← **CONFIRMED** (tape 262213 cells, 131072 steps)
+- w=34 witnesses at n''=35598 (F=0, H=1) ← CONFIRMED
+
+sensitivity_transfer with w=34, P=131072, n''=35598 will close the s≡0 subcase.
+The Lean native_decide cert for twoSpikeList(34,22) at P=131072 is feasible (same ~20h build as other large certs).
+
+**Gap in CLAUDE.md**: The code says "period-131072 certs for spike(34)". Strictly, spike-at-34 has period 8192, so the F cert can be derived from `caEvolve_cert_spike34_p8192` via 16 iterations of the period lemma — avoiding a large native_decide for F. Only the H cert requires the full 131072-step computation.
+
