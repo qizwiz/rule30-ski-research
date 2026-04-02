@@ -6036,3 +6036,82 @@ center=1 at some base n'_0, it gives center=1 at n'_0 + k*P for all k.
 The "Level hierarchy" for m=4 is really asking: at which n' values does spike(w) give center=1?
 And the answer is: exactly the n' values where the period-cert chain covers Level 3+ residues.
 
+---
+
+## Arxiv Mining — Session loop-B4 (2026-04-01)
+
+**Topic**: Search for techniques applicable to the two remaining algebraic barriers:
+1. m=4 Level 3+ (n'≡5 mod 16384): period-doubling hierarchy, native_decide infeasible
+2. m=22 l≡0 (n'=35598+65536*s): period-131072 cert too large for native_decide
+
+**Papers surveyed** (9 papers fetched/abstracted):
+
+### 2410.05947 — Maximal Length Cellular Automata: A Survey
+**Verdict**: NOT applicable.
+- Algebraic period proofs via characteristic polynomials work ONLY for linear CAs (rules 90 and 150).
+- Key theorem: "A linear CA is maximal length iff its characteristic polynomial is primitive over GF(2)."
+- Rule 30 is nonlinear; the primitive polynomial technique does not apply.
+- **Confirms**: No polynomial-factorization shortcut for period determination in nonlinear CA.
+
+### 2602.17148 — Integrable CA on finite fields of order 2^n (Yang-Baxter)
+**Verdict**: NOT applicable.
+- Studies CA derived from Yang-Baxter maps over F_{2^n}, proving "temporal period aligns with field order."
+- These are bijective CA on finite fields, completely different from elementary binary CA.
+- Rule 30 is a width-1→1 binary CA, not a Yang-Baxter map CA.
+
+### 2504.15949 — Structural Properties of Non-Linear CA: Permutivity, Surjectivity, Reversibility
+**Verdict**: NOT applicable.
+- Studies surjectivity and reversibility conditions for nonlinear CA.
+- No periodicity or period-length results. Not about specific initial condition dynamics.
+
+### 2508.09768 — Counting Short Trajectories in ECA via Transfer Matrix Method
+**Verdict**: NOT applicable.
+- Transfer matrix method counts configurations leading to short attractors in thermodynamic limit.
+- Not designed to prove period of a specific initial configuration. High computational cost.
+
+### 1005.2280 — Modelling Nonlinear Sequence Generators via Linear CA
+**Verdict**: NOT applicable.
+- Models Clock-Controlled Shrinking Generators (CCSGs) via linear CA equivalents.
+- Cryptographic context (LFSR generators), not relevant to Rule 30 period proofs.
+
+### 2506.18848 — CA as Generators of Interleaving Sequences
+**Verdict**: NOT applicable.
+- Linear CA generating interleaved PN-sequences via primitive polynomials.
+- Our twoSpike sequences have BM ratio ≈ 1.0 (loop-B4), no short LFSR recurrence.
+
+### 2502.13360 — Elementary CA as Multiplicative Automata
+**Verdict**: NOT applicable.
+- Extends ECA to complex numbers via octonion multiplication tables. Abstract/unusual approach.
+- No period analysis for specific initial configurations.
+
+### 2510.14841 — On the Order of Lazy Cellular Automata
+**Verdict**: NOT applicable.
+- Studies abstract "order" (cardinality of orbit set) for lazy CA over group universes.
+- Theoretical foundations work, no connection to Rule 30 or elementary binary CA.
+
+### 2505.04646 — Computational Irreducibility as the Foundation of Agency
+**Verdict**: NOT applicable.
+- About undecidability of autonomous system behavior, not Prize 3 or CA complexity.
+
+---
+
+### Overall Conclusion — Algebraic Period Proofs for Nonlinear CA
+
+**No literature technique found for proving periods of specific initial configurations under nonlinear CA.**
+
+The maximal-length CA literature (the closest match) is restricted to LINEAR CAs (rules 90, 150) where
+the characteristic polynomial being primitive over GF(2) implies maximal period. Rule 30's nonlinear
+update function (x1 XOR x2 XOR x1*x2 XOR x3 over GF(2)) breaks all polynomial-factorization approaches.
+
+**Consequence for our proof**:
+- m=4 Level 3+: linearity corridor is the only known approach (4 Lean lemmas: nl_zero_when_both_zero,
+  hcone_left_edge, f_center_prev_zero, d_leftbound). No arxiv technique transfers here.
+- m=22 period-131072: remains an algebraic barrier. Options are: (a) native_decide at P=131072
+  (~20h build, 262K-cell tape), (b) formal GF(2)^N CA period theory in Lean (large new development),
+  (c) find a clever alternative witness that has a smaller period.
+
+**Note**: Option (c) for m=22 may be worth investigating. The current approach uses w=34 (for s≡0 mod 2)
+and w=40 (for s≡1 mod 2), both requiring period-131072. But the loop-B4 period divisor check only tested
+P up to 2048. It's possible that a different witness width w' exists with a much smaller period that
+still achieves sensitivity at n'=35598+65536*s. This would be a Python computation task for a future loop.
+
