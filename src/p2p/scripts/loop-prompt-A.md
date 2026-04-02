@@ -64,6 +64,44 @@ The output gives you line ranges. Then read only those specific lines with the R
 5. Check CA_Array_residues: `tail -3 /tmp/ca_residues_build.log 2>/dev/null`
 6. Run stall check: `scripts/stall-check`
 
+## PRE-LEAN VERIFICATION PIPELINE (do this BEFORE writing Lean)
+
+**Rule**: never write a `native_decide` or `sorry` without first verifying the claim in Python.
+This pipeline catches wrong statements before they waste build time.
+
+```
+Step 1 — Python verify (seconds, catches wrong claims):
+  python3 scripts/verify_lean_claim.py rightedge_base
+  python3 scripts/verify_lean_claim.py subcaseB_mod8
+  python3 scripts/verify_lean_claim.py sensitivity <k> <m> <T>
+  python3 scripts/verify_lean_claim.py rightedge_period <T>
+  # Exit 0 = verified, 1 = claim is FALSE (do not write Lean!)
+
+Step 2 — #eval in Lean (elaborator, ~30s, checks definition correctness):
+  cat > /tmp/eval_probe.lean << 'EOF'
+  import P2p.CausalConeLemmas
+  import P2p.Prize3_Complete
+  namespace P2p
+  #eval rightEdgeF 10 3088   -- should return true/false quickly
+  #eval rightEdgeG 10 4 3088
+  end P2p
+  EOF
+  lake env lean /tmp/eval_probe.lean 2>&1
+
+Step 3 — Lean probe with ?_ (goal inspection, ~15s):
+  (see LEAN PROBE TOOL below)
+
+Step 4 — native_decide (only after steps 1-3 pass)
+```
+
+**When to use each**:
+- Python: always, for any `native_decide` claim involving CA computation
+- `#eval`: when definitions might be wrong or infinite (catches loops before native_decide hangs)
+- `?_` probe: to see exact goal shape before choosing a tactic
+- `native_decide`: only when Python confirms the fact AND `#eval` confirms the definition
+
+---
+
 ## LEAN PROBE TOOL (fast, ~15s, no full build needed)
 
 ```bash
@@ -153,6 +191,25 @@ Once Level 3+ is solved, combine with mod16/53/21/37 theorems to close subcaseB_
 
 ---
 
+## WHEN STUCK
+
+If you cannot make progress on an open obligation after reading the files — the proof
+won't go through, you're going in circles, or you'd otherwise write `sorry` — do this first:
+
+```bash
+scripts/consult <target>   # e.g. scripts/consult m4-level3
+                           #      scripts/consult m22-l0
+```
+
+Then read the output file it generates (`research/consult_*.md`).
+If it proposes something concrete, attempt it before giving up.
+Commit the consult output + any proof attempt (even partial) rather than skipping to
+a different task.
+
+**Never skip to a different task without first running consult on the blocker.**
+
+---
+
 ## DECISION LOGIC
 
 Check `git log --oneline -3`:
@@ -197,3 +254,4 @@ Always increment N from the last loop-A commit's number (check git log).
 | A87 | A3 extended to t≤2000, A4 REFUTED for m=4 | Fin 2001 native_decide; D[c+1]≠0 for m=4 |
 | A88 | mod64=37 FULLY proved (no sorry) | 10-level cascading case split + 4 new base certs in CA_Array_m4 |
 | A89 | mod64=5 mechanical levels FULLY proved | 14 sub-cases (Levels 0a-2), only Level 3+ algebraic remains |
+| A90 | WHEN STUCK section added; consult targets updated | Wire consult into loop for m4-level3 and m22-l0 blockers |
