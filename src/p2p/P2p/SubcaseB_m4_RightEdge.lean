@@ -252,10 +252,251 @@ theorem rightEdgeF_period8_k10 (T : ℕ) (hT : 100 ≤ T) :
   · intro i hi
     exact hstep_agree i (by rw [hstep_len1]; omega)
 
+/-!
+## G period-8 helpers
+-/
+
+/-- For positions i ≤ 2S-1 of the G-ev5 tape (caEvolve 5 of twoSpikeList 4 (2S) (2S+11)):
+    position i equals caEvolve 5 (spikeAtList (4-i) fixed) at 0, where the right spike
+    (at 2S-i > 10) is outside the 5-step causal cone. -/
+private lemma rightEdgeG_ev5_small_eq (S i : ℕ) (hS : 8 ≤ S) (hi : i ≤ 4) :
+    (caEvolve 5 (twoSpikeList 4 (2 * S) (2 * S + 11))).getD i false =
+    (caEvolve 5 (spikeAtList (4 - i) 11)).getD 0 false := by
+  rw [caEvolve_getD_shift 5 _ i]
+  apply caEvolve_agree 5
+  · simp only [List.length_drop]
+    have : (twoSpikeList 4 (2 * S) (2 * S + 11)).length = 2 * S + 11 := by
+      simp [twoSpikeList, List.length_ofFn]
+    rw [this]; omega
+  · rw [spikeAtList_length]; omega
+  · intro j hj
+    simp only [List.getD_eq_getElem?_getD, List.getElem?_drop]
+    rw [show (twoSpikeList 4 (2 * S) (2 * S + 11)).getElem? (i + j) =
+           some (decide (i + j = 4 ∨ i + j = 2 * S)) from by
+      simp [twoSpikeList, List.getElem?_ofFn]; omega]
+    rw [show (spikeAtList (4 - i) 11).getElem? j =
+           some (decide (j = 4 - i)) from by
+      simp [spikeAtList, List.getElem?_ofFn]; omega]
+    simp
+    constructor
+    · intro h; omega
+    · intro h; omega
+
+/-- For positions i ≤ 2S-1 of the G-ev13 tape (caEvolve 13 of twoSpikeList 4 (2S+16) (2S+27)):
+    position i equals caEvolve 13 (spikeAtList (4-i) 27) at 0, where the right spike
+    (at 2S+16-i > 26) is outside the 13-step causal cone. -/
+private lemma rightEdgeG_ev13_small_eq (S i : ℕ) (hS : 8 ≤ S) (hi : i ≤ 4) :
+    (caEvolve 13 (twoSpikeList 4 (2 * S + 16) (2 * S + 27))).getD i false =
+    (caEvolve 13 (spikeAtList (4 - i) 27)).getD 0 false := by
+  rw [caEvolve_getD_shift 13 _ i]
+  apply caEvolve_agree 13
+  · simp only [List.length_drop]
+    have : (twoSpikeList 4 (2 * S + 16) (2 * S + 27)).length = 2 * S + 27 := by
+      simp [twoSpikeList, List.length_ofFn]
+    rw [this]; omega
+  · rw [spikeAtList_length]; omega
+  · intro j hj
+    simp only [List.getD_eq_getElem?_getD, List.getElem?_drop]
+    rw [show (twoSpikeList 4 (2 * S + 16) (2 * S + 27)).getElem? (i + j) =
+           some (decide (i + j = 4 ∨ i + j = 2 * S + 16)) from by
+      simp [twoSpikeList, List.getElem?_ofFn]; omega]
+    rw [show (spikeAtList (4 - i) 27).getElem? j =
+           some (decide (j = 4 - i)) from by
+      simp [spikeAtList, List.getElem?_ofFn]; omega]
+    simp
+    constructor
+    · intro h; omega
+    · intro h; omega
+
+/-- For positions 5 ≤ i ≤ 2S-1 of G-ev5: the value is the same as for F-ev5 (both
+    reduce to caEvolve 5 on a tape with the right spike only). -/
+private lemma rightEdgeG_ev5_ge5_eq_F (S i : ℕ) (hS : 8 ≤ S) (hi5 : 5 ≤ i) (hiS : i ≤ 2 * S - 1) :
+    (caEvolve 5 (twoSpikeList 4 (2 * S) (2 * S + 11))).getD i false =
+    (caEvolve 5 (spikeAtList (2 * S) (2 * S + 11))).getD i false := by
+  rw [caEvolve_getD_shift 5 _ i, caEvolve_getD_shift 5 _ i]
+  apply caEvolve_agree 5
+  · simp only [List.length_drop]
+    have : (twoSpikeList 4 (2 * S) (2 * S + 11)).length = 2 * S + 11 := by
+      simp [twoSpikeList, List.length_ofFn]
+    rw [this]; omega
+  · rw [List.length_drop, spikeAtList_length]; omega
+  · intro j hj
+    simp only [List.getD_eq_getElem?_getD, List.getElem?_drop]
+    have hij_bound : i + j < 2 * S + 11 := by omega
+    rw [show (twoSpikeList 4 (2 * S) (2 * S + 11)).getElem? (i + j) =
+           some (decide (i + j = 4 ∨ i + j = 2 * S)) from by
+      simp [twoSpikeList, List.getElem?_ofFn, hij_bound]]
+    rw [show (spikeAtList (2 * S) (2 * S + 11)).getElem? (i + j) =
+           some (decide (i + j = 2 * S)) from by
+      simp [spikeAtList, List.getElem?_ofFn, hij_bound]]
+    simp
+    omega
+
+/-- For positions 5 ≤ i ≤ 2S-1 of G-ev13: the value is the same as for F-ev13. -/
+private lemma rightEdgeG_ev13_ge5_eq_F (S i : ℕ) (hS : 8 ≤ S) (hi5 : 5 ≤ i) (hiS : i ≤ 2 * S - 1) :
+    (caEvolve 13 (twoSpikeList 4 (2 * S + 16) (2 * S + 27))).getD i false =
+    (caEvolve 13 (spikeAtList (2 * S + 16) (2 * S + 27))).getD i false := by
+  rw [caEvolve_getD_shift 13 _ i, caEvolve_getD_shift 13 _ i]
+  apply caEvolve_agree 13
+  · simp only [List.length_drop]
+    have : (twoSpikeList 4 (2 * S + 16) (2 * S + 27)).length = 2 * S + 27 := by
+      simp [twoSpikeList, List.length_ofFn]
+    rw [this]; omega
+  · rw [List.length_drop, spikeAtList_length]; omega
+  · intro j hj
+    simp only [List.getD_eq_getElem?_getD, List.getElem?_drop]
+    have hij_bound : i + j < 2 * S + 27 := by omega
+    rw [show (twoSpikeList 4 (2 * S + 16) (2 * S + 27)).getElem? (i + j) =
+           some (decide (i + j = 4 ∨ i + j = 2 * S + 16)) from by
+      simp [twoSpikeList, List.getElem?_ofFn, hij_bound]]
+    rw [show (spikeAtList (2 * S + 16) (2 * S + 27)).getElem? (i + j) =
+           some (decide (i + j = 2 * S + 16)) from by
+      simp [spikeAtList, List.getElem?_ofFn, hij_bound]]
+    simp
+    omega
+
+/-- Native_decide certs: caEvolve 5 (spikeAtList j 11) at 0 = caEvolve 13 (spikeAtList j 27) at 0
+    for j ∈ {0,1,2,3,4}. These hold because 13 = 5+8 and period-8 holds for each spike position. -/
+private lemma leftSpike_ev5_eq_ev13_j4 :
+    (caEvolve 5 (spikeAtList 4 11)).getD 0 false =
+    (caEvolve 13 (spikeAtList 4 27)).getD 0 false := by native_decide
+
+private lemma leftSpike_ev5_eq_ev13_j3 :
+    (caEvolve 5 (spikeAtList 3 9)).getD 0 false =
+    (caEvolve 13 (spikeAtList 3 25)).getD 0 false := by native_decide
+
+private lemma leftSpike_ev5_eq_ev13_j2 :
+    (caEvolve 5 (spikeAtList 2 7)).getD 0 false =
+    (caEvolve 13 (spikeAtList 2 23)).getD 0 false := by native_decide
+
+private lemma leftSpike_ev5_eq_ev13_j1 :
+    (caEvolve 5 (spikeAtList 1 5)).getD 0 false =
+    (caEvolve 13 (spikeAtList 1 21)).getD 0 false := by native_decide
+
+private lemma leftSpike_ev5_eq_ev13_j0 :
+    (caEvolve 5 (spikeAtList 0 3)).getD 0 false =
+    (caEvolve 13 (spikeAtList 0 19)).getD 0 false := by native_decide
+
+/-- Combined: for i ≤ 4, G-ev5 at i = G-ev13 at i. Uses the small reduction + native_decide certs. -/
+private lemma rightEdgeG_agree_le4 (S i : ℕ) (hS : 8 ≤ S) (hi : i ≤ 4) :
+    (caEvolve 5 (twoSpikeList 4 (2 * S) (2 * S + 11))).getD i false =
+    (caEvolve 13 (twoSpikeList 4 (2 * S + 16) (2 * S + 27))).getD i false := by
+  rw [rightEdgeG_ev5_small_eq S i hS hi, rightEdgeG_ev13_small_eq S i hS hi]
+  -- Both sides now: caEvolve k (spikeAtList (4-i) size) at 0
+  -- Use caEvolve_spikeAt_agree to reduce to canonical small tapes
+  rw [caEvolve_spikeAt_agree 5 (4 - i) 11 (2 * (4 - i) + 3) 0 (by omega) (by omega)]
+  rw [caEvolve_spikeAt_agree 13 (4 - i) 27 (2 * (4 - i) + 27) 0 (by omega) (by omega)]
+  -- Now dispatch by case on i
+  interval_cases i
+  · exact leftSpike_ev5_eq_ev13_j4
+  · exact leftSpike_ev5_eq_ev13_j3
+  · exact leftSpike_ev5_eq_ev13_j2
+  · exact leftSpike_ev5_eq_ev13_j1
+  · exact leftSpike_ev5_eq_ev13_j0
+
+/-- Cert: position 2S-1 of caEvolve 5 (twoSpikeList 4 (2S) (2S+11)) = true.
+    The drop by (2S-1) gives spike at position 1 (from the right spike at 2S), same as
+    spikeAtList 1 12. Same cert as the F case. -/
+private lemma rightEdgeG_ev5_pos2Sm1 (S : ℕ) (hS : 6 ≤ S) :
+    (caEvolve 5 (twoSpikeList 4 (2 * S) (2 * S + 11))).getD (2 * S - 1) false = true := by
+  rw [caEvolve_getD_shift 5 _ (2 * S - 1)]
+  -- drop (2S-1) of twoSpikeList 4 (2S) (2S+11) agrees with spikeAtList 1 12 on 0..10
+  -- because: position j of drop is decide(2S-1+j = 4 ∨ 2S-1+j = 2S).
+  -- For j ≤ 10: 2S-1+j = 4 iff j = 5-2S < 0 (false for S≥3); 2S-1+j = 2S iff j = 1.
+  -- So drop agrees with spikeAtList 1 12 on positions 0..10.
+  apply (caEvolve_agree 5 _ (spikeAtList 1 12) (by
+    simp only [List.length_drop]
+    have : (twoSpikeList 4 (2 * S) (2 * S + 11)).length = 2 * S + 11 := by
+      simp [twoSpikeList, List.length_ofFn]
+    rw [this]; omega) (by rw [spikeAtList_length]; omega) (fun j hj => ?_)).trans
+    rightEdge_ev5_pos2Sm1_cert
+  simp only [List.getD_eq_getElem?_getD, List.getElem?_drop]
+  have hbound : 2 * S - 1 + j < 2 * S + 11 := by omega
+  rw [show (twoSpikeList 4 (2 * S) (2 * S + 11)).getElem? (2 * S - 1 + j) =
+         some (decide (2 * S - 1 + j = 4 ∨ 2 * S - 1 + j = 2 * S)) from by
+    simp [twoSpikeList, List.getElem?_ofFn, hbound]]
+  rw [show (spikeAtList 1 12).getElem? j =
+         some (decide (j = 1)) from by
+    simp [spikeAtList, List.getElem?_ofFn]; omega]
+  simp; omega
+
+/-- Cert: position 2S-1 of caEvolve 13 (twoSpikeList 4 (2S+16) (2S+27)) = true.
+    The drop by (2S-1) gives spike at position 17 (from right spike at 2S+16). -/
+private lemma rightEdgeG_ev13_pos2Sm1 (S : ℕ) (hS : 6 ≤ S) :
+    (caEvolve 13 (twoSpikeList 4 (2 * S + 16) (2 * S + 27))).getD (2 * S - 1) false = true := by
+  rw [caEvolve_getD_shift 13 _ (2 * S - 1)]
+  apply (caEvolve_agree 13 _ (spikeAtList 17 28) (by
+    simp only [List.length_drop]
+    have : (twoSpikeList 4 (2 * S + 16) (2 * S + 27)).length = 2 * S + 27 := by
+      simp [twoSpikeList, List.length_ofFn]
+    rw [this]; omega) (by rw [spikeAtList_length]; omega) (fun j hj => ?_)).trans
+    rightEdge_ev13_pos2Sm1_cert
+  simp only [List.getD_eq_getElem?_getD, List.getElem?_drop]
+  have hbound : 2 * S - 1 + j < 2 * S + 27 := by omega
+  rw [show (twoSpikeList 4 (2 * S + 16) (2 * S + 27)).getElem? (2 * S - 1 + j) =
+         some (decide (2 * S - 1 + j = 4 ∨ 2 * S - 1 + j = 2 * S + 16)) from by
+    simp [twoSpikeList, List.getElem?_ofFn, hbound]]
+  rw [show (spikeAtList 17 28).getElem? j =
+         some (decide (j = 17)) from by
+    simp [spikeAtList, List.getElem?_ofFn]; omega]
+  simp; omega
+
 -- G period-8: same structure, but with twoSpike (spikes at 4 and 2T-10)
 theorem rightEdgeG_period8_k10 (T : ℕ) (hT : 100 ≤ T) :
     rightEdgeG 10 4 (T + 8) = rightEdgeG 10 4 T := by
-  sorry -- TODO: same decomposition as F, with twoSpike certs
+  simp only [rightEdgeG]
+  set S := T - 5 with hS_def
+  have h1 : 2 * (T + 8) - 10 = 2 * S + 16 := by omega
+  have h2 : 2 * (T + 8) + 1 = 2 * S + 27 := by omega
+  have h3 : 2 * T - 10 = 2 * S := by omega
+  have h4 : 2 * T + 1 = 2 * S + 11 := by omega
+  rw [h1, h2, h3, h4]
+  rw [show T + 8 = (S - 1) + 1 + 13 from by omega]
+  rw [show T = (S - 1) + 1 + 5 from by omega]
+  rw [caEvolve_add (S - 1 + 1) 13, caEvolve_add (S - 1 + 1) 5]
+  rw [caEvolve_add (S - 1) 1, caEvolve_add (S - 1) 1]
+  simp only [caEvolve_succ, caEvolve_zero]
+  set tape1 := caEvolve 13 (twoSpikeList 4 (2 * S + 16) (2 * S + 27))
+  set tape2 := caEvolve 5 (twoSpikeList 4 (2 * S) (2 * S + 11))
+  have hlen1 : tape1.length = 2 * S + 1 := by
+    simp only [tape1]
+    have := caEvolve_length_le 13 (twoSpikeList 4 (2 * S + 16) (2 * S + 27))
+              (by simp [twoSpikeList, List.length_ofFn]; omega)
+    simp [twoSpikeList, List.length_ofFn] at this; omega
+  have hlen2 : tape2.length = 2 * S + 1 := by
+    simp only [tape2]
+    have := caEvolve_length_le 5 (twoSpikeList 4 (2 * S) (2 * S + 11))
+              (by simp [twoSpikeList, List.length_ofFn]; omega)
+    simp [twoSpikeList, List.length_ofFn] at this; omega
+  have hstep_agree : ∀ i, i < (caStepList tape1).length →
+      (caStepList tape1).getD i false = (caStepList tape2).getD i false := by
+    apply rightEdge_caStep_agree S (by omega) tape1 tape2 hlen1 hlen2
+    · -- Agreement on 0..2S-1
+      intro i hi
+      simp only [tape1, tape2]
+      by_cases hi4 : i ≤ 4
+      · -- Left spike zone: use rightEdgeG_agree_le4
+        exact rightEdgeG_agree_le4 S i (by omega) hi4
+      · -- Right-spike-only zone: reduce to F tapes, which both give false
+        push_neg at hi4
+        have hi5 : 5 ≤ i := by omega
+        rw [rightEdgeG_ev5_ge5_eq_F S i (by omega) hi5 hi]
+        rw [rightEdgeG_ev13_ge5_eq_F S i (by omega) hi5 hi]
+        rw [rightEdge_spike_evolve_false 13 S i hi (by omega)]
+        rw [rightEdge_spike_evolve_false 5 S i hi (by omega)]
+    · exact rightEdgeG_ev13_pos2Sm1 S (by omega)
+    · exact rightEdgeG_ev5_pos2Sm1 S (by omega)
+  have hstep_len1 : (caStepList tape1).length = 2 * S - 1 := by
+    rw [show (caStepList tape1).length = tape1.length - 2 from caStep_length tape1 (by omega)]
+    omega
+  have hstep_len2 : (caStepList tape2).length = 2 * S - 1 := by
+    rw [show (caStepList tape2).length = tape2.length - 2 from caStep_length tape2 (by omega)]
+    omega
+  apply caEvolve_agree (S - 1)
+  · rw [hstep_len1]; omega
+  · rw [hstep_len2]; omega
+  · intro i hi
+    exact hstep_agree i (by rw [hstep_len1]; omega)
 
 /-!
 ## Period-8 sensitivity propagation
