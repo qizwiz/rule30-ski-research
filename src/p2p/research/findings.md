@@ -6228,3 +6228,13 @@ spike-at-34 has minimal period 8192 (not 131072). The F cert can be added at P=8
 **Status**: B6 COMPLETE. No new algebraic path found. Algebraic barrier confirmed for H cert.
 The m=22 l≡0 sorry remains the hardest obligation — requires period-131072 H cert or linearity corridor proof.
 
+
+### Addendum: w=40 cert data (s≡1 case)
+
+cert_F(40, P) = False for P ≤ 16384. spike-at-40 minimal period > 16384.
+From existing pattern (spike-at-34 period = 8192, spike-at-32 period = 4096):
+spike-at-40 period is likely 32768 or 65536 (consistent with code using w=40, P=131072 for s≡1 case).
+
+cert_H(40, 22, P) = False for P ≤ 16384 (unchecked at 32768, 65536, 131072).
+Same algebraic barrier applies.
+
