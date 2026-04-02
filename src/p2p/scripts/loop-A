@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# loop-A: Lean/corridor autonomous iteration (Opus, 10-min interval)
+#
+# Track A: linearity corridor proof for m=4 axiom.
+# Uses claude-opus-4-6 with higher budget for hard mathematical work.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+LOG_DIR="$PROJECT_ROOT/runtime"
+mkdir -p "$LOG_DIR"
+
+TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+LOG_FILE="$LOG_DIR/$TIMESTAMP-loop-A.log"
+LOCK_FILE="$LOG_DIR/loop-A.lock"
+
+export PATH="/Users/jonathanhill/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
+# --- Lock: only one loop-A iteration at a time ---
+if ! (set -C; echo $$ > "$LOCK_FILE") 2>/dev/null; then
+  existing_pid="$(cat "$LOCK_FILE" 2>/dev/null || echo '?')"
+  if kill -0 "$existing_pid" 2>/dev/null; then
+    echo "[$TIMESTAMP] loop-A already running (PID $existing_pid), skipping" >> "$LOG_DIR/loop-runner.log"
+    exit 0
+  else
+    # Stale lock — remove and continue
+    echo "[$TIMESTAMP] loop-A stale lock (PID $existing_pid dead), removing" >> "$LOG_DIR/loop-runner.log"
+    rm -f "$LOCK_FILE"
+    echo $$ > "$LOCK_FILE"
+  fi
+fi
+trap 'rm -f "$LOCK_FILE"' EXIT
+
+echo "[$TIMESTAMP] loop-A starting" | tee -a "$LOG_DIR/loop-runner.log"
+
+# --- Run stall detector before each iteration ---
+if [[ -x "$SCRIPT_DIR/stall-check" ]]; then
+  "$SCRIPT_DIR/stall-check" || true
+fi
+
+# --- Run one iteration ---
+cd "$PROJECT_ROOT"
+/Users/jonathanhill/.local/bin/claude \
+  --dangerously-skip-permissions \
+  --print \
+  --model claude-opus-4-6 \
+  --max-budget-usd 15 \
+  < "$SCRIPT_DIR/loop-prompt-A.md" \
+  > "$LOG_FILE" 2>&1
+
+EXIT_CODE=$?
+echo "[$TIMESTAMP] loop-A exited $EXIT_CODE" | tee -a "$LOG_DIR/loop-runner.log"
+echo "[$TIMESTAMP] loop-A log: $LOG_FILE" | tee -a "$LOG_DIR/loop-runner.log"
+
+echo "--- loop-A last output ---" >> "$LOG_DIR/loop-runner.log"
+tail -5 "$LOG_FILE" >> "$LOG_DIR/loop-runner.log"
+echo "---" >> "$LOG_DIR/loop-runner.log"
+
+exit $EXIT_CODE

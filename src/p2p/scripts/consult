@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+# consult: creative consultant — fresh-eyes attack on a stuck problem
+#
+# Usage:
+#   scripts/consult f_center_prev_zero
+#   scripts/consult m22
+#   scripts/consult d_leftbound
+#   scripts/consult "linearity corridor"
+#
+# Uses claude-opus-4-6 for maximum reasoning.
+# Output goes to research/consult_TIMESTAMP.md — does NOT auto-commit.
+# Human reviews output before acting.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+
+export PATH="/Users/jonathanhill/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
+if [[ $# -eq 0 ]]; then
+  echo "Usage: $0 <target>"
+  echo ""
+  echo "Targets:"
+  echo "  f_center_prev_zero  — anti-diagonal zero claim (hard)"
+  echo "  d_leftbound         — D-field support lower bound"
+  echo "  m22                 — m=22 l≡0 sorry (P=131072 barrier)"
+  echo "  nl_zero             — nl_zero_when_both_zero lemma"
+  echo "  <custom>            — any free-form topic"
+  exit 1
+fi
+
+TARGET="$1"
+OUTPUT_FILE="$PROJECT_ROOT/research/consult_${TIMESTAMP}.md"
+
+echo "Running creative consultant on: $TARGET"
+echo "Output will be: $OUTPUT_FILE"
+echo ""
+
+# --- Get RAG context for this target ---
+RAG_CONTEXT=""
+case "$TARGET" in
+  f_center_prev_zero|anti-diagonal)
+    RAG_RESULTS=$("$SCRIPT_DIR/rag_query.sh" "anti-diagonal" 2>/dev/null || echo "")
+    RAG_TOPIC="f_center_prev_zero (anti-diagonal zero claim)"
+    ;;
+  d_leftbound|d-field|dfield)
+    RAG_RESULTS=$("$SCRIPT_DIR/rag_query.sh" "D-field" 2>/dev/null || echo "")
+    RAG_TOPIC="d_leftbound (D-field support lower bound)"
+    ;;
+  m22|"m=22")
+    RAG_RESULTS=$("$SCRIPT_DIR/rag_query.sh" "m=22" 2>/dev/null || echo "")
+    RAG_TOPIC="m=22 l≡0 sorry (n'=35598+65536s, P=131072 algebraic barrier)"
+    ;;
+  nl_zero|nl_zero_when_both_zero)
+    RAG_RESULTS=$("$SCRIPT_DIR/rag_query.sh" "linearity corridor" 2>/dev/null || echo "")
+    RAG_TOPIC="nl_zero_when_both_zero (linearity corridor truth-table lemma)"
+    ;;
+  *)
+    RAG_RESULTS=$("$SCRIPT_DIR/rag_query.sh" "$TARGET" 2>/dev/null || echo "")
+    RAG_TOPIC="$TARGET"
+    ;;
+esac
+
+# --- Build the prompt ---
+PROMPT=$(cat << ENDPROMPT
+You are a mathematician seeing this problem completely fresh, with no prior context.
+
+## The Problem
+
+We are proving Wolfram Prize 3: computing the nth cell of Rule 30's center column requires Ω(n) work.
+
+The proof strategy: Rule 30's center cell at step n has block sensitivity ≥ n. This is being
+formalized in Lean 4. One key stuck point is: **$RAG_TOPIC**.
+
+## The Project Context
+
+Project root: /Users/jonathanhill/src/p2p
+Main Lean files:
+- P2p/Prize3_Complete.lean — prize theorem
+- P2p/SubcaseBPeriod.lean — SubcaseB period proofs
+- P2p/CausalConeLemmas.lean — period certs for spike sequences
+
+Rule 30 update: cell[i] at t+1 = cell[i-1] XOR (cell[i] OR cell[i+1]) at t.
+
+SubcaseB fires when: spike_m gives center=false, twoSpike_{m,last} gives center=true.
+We need a witness c proving sensitivity at m.
+
+## What Has Been Tried (from research/findings.md)
+
+$RAG_RESULTS
+
+## Your Task
+
+**Attack this from a completely different angle.** Do not just restate what's been tried.
+
+1. Read the relevant Lean files to understand the exact proof state
+2. Think like a mathematician who hasn't been stuck in this rut
+3. Propose 1-3 concrete proof approaches that haven't been tried
+4. For the most promising approach: write a sketch of the Lean proof
+5. If you find something, write Python to verify computationally first
+
+Be specific. "Try induction" is not useful. "Prove it by showing the XOR structure
+at position i+t=7 is invariant under the Rule 30 recurrence, specifically..." is useful.
+
+Start with: what is the ACTUAL mathematical statement that needs to be proved in Lean?
+Then attack it.
+
+Output your findings to: $OUTPUT_FILE
+At the end, write a summary section "## Recommended Next Step" with exactly one action.
+ENDPROMPT
+)
+
+# --- Run claude ---
+echo "$PROMPT" | /Users/jonathanhill/.local/bin/claude \
+  --dangerously-skip-permissions \
+  --print \
+  --model claude-opus-4-6 \
+  --max-budget-usd 20 \
+  > "$OUTPUT_FILE" 2>&1
+
+EXIT_CODE=$?
+
+echo ""
+echo "Consultant finished (exit $EXIT_CODE)"
+echo "Output: $OUTPUT_FILE"
+echo ""
+echo "Review output before committing. If useful:"
+echo "  git add $OUTPUT_FILE research/findings.md"
+echo "  git commit -m 'consult: $TARGET — [brief finding]'"

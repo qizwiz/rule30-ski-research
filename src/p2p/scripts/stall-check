@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# stall-check: detect if proof obligations haven't decreased in 48h
+#
+# Reads runtime/loop-runner.log for obligation-count lines.
+# If no decrease in 48h, appends warning to runtime/stall.log
+# and (if called from loop-A context) writes a stuck summary.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+LOG_DIR="$PROJECT_ROOT/runtime"
+RUNNER_LOG="$LOG_DIR/loop-runner.log"
+STALL_LOG="$LOG_DIR/stall.log"
+TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+
+mkdir -p "$LOG_DIR"
+
+# Get current obligation count from proof-gate
+if ! command -v lake >/dev/null 2>&1; then
+  echo "[$TIMESTAMP] stall-check: lake not found, skipping" >> "$STALL_LOG"
+  exit 0
+fi
+
+cd "$PROJECT_ROOT"
+CURRENT_COUNT=$(scripts/proof-gate check 2>/dev/null | grep -oE 'count=[0-9]+' | grep -oE '[0-9]+' || echo "")
+if [[ -z "$CURRENT_COUNT" ]]; then
+  # Try alternate format
+  CURRENT_COUNT=$(scripts/proof-gate check 2>/dev/null | grep -oE '[0-9]+ (sorry|axiom|obligation)' | head -1 | grep -oE '^[0-9]+' || echo "unknown")
+fi
+
+# Find the last time obligations decreased by scanning runner log for count lines
+# We look for lines like "obligations: N" written by proof-gate check
+LAST_DECREASE_LINE=$(grep -n "obligations\|count=" "$RUNNER_LOG" 2>/dev/null | tail -100 || echo "")
+
+# Simple heuristic: check git log for last loop commit in past 48h
+LAST_LOOP_COMMIT=$(git -C "$PROJECT_ROOT" log --oneline --since="48 hours ago" --grep="^loop" 2>/dev/null | head -1 || echo "")
+
+if [[ -z "$LAST_LOOP_COMMIT" ]]; then
+  STALL_MSG="[$TIMESTAMP] STALL DETECTED: No loop commit in past 48h. Current obligations: $CURRENT_COUNT"
+  echo "$STALL_MSG" | tee -a "$STALL_LOG"
+
+  # Write stuck summary if we're in the research dir (loop-A context)
+  STUCK_FILE="$PROJECT_ROOT/research/stuck_${TIMESTAMP}.md"
+  cat > "$STUCK_FILE" << EOF
+# Stuck Summary — $TIMESTAMP
+
+## Stall detected
+No loop commit with obligation decrease in the past 48 hours.
+
+## Current obligation count
+$CURRENT_COUNT
+
+## Recent git log (last 10 commits)
+$(git -C "$PROJECT_ROOT" log --oneline -10 2>/dev/null || echo "(git log failed)")
+
+## Last 20 lines of loop-runner.log
+$(tail -20 "$RUNNER_LOG" 2>/dev/null || echo "(no runner log)")
+
+## Open obligations (proof-gate check)
+$(cd "$PROJECT_ROOT" && scripts/proof-gate check 2>/dev/null || echo "(proof-gate check failed)")
+
+## Suggested actions
+1. Check if build is stuck: ps aux | grep "lake build"
+2. Check if lock files are stale: ls -la runtime/*.lock
+3. Read last loop log: ls -t runtime/*-loop*.log | head -3
+4. Check for Lean syntax errors that are blocking progress
+EOF
+  echo "[$TIMESTAMP] stall-check: wrote stuck summary to $STUCK_FILE" | tee -a "$STALL_LOG"
+else
+  echo "[$TIMESTAMP] stall-check: OK (last loop commit: $LAST_LOOP_COMMIT)" >> "$STALL_LOG"
+fi
+
+exit 0
