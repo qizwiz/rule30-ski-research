@@ -1,6 +1,6 @@
 # arxiv Finds — Wolfram Prize 3 Relevance
 
-Last updated: 2026-04-01 (loop-B3)
+Last updated: 2026-04-01 (loop-B5)
 
 ---
 
@@ -59,3 +59,70 @@ Last updated: 2026-04-01 (loop-B3)
 2. The block sensitivity framework (2602.01042) is actively studied in 2026. No one has yet published a block sensitivity lower bound for cellular automaton functions specifically — our proof would be novel in this direction.
 
 3. For closing the remaining axioms (m=4 Level 3+, m=22 period-131072), no arxiv papers found with applicable LFSR/algebraic techniques specific to nonlinear CA period proofs. The algebraic path remains internal to our project.
+
+---
+
+## Loop-B5 Mining Session — Algebraic Period Proofs for m=4/m=22
+
+**Focus**: Can any known technique prove period bounds for center-column outputs of Rule 30
+started from structured central initial configs (spike/twoSpike)? 14 papers surveyed.
+
+---
+
+### Paper 6: Local Nested Structure in Rule 30 (Rowland 2006)
+- **Source**: Complex Systems 16 (2006) 239–258. Not on arxiv.
+  PDF: https://ericrowland.github.io/papers/Local_nested_structure_in_rule_30.pdf
+- **Key technique**: Right/left bijectivity of Rule 30. For left-justified Rule 30 (Rule 86),
+  all columns are eventually periodic with period a power of 2 (Jen's Theorem 4, 1986).
+  Rowland's Proposition 2: period of column m doubles exactly when column m−1 is eventually
+  white and the column m−2 period block contains an odd number of black cells.
+- **Relevance to m=22 period-131072**: Proves period-as-power-of-2 for Rule 30 columns/diagonals
+  via bijectivity. BUT applies only to rightful initial conditions (left tail constant), not central
+  initial conditions like twoSpike(34,22). Non-trivial adaptation needed.
+- **Relevance to m=4 Level 3+ hierarchy**: Self-similar period-doubling in left diagonals is
+  structurally analogous to the witness-width hierarchy (P=8,16,64,...,131072). Mechanism
+  (bijectivity condition propagates left) may illuminate why the hierarchy exists.
+- **Verdict: CONTEXT** — closest existing algebraic work on Rule 30 period doubling.
+  Right family of ideas but does not directly transfer to central initial conditions.
+
+### Paper 7: Global Properties of Cellular Automata (Jen 1986)
+- **Source**: J. Statistical Physics 43 (1986) 219–242.
+- **Key technique**: Theorem 4: eventual periodicity with period a power of 2 for columns
+  of right-bijective rules from rightful initial conditions.
+- **Verdict: CONTEXT** — foundational result underlying Rowland. Same limitation.
+
+### Papers 8–14: NLFSR / nonlinear complexity / GF(2) period surveys
+- arxiv:1005.2280 — embeds clock-controlled generators into linear CA; not Rule 30.
+- arxiv:2602.01134 — characterizes sequences with high NFSR order; doesn't bound period.
+- arxiv:2602.17148 — period proofs for Yang-Baxter CA over F_{2^n}; not Rule 30.
+- arxiv:1108.3982 — renormalization of probabilistic CA; not algebraic period analysis.
+- NLFSR construction papers — build maximal-period registers; opposite direction from bounding.
+- arxiv:2404.16313, 2405.08479 — NFSR order / 2-adic complexity surveys; not period bounds.
+- **All VERDICT: NOT RELEVANT**
+
+---
+
+## B5 Synthesis: Key Insight for Loop-A
+
+**Jen-Rowland bijectivity is the right family of ideas for both open problems.**
+
+The algebraic mechanism is: in the left-bijective form of Rule 30, the rightward causal
+influence of any initial cell is strictly bounded. Once that cell's cone doesn't reach
+a given column at time T, that column's value is determined by the LEFT boundary alone —
+making the column output periodic with the same period as the left boundary dynamics.
+
+**Adaptation needed for central initial conditions (twoSpike, spike):**
+- In twoSpike(w, m), both tails are white after width w. The right-bijective argument
+  applies to the right half; the left-bijective argument applies to the left half.
+- The center-column output at time n' is the XOR of contributions from both cones.
+- Once n' is large enough that twoSpike's support doesn't reach the boundary, the
+  center output is determined by two "rightful-from-center" sub-problems.
+- This is precisely the D-field / linearity corridor structure already in the proof!
+
+**Implication**: The corridor proof (CausalConeLemmas.lean) IS the right adaptation of
+Rowland/Jen to the central-initial-condition case. The remaining algebraic work (m=4
+Level 3+, m=22 period-131072) is proving that the "nonlinear interaction term" I=F⊕G⊕1
+vanishes outside the D-field support — which is what d_leftbound and nl_zero_when_both_zero
+establish. The Lean proof structure already matches the right mathematical approach.
+
+**No new technique found; algebraic barrier is confirmed genuine and unaddressed in literature.**
