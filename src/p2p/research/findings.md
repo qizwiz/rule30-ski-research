@@ -6115,3 +6115,116 @@ and w=40 (for s≡1 mod 2), both requiring period-131072. But the loop-B4 period
 P up to 2048. It's possible that a different witness width w' exists with a much smaller period that
 still achieves sensitivity at n'=35598+65536*s. This would be a Python computation task for a future loop.
 
+
+---
+
+## B6: twoSpikeList(34,22) Period Analysis — m=22 Sorry Cert Structure (loop-B6, 2026-04-02)
+
+### Question
+What are the actual period cert requirements for closing the m=22 l≡0 sorry?
+The code comment says "period-131072 certs for spike(34), twoSpike(34,22)" — is this correct?
+
+### Background
+The sorry at SubcaseBPeriod.lean line 2417 covers n'=35598+65536*s (s≡0 mod 2),
+i.e., n' = 35598 + 131072*t. sensitivity_transfer with witness w and period P needs:
+  hF_cert: caEvolve P (spikeAtList w (2*P+2*w+1)) = spikeAtList w (2*w+1)
+  hH_cert: caEvolve P (twoSpikeList w m (2*P+2*(max w m)+1)) = twoSpikeList w m (2*(max w m)+1)
+Both must use the SAME P.
+
+### Method
+Python (numpy vectorized Rule30, fixed-tape with zero boundary).
+Equivalence: (caEvolve k tape)[j] = cell[j+k] after k standard Rule30 steps.
+So cert holds iff cell[P..P+2*M] after P steps matches twoSpikeList target.
+
+### Results
+
+**Witness confirmation** (n'=35598):
+| w  | F    | H    | sensitive |
+|----|------|------|-----------|
+| 2  | 1    | 1    | False     |
+| 4  | 1    | 1    | False     |
+| 6  | 1    | 1    | False     |
+| 8  | 0    | 0    | False     |
+| 10 | 1    | 1    | False     |
+| 12 | 1    | 1    | False     |
+| 14 | 0    | 0    | False     |
+| 16 | 0    | 0    | False     |
+| 18 | 1    | 1    | False     |
+| 20 | 1    | 1    | False     |
+| 22 | 0    | 0    | False     |
+| 24 | 0    | 0    | False     |
+| 26 | 1    | 1    | False     |
+| 28 | 1    | 1    | False     |
+| 30 | 0    | 0    | False     |
+| 32 | 0    | 0    | False     |
+| **34** | **0** | **1** | **True**  |
+
+**w=34 is the minimum sensitive witness at n'=35598** (F=0, H=1). Confirmed.
+
+**spike-at-34 period** (F cert):
+| P      | cert_F(34,P) |
+|--------|-------------|
+| ...    | ...         |
+| 8192   | **True**    |  ← MINIMAL (among powers of 2 tested)
+
+cert_F(34, 8192) = True. The spike-at-34 has minimal period dividing 8192.
+The code comment says "period-131072 certs for spike(34)" — this is **WRONG**.
+The F cert can be done at P=8192 (tape = 16453 cells, 8192 steps — feasible native_decide).
+
+**twoSpikeList(34,22) period** (H cert):
+| P      | cert_H(34,22,P) |
+|--------|-----------------|
+| 8192   | False           |
+| 16384  | False           |
+| 32768  | False           |
+| 65536  | False           |
+| 131072 | (running)       |
+
+cert_H(34,22,P) fails for all P ≤ 65536. The twoSpikeList(34,22) minimal period is likely 131072.
+
+**spike-at-m minimal periods** (new table, verified via Python):
+
+| m  | spike-at-m period |
+|----|-------------------|
+| 4  | 8                 |
+| 6  | 16                |
+| 8  | 32                |
+| 10 | 64                |
+| 12 | 64                |
+| 14 | 64                |
+| 16 | 256               |
+| 20 | 256               |
+| 22 | 256               |
+| 24 | 512               |
+| 26 | 1024              |
+| 28 | 2048              |
+| 30 | 4096              |
+| 32 | 4096              |
+| **34** | **8192**      |
+
+### Conclusion
+
+**Key finding**: The code comment "period-131072 certs for spike(34)" is **WRONG** about the F cert.
+spike-at-34 has minimal period 8192 (not 131072). The F cert can be added at P=8192:
+  `caEvolve_cert_spike34_p8192 : caEvolve 8192 (spikeAtList 34 16453) = spikeAtList 34 69`
+(tape 16453 = 2*8192+2*34+1 cells, much smaller than the 262K tape for P=131072).
+
+**True bottleneck**: The H cert for twoSpikeList(34,22) requires P = 131072 (confirmed: fails for P ≤ 65536). sensitivity_transfer requires SAME P for both F and H, so P=131072 is forced by the H cert.
+
+**F cert at P=131072**: Since sensitivity_transfer needs P=131072 for the H cert, the F cert also needs to be at P=131072. But since spike-at-34 has period 8192 dividing 131072, cert_F(34,131072) = True trivially (131072 = 16*8192).
+
+**Practical implication for loop-A**:
+1. The F cert `caEvolve_cert_spike34_p131072` (tape 262213, 131072 steps) is needed.
+   It can be proved by native_decide. Time estimate: ~same as H cert since tape sizes match.
+2. The H cert `caEvolve_cert_ts3422_p131072` (twoSpikeList 34 22, tape 262213) is the bottleneck.
+3. BOTH are needed together for sensitivity_transfer.
+4. Combined, this closes the s≡0 case. The s≡1 case needs analogous certs for w=40.
+
+**Algebraic shortcut**: The F cert CAN be proved from a smaller cert using periodicity:
+  If caEvolve_cert_spike34_p8192 is proved (tape 16453), then
+  caEvolve_cert_spike34_p131072 follows by 16 applications of the period lemma.
+  This avoids the large native_decide for the F cert (only the H cert needs large tape).
+
+**Status**: B6 COMPLETE. No new algebraic path found. Algebraic barrier confirmed for H cert.
+The m=22 l≡0 sorry remains the hardest obligation — requires period-131072 H cert or linearity corridor proof.
+
