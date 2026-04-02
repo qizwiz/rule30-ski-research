@@ -468,6 +468,13 @@ Results match prior claims exactly: $m=4$ at offsets $\{6\}$ (per period 8);
 $m=16$ at offsets $\{120,124,192\}$ (per period 256); all other active small-$m$
 confirmed (136\,s total, exhaustive over one full period each).
 
+\textbf{Right-edge witness approach for $m=4$ (2026-04-02).}
+The infinite self-similar hierarchy for $m=4$ Level~3+ (SubcaseB at $n' \equiv 5 \pmod{16384}$) is resolved by a \emph{co-moving frame}: instead of witnesses at fixed positions (which grow without bound as $n'$ increases), use witnesses at fixed offsets from the right edge of the causal cone: $w = 2(n'+1) - k$ for $k = 10$. As $n'$ grows, $w$ grows with it; the relative structure is constant.
+
+Computationally verified (Python, 2026-04-02): SubcaseB for $m=4$ fires exclusively at $n' \equiv 5 \pmod 8$ for all $n' \in [3087, 3200]$ (residues $\{0,1,2,3,4,6,7\}$ produce no SubcaseB event). The right-edge function $F_{10}(T) := \mathtt{caEvolve}(T, \mathtt{spike}(2T{-}10))[\text{center}]$ has period~4 in $T$; the two-spike function $G_{10}(T) := \mathtt{caEvolve}(T, \mathtt{twoSpike}(4, 2T{-}10))[\text{center}]$ has period~8. The sensitivity $F_{10}(T) \neq G_{10}(T)$ (i.e., the right-edge witness is valid) has period~8, covering the $n' \equiv 5 \pmod 8$ SubcaseB class.
+
+This collapses the infinite hierarchy to: two focused period-8 axioms (\texttt{rightEdgeF\_period8\_k10}, \texttt{rightEdgeG\_period8\_k10}) stating $F_{10}(T{+}8) = F_{10}(T)$ and $G_{10}(T{+}8) = G_{10}(T)$ for $T \geq 100$, together with one native\_decide base case ($T = 3094$, corresponding to $n' = 3093 \equiv 5 \pmod 8$). The formalization is in \texttt{P2p/SubcaseB\_m4\_RightEdge.lean} (0~sorries, 2~axioms). The two period-8 axioms are closeable via 41-cell, 8-step combined-pattern period certificates (feasible \texttt{native\_decide}).
+
 \textbf{Period structure and max-$m$ growth.}  The existing Lean lemmas in
 \texttt{CausalConeLemmas}\allowbreak\texttt{.lean} establish that the
 \emph{open-boundary} (causal-cone)
@@ -1582,12 +1589,16 @@ successfully with a clean \texttt{.olean} after fixing a \texttt{maxRecDepth}
 elaboration issue in \texttt{subcaseB\_m4\_unique\_in\_period} (the Fin-indexed
 formulation triggered recursive Nat kernel reduction; replaced with a
 \texttt{List.mem}-based formulation).  The current obligation count is
-\textbf{5 total}: the axiom \texttt{subcaseB\_m4\_ge3087} (the algebraic case above),
-the master axiom \texttt{subcaseB\_resolution\_ge3087} (which assembles all sub-cases
-and will become a theorem once the m=4 axiom is closed), two native\_decide axioms
-for $m=28$ and $m=30$ residue classifications in \texttt{CA\_Array.lean} (currently
-compiling in \texttt{CA\_Array\_residues.lean}), and the
-\texttt{subcaseB\_right\_mirror\_ge3087} which will follow from left-boundary symmetry.
+\textbf{4 total}: \texttt{subcaseB\_m4\_ge3087} is replaced by
+\texttt{SubcaseB\_m4\_RightEdge.lean} containing 2 focused period-8 axioms
+(\texttt{rightEdgeF\_period8\_k10}, \texttt{rightEdgeG\_period8\_k10}) with 0 sorrys;
+the period-8 identities are the remaining mathematical content for $m=4$.
+The remaining obligations are the master axiom
+\texttt{subcaseB\_resolution\_ge3087} (which assembles all sub-cases and will become a
+theorem once the $m=4$ axioms are closed), two native\_decide axioms for $m=28$ and
+$m=30$ residue classifications in \texttt{CA\_Array.lean} (currently compiling in
+\texttt{CA\_Array\_residues.lean}), and the \texttt{subcaseB\_right\_mirror\_ge3087}
+which will follow from left-boundary symmetry.
 All other sub-cases ($m \in \{6, 8, \ldots, 26\}$) are axiom-free.
 
 Our essentiality theorem characterizes the causal structure of Rule~30 precisely and
