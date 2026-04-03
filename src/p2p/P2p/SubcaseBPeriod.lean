@@ -42,6 +42,7 @@ import P2p.CA_Array
 import P2p.CA_Array_m4
 import P2p.SubcaseB_BaseSens
 import P2p.SubcaseB_m4_RightEdge
+import P2p.SubcaseB_m22_RightEdge
 import Mathlib.Tactic.Ring
 
 set_option maxHeartbeats 800000000
@@ -2741,12 +2742,9 @@ theorem subcaseB_m22_ge3087_proved (n' : Nat) (hn' : 3087 ≤ n')
               -- Structure (verified by C shrinking-CA, loop75):
               --   s≡0 mod 2 (n'=35598+131072*t): w=34 witnesses. F=0,H=1 at n'=35598 AND n'=166670.
               --   s≡1 mod 2 (n'=101134+131072*t): w=40 witnesses. F=1,H=0 at n'=101134.
-              -- Mechanical closure requires period-131072 certs for spike(34), twoSpike(34,22),
-              -- spike(40), twoSpike(40,22) — each needing CA on tape ~262213, ~20h native_decide.
-              -- Also base sensitivity certs: n''=35598 (tape 71199) and n''=101134 (tape 202271).
-              -- ALGEBRAIC PROOF (linearity corridor) is the practical path.
-              obtain ⟨s, hls⟩ : ∃ s, l = 2 * s := ⟨l / 2, by omega⟩
-              sorry
+              -- Closed by right-edge witness proof (SubcaseB_m22_RightEdge.lean):
+              -- k=6 right-edge witnesses have period 256, bypassing the 131072 barrier entirely.
+              exact subcaseB_m22_ge3087_from_rightedge n' hn' m hm22 hcase hts
             · -- l ≡ 1 (odd): l = 2*t+1, so n' = 2830 + 65536*(t+1), use w=32, P=65536
               -- Python (shrinking CA) verified: spike(32) P=65536 PASS, twoSpike(32,22) PASS,
               -- base sensitivity n''=2830 w=32: F=false≠H=true ✓
