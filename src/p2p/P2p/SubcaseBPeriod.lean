@@ -5198,6 +5198,76 @@ theorem subcaseB_right_mirror_ge3087 (n' : Nat) (hn' : 3087 ≤ n')
       exact absurd hts_caE (by decide)
 
 /-!
+## Inactive m infrastructure (m=2 and m=18)
+
+For inactive m values, SubcaseB never fires for large n'.
+We prove this by period reduction + base case native_decide.
+-/
+
+-- Period certs for m=2 (period 2)
+set_option maxHeartbeats 800000 in
+lemma caEvolve_cert_m2_p2 :
+    caEvolve 2 (spikeAtList 2 9) = spikeAtList 2 5 := by native_decide
+
+set_option maxHeartbeats 800000 in
+lemma caEvolve_h1_p2 :
+    (caEvolve 2 (spikeAtList 4 5)).getD 0 false = true := by native_decide
+
+lemma rule30n_twoSpikeLast2_period2 (n : Nat) (hn : n ≥ 2) :
+    (caEvolve (n + 1) (twoSpikeLastList 2 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 2) (twoSpikeLastList 2 (2 * ((n + 1) + 2) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 2 2 caEvolve_cert_m2_p2 caEvolve_h1_p2 n hn
+
+lemma twoSpikeLast2_iterated_period2 (n k : Nat) (hn : n ≥ 2) :
+    (caEvolve (n + 1) (twoSpikeLastList 2 (2*(n+1)+1))).getD 0 false =
+    (caEvolve (n + 1 + k * 2) (twoSpikeLastList 2 (2*(n+1+k*2)+1))).getD 0 false := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [ih]
+    conv_lhs => rw [show n + 1 + k * 2 = (n + k * 2) + 1 from by omega]
+    have hstep : n + 1 + (k + 1) * 2 = (n + k * 2) + 1 + 2 := by ring
+    rw [hstep]
+    exact rule30n_twoSpikeLast2_period2 (n + k * 2) (by omega)
+
+/-- For m=2, twoSpikeLast gives center=false for all n'' ∈ [2, 4). -/
+set_option maxHeartbeats 800000 in
+lemma subcaseB_m2_G_always_false :
+    ∀ j : Fin 2,
+    (caEvolve (j.val + 2 + 1) (twoSpikeLastList 2 (2*(j.val + 2 + 1)+1))).getD 0 false = false := by
+  native_decide
+
+-- Period certs for m=18 (period 256)
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_cert_m18_p256 :
+    caEvolve 256 (spikeAtList 18 549) = spikeAtList 18 37 := by native_decide
+
+lemma rule30n_twoSpikeLast18_period256 (n : Nat) (hn : n ≥ 18) :
+    (caEvolve (n + 1) (twoSpikeLastList 18 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 256) (twoSpikeLastList 18 (2 * ((n + 1) + 256) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 18 256 caEvolve_cert_m18_p256 caEvolve_h1_p256 n hn
+
+lemma twoSpikeLast18_iterated_period256 (n k : Nat) (hn : n ≥ 18) :
+    (caEvolve (n + 1) (twoSpikeLastList 18 (2*(n+1)+1))).getD 0 false =
+    (caEvolve (n + 1 + k * 256) (twoSpikeLastList 18 (2*(n+1+k*256)+1))).getD 0 false := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [ih]
+    conv_lhs => rw [show n + 1 + k * 256 = (n + k * 256) + 1 from by omega]
+    have hstep : n + 1 + (k + 1) * 256 = (n + k * 256) + 1 + 256 := by ring
+    rw [hstep]
+    exact rule30n_twoSpikeLast18_period256 (n + k * 256) (by omega)
+
+/-- For m=18, SubcaseB never fires in base period [18, 274). -/
+set_option maxHeartbeats 4000000000 in
+lemma subcaseB_m18_never_fires :
+    ∀ j : Fin 256,
+    (caEvolve (j.val + 18 + 1) (spikeAtList 18 (2*(j.val + 18 + 1)+1))).getD 0 false = false →
+    (caEvolve (j.val + 18 + 1) (twoSpikeLastList 18 (2*(j.val + 18 + 1)+1))).getD 0 false = true →
+    False := by native_decide
+
+/-!
 ## Main SubcaseB resolution theorem for n' ≥ 3087
 
 Combines the case analysis over m values.
@@ -5215,12 +5285,12 @@ also have witnesses but are not yet individually axiomatized.
 -/
 
 /-- SubcaseB resolution for n' ≥ 3087: given SubcaseB conditions, a sensitive witness exists.
-    Mathematically true: for every n' ≥ 3087 and every even m with 1 ≤ m < 2*(n'+1),
-    if F_m(n'+1)=false and G_{m,last}(n'+1)=true, then spike_w is sensitive at m for
-    some even w. The active m set is periodic with period lcm(8,16,32,64,256,...) and
-    witnesses exist at each firing position (computationally verified for n' ≤ 50000).
-    Full Lean proof requires a unified multi-witness period reduction framework. -/
-axiom subcaseB_resolution_ge3087
+    For every n' ≥ 3087 and every even m with 1 ≤ m < 2*(n'+1), m ≠ 2*n',
+    if F_m(n'+1)=false and G_{m,last}(n'+1)=true, then spike_w is sensitive at m.
+    Proof: case analysis over m values. Active m ∈ {4,6,...,28} + right-mirror at 2T-8.
+    Inactive m ∈ {2,18} proved via period reduction (SubcaseB never fires).
+    Remaining sorry: m > 30, m ≠ 2T-8 (computationally verified, needs structural proof). -/
+theorem subcaseB_resolution_ge3087
     (n' : Nat) (hn' : 3087 ≤ n')
     (m : Fin (2 * (n' + 1) + 1))
     (hm_even : m.val % 2 = 0)
@@ -5233,7 +5303,83 @@ axiom subcaseB_resolution_ge3087
              decide (k.val = m.val ∨ k.val = 2 * (n' + 1))) = true) :
     ∃ c_n : Config (n' + 1),
       (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
-      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m)
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  -- Case split: m ≤ 30 or m > 30
+  by_cases hm30 : m.val ≤ 30
+  · -- m ≤ 30: enumerate all even values 2, 4, 6, ..., 30
+    -- m is even (hm_even), m ≥ 1 (hm_low), m ≤ 30
+    interval_cases (m.val)
+    all_goals (first
+      | (-- odd: contradicts hm_even
+         omega)
+      | (-- m = 0: contradicts hm_low
+         omega)
+      | (-- m = 2: SubcaseB never fires (inactive, G always false)
+         exfalso
+         have hts2 : (caEvolve (n'+1) (twoSpikeLastList 2 (2*(n'+1)+1))).getD 0 false = true := by
+           rw [← rule30n_twoSpikeLast_eq n' 2]; exact hts
+         obtain ⟨k, hn'_eq⟩ := periodReduce_diff 2 2 n' (by omega) (by omega)
+         have hn''_range := periodReduce_range 2 2 n' (by omega) (by omega)
+         set n'' := periodReduce 2 2 n'
+         have hG_n'' : (caEvolve (n''+1) (twoSpikeLastList 2 (2*(n''+1)+1))).getD 0 false = true := by
+           have hp := twoSpikeLast2_iterated_period2 n'' k (by omega)
+           rw [show n''+1+k*2 = n'+1 from by omega] at hp; rw [hp]; exact hts2
+         have hG_false : (caEvolve (n''+1) (twoSpikeLastList 2 (2*(n''+1)+1))).getD 0 false = false := by
+           have := subcaseB_m2_G_always_false ⟨n'' - 2, by omega⟩
+           convert this using 2 <;> omega
+         exact absurd hG_n'' (by rw [hG_false]; decide))
+      | (-- m = 4
+         exact subcaseB_m4_ge3087 n' hn' m (by omega) hcase hts)
+      | (-- m = 6
+         exact subcaseB_m6_ge3087_proved n' hn' m (by omega) hcase hts)
+      | (-- m = 8
+         exact subcaseB_m8_ge3087_proved n' hn' m (by omega) hcase hts)
+      | (-- m = 10
+         exact subcaseB_m10_ge3087_proved n' hn' m (by omega) hcase hts)
+      | (-- m = 12
+         exact subcaseB_m12_ge3087_proved n' hn' m (by omega) hcase hts)
+      | (-- m = 14
+         exact subcaseB_m14_ge3087_proved n' hn' m (by omega) hcase hts)
+      | (-- m = 16
+         exact subcaseB_m16_ge3087_proved n' hn' m (by omega) hcase hts)
+      | (-- m = 18: SubcaseB never fires (inactive, F=false ∧ G=true impossible)
+         exfalso
+         have hcase18 : (caEvolve (n'+1) (spikeAtList 18 (2*(n'+1)+1))).getD 0 false = false := by
+           rw [← rule30n_spikeAt_eq n' 18]; exact hcase
+         have hts18 : (caEvolve (n'+1) (twoSpikeLastList 18 (2*(n'+1)+1))).getD 0 false = true := by
+           rw [← rule30n_twoSpikeLast_eq n' 18]; exact hts
+         obtain ⟨k, hn'_eq⟩ := periodReduce_diff 18 256 n' (by omega) (by omega)
+         have hn''_range := periodReduce_range 18 256 n' (by omega) (by omega)
+         set n'' := periodReduce 18 256 n'
+         have hF_n'' : (caEvolve (n''+1) (spikeAtList 18 (2*(n''+1)+1))).getD 0 false = false := by
+           have hp := spikeAt_iterated_period 18 256 (by omega) caEvolve_cert_m18_p256 n'' k
+           rw [show n''+1+k*256 = n'+1 from by omega] at hp; rw [hp]; exact hcase18
+         have hG_n'' : (caEvolve (n''+1) (twoSpikeLastList 18 (2*(n''+1)+1))).getD 0 false = true := by
+           have hp := twoSpikeLast18_iterated_period256 n'' k (by omega)
+           rw [show n''+1+k*256 = n'+1 from by omega] at hp; rw [hp]; exact hts18
+         exact subcaseB_m18_never_fires ⟨n'' - 18, by omega⟩
+           (by convert hF_n'' using 2; omega)
+           (by convert hG_n'' using 2; omega))
+      | (-- m = 20
+         exact subcaseB_m20_ge3087_proved n' hn' m (by omega) hcase hts)
+      | (-- m = 22
+         exact subcaseB_m22_ge3087_proved n' hn' m (by omega) hcase hts)
+      | (-- m = 24
+         exact subcaseB_m24_ge3087_proved n' hn' m (by omega) hcase hts)
+      | (-- m = 26
+         exact subcaseB_m26_ge3087_proved n' hn' m (by omega) hcase hts)
+      | (-- m = 28
+         exact subcaseB_m28_ge3087_proved n' hn' m (by omega) hcase hts)
+      | (-- m = 30
+         exact subcaseB_m30_ge3087_proved n' hn' m (by omega) hcase hts))
+  · -- m > 30
+    push_neg at hm30
+    by_cases hrm : m.val = 2 * (n' + 1) - 8
+    · -- right-mirror case
+      exact subcaseB_right_mirror_ge3087 n' hn' m hrm hm_even hm_low hcase hts
+    · -- m > 30, not right-mirror: SubcaseB never fires here
+      -- Computationally verified for n' ≤ 50000. Structural proof pending.
+      exfalso; sorry
 
 -- subcaseB_resolution_ge3087 is the public API (called by LiftingLemma_LeftPermutive).
 -- The n'∈[5,3086] case is handled directly by the native_decide tower in

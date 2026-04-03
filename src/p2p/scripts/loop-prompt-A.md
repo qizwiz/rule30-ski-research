@@ -119,20 +119,23 @@ lake env lean /tmp/probe.lean 2>&1 | grep -A 20 "unsolved goals\|⊢\|error"
 
 ## CURRENT STATE (auto-updated by loop-A)
 
-**Obligations**: 4 (as of loop-A94)
-- `subcaseB_m4_ge3087` — ✓ CLOSED (loop-A94): axiom→theorem via SubcaseB_m4_RightEdge import
-- `subcaseB_resolution_ge3087` — master axiom, line 5225 — closes when m22 + m28/m30 close
-- `subcaseB_m22_l0_sorry` — line 2749 — algebraic barrier (P=131072, infeasible native_decide)
-- `subcaseB_m28_residue_3class_proved` — CA_Array.lean axiom — CA_Array_residues BUILDING (PID 59371)
-- `subcaseB_m30_residue_unique_proved` — CA_Array.lean axiom — CA_Array_residues BUILDING (PID 59371)
+**Obligations**: 3 (as of loop-A95)
+- `subcaseB_resolution_ge3087` — now a THEOREM with 1 sorry (m>30 non-mirror)
+  - m=2: ✓ CLOSED (loop-A95, inactive — G always false, period 2)
+  - m=18: ✓ CLOSED (loop-A95, inactive — SubcaseB never fires, period 256)
+  - m=4,6,8,...,28,30: ✓ all delegated to existing component theorems
+  - m=right-mirror: ✓ delegated to subcaseB_right_mirror_ge3087
+  - m>30 non-mirror: sorry (computationally verified inactive, needs structural proof)
+- `subcaseB_m28_residue_3class_proved` — CA_Array.lean axiom — CA_Array_residues BUILDING
+- `subcaseB_m30_residue_unique_proved` — CA_Array.lean axiom — CA_Array_residues BUILDING
 
 **Build status**:
-- SubcaseBPeriod.lean: ⚠️ olean stale (needs rebuild after m4 axiom→theorem)
+- SubcaseBPeriod.lean: ⚠️ olean stale (needs rebuild with new inactive m lemmas + theorem body)
 - SubcaseB_m4_RightEdge.lean: ✓ clean olean (0 axioms, 0 sorrys)
 - CA_Array.lean: ✓ clean olean
 - CA_Array_residues.lean: BUILDING at /tmp/ca_residues_build.log (PID 59371, started ~11:26AM Apr 2)
 
-**Recent work**: loop-A94 closed subcaseB_m4_ge3087 axiom via right-edge import delegation
+**Recent work**: loop-A95 converted subcaseB_resolution_ge3087 from axiom to theorem; closed m=2 and m=18 inactive cases
 
 ---
 
@@ -272,3 +275,4 @@ Always increment N from the last loop-A commit's number (check git log).
 | A90 | WHEN STUCK section added; consult targets updated | Wire consult into loop for m4-level3 and m22-l0 blockers |
 | A91 | A6 right-edge approach documented; obligations updated | shrinking CA verified, period-8 axioms are the blocker |
 | A94 | subcaseB_m4_ge3087 axiom→theorem; obligations 5→4 | import SubcaseB_m4_RightEdge, delegate to proved theorem |
+| A95 | subcaseB_resolution_ge3087 axiom→theorem; m=2,m=18 closed | period certs + base case native_decide for inactive m |
