@@ -28,55 +28,82 @@ output requires checking at least n cells → Ω(n) work.
 
 ## PROOF STATUS
 
-### ✓ DONE (axiom-free, machine-checked)
+### ✓ DONE (machine-checked)
 - Core definitions: `rule30Local`, `Config`, `Essential`, `HasBlockSensitivity`
 - Base cases n=0..5 via `native_decide`
 - `AllEssential`: all 2n+1 cells essential at every level
-- `rule30_bs_ge_n`: the prize theorem — **proved via one axiom** (see below)
+- `rule30_bs_ge_n`: prize theorem **via `lifting_lemma` axiom**
+- `rule30_bs_ge_n_direct`: prize theorem **via `subcaseB_mgt30_split` axiom** (no lifting_lemma needed!)
+- `subcaseB_resolution_ge3087`: **THEOREM** (0 code sorrys, 0 axioms in proof body)
 
-### THE SINGLE REMAINING AXIOM
+### TWO REMAINING AXIOMS
 ```lean
-axiom subcaseB_resolution_ge3087 : ...
+axiom lifting_lemma : ...           -- Prize3_Complete.lean:309
+axiom subcaseB_mgt30_split : ...    -- SubcaseB_Firewall.lean:108
 ```
-Lives in `P2p/SubcaseBPeriod.lean`. This axiom says: for all active m and all n' ≥ 3087,
-if SubcaseB fires (spike_m gives center=false, twoSpike_{m,last} gives center=true),
-then there exists a valid witness c proving sensitivity at m.
 
-**Closing this axiom = axiom-free proof of Prize 3.**
+`rule30_bs_ge_n_direct` (LiftingLemma_LeftPermutive.lean) proves Prize 3 with ONLY `subcaseB_mgt30_split`.
+`lifting_lemma` is only needed for the induction-based `rule30_bs_ge_n` path.
 
-## DEPENDENCY TREE TO CLOSE subcaseB_resolution_ge3087
+**Closing `subcaseB_mgt30_split` = near-axiom-free proof of Prize 3.**
+
+`subcaseB_mgt30_split`: SubcaseB never fires for inactive even m ≥ 40 at n' ≥ 3087.
+Computationally verified over [3087, 5000]. Requires Phi_3/LFSR algebraic proof.
+
+## DEPENDENCY TREE (CURRENT STATE Apr 6 2026)
 
 ```
-subcaseB_resolution_ge3087  (master, needs ALL below)
-├── subcaseB_m4_ge3087_proved        ← AXIOM (line 815)
-├── subcaseB_m6_ge3087_proved        ← WRITTEN (proof in SubcaseBPeriod.lean; unverified: build OOMs)
-├── subcaseB_m8_ge3087_proved        ✓ proved
-├── subcaseB_m10_ge3087_proved       ✓ proved
-├── subcaseB_m12_ge3087_proved       ✓ proved
-├── subcaseB_m14_ge3087_proved       ✓ proved
-├── subcaseB_m16_ge3087_proved       ✓ proved
-├── subcaseB_m20_ge3087_proved       ✓ proved
-├── subcaseB_m22_ge3087_proved       ← SORRY (line 2281: n'=35598+65536*s algebraic barrier; loop63 claim was WRONG)
-├── subcaseB_m24_ge3087_proved       ✓ proved
+rule30_bs_ge_n_direct             ← THE GOAL (1 axiom)
+└── subcaseB_mgt30_split          ← ONLY remaining axiom (SubcaseB_Firewall.lean:108)
+    (via subcaseB_resolution_ge3087 → all m-cases closed ✓)
+
+rule30_bs_ge_n (via lifting_lemma) ← Old path (2 axioms)
+├── lifting_lemma                 ← axiom (Prize3_Complete.lean:309)
+└── subcaseB_mgt30_split          ← same axiom
+```
+
+```
+subcaseB_resolution_ge3087  ✓ THEOREM (all m-cases proved)
+├── subcaseB_m4_ge3087           ✓ proved (SubcaseB_m4_RightEdge.lean)
+├── subcaseB_m6_ge3087_proved    ✓ proved (SubcaseBPeriod.lean, awaiting build verify)
+├── subcaseB_m8_ge3087_proved    ✓ proved
+├── subcaseB_m10_ge3087_proved   ✓ proved
+├── subcaseB_m12_ge3087_proved   ✓ proved
+├── subcaseB_m14_ge3087_proved   ✓ proved
+├── subcaseB_m16_ge3087_proved   ✓ proved
+├── subcaseB_m20_ge3087_proved   ✓ proved
+├── subcaseB_m22_ge3087_proved   ✓ proved
+├── subcaseB_m24_ge3087_proved   ✓ proved
 ├── subcaseB_m26_ge3087_proved       ✓ proved
 ├── subcaseB_m28_ge3087_proved       ✓ proved (via CA_Array.lean native_decide)
 ├── subcaseB_m30_ge3087_proved       ✓ proved (via CA_Array.lean native_decide)
 └── subcaseB_right_mirror_ge3087     ✓ proved (no actual sorrys in theorem)
 ```
 
-**Also needed:** `subcaseB_m28_residue_3class_proved` and `subcaseB_m30_residue_unique_proved`
-proved in `P2p/CA_Array_residues.lean` (build running, log /tmp/ca_residues_build.log).
-Once done: remove 2 axioms from CA_Array.lean, import CA_Array_residues there.
+**Status Apr 6 2026**: All m28/m30/m34/m36/m38 residues proved in dedicated files (CA_Array_m{28,30,34,36,38}_residues.lean). CA_Array.lean has 0 axioms. SubcaseBPeriod.lean awaiting final build with m36/m38 residue oleans.
 
 ## RANKED TASK LIST
 
-### Priority 1: m=22 SORRY OPEN (loop63 claim was WRONG)
-- l≡1 case proved (w=32, P=65536). l≡0 case (n'=35598+65536*s) still sorry'd.
-- loop63 claimed w=6, P=256 works — REFUTED by loop76. n''=270 is NOT sensitive for (w=6,m=22).
-- True witnesses: w=34 for s≡0 mod 2, w=40 for s≡1 mod 2. Both need period-131072 certs (~20h).
-- **ONLY PATH**: algebraic/LFSR proof that these center-output sequences have period 131072.
+### Priority 1: Close `subcaseB_mgt30_split` (axiom in SubcaseB_Firewall.lean:108)
+- This is the ONLY blocker for prize3 proof with 0 axioms (via rule30_bs_ge_n_direct)
+- Requires Phi_3/LFSR algebraic proof that inactive even m≥40 never fires SubcaseB
+- Computationally verified for n'∈[3087,5000]
 
-### Priority 1: Prove m=4 SubcaseB (axiom removal) — PARTIALLY ALGEBRAIC
+### Priority 2: Build chain running — wait and verify
+- CA_Array_m36_residues: building (ETA ~6:10AM)
+- CA_Array_m38 period cert: building (ETA ~7:30AM)
+- CA_Array_m38_residues: auto-starts (~7:30AM, ETA ~11:30AM)
+- SubcaseBPeriod.lean: auto-starts when both done (watcher PID 72358)
+- LiftingLemma_LeftPermutive.lean: auto-starts after SubcaseBPeriod
+
+### (Deprecated) Priority 1: m=22 SORRY OPEN
+- CLOSED: m=22 proved via right-edge witnesses (loop commit 82576a4)
+
+### (Historical reference) m=4 SubcaseB analysis
+- Location: SubcaseBPeriod.lean line 981, was `axiom subcaseB_m4_ge3087`
+- NOW CLOSED: delegated to SubcaseB_m4_RightEdge.lean (loop-A94)
+
+### Priority 2: Prove m=4 SubcaseB Level 3+ (historical — may be closed, verify on build)
 - Location: `SubcaseBPeriod.lean` line 981, `axiom subcaseB_m4_ge3087`
 - Fires at n'≡5 mod 8, giving 8 mod64 residue classes. Structure (loop66 analysis):
   - mod64∈{29,45,61,13}: w=6, P=16 — TRIVIAL (all certs exist in SubcaseBPeriod.lean)

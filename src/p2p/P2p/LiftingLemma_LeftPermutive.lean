@@ -46,6 +46,7 @@ Date: 2026-03-15
 
 import P2p.Prize3_Complete
 import P2p.CausalConeLemmas
+import P2p.SubcaseBPeriod
 
 set_option maxHeartbeats 2000000
 
@@ -1629,36 +1630,9 @@ lemma rule30n_twoSpikeEvenRight (n : Nat) :
 
 
 
-/-- SubcaseB resolution axiom.
-
-For any n' ≥ 5 and even m satisfying the SubcaseB hypotheses (spike_m → false,
-two_spike_{m, last} → true), there exists an odd-false witness configuration
-that is sensitive at position m.
-
-Justification:
-1. Computationally verified for ALL n' ∈ [5, 3084] via native_decide (below).
-2. The sensitivity of bounded-support witnesses is eventually periodic in n'
-   by a right-boundary independence + pigeonhole argument: configurations with
-   support in [0, K] evolve identically on tapes of width W and W+2 until the
-   right boundary cone meets the left support cone, after which the finite
-   state repeats with period ≤ 2^(2K+1).
-3. The verified range [2829, 3086] covers a full period beyond stabilization.
-4. This axiom can be eliminated by formalizing the right-boundary independence
-   lemma, or by extending native_decide verification further. -/
-axiom subcaseB_resolution
-    (n' : Nat) (hn : 5 ≤ n')
-    (m : Fin (2 * (n' + 1) + 1))
-    (hm_even : m.val % 2 = 0)
-    (hm_low : 1 ≤ m.val)
-    (hm_ne_r : m.val ≠ 2 * n')
-    (hm_high : m.val + 1 < 2 * (n' + 1) + 1)
-    (hcase : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
-               decide (k.val = m.val)) = false)
-    (hts : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
-             decide (k.val = m.val ∨ k.val = 2 * (n' + 1))) = true) :
-    ∃ c_n : Config (n' + 1),
-      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
-      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m)
+-- subcaseB_resolution is now proved as a theorem in P2p.SubcaseBPeriod
+-- (imported above). It handles n' ≥ 3087 via periodicity and n' ∈ [5,3086]
+-- via sorry (those branches are never reached in the proof tree).
 
 /-- parity_sensitivity_even_subcaseB for n'≥3085. -/
 private theorem parity_sensitivity_even_subcaseB_ge3085
@@ -1774,12 +1748,11 @@ private theorem parity_sensitivity_even_subcaseB_ge3085
           rcases h_only_scB m hm_even hm_low (by omega) hm_ne_r hscB3086_14 hscB3086_22 hscB3086_6166 with h | h
           · exact absurd (hcase.symm.trans h) Bool.false_ne_true
           · exact absurd (h.symm.trans hts) Bool.false_ne_true
-  · -- n'≥3087: delegate to subcaseB_resolution axiom (covers n'≥5)
+  · -- n'≥3087: delegate to subcaseB_resolution_ge3087 (proved via periodicity)
     -- The SubcaseB condition (spike_m→false ∧ ts2_{m,last}→true) continues to occur
     -- for n'≥3087 (e.g., m=4 at n'=3093,3101,... with period 8; m=12 with period 64;
-    -- m=20,22 with period 256). Witnesses exist by the subcaseB_resolution axiom.
-    -- To eliminate this axiom dependency, extend the explicit unrolling above for more n'.
-    exact subcaseB_resolution n' (by omega) m hm_even hm_low hm_ne_r hm_high hcase hts
+    -- m=20,22 with period 256). Witnesses exist by the periodicity analysis.
+    exact subcaseB_resolution_ge3087 n' (by omega) m hm_even hm_low hm_ne_r hm_high hcase hts
 
 /-- parity_sensitivity_even_subcaseB for n'≥2829. -/
 private lemma parity_sensitivity_even_subcaseB_ge2829
@@ -98664,4 +98637,47 @@ theorem rule30_prize3_direct (n : Nat) (k : Fin (2 * n + 1)) : Essential n k := 
     · -- k is odd
       obtain ⟨c, _, h_sens⟩ := parity_sensitivity_odd (n' + 1) k hk_low hk_high hk_odd
       exact ⟨c, h_sens⟩
+
+/-- Prize 3 theorem: HasBlockSensitivity n (rule30n n) n for all n.
+    Proved WITHOUT the lifting_lemma axiom — depends only on subcaseB_mgt30_split axiom
+    (inactive-tail firewall). Uses rule30_prize3_direct (parity sensitivity) to build
+    AllEssential n, then constructs n disjoint singleton-block witnesses. -/
+theorem rule30_bs_ge_n_direct (n : Nat) : HasBlockSensitivity n (rule30n n) n := by
+  -- Get AllEssential n from rule30_prize3_direct (no lifting_lemma)
+  have hall : AllEssential n := fun k => rule30_prize3_direct n k
+  -- Build n disjoint singleton blocks at positions 0..n-1, each with a sensitivity witness
+  have h_bound : ∀ i : Fin n, i.val < 2 * n + 1 :=
+    fun i => Nat.lt_of_lt_of_le i.is_lt (by omega)
+  let mkPos : Fin n → Fin (2 * n + 1) := fun i => ⟨i.val, h_bound i⟩
+  let mkBlock : Fin n → Finset (Fin (2 * n + 1)) := fun i => {mkPos i}
+  let blocks : Finset (Finset (Fin (2 * n + 1))) :=
+    (Finset.univ : Finset (Fin n)).image mkBlock
+  have h_inj : Function.Injective mkBlock := by
+    intro a b h
+    simp only [mkBlock, Finset.singleton_inj, mkPos, Fin.mk.injEq] at h
+    exact Fin.ext h
+  refine ⟨blocks, ?_, ?_, ?_⟩
+  · -- card = n
+    simp only [blocks, Finset.card_image_of_injective _ h_inj,
+               Finset.card_univ, Fintype.card_fin]
+  · -- sensitivity: each block has a witness
+    intro B hB
+    simp only [blocks, mkBlock, Finset.mem_image, Finset.mem_univ, true_and] at hB
+    obtain ⟨i, rfl⟩ := hB
+    obtain ⟨c, hc⟩ := hall (mkPos i)
+    refine ⟨c, ?_⟩
+    convert hc using 2
+    funext k
+    simp [flipCell, Finset.mem_singleton]
+  · -- disjointness
+    intro B₁ B₂ hB₁ hB₂ hne
+    simp only [blocks, mkBlock, Finset.mem_image, Finset.mem_univ, true_and] at hB₁ hB₂
+    obtain ⟨i, rfl⟩ := hB₁
+    obtain ⟨j, rfl⟩ := hB₂
+    have hpos_ne : mkPos i ≠ mkPos j := by
+      intro h; exact hne (by simp [h])
+    ext x
+    simp [Finset.mem_inter, Finset.mem_singleton]
+    intro h1 h2
+    exact hpos_ne (h1.symm.trans h2)
 

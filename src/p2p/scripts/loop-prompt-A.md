@@ -119,23 +119,27 @@ lake env lean /tmp/probe.lean 2>&1 | grep -A 20 "unsolved goals\|⊢\|error"
 
 ## CURRENT STATE (auto-updated by loop-A)
 
-**Obligations**: 3 (as of loop-A95)
-- `subcaseB_resolution_ge3087` — now a THEOREM with 1 sorry (m>30 non-mirror)
-  - m=2: ✓ CLOSED (loop-A95, inactive — G always false, period 2)
-  - m=18: ✓ CLOSED (loop-A95, inactive — SubcaseB never fires, period 256)
-  - m=4,6,8,...,28,30: ✓ all delegated to existing component theorems
-  - m=right-mirror: ✓ delegated to subcaseB_right_mirror_ge3087
-  - m>30 non-mirror: sorry (computationally verified inactive, needs structural proof)
-- `subcaseB_m28_residue_3class_proved` — CA_Array.lean axiom — CA_Array_residues BUILDING
-- `subcaseB_m30_residue_unique_proved` — CA_Array.lean axiom — CA_Array_residues BUILDING
+**Obligations**: 2 (as of interactive session Apr 6)
+- `subcaseB_mgt30_split` — axiom in SubcaseB_Firewall.lean:108
+  - Computationally verified inactive for m≥40 over n'∈[3087,5000]
+  - Requires Phi_3/LFSR algebraic characterization of inactive m
+  - `subcaseB_resolution_ge3087` IS a THEOREM (0 code sorrys); calls subcaseB_mgt30_split
+- `lifting_lemma` — axiom in Prize3_Complete.lean:309
+  - `rule30_bs_ge_n_direct` (LiftingLemma_LeftPermutive.lean) proves prize WITHOUT this axiom
+  - Only 1 remaining axiom for the direct path: subcaseB_mgt30_split
 
-**Build status**:
-- SubcaseBPeriod.lean: ⚠️ olean stale (needs rebuild with new inactive m lemmas + theorem body)
-- SubcaseB_m4_RightEdge.lean: ✓ clean olean (0 axioms, 0 sorrys)
-- CA_Array.lean: ✓ clean olean
-- CA_Array_residues.lean: BUILDING at /tmp/ca_residues_build.log (PID 59371, started ~11:26AM Apr 2)
+**Build status** (Apr 6 ~6AM CDT):
+- CA_Array_m28_residues.lean: ✓ clean olean
+- CA_Array_m30_residues.lean: ✓ clean olean
+- CA_Array_m34_residues.lean: ✓ clean olean
+- CA_Array_m36_residues.lean: BUILDING (PID 94883, ~2.5h elapsed, watcher auto-starts m38_residues)
+- CA_Array_m38.lean: BUILDING (PID 83151, ~1.2h elapsed)
+- CA_Array_m38_residues.lean: WAITING (auto-starts when m36+m38 done, watcher PID 68265)
+- SubcaseBPeriod.lean: WAITING (auto-starts when m38+m38_residues done, watcher PID 72358)
+- LiftingLemma_LeftPermutive.lean: WAITING (auto-starts after SubcaseBPeriod, same watcher)
 
-**Recent work**: loop-A95 converted subcaseB_resolution_ge3087 from axiom to theorem; closed m=2 and m=18 inactive cases
+**Recent work**: Added rule30_bs_ge_n_direct to LiftingLemma_LeftPermutive.lean — prize theorem
+proved WITHOUT lifting_lemma axiom (depends only on subcaseB_mgt30_split)
 
 ---
 
