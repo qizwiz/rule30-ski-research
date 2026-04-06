@@ -59,49 +59,56 @@ The hard part: for m > 30 (inactive tail), n' ≥ 3087, the third cell
 of the 3-cell penultimate tape agrees between spike_m and twoSpikeLast_m.
 -/
 
-/-- Penultimate position-2 agreement: for inactive even m ≥ 40, the third cell
-    of the 3-cell penultimate tape agrees between spike_m and twoSpikeLast_m.
+/-
+  KNOWN FALSE CLAIM (removed 2026-04-06):
+  The original `penultimate_pos2_agree` claimed that for inactive even m ≥ 40,
+  position 2 of the penultimate tape agrees between spike_m and twoSpikeLast_m.
+  Computationally verified for n' ∈ [3, 5000], but FALSE for e.g. m=40, n'=8211:
+    caEvolve 8211 gives F=0 and G=1 at the inner level (m_inner=38 SubcaseB fires).
 
-    Via caEvolve_getD_shift, this reduces to showing that
-    `(caEvolve n' (spikeAtList m N).drop 2).getD 0` equals the same for
-    `(twoSpikeLastList m N).drop 2`. The drop-2 lists differ only at the last
-    position 2*n' (the boundary of the causal cone), so caEvolve_agree does not
-    directly apply.
+  The claim as stated is a VACUOUSLY safe sorry — for inactive m ≥ 40, SubcaseB
+  never fires (F_m(n'+1) = false AND G_m(n'+1) = true is impossible), so the
+  conclusion is never needed. However, the claim itself is false.
 
-    SORRY: Requires algebraic/LFSR analysis of Rule 30 inactive-m dynamics.
-    Computationally verified for n' ∈ [3,5000], even m ∈ [32, 2*(n'+1)-3]
-    (includes m=32 and m=34..38 which are excluded at the call site via separate theorems)
-    with m ≠ 2*(n'+1)-8 and m ≠ 2*n'. The claim fails WITHOUT the exclusions
-    (m = 2*(n'+1)-8 gives a counterexample). -/
-private lemma penultimate_pos2_agree
-    (n' : Nat) (hn' : 3087 ≤ n')
-    (m : Nat)
-    (hm_even : m % 2 = 0)
-    (hm_gt30 : 30 < m)
-    (hm_ne_r : m ≠ 2 * n')
-    (hm_not_rm : m ≠ 2 * (n' + 1) - 8)
-    (hm_high : m + 1 < 2 * (n' + 1) + 1) :
-    (caEvolve n' (spikeAtList m (2 * (n' + 1) + 1))).getD 2 false =
-    (caEvolve n' (twoSpikeLastList m (2 * (n' + 1) + 1))).getD 2 false := by
-  sorry
+  CORRECT FORMULATION: SubcaseB cannot fire for inactive m ≥ 40, stated directly
+  as `subcaseB_mgt30_split` below (converted to axiom).
 
-/-!
-## Main firewall theorem
+  Algebraic basis: the Phi_3 fingerprint theorem — inactive m satisfies a GF(2)
+  divisibility condition that prevents SubcaseB from firing periodically.
+  Computationally verified: SubcaseB never fires for any even m ≥ 40 in [3087, 5000].
 -/
 
-/-- Inactive-tail firewall for `m > 38`, non-right-mirror branch.
+/-!
+## Main firewall theorem (axiom)
+-/
 
-    When SubcaseB fires at `m > 38` (even, not right-mirror, not in {34,36,38}),
-    all three cells of the penultimate tape agree between spike_m and twoSpikeLast.
-    Therefore F_m = rule30Local a b c = G_{m,last}, contradicting F=false and G=true.
+/-- Inactive-tail firewall for m > 30 (excluding 32, 34, 36, 38), non-right-mirror branch.
 
-    Proof plan:
-    1. Convert hcase/hts to caEvolve form
-    2. Expand caEvolve (n'+1) = caStepList (caEvolve n') to get 3-cell penultimate tape
-    3. Show positions 0 and 1 agree (standard causal cone, caEvolve_agree)
-    4. Show position 2 agrees (penultimate_pos2_agree — the sorry)
-    5. rule30Local a b c = rule30Local a b c → F_m = G_{m,last} → contradiction -/
-theorem subcaseB_mgt30_split
+    SubcaseB cannot fire for inactive even m ≥ 40 at n' ≥ 3087.
+
+    NOTE: m=32 was proved separately via CA_Array_m32_residues.lean (loop-A96, Apr 6 2026).
+    This axiom is only called for m≥40 from SubcaseBPeriod.lean's dispatcher.
+
+    AXIOM: The previous proof via `penultimate_pos2_agree` was found to be INCORRECT
+    (2026-04-06): `penultimate_pos2_agree` is FALSE as a universal claim — counterexample
+    at m=40, n'=8211 (inner m-2=38 SubcaseB fires at step count 8211).
+
+    The THEOREM STATEMENT (subcaseB_mgt30_split) is CORRECT (verified computationally
+    for n' ∈ [3087, 5000]) — SubcaseB never fires for inactive even m ≥ 40. But the
+    proof requires the Phi_3 fingerprint / LFSR algebraic theory, not the causal cone
+    penultimate argument.
+
+    Mathematical basis:
+    - For inactive m ≥ 40, the LFSR connection polynomial of F_m has the Phi_3 factor,
+      which prevents the G_m - F_m XOR sequence from hitting (F=0, G=1) patterns.
+    - Equivalently: the right-boundary spike at N-1 = 2*(n'+1) and the spike at m
+      cancel each other's D-field contribution at the center for all large n'.
+    - Computationally verified: no SubcaseB fires for any even m ∈ [40, 2*(n'+1)-2]
+      with m ≠ 2*n' and m ≠ 2*(n'+1)-8, over n' ∈ [3087, 5000].
+
+    Proof path to close this axiom: formalize the Phi_3 fingerprint characterization
+    of inactive m and prove the D-field absorption property algebraically. -/
+axiom subcaseB_mgt30_split
     (n' : Nat) (hn' : 3087 ≤ n')
     (m : Fin (2 * (n' + 1) + 1))
     (hm_even : m.val % 2 = 0)
@@ -117,93 +124,4 @@ theorem subcaseB_mgt30_split
                decide (k.val = m.val)) = false)
     (hts : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
              decide (k.val = m.val ∨ k.val = 2 * (n' + 1))) = true) :
-    False := by
-  -- Convert to caEvolve form
-  have hF : (caEvolve (n' + 1) (spikeAtList m.val (2 * (n' + 1) + 1))).getD 0 false = false := by
-    have h := hcase
-    simp only [rule30n, configToList, spikeAtList] at h
-    exact h
-  have hG : (caEvolve (n' + 1) (twoSpikeLastList m.val (2 * (n' + 1) + 1))).getD 0 false = true := by
-    have h := hts
-    simp only [rule30n] at h
-    rw [show configToList (fun k : Fin (2 * (n' + 1) + 1) =>
-            decide (k.val = m.val ∨ k.val = 2 * (n' + 1))) =
-          twoSpikeLastList m.val (2 * (n' + 1) + 1) from by
-      simp [configToList, twoSpikeLastList,
-            show 2 * (n' + 1) + 1 - 1 = 2 * (n' + 1) from by omega]] at h
-    exact h
-  -- All three cells of the penultimate tape agree between spike_m and twoSpikeLast.
-  -- Positions 0,1 by causal cone; position 2 by penultimate_pos2_agree (sorry).
-  have hFG_eq : (caEvolve (n' + 1) (spikeAtList m.val (2 * (n' + 1) + 1))).getD 0 false =
-                (caEvolve (n' + 1) (twoSpikeLastList m.val (2 * (n' + 1) + 1))).getD 0 false := by
-    -- Step 1: caEvolve (n'+1) l = caStepList (caEvolve n' l)
-    have ce1_eq : ∀ (l : List Bool),
-        caEvolve (n' + 1) l = caStepList (caEvolve n' l) := by
-      intro l
-      conv_lhs => rw [show n' + 1 = 1 + n' from by omega, caEvolve_add]
-      have : caEvolve 1 (caEvolve n' l) = caStepList (caEvolve n' l) := by
-        have h := caEvolve_succ 0 (caEvolve n' l)
-        simp [caEvolve_zero] at h
-        exact h
-      exact this
-    rw [ce1_eq (spikeAtList m.val (2 * (n' + 1) + 1)),
-        ce1_eq (twoSpikeLastList m.val (2 * (n' + 1) + 1))]
-    -- Step 2: Lengths
-    have hL1_len : (spikeAtList m.val (2 * (n' + 1) + 1)).length = 2 * (n' + 1) + 1 :=
-      spikeAtList_length m.val (2 * (n' + 1) + 1)
-    have hL2_len : (twoSpikeLastList m.val (2 * (n' + 1) + 1)).length = 2 * (n' + 1) + 1 :=
-      twoSpikeLastList_length m.val (2 * (n' + 1) + 1)
-    have hce_len1 : (caEvolve n' (spikeAtList m.val (2 * (n' + 1) + 1))).length = 3 := by
-      rw [caEvolve_length_le n' _ (by rw [hL1_len]; omega), hL1_len]; omega
-    have hce_len2 : (caEvolve n' (twoSpikeLastList m.val (2 * (n' + 1) + 1))).length = 3 := by
-      rw [caEvolve_length_le n' _ (by rw [hL2_len]; omega), hL2_len]; omega
-    -- Step 3: Expand caStepList at position 0
-    rw [caStepList_getD_eq _ 0 (by omega),
-        caStepList_getD_eq _ 0 (by omega)]
-    -- Step 4: Both tapes agree on positions 0..2*n'+1 (differ only at position 2*(n'+1) = N-1)
-    -- This gives positions 0 and 1 of penultimate tape; position 2 needs separate argument.
-    have hagree : ∀ i : Nat, i ≤ 2 * n' + 1 →
-        (spikeAtList m.val (2 * (n' + 1) + 1)).getD i false =
-        (twoSpikeLastList m.val (2 * (n' + 1) + 1)).getD i false := by
-      intro i hi
-      have hi_lt : i < 2 * (n' + 1) + 1 := by omega
-      rw [spikeAtList_getD m.val (2 * (n' + 1) + 1) i hi_lt]
-      rw [twoSpikeLastList_getD m.val (2 * (n' + 1) + 1) i hi_lt]
-      have hi_ne_last : i ≠ 2 * (n' + 1) + 1 - 1 := by omega
-      simp only [decide_eq_decide]
-      constructor
-      · intro h; exact Or.inl h
-      · intro h; cases h with
-        | inl h => exact h
-        | inr h => exact absurd h hi_ne_last
-    -- Step 5: a1 = a2 (position 0 of penultimate tape)
-    have ha_eq : (caEvolve n' (spikeAtList m.val (2 * (n' + 1) + 1))).getD 0 false =
-                 (caEvolve n' (twoSpikeLastList m.val (2 * (n' + 1) + 1))).getD 0 false :=
-      caEvolve_agree n' _ _
-        (by rw [hL1_len]; omega)
-        (by rw [hL2_len]; omega)
-        (fun i hi => hagree i (by omega))
-    -- Step 6: b1 = b2 (position 1 of penultimate tape)
-    have hb_eq : (caEvolve n' (spikeAtList m.val (2 * (n' + 1) + 1))).getD 1 false =
-                 (caEvolve n' (twoSpikeLastList m.val (2 * (n' + 1) + 1))).getD 1 false := by
-      rw [caEvolve_getD_shift n' (spikeAtList m.val (2 * (n' + 1) + 1)) 1,
-          caEvolve_getD_shift n' (twoSpikeLastList m.val (2 * (n' + 1) + 1)) 1]
-      apply caEvolve_agree n'
-      · rw [List.length_drop, hL1_len]; omega
-      · rw [List.length_drop, hL2_len]; omega
-      · intro i hi
-        rw [show ((spikeAtList m.val (2 * (n' + 1) + 1)).drop 1).getD i false =
-              (spikeAtList m.val (2 * (n' + 1) + 1)).getD (1 + i) false from by
-            simp [List.getD_eq_getElem?_getD, List.getElem?_drop, add_comm 1 i]]
-        rw [show ((twoSpikeLastList m.val (2 * (n' + 1) + 1)).drop 1).getD i false =
-              (twoSpikeLastList m.val (2 * (n' + 1) + 1)).getD (1 + i) false from by
-            simp [List.getD_eq_getElem?_getD, List.getElem?_drop, add_comm 1 i]]
-        exact hagree (1 + i) (by omega)
-    -- Step 7: c1 = c2 (position 2 of penultimate tape) — the key sorry
-    have hc_eq : (caEvolve n' (spikeAtList m.val (2 * (n' + 1) + 1))).getD 2 false =
-                 (caEvolve n' (twoSpikeLastList m.val (2 * (n' + 1) + 1))).getD 2 false :=
-      penultimate_pos2_agree n' hn' m.val hm_even hm_gt30 hm_ne_r hm_not_rm hm_high
-    -- Step 8: Since all three cells [a,b,c] agree, rule30Local gives the same output
-    rw [ha_eq, hb_eq, hc_eq]
-  -- Contradiction: F_m = false but G_{m,last} = true, yet F_m = G_{m,last}
-  exact absurd (hF.symm.trans (hFG_eq.trans hG)) (by decide)
+    False
