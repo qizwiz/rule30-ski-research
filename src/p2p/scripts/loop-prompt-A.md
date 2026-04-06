@@ -280,3 +280,4 @@ Always increment N from the last loop-A commit's number (check git log).
 | A91 | A6 right-edge approach documented; obligations updated | shrinking CA verified, period-8 axioms are the blocker |
 | A94 | subcaseB_m4_ge3087 axiom→theorem; obligations 5→4 | import SubcaseB_m4_RightEdge, delegate to proved theorem |
 | A95 | subcaseB_resolution_ge3087 axiom→theorem; m=2,m=18 closed | period certs + base case native_decide for inactive m |
+| A96 | m=32 inactive case added; CA_Array_m32_residues.lean | checkResiduesBool empty valid set, period 4096 |

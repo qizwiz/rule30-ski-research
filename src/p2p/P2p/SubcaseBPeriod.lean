@@ -51,6 +51,10 @@ import P2p.SubcaseB_m4_RightEdge
 import P2p.SubcaseB_m22_RightEdge
 import P2p.SubcaseB_Firewall
 import Mathlib.Tactic.Ring
+import P2p.CA_Array_m32_residues
+import P2p.CA_Array_m34_residues
+import P2p.CA_Array_m36_residues
+import P2p.CA_Array_m38_residues
 
 set_option maxHeartbeats 800000000
 
@@ -3761,14 +3765,7 @@ lemma twoSpikeLast34_iterated_period8192 (n k : Nat) (hn : n ≥ 34) :
     rw [hstep]
     exact rule30n_twoSpikeLast34_period8192 (n + k * 8192) (by omega)
 
-/-- Residue uniqueness for m=34: SubcaseB fires only at 4112 and 4116 in one period window.
-    DEFERRED: native_decide over Fin 8192 infeasibly slow. Computationally verified. -/
-private lemma subcaseB_m34_residue_2class_proved :
-    ∀ j : Fin 8192,
-    (caEvolve (j.val + 34 + 1) (spikeAtList 34 (2*(j.val+34+1)+1))).getD 0 false = false →
-    (caEvolve (j.val + 34 + 1) (twoSpikeLastList 34 (2*(j.val+34+1)+1))).getD 0 false = true →
-    j.val + 34 = 4112 ∨ j.val + 34 = 4116 := by
-  sorry
+-- subcaseB_m34_residue_2class_proved: imported from CA_Array_m34_residues.lean
 
 /-- SubcaseB for `m=34` fires only at `n'' ∈ {4112, 4116}` in `[3087, 11279)`. -/
 lemma subcaseB_m34_unique_in_period (n'' : Nat) (hn''_lo : 3087 ≤ n'') (hn''_hi : n'' < 11279)
@@ -3935,14 +3932,7 @@ lemma twoSpikeLast36_iterated_period16384 (n k : Nat) (hn : n ≥ 36) :
     rw [hstep]
     exact rule30n_twoSpikeLast36_period16384 (n + k * 16384) (by omega)
 
-/-- Residue uniqueness for m=36: SubcaseB fires only at 4113 and 4117 in one period window.
-    DEFERRED: native_decide over Fin 16384 infeasibly slow (O(P³) kernel). Computationally verified. -/
-private lemma subcaseB_m36_residue_2class :
-    ∀ j : Fin 16384,
-    (caEvolve (j.val + 36 + 1) (spikeAtList 36 (2*(j.val+36+1)+1))).getD 0 false = false →
-    (caEvolve (j.val + 36 + 1) (twoSpikeLastList 36 (2*(j.val+36+1)+1))).getD 0 false = true →
-    j.val + 36 = 4113 ∨ j.val + 36 = 4117 := by
-  sorry
+-- subcaseB_m36_residue_2class: imported from CA_Array_m36_residues.lean
 
 /-- SubcaseB for `m=36` fires only at `n'' ∈ {4113, 4117}` in `[3087, 19471)`. -/
 lemma subcaseB_m36_unique_in_period (n'' : Nat) (hn''_lo : 3087 ≤ n'') (hn''_hi : n'' < 19471)
@@ -4060,14 +4050,7 @@ lemma twoSpikeLast38_iterated_period32768 (n k : Nat) (hn : n ≥ 38) :
     rw [hstep]
     exact rule30n_twoSpikeLast38_period32768 (n + k * 32768) (by omega)
 
-/-- Residue uniqueness for m=38: SubcaseB fires only at 8210 and 8214 in one period window.
-    DEFERRED: native_decide over Fin 32768 infeasibly slow. Computationally verified. -/
-private lemma subcaseB_m38_residue_2class_proved :
-    ∀ j : Fin 32768,
-    (caEvolve (j.val + 38 + 1) (spikeAtList 38 (2*(j.val+38+1)+1))).getD 0 false = false →
-    (caEvolve (j.val + 38 + 1) (twoSpikeLastList 38 (2*(j.val+38+1)+1))).getD 0 false = true →
-    j.val + 38 = 8210 ∨ j.val + 38 = 8214 := by
-  sorry
+-- subcaseB_m38_residue_2class_proved: imported from CA_Array_m38_residues.lean
 
 /-- Witness for m=38 SubcaseB at n' = 8210 (w=2). -/
 private lemma subcaseB_m38_residue_8210_w2 (n' k : Nat) (hn' : n' = 8210 + k * 32768)
@@ -5659,6 +5642,28 @@ For inactive m values, SubcaseB never fires for large n'.
 We prove this by period reduction + base case native_decide.
 -/
 
+-- Period certs for m=32 (period 4096, inactive)
+set_option maxHeartbeats 4000000000 in
+lemma caEvolve_cert_m32_p4096 :
+    caEvolve 4096 (spikeAtList 32 8257) = spikeAtList 32 65 := by native_decide
+
+lemma rule30n_twoSpikeLast32_period4096 (n : Nat) (hn : n ≥ 32) :
+    (caEvolve (n + 1) (twoSpikeLastList 32 (2 * (n + 1) + 1))).getD 0 false =
+    (caEvolve ((n + 1) + 4096) (twoSpikeLastList 32 (2 * ((n + 1) + 4096) + 1))).getD 0 false :=
+  rule30n_twoSpikeLast_period 32 4096 caEvolve_cert_m32_p4096 caEvolve_h1_p4096 n hn
+
+lemma twoSpikeLast32_iterated_period4096 (n k : Nat) (hn : n ≥ 32) :
+    (caEvolve (n + 1) (twoSpikeLastList 32 (2*(n+1)+1))).getD 0 false =
+    (caEvolve (n + 1 + k * 4096) (twoSpikeLastList 32 (2*(n+1+k*4096)+1))).getD 0 false := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [ih]
+    conv_lhs => rw [show n + 1 + k * 4096 = (n + k * 4096) + 1 from by omega]
+    have hstep : n + 1 + (k + 1) * 4096 = (n + k * 4096) + 1 + 4096 := by ring
+    rw [hstep]
+    exact rule30n_twoSpikeLast32_period4096 (n + k * 4096) (by omega)
+
 -- Period certs for m=2 (period 2)
 set_option maxHeartbeats 800000 in
 lemma caEvolve_cert_m2_p2 :
@@ -5835,14 +5840,33 @@ theorem subcaseB_resolution_ge3087
     · -- right-mirror case
       exact subcaseB_right_mirror_ge3087 n' hn' m hrm hm_even hm_low hcase hts
     · -- m > 30, not right-mirror: split into late active exceptions and inactive tail.
-      by_cases hm34 : m.val = 34
-      · exact subcaseB_m34_ge3087_proved n' hn' m hm34 hcase hts
-      · by_cases hm36 : m.val = 36
-        · exact subcaseB_m36_ge3087_proved n' hn' m hm36 hcase hts
-        · by_cases hm38 : m.val = 38
-          · exact subcaseB_m38_ge3087_proved n' hn' m hm38 hcase hts
-          · exfalso
-            exact subcaseB_mgt30_split n' hn' m hm_even hm_low (by omega) hm_ne_r hrm hm_high hm34 hm36 hm38 hcase hts
+      by_cases hm32 : m.val = 32
+      · -- m=32: inactive, SubcaseB never fires (G_32 = 0 for all n' ≥ 32)
+        exfalso
+        have hcase32 : (caEvolve (n'+1) (spikeAtList 32 (2*(n'+1)+1))).getD 0 false = false := by
+          rw [← rule30n_spikeAt_eq n' 32]; simp only [hm32] at hcase; exact hcase
+        have hts32 : (caEvolve (n'+1) (twoSpikeLastList 32 (2*(n'+1)+1))).getD 0 false = true := by
+          rw [← rule30n_twoSpikeLast_eq n' 32]; simp only [hm32] at hts; exact hts
+        obtain ⟨k, hn'_eq⟩ := periodReduce_diff 32 4096 n' (by omega) (by omega)
+        have hn''_range := periodReduce_range 32 4096 n' (by omega) (by omega)
+        set n'' := periodReduce 32 4096 n'
+        have hF_n'' : (caEvolve (n''+1) (spikeAtList 32 (2*(n''+1)+1))).getD 0 false = false := by
+          have hp := spikeAt_iterated_period 32 4096 (by omega) caEvolve_cert_m32_p4096 n'' k
+          rw [show n''+1+k*4096 = n'+1 from by omega] at hp; rw [hp]; exact hcase32
+        have hG_n'' : (caEvolve (n''+1) (twoSpikeLastList 32 (2*(n''+1)+1))).getD 0 false = true := by
+          have hp := twoSpikeLast32_iterated_period4096 n'' k (by omega)
+          rw [show n''+1+k*4096 = n'+1 from by omega] at hp; rw [hp]; exact hts32
+        exact subcaseB_m32_never_fires_period ⟨n'' - 32, by omega⟩
+          (by convert hF_n'' using 2; omega)
+          (by convert hG_n'' using 2; omega)
+      · by_cases hm34 : m.val = 34
+        · exact subcaseB_m34_ge3087_proved n' hn' m hm34 hcase hts
+        · by_cases hm36 : m.val = 36
+          · exact subcaseB_m36_ge3087_proved n' hn' m hm36 hcase hts
+          · by_cases hm38 : m.val = 38
+            · exact subcaseB_m38_ge3087_proved n' hn' m hm38 hcase hts
+            · exfalso
+              exact subcaseB_mgt30_split n' hn' m hm_even hm_low (by omega) hm_ne_r hrm hm_high hm34 hm36 hm38 hcase hts
 
 -- subcaseB_resolution_ge3087 is the public API (called by LiftingLemma_LeftPermutive).
 -- The n'∈[5,3086] case is handled directly by the native_decide tower in
