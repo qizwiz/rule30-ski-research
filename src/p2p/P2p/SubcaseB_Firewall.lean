@@ -113,13 +113,10 @@ axiom subcaseB_mgt30_split
     (m : Fin (2 * (n' + 1) + 1))
     (hm_even : m.val % 2 = 0)
     (hm_low : 1 ≤ m.val)
-    (hm_gt30 : 30 < m.val)
+    (hm_ge40 : 40 ≤ m.val)
     (hm_ne_r : m.val ≠ 2 * n')
     (hm_not_rm : m.val ≠ 2 * (n' + 1) - 8)
     (hm_high : m.val + 1 < 2 * (n' + 1) + 1)
-    (hm_ne34 : m.val ≠ 34)
-    (hm_ne36 : m.val ≠ 36)
-    (hm_ne38 : m.val ≠ 38)
     (hcase : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
                decide (k.val = m.val)) = false)
     (hts : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>

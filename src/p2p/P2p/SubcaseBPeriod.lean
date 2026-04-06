@@ -5866,7 +5866,7 @@ theorem subcaseB_resolution_ge3087
           · by_cases hm38 : m.val = 38
             · exact subcaseB_m38_ge3087_proved n' hn' m hm38 hcase hts
             · exfalso
-              exact subcaseB_mgt30_split n' hn' m hm_even hm_low (by omega) hm_ne_r hrm hm_high hm34 hm36 hm38 hcase hts
+              exact subcaseB_mgt30_split n' hn' m hm_even hm_low (by omega) hm_ne_r hrm hm_high hcase hts
 
 -- subcaseB_resolution_ge3087 is the public API (called by LiftingLemma_LeftPermutive).
 -- The n'∈[5,3086] case is handled directly by the native_decide tower in
