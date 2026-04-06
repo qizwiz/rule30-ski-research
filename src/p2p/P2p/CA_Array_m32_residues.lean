@@ -34,6 +34,7 @@ theorem subcaseB_m32_never_fires_period :
       Array.getD_eq_toList_getD, caEvolveArr_toList_eq, spikeArr_toList_eq] at hmem
   rw [gCenterSeq_correct 32 4128 (j.val + 32) (by decide) (by omega),
       Array.getD_eq_toList_getD, caEvolveArr_toList_eq, twoSpikeLastArr_toList_eq] at hmem
-  exact absurd (hmem hF hG) (List.not_mem_nil _)
+  have hmem_result := hmem hF hG
+  simp only [List.mem_nil_iff] at hmem_result
 
 end P2p
