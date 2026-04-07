@@ -141,6 +141,52 @@ lemma dChain_3_parity (T : Nat) : dChain T 3 = (T / 2 % 2 == 1) := by
 
 /-
 ================================================================================
+SECTION 2b: CAUSAL HORIZON LEMMAS
+================================================================================
+-/
+
+/-- Spike at position k ≥ 2*T+1 is outside the causal horizon: center = false. -/
+lemma dChain_beyond_false : ∀ T k : Nat, 2 * T + 1 ≤ k → dChain T k = false := by
+  intro T
+  induction T with
+  | zero =>
+    intro k hk
+    cases k with
+    | zero => omega
+    | succ k => simp [dChain]
+  | succ T ih =>
+    intro k hk
+    -- k ≥ 2*(T+1)+1 = 2*T+3, so k ≥ 3
+    match k with
+    | 0 => omega
+    | 1 => omega
+    | k' + 2 =>
+      -- k'+2 ≥ 2*T+3 → k' ≥ 2*T+1
+      simp only [dChain_step_k, rule30Local]
+      have h1 : dChain T (k' + 2) = false := ih (k' + 2) (by omega)
+      have h2 : dChain T (k' + 1) = false := ih (k' + 1) (by omega)
+      have h3 : dChain T k' = false := ih k' (by omega)
+      simp [h1, h2, h3]
+
+/-- Spike at position 2*T (the rightmost in the causal cone) gives center = true.
+    F_last = 1 universally. -/
+lemma dChain_last_true (T : Nat) : dChain T (2 * T) = true := by
+  induction T with
+  | zero => simp [dChain]
+  | succ T ih =>
+    -- dChain (T+1) (2*(T+1)) = dChain (T+1) (2*T+2)
+    -- = rule30Local (dChain T (2*T+2)) (dChain T (2*T+1)) (dChain T (2*T))
+    show dChain (T + 1) (2 * T + 1 + 1) = true
+    simp only [dChain_step_k, rule30Local]
+    have hf1 : dChain T (2 * T + 1 + 1) = false :=
+      dChain_beyond_false T (2 * T + 1 + 1) (by omega)
+    have hf2 : dChain T (2 * T + 1) = false :=
+      dChain_beyond_false T (2 * T + 1) (by omega)
+    -- rule30Local false false true = false XOR (false OR true) = true
+    simp [hf1, hf2, ih]
+
+/-
+================================================================================
 SECTION 3: THE DELTA — Δ(T, m) = G_{2,m}(T) XOR F_2(T) = 1 at SubcaseB events
 ================================================================================
 
