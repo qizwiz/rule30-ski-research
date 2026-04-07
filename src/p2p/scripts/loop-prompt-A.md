@@ -166,8 +166,24 @@ lemma dChain_2_last_false (T : Nat) (hT : 2 ≤ T) :
     rule30n T (fun j : Fin (2*T+1) => decide (j.val = 2 ∨ j.val = 2*T)) = false
 ```
 
-**Status**: Proof path clear; Lean code not yet written.
-**This is the PRIORITY A-TRACK TASK before the sorry**: it's self-contained, builds List Bool machinery needed for the main proof, and gives a clean structural lemma.
+**Status**: Lean structure WRITTEN (SpinePass.lean, 2 sorrys only). NEEDS: prove `twoSpikeList_2_last_step2`.
+
+**Prove twoSpikeList_2_last_step2** (the ONLY sorry needed for dChain_2_last_false):
+Located at SpinePass.lean ~line 519.
+Goal: `caEvolve 2 (twoSpikeList 2 (2*T) (2*T+1)) = twoSpikeList 2 (2*(T-2)) (2*(T-2)+1)` for T≥4.
+
+Proof via `List.ext_getElem?` + `caEvolve_getD_shift` + `caEvolve_agree`:
+For each position i in [0, 2*(T-2)]:
+- Use `caEvolve_getD_shift 2 _ i` to reduce to 5-cell window
+- Match the 5-cell window against canonical using `caEvolve_agree 2` + `twoSpikeList_getD`
+- Compute canonical result by `native_decide`
+Five canonical patterns (all verified by native_decide):
+  [0,0,1,0,0]→0, [0,1,0,0,0]→0, [1,0,0,0,0]→1, [0,0,0,0,0]→0, [0,0,0,0,1]→1
+Use omega for the case split on i (i=0, i=1, i=2, i∈middle, i=2*(T-2)).
+
+Also verify lengths equal: `caEvolve_length_le 2 ... (by simp [twoSpikeList_length]; omega)`.
+
+SHORTCUT: also verified by native_decide for T=4..11 (Fin 8 check passes in Lean, see probe).
 
 ### The two axioms:
 - `subcaseB_mgt38_witness` — TRUE axiom in SubcaseB_Firewall.lean:149

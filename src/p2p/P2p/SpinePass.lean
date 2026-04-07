@@ -250,6 +250,176 @@ lemma dChain_4_antiperiod (T : Nat) : dChain (T + 4) 4 = !dChain T 4 := by
 
 /-
 ================================================================================
+SECTION 2c: D_5 PERIOD LEMMA
+================================================================================
+
+NOTE: The conjectured pattern "D_k has anti-period 2^(k-2)" is WRONG for k=5.
+  D_2: anti-period 1  (period 2)
+  D_3: anti-period 2  (period 4)
+  D_4: anti-period 4  (period 8)
+  D_5: period 8       (NO anti-period — XOR of D4|D3 clock over 8 steps = false)
+  D_6: anti-period 8  (period 16)
+  D_7: anti-period 16 (period 32)
+The pattern is irregular; D_5 lands in the same phase after 8 steps.
+-/
+
+/-- D_4[T] OR D_3[T] = false only at T%8 ∈ {0,1}, true otherwise. -/
+private lemma dChain_4_or_3 (T : Nat) :
+    (dChain T 4 || dChain T 3) = decide (T % 8 ≠ 0 ∧ T % 8 ≠ 1) := by
+  -- Express D_4 and D_3 in terms of T%8 using anti-period-4 and period-4.
+  -- Strategy: reduce to T%8 via case split.
+  -- D_3 has period 4; D_4 has period 8.
+  -- We know D_4 values mod 8 from dChain_4_antiperiod + dChain_3_parity.
+  -- Use native_decide for the 8 base cases, then induction by 8-step periodicity.
+  -- Step 1: one-step recurrence for D_4
+  have step4 : ∀ S : Nat, dChain (S + 1) 4 = (dChain S 4 ^^ (dChain S 3 || dChain S 2)) := by
+    intro S; rfl
+  -- Step 2: periodicity — after 8 steps, D_4 and D_3 return (since D_4 period=8, D_3 period=4)
+  have period_d4 : ∀ S : Nat, dChain (S + 8) 4 = dChain S 4 := by
+    intro S
+    rw [show S + 8 = S + 4 + 4 from by omega]
+    rw [dChain_4_antiperiod (S + 4), dChain_4_antiperiod S]
+    simp
+  have period_d3 : ∀ S : Nat, dChain (S + 8) 3 = dChain S 3 := by
+    intro S
+    -- D_3 has period 4: (S+4)/2 % 2 = S/2 % 2
+    -- We prove period 4 first, then double it.
+    have h_period4 : ∀ U : Nat, dChain (U + 4) 3 = dChain U 3 := by
+      intro U
+      rw [dChain_3_parity (U + 4), dChain_3_parity U]
+      -- (U+4)/2 % 2 = U/2 % 2 because (U+4)/2 = U/2 + 2
+      congr 1
+      have : (U + 4) / 2 = U / 2 + 2 := by omega
+      rw [this]
+      omega
+    rw [show S + 8 = S + 4 + 4 from by omega, h_period4 (S + 4), h_period4 S]
+  -- Step 3: reduce to T % 8 case
+  suffices h : ∀ r : Nat, r < 8 →
+      (dChain r 4 || dChain r 3) = decide (r % 8 ≠ 0 ∧ r % 8 ≠ 1) by
+    have hr : T % 8 < 8 := Nat.mod_lt T (by omega)
+    have key := h (T % 8) hr
+    -- now need (dChain T 4 || dChain T 3) = (dChain (T%8) 4 || dChain (T%8) 3)
+    -- because both have period 8
+    have hT_eq : T = T % 8 + 8 * (T / 8) := by omega
+    conv_lhs => rw [hT_eq]
+    -- apply periodicity T/8 times
+    have hper : ∀ (k n : Nat),
+        dChain (n + 8 * k) 4 = dChain n 4 ∧ dChain (n + 8 * k) 3 = dChain n 3 := by
+      intro k
+      induction k with
+      | zero => intro n; simp
+      | succ k ih =>
+        intro n
+        rw [show n + 8 * (k + 1) = n + 8 * k + 8 from by omega]
+        exact ⟨by rw [period_d4 (n + 8*k), (ih n).1],
+               by rw [period_d3 (n + 8*k), (ih n).2]⟩
+    have hp := hper (T / 8) (T % 8)
+    rw [hp.1, hp.2]
+    rw [key]
+    simp [Nat.mod_mod_of_dvd]
+  -- Base case: verify for r ∈ {0,1,...,7} by case split + decide
+  intro r hr
+  have h : r = 0 ∨ r = 1 ∨ r = 2 ∨ r = 3 ∨ r = 4 ∨ r = 5 ∨ r = 6 ∨ r = 7 := by omega
+  rcases h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> native_decide
+
+/-- The 8-step telescoped XOR is false: D5 has period 8 (not anti-period). -/
+private lemma eight_period_xor_D5 (T : Nat) :
+    (decide (T % 8 ≠ 0 ∧ T % 8 ≠ 1) ^^
+     decide ((T+1) % 8 ≠ 0 ∧ (T+1) % 8 ≠ 1) ^^
+     decide ((T+2) % 8 ≠ 0 ∧ (T+2) % 8 ≠ 1) ^^
+     decide ((T+3) % 8 ≠ 0 ∧ (T+3) % 8 ≠ 1) ^^
+     decide ((T+4) % 8 ≠ 0 ∧ (T+4) % 8 ≠ 1) ^^
+     decide ((T+5) % 8 ≠ 0 ∧ (T+5) % 8 ≠ 1) ^^
+     decide ((T+6) % 8 ≠ 0 ∧ (T+6) % 8 ≠ 1) ^^
+     decide ((T+7) % 8 ≠ 0 ∧ (T+7) % 8 ≠ 1)) = false := by
+  -- In any 8 consecutive naturals, exactly 2 are ≡ 0 or 1 mod 8.
+  -- So 6 are true and 2 are false → XOR = false (even number of trues).
+  have h1 : (T + 1) % 8 = (T % 8 + 1) % 8 := by omega
+  have h2 : (T + 2) % 8 = (T % 8 + 2) % 8 := by omega
+  have h3 : (T + 3) % 8 = (T % 8 + 3) % 8 := by omega
+  have h4 : (T + 4) % 8 = (T % 8 + 4) % 8 := by omega
+  have h5 : (T + 5) % 8 = (T % 8 + 5) % 8 := by omega
+  have h6 : (T + 6) % 8 = (T % 8 + 6) % 8 := by omega
+  have h7 : (T + 7) % 8 = (T % 8 + 7) % 8 := by omega
+  rw [h1, h2, h3, h4, h5, h6, h7]
+  have hlt : T % 8 < 8 := Nat.mod_lt T (by omega)
+  have h0to7 : T % 8 = 0 ∨ T % 8 = 1 ∨ T % 8 = 2 ∨ T % 8 = 3 ∨
+               T % 8 = 4 ∨ T % 8 = 5 ∨ T % 8 = 6 ∨ T % 8 = 7 := by omega
+  rcases h0to7 with h | h | h | h | h | h | h | h <;> simp only [h] <;> decide
+
+/-- D_5[T] has period 8: dChain (T+8) 5 = dChain T 5. -/
+lemma dChain_5_period (T : Nat) : dChain (T + 8) 5 = dChain T 5 := by
+  -- Step function: dChain (S+1) 5 = dChain S 5 XOR (dChain S 4 || dChain S 3)
+  have step : ∀ S : Nat, dChain (S + 1) 5 = (dChain S 5 ^^ (dChain S 4 || dChain S 3)) := by
+    intro S; rfl
+  -- Rewrite using the clock lemma
+  have step' : ∀ S : Nat, dChain (S + 1) 5 =
+      (dChain S 5 ^^ decide (S % 8 ≠ 0 ∧ S % 8 ≠ 1)) := by
+    intro S; rw [step S, dChain_4_or_3]
+  -- Telescope 8 steps
+  calc dChain (T + 8) 5
+      = (dChain (T + 7) 5 ^^ decide ((T+7) % 8 ≠ 0 ∧ (T+7) % 8 ≠ 1)) := by
+          rw [show T + 8 = T + 7 + 1 from by omega, step' (T + 7)]
+    _ = ((dChain (T + 6) 5 ^^ decide ((T+6) % 8 ≠ 0 ∧ (T+6) % 8 ≠ 1)) ^^
+          decide ((T+7) % 8 ≠ 0 ∧ (T+7) % 8 ≠ 1)) := by
+          rw [show T + 7 = T + 6 + 1 from by omega, step' (T + 6)]
+    _ = (((dChain (T + 5) 5 ^^ decide ((T+5) % 8 ≠ 0 ∧ (T+5) % 8 ≠ 1)) ^^
+          decide ((T+6) % 8 ≠ 0 ∧ (T+6) % 8 ≠ 1)) ^^
+          decide ((T+7) % 8 ≠ 0 ∧ (T+7) % 8 ≠ 1)) := by
+          rw [show T + 6 = T + 5 + 1 from by omega, step' (T + 5)]
+    _ = ((((dChain (T + 4) 5 ^^ decide ((T+4) % 8 ≠ 0 ∧ (T+4) % 8 ≠ 1)) ^^
+          decide ((T+5) % 8 ≠ 0 ∧ (T+5) % 8 ≠ 1)) ^^
+          decide ((T+6) % 8 ≠ 0 ∧ (T+6) % 8 ≠ 1)) ^^
+          decide ((T+7) % 8 ≠ 0 ∧ (T+7) % 8 ≠ 1)) := by
+          rw [show T + 5 = T + 4 + 1 from by omega, step' (T + 4)]
+    _ = (((((dChain (T + 3) 5 ^^ decide ((T+3) % 8 ≠ 0 ∧ (T+3) % 8 ≠ 1)) ^^
+          decide ((T+4) % 8 ≠ 0 ∧ (T+4) % 8 ≠ 1)) ^^
+          decide ((T+5) % 8 ≠ 0 ∧ (T+5) % 8 ≠ 1)) ^^
+          decide ((T+6) % 8 ≠ 0 ∧ (T+6) % 8 ≠ 1)) ^^
+          decide ((T+7) % 8 ≠ 0 ∧ (T+7) % 8 ≠ 1)) := by
+          rw [show T + 4 = T + 3 + 1 from by omega, step' (T + 3)]
+    _ = ((((((dChain (T + 2) 5 ^^ decide ((T+2) % 8 ≠ 0 ∧ (T+2) % 8 ≠ 1)) ^^
+          decide ((T+3) % 8 ≠ 0 ∧ (T+3) % 8 ≠ 1)) ^^
+          decide ((T+4) % 8 ≠ 0 ∧ (T+4) % 8 ≠ 1)) ^^
+          decide ((T+5) % 8 ≠ 0 ∧ (T+5) % 8 ≠ 1)) ^^
+          decide ((T+6) % 8 ≠ 0 ∧ (T+6) % 8 ≠ 1)) ^^
+          decide ((T+7) % 8 ≠ 0 ∧ (T+7) % 8 ≠ 1)) := by
+          rw [show T + 3 = T + 2 + 1 from by omega, step' (T + 2)]
+    _ = (((((((dChain (T + 1) 5 ^^ decide ((T+1) % 8 ≠ 0 ∧ (T+1) % 8 ≠ 1)) ^^
+          decide ((T+2) % 8 ≠ 0 ∧ (T+2) % 8 ≠ 1)) ^^
+          decide ((T+3) % 8 ≠ 0 ∧ (T+3) % 8 ≠ 1)) ^^
+          decide ((T+4) % 8 ≠ 0 ∧ (T+4) % 8 ≠ 1)) ^^
+          decide ((T+5) % 8 ≠ 0 ∧ (T+5) % 8 ≠ 1)) ^^
+          decide ((T+6) % 8 ≠ 0 ∧ (T+6) % 8 ≠ 1)) ^^
+          decide ((T+7) % 8 ≠ 0 ∧ (T+7) % 8 ≠ 1)) := by
+          rw [show T + 2 = T + 1 + 1 from by omega, step' (T + 1)]
+    _ = ((((((((dChain T 5 ^^ decide (T % 8 ≠ 0 ∧ T % 8 ≠ 1)) ^^
+          decide ((T+1) % 8 ≠ 0 ∧ (T+1) % 8 ≠ 1)) ^^
+          decide ((T+2) % 8 ≠ 0 ∧ (T+2) % 8 ≠ 1)) ^^
+          decide ((T+3) % 8 ≠ 0 ∧ (T+3) % 8 ≠ 1)) ^^
+          decide ((T+4) % 8 ≠ 0 ∧ (T+4) % 8 ≠ 1)) ^^
+          decide ((T+5) % 8 ≠ 0 ∧ (T+5) % 8 ≠ 1)) ^^
+          decide ((T+6) % 8 ≠ 0 ∧ (T+6) % 8 ≠ 1)) ^^
+          decide ((T+7) % 8 ≠ 0 ∧ (T+7) % 8 ≠ 1)) := by
+          rw [show T + 1 = T + 1 from rfl, step' T]
+    _ = dChain T 5 := by
+          have hxor := eight_period_xor_D5 T
+          revert hxor
+          generalize dChain T 5 = b
+          generalize decide (T % 8 ≠ 0 ∧ T % 8 ≠ 1) = x0
+          generalize decide ((T+1) % 8 ≠ 0 ∧ (T+1) % 8 ≠ 1) = x1
+          generalize decide ((T+2) % 8 ≠ 0 ∧ (T+2) % 8 ≠ 1) = x2
+          generalize decide ((T+3) % 8 ≠ 0 ∧ (T+3) % 8 ≠ 1) = x3
+          generalize decide ((T+4) % 8 ≠ 0 ∧ (T+4) % 8 ≠ 1) = x4
+          generalize decide ((T+5) % 8 ≠ 0 ∧ (T+5) % 8 ≠ 1) = x5
+          generalize decide ((T+6) % 8 ≠ 0 ∧ (T+6) % 8 ≠ 1) = x6
+          generalize decide ((T+7) % 8 ≠ 0 ∧ (T+7) % 8 ≠ 1) = x7
+          intro h
+          cases b <;> cases x0 <;> cases x1 <;> cases x2 <;> cases x3 <;>
+            cases x4 <;> cases x5 <;> cases x6 <;> cases x7 <;> simp_all
+
+/-
+================================================================================
 SECTION 3: THE DELTA — Δ(T, m) = G_{2,m}(T) XOR F_2(T) = 1 at SubcaseB events
 ================================================================================
 
@@ -307,6 +477,72 @@ lemma twoSpike_center_complement (T m : Nat)
     rule30n T (fun j : Fin (2 * T + 1) => decide (j.val = 2 ∨ j.val = m)) =
     !dChain T 2 := by
   sorry  -- OPEN: LFSR/D-chain algebraic proof needed. See D-chain period theory below.
+
+/-
+================================================================================
+SECTION 3b: TWO-SPIKE UNIVERSAL LEMMA — G_{2,last}(T) = false for T≥2
+================================================================================
+
+Computationally verified T=2..200. Proof via two-step recursion:
+  caEvolve 2 (twoSpikeList 2 (2*T) (2*T+1)) = twoSpikeList 2 (2*(T-2)) (2*(T-2)+1) for T≥4
+which follows from the explicit evolution:
+  step1(twoSpike at {2, 2T}) = tape with 1s at {0,1,2,2*(T-1)}, T≥3
+  step1 of the above = twoSpike at {2, 2*(T-2)}, T≥4
+Base cases T=2,3 terminate to false.
+
+NOTE: Uses twoSpikeList from CausalConeLemmas: twoSpikeList p q N (1s at p and q, width N).
+-/
+
+/-- configToList of the two-spike config equals twoSpikeList 2 (2*T) (2*T+1). -/
+private lemma configToList_twoSpike2last (T : Nat) :
+    configToList (fun j : Fin (2 * T + 1) => decide (j.val = 2 ∨ j.val = 2 * T)) =
+    twoSpikeList 2 (2 * T) (2 * T + 1) := by
+  simp [configToList, twoSpikeList]
+
+/-- After 2 evolution steps, twoSpikeList 2 (2*T) (2*T+1) reduces to
+    twoSpikeList 2 (2*(T-2)) (2*(T-2)+1), for T≥4.
+    This is the key 2-step recursion. Computationally verified T=4..19.
+
+    PROOF SKETCH (for loop-A):
+    Use caEvolve_getD_shift: (caEvolve 2 l).getD j false = (caEvolve 2 (l.drop j)).getD 0 false
+    For each j in [0, 2*(T-2)], the 5-element window [j..j+4] of the input determines result.
+    Spikes at 2 and 2*T are ≥6 apart for T≥4, so no window contains both.
+    Three canonical window types (compute with decide/native_decide):
+      [1,0,0,0,0] → 1, [0,0,0,0,1] → 1, all-zero → 0, others → 0
+    For j=2: window has spike at pos 0 → result 1 = decide(2=2)
+    For j=2*(T-2): window has spike at pos 4 → result 1 = decide(j=2*(T-2))
+    All other j: zero window → result 0 = decide(j=2 ∨ j=2*(T-2))
+    Steps: apply List.ext_getElem?, case split on j, use caEvolve_getD_shift + twoSpikeList_getD -/
+private lemma twoSpikeList_2_last_step2 (T : Nat) (hT : 4 ≤ T) :
+    caEvolve 2 (twoSpikeList 2 (2 * T) (2 * T + 1)) =
+    twoSpikeList 2 (2 * (T - 2)) (2 * (T - 2) + 1) := by
+  sorry  -- PROOF TODO for loop-A (see proof sketch above)
+
+/-- Auxiliary lemma for dChain_2_last_false: induction by 2 using twoSpikeList_2_last_step2. -/
+private lemma dChain_2_last_false_aux (n : Nat) :
+    (caEvolve (n + 2) (twoSpikeList 2 (2 * (n + 2)) (2 * (n + 2) + 1))).getD 0 false = false := by
+  induction n using Nat.strongRecOn with
+  | _ n ih =>
+    match n with
+    | 0 => native_decide
+    | 1 => native_decide
+    | n + 2 =>
+      -- T = n+4; use: caEvolve (n+4) = caEvolve (n+2) ∘ caEvolve 2, then step2 reduction
+      rw [show n + 2 + 2 = (n + 2) + 2 from by omega, caEvolve_add,
+          twoSpikeList_2_last_step2 ((n + 2) + 2) (by omega),
+          show (n + 2) + 2 - 2 = n + 2 from by omega]
+      exact ih n (by omega)
+
+/-- Two spikes at positions 2 and 2T always give center = false for T ≥ 2.
+    Computationally verified T=2..200. Proof: 2-step recursion.
+    Only sorry: twoSpikeList_2_last_step2 (the list equality after 2 evolution steps). -/
+lemma dChain_2_last_false (T : Nat) (hT : 2 ≤ T) :
+    rule30n T (fun j : Fin (2 * T + 1) => decide (j.val = 2 ∨ j.val = 2 * T)) = false := by
+  have key := dChain_2_last_false_aux (T - 2)
+  rw [show T - 2 + 2 = T from by omega] at key
+  unfold rule30n
+  rw [configToList_twoSpike2last]
+  exact key
 
 /-
 ================================================================================

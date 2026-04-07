@@ -6709,3 +6709,60 @@ Since `rule30n T (twoSpike T)` depends on T in a regular way, could use:
 3. The whole proof follows from base cases
 
 The reduction IS the proof — no LFSR theory needed. This is the "free win" lemma.
+
+---
+
+## SpinePass.lean new lemmas (2026-04-06 session)
+
+Added to P2p/SpinePass.lean: `dChain_2_last_false` with 2-step induction structure.
+
+### PROOF STRUCTURE (compiles with 2 sorrys total):
+
+```lean
+-- 2-step reduction: caEvolve 2 (twoSpikeList 2 (2*T) (2*T+1)) = twoSpikeList 2 (2*(T-2)) (2*(T-2)+1)
+-- Only true for T≥4. Verified with native_decide for T=4..11 (n : Fin 8).
+private lemma twoSpikeList_2_last_step2 (T : Nat) (hT : 4 ≤ T) : ... := by sorry
+
+-- Uses Nat.strongRecOn with match on n to do 2-step induction
+private lemma dChain_2_last_false_aux (n : Nat) :
+    (caEvolve (n+2) (twoSpikeList 2 (2*(n+2)) (2*(n+2)+1))).getD 0 false = false
+
+-- Main lemma: T≥2 → G_{2,last}(T) = false
+lemma dChain_2_last_false (T : Nat) (hT : 2 ≤ T) :
+    rule30n T (fun j => decide (j.val = 2 ∨ j.val = 2*T)) = false
+```
+
+### PROOF OF twoSpikeList_2_last_step2 (for loop-A):
+
+Goal: `caEvolve 2 (twoSpikeList 2 (2*T) (2*T+1)) = twoSpikeList 2 (2*(T-2)) (2*(T-2)+1)` for T≥4.
+
+The result list has the same length (2*(T-2)+1 = 2*T-3). For each position i ∈ [0, 2*(T-2)]:
+
+5-cell window at position i has spikes only from {2, 2*T} (≥6 apart for T≥4):
+- i=0: window[2]=1, rest 0 → canonical [0,0,1,0,0] → caEvolve 2 = 0 = decide(0=2 ∨ 0=2*(T-2)) ✓
+- i=1: window[1]=1 → [0,1,0,0,0] → caEvolve 2 = 0 ✓
+- i=2: window[0]=1 → [1,0,0,0,0] → caEvolve 2 = 1 = decide(2=2) ✓
+- i∈[3, 2*(T-2)-1]: window all zero → 0 = decide(false) ✓
+- i=2*(T-2): window[4]=1 (spike at 2T=i+4) → [0,0,0,0,1] → caEvolve 2 = 1 ✓
+
+Lean proof path:
+```lean
+apply List.ext_getElem?
+intro i
+-- Case split on i using omega
+-- For each case, apply caEvolve_getD_shift 2 _ i
+-- then caEvolve_agree 2 with canonical 5-list
+-- then native_decide for the canonical computation
+-- then use twoSpikeList_getD to show window matches canonical
+-- finally omega for decide equality
+```
+
+native_decide verification (works in Lean):
+```lean
+-- [0,0,1,0,0] → 0: (caEvolve 2 [false,false,true,false,false]).getD 0 false = false
+-- [0,1,0,0,0] → 0: (caEvolve 2 [false,true,false,false,false]).getD 0 false = false
+-- [1,0,0,0,0] → 1: (caEvolve 2 [true,false,false,false,false]).getD 0 false = true
+-- [0,0,0,0,0] → 0: (caEvolve 2 [false,false,false,false,false]).getD 0 false = false
+-- [0,0,0,0,1] → 1: (caEvolve 2 [false,false,false,false,true]).getD 0 false = true
+```
+All verified: native_decide EXIT 0.
