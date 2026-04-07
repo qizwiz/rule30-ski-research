@@ -676,6 +676,70 @@ lemma dChain_2_last_false (T : Nat) (hT : 2 ≤ T) :
 
 /-
 ================================================================================
+SECTION 3c: RIGHT-EDGE CONSTANT LEMMAS
+================================================================================
+-/
+
+/-- Spike at the penultimate position 2T-1 gives center = true for all T ≥ 1.
+    Proof: induction; step uses dChain_beyond_false + dChain_last_true. -/
+lemma dChain_penultimate_true : ∀ T : Nat, 1 ≤ T → dChain T (2 * T - 1) = true
+  | 0, h => absurd h (by omega)
+  | 1, _ => by native_decide
+  | T + 2, _ => by
+    have ih : dChain (T + 1) (2 * (T + 1) - 1) = true :=
+      dChain_penultimate_true (T + 1) (by omega)
+    rw [show 2 * (T + 2) - 1 = (2 * T + 1) + 2 from by omega,
+        show T + 2 = (T + 1) + 1 from by omega,
+        dChain_step_k]
+    have h1 : dChain (T + 1) ((2 * T + 1) + 2) = false :=
+      dChain_beyond_false _ _ (by omega)
+    have h2 : dChain (T + 1) ((2 * T + 1) + 1) = true := by
+      rw [show (2 * T + 1) + 1 = 2 * (T + 1) from by omega]; exact dChain_last_true _
+    have h3 : dChain (T + 1) (2 * T + 1) = true := by
+      rw [show 2 * T + 1 = 2 * (T + 1) - 1 from by omega]; exact ih
+    rw [h1, h2, h3]; decide
+
+/-- Spike at position 2T-2 (antepenultimate) gives center = false for all T ≥ 2.
+    Proof: dChain (T+1) (2T) = rule30Local(last=true, penultimate=true, _) = false.
+    Note: rule30Local true true _ = true XOR (true OR _) = true XOR true = false always. -/
+lemma dChain_antepenultimate_false (T : Nat) (hT : 2 ≤ T) : dChain T (2 * T - 2) = false := by
+  induction T with
+  | zero => omega
+  | succ T ih =>
+    cases T with
+    | zero => omega  -- T+1=1 but hT ≥ 2 contradicts
+    | succ T =>
+      -- T_actual = T + 2 ≥ 2.
+      -- dChain (T+2) (2*(T+2)-2) = dChain (T+2) (2T+2)
+      -- = dChain ((T+1)+1) ((2T)+2)
+      -- dChain_step_k with t=T+1, k=2T:
+      --   = rule30Local(dChain(T+1)(2T+2), dChain(T+1)(2T+1), dChain(T+1)(2T))
+      rw [show 2 * (T + 2) - 2 = (2 * T) + 2 from by omega,
+          show T + 2 = (T + 1) + 1 from by omega,
+          dChain_step_k]
+      have h_last : dChain (T + 1) (2 * T + 2) = true := by
+        rw [show 2 * T + 2 = 2 * (T + 1) from by omega]; exact dChain_last_true _
+      have h_pen : dChain (T + 1) (2 * T + 1) = true := by
+        rw [show 2 * T + 1 = 2 * (T + 1) - 1 from by omega]
+        exact dChain_penultimate_true _ (by omega)
+      rw [h_last, h_pen]
+      cases (dChain (T + 1) (2 * T)) <;> decide
+
+/-- dChain T k = false for k > 2*T (outside the causal cone). -/
+private lemma dChain_beyond_cone (T k : Nat) (hk : 2 * T < k) : dChain T k = false := by
+  induction T generalizing k with
+  | zero => exact dChain_t0 k (by omega)
+  | succ T ih =>
+    match k with
+    | 0 => omega
+    | 1 => omega
+    | k + 2 =>
+      rw [dChain_step_k]
+      rw [ih (k + 2) (by omega), ih (k + 1) (by omega), ih k (by omega)]
+      decide
+
+/-
+================================================================================
 SECTION 4: CONNECT rule30n TO THE SPINE
 ================================================================================
 -/
@@ -775,6 +839,218 @@ lemma rule30n_spike_dChain (T k : Nat) (hk : k < 2 * T + 1) :
   unfold rule30n
   rw [configToList_spikeAt T k]
   exact dChain_eq_caEvolve T k
+
+/-
+================================================================================
+SECTION 4b: BOUNDARY SPIKE NEGATION LEMMA
+================================================================================
+
+KEY THEOREM: Two spikes at position 0 and k give center = !dChain T k.
+
+Proof sketch: The center recurrence for G_{0,k}(T+1):
+  - pos 0 after T steps from (spike 0 and k+2) = G_{0,k+2}(T) = !A_{k+2}(T) [IH]
+  - pos 1 after T steps = center of (spike at k+1 only) = A_{k+1}(T)
+    [since drop-1 removes the spike at position 0]
+  - pos 2 after T steps = center of (spike at k only) = A_k(T)
+    [since drop-2 removes both position 0 and 1, spike at k+2 → k]
+So G_{0,k+2}(T+1) = rule30Local(!A_{k+2}, A_{k+1}, A_k)
+= !A_{k+2} XOR (A_{k+1} OR A_k)         [expand rule30Local]
+= !(A_{k+2} XOR (A_{k+1} OR A_k))       [since !x XOR y = !(x XOR y)]
+= !rule30Local(A_{k+2}, A_{k+1}, A_k)
+= !dChain(T+1)(k+2). ✓
+
+The key algebraic identity used: !x XOR y = !(x XOR y) for all x y : Bool.
+This follows because !x = 1 XOR x, so !x XOR y = 1 XOR x XOR y = !(x XOR y).
+
+CONSEQUENCE: The only nonzero interaction in Rule 30's causal cone is between
+position 0 (the "right boundary") and any other position: G_{0,k} = !A_k.
+-/
+
+private lemma configToList_twoSpike0k (T k : Nat) :
+    configToList (fun j : Fin (2 * T + 1) => decide (j.val = 0 ∨ j.val = k)) =
+    twoSpikeList 0 k (2 * T + 1) := by
+  simp [configToList, twoSpikeList]
+
+/-- Drop 1 of twoSpikeList 0 k (2T+3) = spikeAtList 0 (2T+2):
+    the spike at position 0 is "removed" (shifting position 0 to beyond start),
+    and the spike at k shifts to k-1. For k≥1, positions 0..2T are all 0 except
+    possibly k-1. For k=1 the dropped spike is now at 0 → spikeAtList 0. -/
+private lemma twoSpikeList_0k_drop1 (T k : Nat) (hk : 1 ≤ k) (hk_le : k ≤ 2 * T + 2) :
+    (caEvolve T ((twoSpikeList 0 k (2 * T + 3)).drop 1)).getD 0 false =
+    dChain T (k - 1) := by
+  rw [← dChain_eq_caEvolve T (k - 1)]
+  apply caEvolve_agree T _ _ (by rw [List.length_drop, twoSpikeList_length]; omega)
+    (by rw [spikeAtList_length]; omega)
+  intro j hj
+  rw [show ((twoSpikeList 0 k (2 * T + 3)).drop 1).getD j false =
+      (twoSpikeList 0 k (2 * T + 3)).getD (1 + j) false from by
+    simp [List.getD_eq_getElem?_getD, List.getElem?_drop, show j + 1 = 1 + j from by omega]]
+  rw [twoSpikeList_getD 0 k (2 * T + 3) (1 + j) (by omega)]
+  rw [spikeAtList_getD (k - 1) (2 * T + 1) j (by omega)]
+  rw [decide_eq_decide]
+  constructor
+  · rintro (h | h) <;> omega
+  · intro h; right; omega
+
+/-- Drop 2 of twoSpikeList 0 k (2T+3) for k≥2 = spikeAtList (k-2) (2T+1). -/
+private lemma twoSpikeList_0k_drop2 (T k : Nat) (hk : 2 ≤ k) (hk_le : k ≤ 2 * T + 2) :
+    (caEvolve T ((twoSpikeList 0 k (2 * T + 3)).drop 2)).getD 0 false =
+    dChain T (k - 2) := by
+  rw [← dChain_eq_caEvolve T (k - 2)]
+  apply caEvolve_agree T _ _ (by rw [List.length_drop, twoSpikeList_length]; omega)
+    (by rw [spikeAtList_length]; omega)
+  intro j hj
+  rw [show ((twoSpikeList 0 k (2 * T + 3)).drop 2).getD j false =
+      (twoSpikeList 0 k (2 * T + 3)).getD (2 + j) false from by
+    simp [List.getD_eq_getElem?_getD, List.getElem?_drop, show j + 2 = 2 + j from by omega]]
+  rw [twoSpikeList_getD 0 k (2 * T + 3) (2 + j) (by omega)]
+  rw [spikeAtList_getD (k - 2) (2 * T + 1) j (by omega)]
+  rw [decide_eq_decide]
+  constructor
+  · rintro (h | h) <;> omega
+  · intro h; right; omega
+
+/-- Drop 2 of twoSpikeList 0 1 (2T+3) = all zeros: both spikes removed. -/
+private lemma twoSpikeList_01_drop2_allFalse (T : Nat) :
+    (caEvolve T ((twoSpikeList 0 1 (2 * T + 3)).drop 2)).getD 0 false = false := by
+  apply caEvolve_allFalse
+  intro i hi
+  rw [show ((twoSpikeList 0 1 (2 * T + 3)).drop 2).getD i false =
+      (twoSpikeList 0 1 (2 * T + 3)).getD (2 + i) false from by
+    simp [List.getD_eq_getElem?_getD, List.getElem?_drop, show i + 2 = 2 + i from by omega]]
+  rw [List.length_drop, twoSpikeList_length] at hi
+  rw [twoSpikeList_getD 0 1 (2 * T + 3) (2 + i) (by omega)]
+  simp only [decide_eq_false_iff_not, not_or]
+  omega
+
+/-- The core: caEvolve T (twoSpikeList 0 k (2T+1)) at 0 = !dChain T k for k ≥ 1. -/
+private lemma caEvolve_twoSpike0k_neg (T k : Nat) (hk : 1 ≤ k) (hk_le : k ≤ 2 * T) :
+    (caEvolve T (twoSpikeList 0 k (2 * T + 1))).getD 0 false = !dChain T k := by
+  induction T generalizing k with
+  | zero => omega  -- hk_le : k ≤ 0, hk : 1 ≤ k → contradiction
+  | succ T ih =>
+    -- hk_le : k ≤ 2*(T+1) = 2*T+2
+    match k with
+    | 1 =>
+      -- G_{0,1}(T+1): spikes at 0 and 1 in tape 2T+3.
+      -- Use center recurrence: length 3 after T steps.
+      have hlen3 : (caEvolve T (twoSpikeList 0 1 (2 * (T + 1) + 1))).length = 3 := by
+        rw [caEvolve_length_le T _ (by rw [twoSpikeList_length]; omega), twoSpikeList_length]; omega
+      rw [caEvolve_succ_comm, caStepList_getD_eq _ 0 (by omega)]
+      -- pos 0: G_{0,1}(T) — if T=0, it's [T,T] (spikes 0&1 in tape 1 = [true]) → true
+      -- If T=0, tape 2*(T+1)+1 = 3 with spikes at 0 and 1: [T,T,F].
+      -- caEvolve 0 = id. pos 0 = true = !dChain 0 1 = !false = true. ✓
+      -- If T>0, use IH.
+      have hp0 : (caEvolve T (twoSpikeList 0 1 (2 * (T + 1) + 1))).getD 0 false = !dChain T 1 := by
+        cases T with
+        | zero =>
+          -- T=0, tape=[T,T,F], caEvolve 0 = id: pos 0 = T = true = !dChain 0 1 = !F = T ✓
+          native_decide
+        | succ T =>
+          have heq := caEvolve_agree (T + 1)
+            (twoSpikeList 0 1 (2 * (T + 2) + 1))
+            (twoSpikeList 0 1 (2 * (T + 1) + 1))
+            (by rw [twoSpikeList_length]; omega)
+            (by rw [twoSpikeList_length]; omega)
+            (fun j hj => by
+              rw [twoSpikeList_getD 0 1 (2 * (T + 2) + 1) j (by omega)]
+              rw [twoSpikeList_getD 0 1 (2 * (T + 1) + 1) j (by omega)])
+          rw [heq]
+          exact ih 1 (by omega) (by omega)
+      -- pos 1: drop 1 of (twoSpikeList 0 1 (2T+3)), spikes at 0 and 1 → after drop: spike at 0 only
+      have hp1 : (caEvolve T (twoSpikeList 0 1 (2 * (T + 1) + 1))).getD 1 false = true := by
+        rw [caEvolve_getD_shift T _ 1, show 2 * (T + 1) + 1 = 2 * T + 3 from by omega]
+        have := twoSpikeList_0k_drop1 T 1 (by omega) (by omega)
+        rw [show (1 : Nat) - 1 = 0 from by omega] at this
+        rw [this, dChain_k0]
+      -- pos 2: drop 2, spikes at 0 and 1 both removed → all false
+      have hp2 : (caEvolve T (twoSpikeList 0 1 (2 * (T + 1) + 1))).getD 2 false = false := by
+        rw [caEvolve_getD_shift T _ 2]
+        -- drop 2 of (twoSpikeList 0 1 (2T+3)): length 2T+1, no spikes in range
+        exact caEvolve_allFalse T _ (by
+          intro i hi
+          rw [show ((twoSpikeList 0 1 (2 * (T + 1) + 1)).drop 2).getD i false =
+              (twoSpikeList 0 1 (2 * (T + 1) + 1)).getD (2 + i) false from by
+            simp [List.getD_eq_getElem?_getD, List.getElem?_drop, show i + 2 = 2 + i from by omega]]
+          rw [List.length_drop, twoSpikeList_length] at hi
+          rw [twoSpikeList_getD 0 1 (2*(T+1)+1) (2+i) (by omega)]
+          simp only [decide_eq_false_iff_not, not_or]; omega)
+      rw [hp0, hp1, hp2]
+      simp [dChain_step_1, rule30Local, dChain_k0]
+    | k + 2 =>
+      -- G_{0,k+2}(T+1): spikes at 0 and k+2 in tape 2T+3.
+      have hk' : k + 2 ≤ 2 * T + 2 := by omega
+      have hlen3 : (caEvolve T (twoSpikeList 0 (k + 2) (2 * (T + 1) + 1))).length = 3 := by
+        rw [caEvolve_length_le T _ (by rw [twoSpikeList_length]; omega), twoSpikeList_length]; omega
+      rw [caEvolve_succ_comm, caStepList_getD_eq _ 0 (by omega)]
+      -- pos 0: G_{0,k+2}(T) = !dChain T (k+2) by IH (if k+2 ≤ 2*T) or outside-cone (if k+2 > 2*T)
+      have hp0 : (caEvolve T (twoSpikeList 0 (k + 2) (2 * (T + 1) + 1))).getD 0 false =
+          !dChain T (k + 2) := by
+        rcases Nat.lt_or_ge (2 * T) (k + 2) with hgt | hle
+        · -- hgt : 2*T < k+2 → spike outside causal cone, center = spike-at-0 = true = !false
+          have hdc : dChain T (k + 2) = false := dChain_beyond_cone T (k + 2) (by omega)
+          have heq := caEvolve_agree T
+            (twoSpikeList 0 (k + 2) (2 * (T + 1) + 1))
+            (spikeAtList 0 (2 * (T + 1) + 1))
+            (by rw [twoSpikeList_length]; omega)
+            (by rw [spikeAtList_length]; omega)
+            (fun j hj => by
+              rw [twoSpikeList_getD 0 (k + 2) (2 * (T + 1) + 1) j (by omega)]
+              rw [spikeAtList_getD 0 (2 * (T + 1) + 1) j (by omega)]
+              simp only [decide_eq_decide]
+              constructor
+              · rintro (h | h) <;> omega
+              · intro h; left; exact h)
+          rw [heq, hdc, Bool.not_false]
+          exact (caEvolve_spikeAt_agree T 0 (2 * (T + 1) + 1) (2 * T + 1) 0 (by omega) (by omega)).trans
+                (spikeAtList0_always_true T)
+        · -- hle : k+2 ≤ 2*T → within cone, reduce tape size and apply IH
+          have heq := caEvolve_agree T
+            (twoSpikeList 0 (k + 2) (2 * (T + 1) + 1))
+            (twoSpikeList 0 (k + 2) (2 * T + 1))
+            (by rw [twoSpikeList_length]; omega)
+            (by rw [twoSpikeList_length]; omega)
+            (fun j hj => by
+              rw [twoSpikeList_getD 0 (k + 2) (2 * (T + 1) + 1) j (by omega)]
+              rw [twoSpikeList_getD 0 (k + 2) (2 * T + 1) j (by omega)])
+          rw [heq]; exact ih (k + 2) (by omega) (by omega)
+      -- pos 1: drop 1 → spike at k+1 only → dChain T (k+1)
+      have hp1 : (caEvolve T (twoSpikeList 0 (k + 2) (2 * (T + 1) + 1))).getD 1 false =
+          dChain T (k + 1) := by
+        rw [caEvolve_getD_shift T _ 1]
+        have := twoSpikeList_0k_drop1 T (k+2) (by omega) (by omega)
+        rw [show k + 2 - 1 = k + 1 from by omega] at this
+        exact this
+      -- pos 2: drop 2 → spike at k only → dChain T k
+      have hp2 : (caEvolve T (twoSpikeList 0 (k + 2) (2 * (T + 1) + 1))).getD 2 false =
+          dChain T k := by
+        rw [caEvolve_getD_shift T _ 2]
+        have := twoSpikeList_0k_drop2 T (k+2) (by omega) (by omega)
+        rw [show k + 2 - 2 = k from by omega] at this
+        exact this
+      rw [hp0, hp1, hp2]
+      -- rule30Local(!dChain T (k+2), dChain T (k+1), dChain T k)
+      -- = !dChain T (k+2) XOR (dChain T (k+1) OR dChain T k)
+      -- = !(dChain T (k+2) XOR (dChain T (k+1) OR dChain T k))  [!x XOR y = !(x XOR y)]
+      -- = !rule30Local(dChain T (k+2), dChain T (k+1), dChain T k)
+      -- = !dChain (T+1) (k+2)
+      rw [rule30Local, show dChain (T + 1) (k + 2) =
+          rule30Local (dChain T (k + 2)) (dChain T (k + 1)) (dChain T k) from
+          dChain_step_k T k, rule30Local]
+      -- goal: !dChain T (k+2) ^^ (dChain T (k+1) || dChain T k) =
+      --       !(dChain T (k+2) ^^ (dChain T (k+1) || dChain T k))
+      -- This is just Bool.not_xor or similar
+      cases (dChain T (k + 2)) <;> cases (dChain T (k + 1)) <;> cases (dChain T k) <;> simp
+
+/-- Two spikes at position 0 and k give center = !dChain T k for all T, k ≥ 1, k ≤ 2T.
+    Equivalently: G_{0,k}(T) = !F_k(T) — the "right boundary spike" negates.
+
+    Key consequence: at SubcaseB(T,m) where F_m=0, G_{0,m}(T) = !0 = 1 (sensitivity). -/
+lemma twoSpike0k_neg_dChain (T k : Nat) (hk : 1 ≤ k) (hk_le : k ≤ 2 * T) :
+    rule30n T (fun j : Fin (2 * T + 1) => decide (j.val = 0 ∨ j.val = k)) = !dChain T k := by
+  unfold rule30n
+  rw [configToList_twoSpike0k]
+  exact caEvolve_twoSpike0k_neg T k hk hk_le
 
 /-
 ================================================================================
