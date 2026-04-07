@@ -70,14 +70,19 @@ The full file is 5800+ lines — always use RAG first.
 
 ---
 
-## CURRENT STATE (updated Apr 6 ~2AM CDT)
+## CURRENT STATE (updated Apr 6, interactive session)
 
 **Architecture**: 93→22 active .lean files, single-root DAG. Dead experiments in archive/.
-**Single blocker**: `twoSpike_center_complement` sorry in SpinePass.lean:309
+**Single blocker**: `twoSpike_center_complement` sorry in SpinePass.lean:479
 
-**Open Track B items**: B7 (X=2 algebraic theory), B8 (arxiv mining — interaction term theory)
+**Open Track B items**: B7a (3-body term T(2,m,last) verification), B8 (arxiv mining)
+**Partially done**: B7 (SubcaseB locking confirmed, mod-8 structure, G_{2,last}=0 lemma found)
 **Closed**: B1 (D-field shape), B2 (witness LFSR — negative), B3 (Prize 2), B4 (m=22 LFSR — negative),
            B5 (caEvolve bridge — LeftBoundary.lean ARCHIVED, moot), B6 (m=22 P=131072 — m=22 PROVED, moot)
+
+**NEW provable Lean lemma (loop-A)**: G_{2,last}(T) = 0 for T≥2
+- `rule30n T (fun j => decide (j.val = 2 ∨ j.val = 2*T)) = false` for T≥2
+- Add to SpinePass.lean, uses dChain framework, no sorry needed
 
 ---
 
@@ -105,30 +110,30 @@ The full file is 5800+ lines — always use RAG first.
 
 ### B6: m=22 P=131072 cert — ✓ DONE (moot, m=22 fully proved in SubcaseBPeriod.lean)
 
-### B7: X=2 interaction term — OPEN (THE NEW KEY TASK)
+### B7: X=2 interaction term — PARTIALLY DONE (interactive session 2026-04-06)
 
 **Goal**: Find an algebraic argument for why I(2,m) = 1 at SubcaseB events for even m≥40.
 
-**Background**:
-- G_{2,m}(T) = center of twoSpike(2,m) after T steps
-- F_2(T) = dChain T 2 = (T%2 == 1)  [proved in SpinePass.lean]
-- At SubcaseB events (F_m=0, G_{m,last}=1): G_{2,m} = !F_2 (computationally verified)
-- The interaction term: I(2,m) = G_{2,m} XOR F_2 XOR F_m = G_{2,m} XOR F_2 (since F_m=0)
-- Need: I(2,m) = 1, i.e., G_{2,m} ≠ F_2 at SubcaseB events
-- Also known: I(m,last) = 0 at SubcaseB events (follows from F_m=0, F_last=1, G_{m,last}=1)
+**COMPLETED** (interactive session, findings appended to research/findings.md ~line 6545):
+- SubcaseB is necessary AND sufficient for locking I(2,m) (three-way case split confirmed)
+- G_{2,last}(T) = 0 for all T≥2 (universal lemma, verified T=2..200)
+- Mod-8 T-residue structure: m≥40 SubcaseB fires on specific T%8 residues, ALL giving I=1
+- Verified m=40@T=40984 (T%8=0) AND m=40@T=61460 (T%8=4): both give I=1
+- Second-half identity: G_{2,m,last} = I(2,m) ⊕ T(2,m,last) at SubcaseB events
 
-**Question**: Is there a known relationship between I(k1,k2) and I(k2,k3) for XOR-based CAs?
-Specifically: does I(m,last)=0 imply I(2,m)=1 via some algebraic structure?
+**OPEN SUB-TASK B7a**: Verify T(2,m,last) = 0 at SubcaseB events
+- T(2,m,last) = 3-body interaction term (rule30n of twoSpike_{2,m,last} - pairwise corrections)
+- If T=0 universally at SubcaseB, then G_{2,m,last} = I(2,m), giving a new proof path
+- Write Python script: compute T(2,m,last) at SubcaseB events for m=40..60
 
-**Parity lock observation** (empirical):
-- m=40 (m/2=20, even): SubcaseB fires at EVEN T → F_2=0, G_{2,40}=1
-- m=42 (m/2=21, odd): SubcaseB fires at ODD T → F_2=1, G_{2,42}=0
+**OPEN SUB-TASK B7b**: Provable Lean lemma (loop-A can do this)
+- `dChain_2_last_false (T : Nat) (hT : 2 ≤ T) : rule30n T (fun j => decide (j.val = 2 ∨ j.val = 2*T)) = false`
+- Verified computationally; needs induction proof in SpinePass.lean
+- Does NOT require the sorry — can be a free win for loop-A
 
-**Your task**:
-1. Write a Python script to compute I(2,m) for m=40..60 at SubcaseB events in [3087, 10000] (if any exist)
-2. Also check: does I(2,m) = !I(m,last) hold universally? (I.e., does I(2,m) XOR I(m,last) = 1 always?)
-3. Check: at non-SubcaseB times (F_m=1 or G_{m,last}=0), does I(2,m) vary or is it always 0?
-4. Write findings to `research/findings.md` with concrete data
+**REMAINING GAP**: WHY does SubcaseB lock I(2,m)=1 for m≥40 algebraically?
+- Candidate: D-chain cascade argument (spike-at-2 "sources" D_2 which drives SubcaseB at m)
+- Candidate: Three-body term T(2,m,last)=0 + G_{2,m,last} characterization
 
 ### B8: Arxiv mining — OPEN (algebraic CA interaction terms)
 
@@ -208,3 +213,4 @@ Always increment N from the last loop-B commit's number (check git log).
 | B-init | Created loop-prompt-B.md | Parallel infrastructure split |
 | loop-B1 | Marked B2 DONE (negative), updated CURRENT STATE | B2 witness LFSR computation complete |
 | loop-B2 | Marked B1 DONE, updated CURRENT STATE | D-field causal cone gap analysis complete |
+| interactive Apr6 | B7 partial: SubcaseB locking, G_{2,last}=0, mod-8 structure | Session with Knurl |

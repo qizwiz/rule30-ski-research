@@ -125,7 +125,7 @@ Dead experiments moved to archive/. Build verified: 765 jobs, 0 errors.
 **Obligations**: 1 sorry + 2 axioms
 
 ### The single sorry (THE BLOCKER):
-- `twoSpike_center_complement` sorry in `P2p/SpinePass.lean:309`
+- `twoSpike_center_complement` sorry in `P2p/SpinePass.lean:479`
   - Claims: at non-right-mirror SubcaseB events for m≥40, T≥3088:
     G_{2,m}(T) = !F_2(T) (spike at position 2 is a universal sensitivity witness)
   - Computationally verified: m=40 (6 events), m=42 (T=118805), m=46 (T=106523) — all delta=1
@@ -133,6 +133,18 @@ Dead experiments moved to archive/. Build verified: 765 jobs, 0 errors.
   - SpinePass.lean has all D-chain building blocks proved:
     dChain_1_parity, dChain_2_parity, dChain_3_parity, dChain_4_antiperiod,
     dChain_beyond_false, dChain_last_true, rule30n_spike_dChain
+
+### FREE WIN: G_{2,last}(T) = 0 for T≥2 (no sorry needed, add to SpinePass.lean)
+- `∀ T ≥ 2, rule30n T (fun j : Fin (2*T+1) => decide (j.val = 2 ∨ j.val = 2*T)) = false`
+- Computationally verified T=2..200 (T=1 is the only exception)
+- Proof path: use dChain framework — G_{2,2T} = F_2 XOR F_{2T} XOR I(2,2T)
+  - F_{2T} = dChain T (2*T) = 1 (dChain_last_true — proved)
+  - F_2 = dChain T 2 = (T%2==1) (dChain_2_parity — proved)
+  - G_{2,2T} = 0 requires showing I(2,2T) = F_2 XOR 1 = !(T%2==1)
+  - Alternative: direct induction proof using caEvolve recurrence
+- This lemma is NOT needed for the sorry directly, but establishes structural facts about
+  the three-spike identity useful for the algebraic approach to twoSpike_center_complement.
+- **Attempt this before the main sorry**: small, self-contained, builds intuition.
 
 ### The two axioms:
 - `subcaseB_mgt38_witness` — TRUE axiom in SubcaseB_Firewall.lean:149
@@ -298,3 +310,4 @@ Always increment N from the last loop-A commit's number (check git log).
 | A94 | subcaseB_m4_ge3087 axiom→theorem; obligations 5→4 | import SubcaseB_m4_RightEdge, delegate to proved theorem |
 | A95 | subcaseB_resolution_ge3087 axiom→theorem; m=2,m=18 closed | period certs + base case native_decide for inactive m |
 | A96 | m=32 inactive case added; CA_Array_m32_residues.lean | checkResiduesBool empty valid set, period 4096 |
+| A97 | G_{2,last}=0 free-win lemma added to CURRENT STATE | Interactive session: SubcaseB locking confirmed, mod-8 structure |

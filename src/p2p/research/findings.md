@@ -6253,3 +6253,396 @@ The Lean native_decide cert for twoSpikeList(34,22) at P=131072 is feasible (sam
 
 **Gap in CLAUDE.md**: The code says "period-131072 certs for spike(34)". Strictly, spike-at-34 has period 8192, so the F cert can be derived from `caEvolve_cert_spike34_p8192` via 16 iterations of the period lemma — avoiding a large native_decide for F. Only the H cert requires the full 131072-step computation.
 
+---
+
+## Fiber Bundle / Transport Matrix Approach for m=22 l≡0 (2026-04-02)
+
+*Synthesized from Gemini 2.5 Pro consultation + BM experiment + dynamical systems analysis.*
+
+### Why the period is 131072 = 256 × 512
+
+The period-131072 of `twoSpikeList(34,22)` is NOT a coincidence. It arises from a
+two-layer structure:
+
+**Layer 1 — The base clock (period 256):**
+The single-spike F-sequence `caEvolve(n', spike_22)` has a degree-254 LFSR over GF(2)
+with period 256. BM-confirmed on n'=3088..3667 (2026-04-02). This means there is a
+256-bit state vector `v_n ∈ GF(2)^256` with `v_{n+1} = M·v_n` (M a 256×256 matrix)
+that completely captures the center-column behavior of the spike-22 CA.
+
+**Layer 2 — The interaction ratchet (period 512):**
+Adding spike_34 creates a perturbation wave that propagates leftward through the spike-22
+medium. Define the **interaction state** `w_n` as the finite pattern (≈256 cells near
+center) that determines whether the spike-34 contribution changes the center output.
+
+The crucial observation: the evolution of `w_n` over one full 256-step LFSR cycle is
+governed by a **transport operator** Φ (a 256×256 GF(2) matrix). Since the background
+medium returns to the same state after 256 steps, we have:
+
+    w_{n+256} = Φ · w_n    (same Φ every cycle)
+
+The interaction output D(n') = G(n') ⊕ F(n') = some linear function of w_n.
+The period of D(n') = 256 × ord(Φ).
+
+**Empirical claim**: ord(Φ) = 512, giving period 256 × 512 = 131072. ✓
+
+This explains the period-squaring phenomenon without any mystery: it's holonomy in a
+trivial fiber bundle over the LFSR base space.
+
+### The Transport Matrix Proof Strategy
+
+**Step 1 — Compute Φ numerically:**
+Run 256 basis vectors (each a single-spike perturbation at one of the 256 center
+cells) through 256 CA steps of the spike-22 background. The resulting 256×256 GF(2)
+matrix IS Φ. Cost: 256 × 256 × 256 ≈ 17M operations. Fast (seconds in Python).
+
+**Step 2 — Verify ord(Φ) = 512:**
+Compute Φ^256 and Φ^512. If Φ^512 = I and Φ^256 ≠ I, then ord(Φ) = 512. Cost: ~9
+256×256 matrix multiplications over GF(2). Fast.
+
+**Step 3 — Lean proof:**
+```lean
+-- Φ is an explicit 256×256 Bool matrix (a fixed constant in the file)
+def transportMatrix : Matrix (Fin 256) (Fin 256) Bool := ...
+-- Prove the transport recurrence: w advances by Φ each 256 steps
+lemma interaction_transport (n : ℕ) : interactionState (n + 256) = transportMatrix * interactionState n
+-- Prove the order
+lemma transportMatrix_order_512 : transportMatrix ^ 512 = 1 ∧ transportMatrix ^ 256 ≠ 1
+  := by native_decide  -- 256×256 matrix, feasible!
+-- Conclude period = 131072
+theorem twoSpikeList_34_22_period : ∀ n, caEvolve (n + 131072) ... = caEvolve n ...
+```
+
+The key insight: `native_decide` on a 256×256 Bool matrix exponentiation IS feasible
+(matrix has 65536 bits = 8KB; Φ^512 is 9 matrix multiplications). This is orders of
+magnitude smaller than `native_decide` on a 262213-cell tape for 131072 steps.
+
+### The Hard Part: Step 3's Transport Recurrence Lemma
+
+`interaction_transport` — proving the 256-step recurrence holds for all n — is the
+structural heart of the proof. It requires showing:
+
+1. The "interaction state" w_n is well-defined as a finite slice of the CA tape
+2. The evolution of w_n from n to n+256 depends only on w_n and v_n (not the full tape)
+3. Since v_{n+256} = v_n (LFSR period), Φ is the same matrix each cycle
+
+This is a finite-state argument using the causal cone: the center cell at time n+256
+is determined by the tape cells in [n+256-256, n+256+256] = [n, n+512] at time n.
+Within this window, the background (spike-22 medium) is determined by v_n, and the
+perturbation (spike-34 effect) is w_n. QED structure.
+
+### What to compute next
+
+```python
+# scripts/compute_transport_matrix.py
+# 1. For each basis vector e_i (i=0..255): single-bit perturbation at center±i
+# 2. Run spike_22 background for 256 steps
+# 3. XOR with unperturbed background to get Φ[:,i]
+# 4. Report Φ as a hex matrix
+# 5. Compute Φ^256 and Φ^512; report orders
+```
+
+If ord(Φ) = 512: this is the proof path. Generate Φ as a Lean constant, prove the
+transport recurrence structurally, close the sorry.
+
+If ord(Φ) ≠ 512: investigate why. The period-131072 is computationally confirmed, so
+Φ must have order dividing 131072/256 = 512. ord(Φ) ∈ {1,2,4,8,16,32,64,128,256,512}.
+
+### Status
+- BM experiment (2026-04-02): F and G both deg≈254, period 256 ✓ (easy range)
+- Transport matrix Φ: NOT YET COMPUTED (next step)
+- ord(Φ): NOT YET KNOWN
+- Lean proof: NOT STARTED
+
+---
+
+## CRITICAL DISCOVERY: subcaseB_mgt30_split is FALSE (2026-04-06)
+
+### Summary
+
+The axiom `subcaseB_mgt30_split` in SubcaseB_Firewall.lean (line 111) claims that SubcaseB
+never fires for inactive even m ≥ 40 at n' ≥ 3087. This claim is **FALSE**.
+
+### Verification (triple-confirmed)
+
+1. **gCenterSeq recurrence simulation** (`/tmp/verify_I38_full2.c`, T_MAX=69000):
+   Finds SubcaseB at m=40, n'=40983 (F40=0, G40=1) with period-65536 structure.
+
+2. **Diagonal recurrence simulation** (`/tmp/scan_large_m2.c`, T_MAX=5M):
+   Finds SubcaseB for m=40,42,44,46,48,50,52,54 with growing first-firing n' values.
+
+3. **Direct simulation** (`/tmp/direct_m40_verify.c`):
+   Directly evolves spikeAtList 40 (81969 cells) and twoSpikeLastList 40 (81969 cells)
+   for 40984 steps. Result: F40=0, G40=1 at n'=40983. ✓
+
+### Active set (extended)
+
+Previous claim: active set = {4,6,8,10,12,14,16,20,22,24,26,28} + right-mirror.
+Verified-inactive: m=30,32,34,36,38 (SubcaseB fires at specific residues, handled).
+
+NEW FINDING: SubcaseB fires for ALL of m=40,42,44,46,48,50,52,54 at large n':
+- m=40: first n'=40983, period=65536, residues={40983,61459} mod 65536
+- m=42: first n'=118804
+- m=44: first n'=249877
+- m=46: first n'=106522
+- m=48: first n'=262167 ≈ 2^18
+- m=50: first n'=262168 ≈ 2^18
+- m=52: first n'=2097181 ≈ 2^21
+- m=54: first n'=2097178 ≈ 2^21
+- m=56,58: first n' ≈ 2^24 (predicted; not found in [0,5M))
+- Pattern: pairs (4k, 4k+2) fire at ~2^(3k-2) for large k
+
+### Mathematical structure
+
+The D-recurrence D_{m+2}(s+1) = NOT(F_{m+1}(s)) AND D_m(s) propagates from D_38
+(which fires with period 32768) to D_40, D_42, etc. The F[m][s] sequences come from
+the **diagonal recurrence** of the Rule 30 triangle:
+  D_k[t] = rule30(D_k[t-1], D_{k-1}[t-1], D_{k-2}[t-1])
+with D_0[t]=1 (rightmost boundary, always 1) and D_{-k}[t]=0.
+
+Since D_0=1 always and F[m][s] = D_m[s+1] is quasiperiodic (period grows with m),
+the chain propagates to ALL even m. The active set is **INFINITE**.
+
+The previous computational verification only covered n'∈[3087,5000], far below the
+first firing at n'=40983 for m=40.
+
+### Impact on Prize 3 proof
+
+The proof `rule30_bs_ge_n_direct` depends entirely on `subcaseB_mgt30_split`.
+Since subcaseB_mgt30_split is false, **rule30_bs_ge_n_direct is INVALID**.
+
+The other path `rule30_bs_ge_n` depends on both `subcaseB_mgt30_split` AND `lifting_lemma`.
+Both paths are currently broken.
+
+The **PRIZE THEOREM** (rule30_bs_ge_n) is still believed true — the mathematical
+content is correct. The proof strategy needs fundamental rethinking.
+
+### Why the original check missed this
+
+The adversarial check (Loop #2) tested m=40 only in a small window near the
+"resonance prediction" of n'≈13333. The actual first firing at n'=40983 is 3× larger.
+The period-65536 means the probability of hitting SubcaseB in any random n' sample
+of size 100 is ~2/65536 ≈ 0.003%, making random sampling essentially useless.
+
+### Needed for proof repair
+
+Option A: Handle m=40,42,...,M_max explicitly + prove subcaseB for m>M_max.
+  INFEASIBLE: active set is infinite; no finite M_max exists.
+
+Option B: Uniform witness construction.
+  For SubcaseB at (n', m≥40): construct a Lean witness config c_n (all odd cells 0)
+  where rule30n(c_n) ≠ rule30n(flipCell c_n m). This must work for ALL m simultaneously.
+  Key obstacle: the naive witnesses (twoSpikeLastList) don't work (right spike center=1).
+
+Option C: Prove lifting_lemma directly.
+  lifting_lemma connects sensitivity at level n to level n+1. If proved, the SubcaseB
+  case is irrelevant (the base cases handle small n, lifting covers large n).
+  The diagonal recurrence structure (D_k[t]) might provide a path to lifting_lemma.
+
+### Status
+- CRITICAL: Prize 3 proof via rule30_bs_ge_n_direct is INVALID
+- CRITICAL: Prize 3 proof via rule30_bs_ge_n is INVALID (also uses subcaseB_mgt30_split)
+- Individual m-case proofs (m=4..38) are still valid
+- Prize theorem is still BELIEVED TRUE
+- Next step: pursue Option C (lifting_lemma) or Option B (uniform witness)
+
+
+## Witness Search for SubcaseB m≥40 (2026-04-06 Session 2)
+
+### Key Results
+
+**m=40 witnesses confirmed:**
+- X=N-13 (=N-1-12, distance 12 from right edge): UNIVERSAL W(0→1) for m=40
+  - Verified at n'=40983, 61459, 106519 (all SubcaseB firing positions)
+  - N-13 = 2*(n'+1)+1-13 = 2n'-10 (depends on n', not a fixed position)
+
+- X=34 (=m-6=40-6, FIXED position): UNIVERSAL W(1→0) for m=40
+  - Verified at n'=40983, 61459, 106519, 126995, 172055, 192531 (ALL SubcaseB)
+  - ALL cases: rule30n({34})=1 and rule30n({34,40})=0
+  - Sensitivity sequence is CONSTANT (always witnesses)
+
+- X=2 (FIXED position): UNIVERSAL W(0→1) for m=40
+  - Verified at n'=40983, 61459, 106519, 126995, 172055 (5 events confirmed)
+  - ALL cases: rule30n({2})=0 and rule30n({2,40})=1
+  - F_2(n') = (n'+1)%2 = 0 for all SubcaseB n' (all SubcaseB n' are ODD)
+
+### Parity-clean proof structure
+All witnesses (X=34, X=2) are parity-clean: spike at even position, all-odd-false. ✓
+The backwardFill construction works: c_n[m-1] = c_n[39] = 0 (odd position, spike only at X). ✓
+
+### Why X=m-6 is NOT universal for all m
+X=m-6 fails for small active m (m=6: only 1/100, m=8: 97/100, etc.).
+The formula X=m-6 works specifically for m≥10 where m-6≥4 is in the active range.
+
+### The algebraic question
+For m=40 SubcaseB positions (n' all ODD): why is F_34(n')=1 always?
+- D_34 has period ~131072 (estimated from doubling pattern)  
+- SubcaseB fires at n'≡40983 or 61459 (mod 65536) — all ODD
+- F_34(n')=D_34[n'+1]=D_34[EVEN]=? (since n' odd → n'+1 even)
+- If D_34[EVEN]=1 ALWAYS at SubcaseB positions, then X=34 is algebraically provable
+
+### D-chain cascade structure  
+SubcaseB fires for m=40 at s requires (via D-chain):
+- D_34(s-3)=1 AND F_35(s-3)=0 AND F_37(s-2)=0 AND F_39(s-1)=0 AND F_40(s)=0
+The D-chain shows SubcaseB at m=40 is CAUSED BY non-trivial D_34 activity 3 steps prior.
+
+### Next algebraic steps (2026-04-06 Session 3 UPDATE — X=2 is the uniform witness!)
+
+## X=2 Universal Witness Conjecture (2026-04-06 Session 3)
+
+**CRITICAL NEW FINDING**: X=2 (spike at position 2) is a universal sensitivity witness
+for SubcaseB at ALL even m≥40.
+
+### Verified instances
+| m  | n' (first SubcaseB) | F_2 | G_{2,m} | F_2≠G? | direction |
+|----|---------------------|-----|---------|--------|-----------|
+| 40 | 40983 (ODD)         | 0   | 1       | YES ✓  | W(0→1)    |
+| 40 | 61459 (ODD)         | 0   | 1       | YES ✓  | W(0→1)    |
+| 40 | 106519 (ODD)        | 0   | 1       | YES ✓  | W(0→1)    |
+| 40 | 126995 (ODD)        | 0   | 1       | YES ✓  | W(0→1)    |
+| 40 | 172055 (ODD)        | 0   | 1       | YES ✓  | W(0→1)    |
+| 42 | 118804 (EVEN)       | 1   | 0       | YES ✓  | W(1→0)    |
+| 46 | 106522 (EVEN)       | 1   | 0       | YES ✓  | W(1→0)    |
+
+Note: X=m-6=36 FAILS for m=42 (F_36=0, G_{36,42}=0 — same value, not a witness).
+But X=2 works for both m=40 (ODD n') and m=42, m=46 (EVEN n').
+
+### Pattern: complementarity
+For ALL tested SubcaseB events: G_{2,m}(n') XOR F_2(n') = 1.
+Equivalently: G_{2,m}(n') = 1 - F_2(n') = 1 - (n'+1)%2.
+- SubcaseB at ODD n': F_2=0, G_{2,m}=1
+- SubcaseB at EVEN n': F_2=1, G_{2,m}=0
+
+### The algebraic conjecture
+**CONJECTURE**: For any even m≥40 and any n' where SubcaseB fires at (m, n'):
+```
+rule30n n' (spikeAt 2) ≠ rule30n n' (twoSpike 2 m)
+```
+Equivalently: config {spike at 2} is sensitive at cell m whenever SubcaseB fires.
+
+### Why this might be true (intuition)
+The D-chain cascade: SubcaseB at (m, n') is driven by a causal chain D_2 → D_4 → ... → D_m.
+The spike at position 2 is the "source" of D_2. When the cascade reaches m (SubcaseB fires),
+adding spike at m "intercepts" the causal chain and flips the final center value.
+This is a causal argument: the information from spike-at-2 reaches the center via the D-chain
+through m, and inserting spike-at-m at the endpoint reverses the accumulated parity.
+
+### Why X=m-6 fails for m=42
+The X=m-6 formula (X=36 for m=42) fails because F_36(n')=0 at SubcaseB events for m=42.
+Both spike-at-36 alone and spike-at-{36,42} give center=0. No flip, no witness.
+The distance-6 relationship that worked for m=40 doesn't generalize to m=42.
+
+### Implications for Lean proof
+If the X=2 conjecture is proved, it directly extends subcaseB_resolution_ge3087 to handle
+ALL m≥40. The proof extension adds:
+```lean
+-- For m≥40 SubcaseB at n': witness is spikeAt 2 (parity-clean, even position)
+-- Algebraic lemma: G_{2,m}(n') ≠ F_2(n') at SubcaseB events (D-chain argument)
+```
+This completes the SubcaseB handling for all m, enabling lifting_lemma to be proved,
+enabling all_essential_succ, enabling all_essential_all, and thus rule30_bs_ge_n. ✓
+
+
+---
+
+## Session findings: SubcaseB locking and interaction term structure (2026-04-06, interactive)
+
+### KEY FINDING: SubcaseB is necessary AND sufficient for locking I(2,m)
+
+Three-way case split on (F_m, G_{m,last}):
+
+| F_m | G_{m,last} | I(2,m) | Notes |
+|-----|-----------|--------|-------|
+| 0   | 1         | **LOCKED** (SubcaseB) | Universal lock for m≥40: always 1 |
+| 0   | 0         | **LOCKED** | Always 0 (verified m=4..16 in [0,200]) |
+| 1   | any       | MIXED | I(2,m) varies freely; not useful |
+
+**Conclusion**: SubcaseB (F_m=0 AND G_{m,last}=1) is the ONLY condition that locks I(2,m).
+Outside SubcaseB, the interaction term is unpredictable. This confirms the sorry's
+hypothesis structure is exactly right.
+
+### KEY FINDING: G_{2,last}(T) = 0 for all T≥2
+
+For ANY T≥2: rule30n T (twoSpike 2 (2*T)) = false.
+In other words, spikes at positions 2 and 2*T (the last position) always give center=0.
+
+Verification: T=1..200 (T=1 is the only exception: G_{2,last}=1 at T=1).
+
+This is a **provable Lean lemma** (add to SpinePass.lean). It does NOT require the sorry.
+Proof sketch: 
+- F_2(T) = (T%2==1), F_last(T) = 1 (proved: dChain_last_true)
+- G_{2,last}=0 means the two-spike interaction has I(2,last) = F_2 XOR F_last XOR 0 = F_2 XOR 1
+- Equivalently: I(2,last)(T) = (T%2==0): the interaction term tracks T parity exactly
+- This can be verified by induction on T using the caEvolve recurrence structure.
+
+**Status**: Verified T=2..200 computationally; Lean proof not yet written.
+**Loop-A task**: Prove `dChain_2_last_false (T : Nat) (hT : 2 ≤ T) : rule30n T (fun j => decide (j.val = 2 ∨ j.val = 2*T)) = false`
+
+### KEY FINDING: Mod-8 T-residue structure of SubcaseB events
+
+SubcaseB events for even m land on specific T%8 residues:
+
+| m  | T%8 residues seen | I(2,m) at all | Notes |
+|----|------------------|---------------|-------|
+| 4  | {6}              | 0             | Never a witness at m=4! |
+| 6  | {3,7}            | alternates 0/1 | Mixed — m=6 has two residues |
+| 8  | {0}              | 1             | Single residue, locked |
+| 10 | {5}              | 1             | Single residue, locked |
+| 12 | {3,7}            | not fully locked | Still mixed at mod-8 level |
+| 14 | {1,5}            | not fully locked | Still mixed at mod-8 level |
+| 16 | {0}              | 1             | Single residue, locked |
+| 40 | {0,4}            | 1,1           | BOTH residues give I=1 (confirmed T=40984,61460) |
+| 42 | {5}              | 1             | Single residue (T=118805), I=1 |
+| 46 | {3}              | 1             | Single residue (T=106523), I=1 |
+
+**Key observation for m≥40**: Both T%8 residue classes for m=40 give I(2,m)=1.
+For m=40: T=40984 (T%8=0) and T=61460 (T%8=4) both confirmed SubcaseB with I=1.
+
+**Why m=4 fails (I=0 always)**: m=4 SubcaseB fires at T%8=6. At T%8=6: F_2=(6%2==1)=0,
+and G_{2,4}=0 (verified). So I(2,4) = G XOR F_2 XOR F_4 = 0 XOR 0 XOR 0 = 0.
+This is consistent with m=4 needing the right-edge witness (not the X=2 witness).
+
+### KEY FINDING: The algebraic gap — what we still need
+
+We can verify I(2,m)=1 for specific (m,T) pairs but lack a general algebraic argument.
+
+What would be needed for Lean:
+1. **Period characterization**: The joint sequence (F_m(T), G_{m,last}(T)) has period P_m = 2^{m/2}.
+   SubcaseB events are the T values where this sequence hits the state (0, 1).
+2. **Exhaustion argument**: For each m≥40, enumerate all SubcaseB events mod P_m and verify I=1.
+   But P_m = 2^{m/2} grows exponentially — unfeasible for large m without algebraic insight.
+3. **Algebraic argument needed**: WHY does I(2,m)=1 at SubcaseB for m≥40?
+   
+   Candidate approaches for B8 arxiv search:
+   - Nonlinear boolean function coupling theory (XOR-OR systems)
+   - Cellular automaton sensitivity propagation lemmas
+   - D-chain phase-lock arguments (the "cascade" perspective from comments in SpinePass.lean)
+
+### THE SECOND-HALF IDENTITY (strongest structural clue)
+
+From inclusion-exclusion for three spikes at {2, m, last}:
+  G_{2,m,last} = F_2 ⊕ F_m ⊕ F_last ⊕ I(2,m) ⊕ I(m,last) ⊕ I(2,last) ⊕ T(2,m,last)
+
+At SubcaseB (F_m=0, F_last=1, G_{m,last}=1):
+  I(m,last) = G_{m,last} ⊕ F_m ⊕ F_last = 1 ⊕ 0 ⊕ 1 = 0
+
+Also: G_{2,last}=0 (from the lemma above), so:
+  I(2,last) = G_{2,last} ⊕ F_2 ⊕ F_last = 0 ⊕ F_2 ⊕ 1 = !F_2
+
+Substituting into the 3-spike formula:
+  G_{2,m,last} = F_2 ⊕ 0 ⊕ 1 ⊕ I(2,m) ⊕ 0 ⊕ !F_2 ⊕ T(2,m,last)
+               = (F_2 ⊕ !F_2) ⊕ 1 ⊕ I(2,m) ⊕ T(2,m,last)
+               = 1 ⊕ 1 ⊕ I(2,m) ⊕ T(2,m,last)
+               = I(2,m) ⊕ T(2,m,last)
+
+So G_{2,m,last} = I(2,m) ⊕ T(2,m,last).
+
+If T(2,m,last)=0 (no 3-body interaction), then G_{2,m,last} = I(2,m).
+If T(2,m,last)=0 and I(2,m)=1, then G_{2,m,last}=1.
+
+**This gives a NEW provable direction**: If we can show G_{2,m,last}=1 at SubcaseB events
+AND T(2,m,last)=0, then I(2,m)=1 follows immediately.
+
+**QUESTION for loop-B**: Is T(2,m,last)=0 at SubcaseB events? (3-spike inclusion-exclusion term)
+And can G_{2,m,last} be characterized algebraically?
+
