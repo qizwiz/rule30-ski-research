@@ -87,6 +87,58 @@ lemma dChain_2_parity (T : Nat) : dChain T 2 = (T % 2 == 1) := by
       subst hn
       simp [h, show (T + 1) % 2 = 0 from by omega]
 
+/-- D_1[T] alternates: false for even T, true for odd T. Same as D_2. -/
+lemma dChain_1_parity (T : Nat) : dChain T 1 = (T % 2 == 1) := by
+  induction T with
+  | zero => simp [dChain]
+  | succ T ih =>
+    simp only [dChain_step_1, rule30Local]
+    -- rule30Local (dChain T 1) true false = (dChain T 1) XOR (true OR false) = !(dChain T 1)
+    simp only [Bool.or_false, Bool.xor_true]
+    rw [ih]
+    cases h : T % 2 with
+    | zero => simp [h, show (T + 1) % 2 = 1 from by omega]
+    | succ n =>
+      have hn : n = 0 := by omega
+      subst hn
+      simp [h, show (T + 1) % 2 = 0 from by omega]
+
+/-- D_3[T] = floor(T/2) % 2: doubles the period of D_2. -/
+lemma dChain_3_parity (T : Nat) : dChain T 3 = (T / 2 % 2 == 1) := by
+  induction T with
+  | zero => simp [dChain]
+  | succ T ih =>
+    simp only [dChain_step_k, rule30Local]
+    -- dChain (T+1) 3 = rule30Local (dChain T 3) (dChain T 2) (dChain T 1)
+    --               = (dChain T 3) XOR ((dChain T 2) OR (dChain T 1))
+    -- D_1[T] = D_2[T] = (T%2==1), so OR = (T%2==1)
+    rw [dChain_2_parity, dChain_1_parity]
+    -- goal: (dChain T 3) XOR ((T%2==1) OR (T%2==1)) = ((T+1)/2%2==1)
+    simp only [Bool.or_self]
+    rw [ih]
+    -- goal: (T/2%2==1) XOR (T%2==1) = ((T+1)/2%2==1)
+    -- case split on T % 2
+    cases h2 : T % 2 with
+    | zero =>
+      -- T even: T%2=0, so (T%2==1)=false; XOR with false = id
+      -- T/2 vs (T+1)/2: for even T, (T+1)/2 = T/2
+      have hT1 : (T + 1) / 2 = T / 2 := by omega
+      simp [hT1]
+    | succ n =>
+      have hn : n = 0 := by omega
+      subst hn
+      -- T odd: T%2=1, so (T%2==1)=true; XOR with true = Bool.not
+      -- T/2 vs (T+1)/2: for odd T, (T+1)/2 = T/2 + 1
+      have hT1 : (T + 1) / 2 = T / 2 + 1 := by omega
+      simp [hT1]
+      -- goal: !(T/2%2==1) = (T/2+1)%2==1
+      cases h4 : T / 2 % 2 with
+      | zero => simp [show (T / 2 + 1) % 2 = 1 from by omega]
+      | succ n =>
+        have hn2 : n = 0 := by omega
+        subst hn2
+        simp [show (T / 2 + 1) % 2 = 0 from by omega]
+
 /-
 ================================================================================
 SECTION 3: THE DELTA — Δ(T, m) = G_{2,m}(T) XOR F_2(T) = 1 at SubcaseB events
@@ -114,19 +166,30 @@ position 2 to m ensures G_{2,m}(T) = !F_2(T). Formalization requires:
 /-- The REAL content: at non-right-mirror SubcaseB events for m≥40 with n'≥3087,
     G_{2,m}(T) = !F_2(T), making twoSpike(2,m) a sensitivity witness.
 
+    NOTE: hm_ge40 is ESSENTIAL. For m=4 at T≥3088, SubcaseB fires (T≡6 mod 8)
+    and delta=0 — the lemma is FALSE without m≥40. Computationally verified:
+    - m=4: delta=0 at ALL SubcaseB events (right-mirror excluded or not)
+    - m=6,12,14: delta alternates 0/1 at SubcaseB events
+    - m≥40: delta=1 at ALL SubcaseB events verified (T=40984, 106522, 118804)
+
     HYPOTHESES NEEDED (matching subcaseB_mgt38_witness exactly):
     - T ≥ 3088 (n' = T-1 ≥ 3087)
-    - m ≥ 4, m even (hm_ge, hm_even)
+    - m ≥ 40, m even (hm_ge40, hm_even)
     - m ≠ 2*(T-1) = 2*n' (hm_ne_r: not right-boundary)
     - m ≠ 2*T - 8 = 2*(n'+1) - 8 (hm_not_rm: not right-mirror)
     - dChain T m = false (SubcaseB condition: F_m(T) = 0)
     - G_{m,last}(T) = true (SubcaseB condition: twoSpike with last = 1)
 
-    Computational evidence: verified for all 3 known large SubcaseB events.
-    Proof status: OPEN — requires LFSR/D-chain algebraic theory. -/
+    Computational evidence: verified for all 3 known large SubcaseB events (m=40,42,46).
+    Proof status: OPEN — requires LFSR/D-chain algebraic theory.
+
+    Algebraic argument sketch:
+    For m≥40, SubcaseB fires at T with T%2 = (m/2)%2 (parity lock from D-chain cascade).
+    The D-chain cascade from position 2 to m is fully activated at SubcaseB events,
+    which forces G_{2,m}(T) = !D_2[T] = !(T%2==1). -/
 lemma twoSpike_center_complement (T m : Nat)
     (hT : 3088 ≤ T)
-    (hm_ge : 4 ≤ m) (hm_even : m % 2 = 0)
+    (hm_ge40 : 40 ≤ m) (hm_even : m % 2 = 0)
     (hm_not_rm : m ≠ 2 * T - 8)
     (hm_ne_r : m ≠ 2 * (T - 1))
     (hSB : dChain T m = false)
@@ -134,7 +197,7 @@ lemma twoSpike_center_complement (T m : Nat)
              decide (j.val = m ∨ j.val = 2 * T)) = true) :
     rule30n T (fun j : Fin (2 * T + 1) => decide (j.val = 2 ∨ j.val = m)) =
     !dChain T 2 := by
-  sorry  -- OPEN: LFSR/D-chain algebraic proof needed
+  sorry  -- OPEN: LFSR/D-chain algebraic proof needed. See D-chain period theory below.
 
 /-
 ================================================================================
