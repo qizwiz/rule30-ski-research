@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# loop-B: Exploration + arxiv mining (Sonnet, 5-min interval)
+# loop-B: Exploration + arxiv mining (Gemini large-context, 2h interval)
 #
 # Track B: exploration, arxiv mining, findings.md updates only.
 # MUST NOT touch .lean files.
@@ -14,7 +14,20 @@ TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 LOG_FILE="$LOG_DIR/$TIMESTAMP-loop-B.log"
 LOCK_FILE="$LOG_DIR/loop-B.lock"
 
-export PATH="/Users/jonathanhill/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:/Users/jonathanhill/.elan/bin:/Users/jonathanhill/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+# --- Self-throttle: skip if last completion was < 90 minutes ago ---
+LAST_RUN_FILE="$LOG_DIR/loop-B.last"
+MIN_INTERVAL_SECS=5400  # 90 minutes
+if [[ -f "$LAST_RUN_FILE" ]]; then
+  last_run=$(cat "$LAST_RUN_FILE")
+  now=$(date +%s)
+  elapsed=$(( now - last_run ))
+  if (( elapsed < MIN_INTERVAL_SECS )); then
+    echo "[$TIMESTAMP] loop-B throttled (last run ${elapsed}s ago, min ${MIN_INTERVAL_SECS}s)" >> "$LOG_DIR/loop-runner.log"
+    exit 0
+  fi
+fi
 
 # --- Lock: only one loop-B iteration at a time ---
 if ! (set -C; echo $$ > "$LOCK_FILE") 2>/dev/null; then
@@ -32,17 +45,12 @@ trap 'rm -f "$LOCK_FILE"' EXIT
 
 echo "[$TIMESTAMP] loop-B starting" | tee -a "$LOG_DIR/loop-runner.log"
 
-# --- Run one iteration ---
+# --- Run one discovery packet ---
 cd "$PROJECT_ROOT"
-/Users/jonathanhill/.local/bin/claude \
-  --dangerously-skip-permissions \
-  --print \
-  --model claude-sonnet-4-6 \
-  --max-budget-usd 10 \
-  < "$SCRIPT_DIR/loop-prompt-B.md" \
-  > "$LOG_FILE" 2>&1
+python3 "$SCRIPT_DIR/run_rule30_queue.py" --team discovery --engine auto > "$LOG_FILE" 2>&1
 
 EXIT_CODE=$?
+date +%s > "$LAST_RUN_FILE"
 echo "[$TIMESTAMP] loop-B exited $EXIT_CODE" | tee -a "$LOG_DIR/loop-runner.log"
 echo "[$TIMESTAMP] loop-B log: $LOG_FILE" | tee -a "$LOG_DIR/loop-runner.log"
 

@@ -70,10 +70,14 @@ The full file is 5800+ lines — always use RAG first.
 
 ---
 
-## CURRENT STATE (auto-updated by loop-B)
+## CURRENT STATE (updated Apr 6 ~2AM CDT)
 
-**Open Track B items**: none (all closed)
-**Closed**: B1 (D-field shape — causal cone gap ≈ w-6, NL=0 algebraically, sensitivity reduces to single-spike), B2 (witness LFSR — negative, no F-seq connection), B3 (Prize 2), B4 (m=22 LFSR)
+**Architecture**: 93→22 active .lean files, single-root DAG. Dead experiments in archive/.
+**Single blocker**: `twoSpike_center_complement` sorry in SpinePass.lean:309
+
+**Open Track B items**: B7 (X=2 algebraic theory), B8 (arxiv mining — interaction term theory)
+**Closed**: B1 (D-field shape), B2 (witness LFSR — negative), B3 (Prize 2), B4 (m=22 LFSR — negative),
+           B5 (caEvolve bridge — LeftBoundary.lean ARCHIVED, moot), B6 (m=22 P=131072 — m=22 PROVED, moot)
 
 ---
 
@@ -96,6 +100,43 @@ The full file is 5800+ lines — always use RAG first.
 - For all m: witness LC << F-LC → witnesses are simpler than F-structure suggests
 - No algebraic shortcut: witnesses cannot be derived from F-LFSR recurrence
 - For m=4 large n', linearity corridor proof is still the only path
+
+### B5: caEvolve bridge — ✓ DONE (moot, LeftBoundary.lean archived)
+
+### B6: m=22 P=131072 cert — ✓ DONE (moot, m=22 fully proved in SubcaseBPeriod.lean)
+
+### B7: X=2 interaction term — OPEN (THE NEW KEY TASK)
+
+**Goal**: Find an algebraic argument for why I(2,m) = 1 at SubcaseB events for even m≥40.
+
+**Background**:
+- G_{2,m}(T) = center of twoSpike(2,m) after T steps
+- F_2(T) = dChain T 2 = (T%2 == 1)  [proved in SpinePass.lean]
+- At SubcaseB events (F_m=0, G_{m,last}=1): G_{2,m} = !F_2 (computationally verified)
+- The interaction term: I(2,m) = G_{2,m} XOR F_2 XOR F_m = G_{2,m} XOR F_2 (since F_m=0)
+- Need: I(2,m) = 1, i.e., G_{2,m} ≠ F_2 at SubcaseB events
+- Also known: I(m,last) = 0 at SubcaseB events (follows from F_m=0, F_last=1, G_{m,last}=1)
+
+**Question**: Is there a known relationship between I(k1,k2) and I(k2,k3) for XOR-based CAs?
+Specifically: does I(m,last)=0 imply I(2,m)=1 via some algebraic structure?
+
+**Parity lock observation** (empirical):
+- m=40 (m/2=20, even): SubcaseB fires at EVEN T → F_2=0, G_{2,40}=1
+- m=42 (m/2=21, odd): SubcaseB fires at ODD T → F_2=1, G_{2,42}=0
+
+**Your task**:
+1. Write a Python script to compute I(2,m) for m=40..60 at SubcaseB events in [3087, 10000] (if any exist)
+2. Also check: does I(2,m) = !I(m,last) hold universally? (I.e., does I(2,m) XOR I(m,last) = 1 always?)
+3. Check: at non-SubcaseB times (F_m=1 or G_{m,last}=0), does I(2,m) vary or is it always 0?
+4. Write findings to `research/findings.md` with concrete data
+
+### B8: Arxiv mining — OPEN (algebraic CA interaction terms)
+
+Search for papers that might help prove I(2,m) = 1 at SubcaseB events:
+- `"nonlinear cellular automata interaction term GF(2)"`
+- `"rule 30 sensitivity witness position"`
+- `"boolean function sensitivity nonlinear coupling XOR OR"`
+- `"cellular automata block sensitivity lower bound spike"`
 
 ### B3: Prize 2 connection — ✓ DONE (loop82)
 
@@ -130,10 +171,9 @@ Do arxiv mining if no Track B Python task is ready to run, or rotate every 2 ite
 
 ## DECISION LOGIC
 
-Pick the first open Track B item. If B1 and B2 both need Python computation,
-do B1 first (D-field data is needed for loop-A's d_leftbound lemma).
-
-If B1 and B2 are both running/complete, do arxiv mining.
+1. Do B7 (X=2 interaction term Python computation) — this directly feeds the open sorry
+2. If B7 data looks promising → B8 arxiv mining for algebraic techniques
+3. Check `research/findings.md` for questions loop-A has flagged
 
 ---
 

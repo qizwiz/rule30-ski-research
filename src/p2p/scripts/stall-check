@@ -7,6 +7,9 @@
 
 set -euo pipefail
 
+# Fix: launchd strips ~/.elan/bin; add it explicitly
+export PATH="/Users/jonathanhill/.elan/bin:/Users/jonathanhill/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 LOG_DIR="$PROJECT_ROOT/runtime"

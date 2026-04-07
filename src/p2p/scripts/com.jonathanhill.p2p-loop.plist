@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.jonathanhill.p2p-loop</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>PATH</key>
+      <string>/Users/jonathanhill/.local/bin:/Users/jonathanhill/.elan/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+      <key>HOME</key>
+      <string>/Users/jonathanhill</string>
+    </dict>
+
+    <key>ProgramArguments</key>
+    <array>
+      <string>/bin/bash</string>
+      <string>/Users/jonathanhill/src/p2p/scripts/loop</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/jonathanhill/src/p2p</string>
+
+    <!-- Run every 30 minutes -->
+    <key>StartInterval</key>
+    <integer>1800</integer>
+
+    <key>StandardOutPath</key>
+    <string>/Users/jonathanhill/src/p2p/runtime/launchd.out.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/jonathanhill/src/p2p/runtime/launchd.err.log</string>
+
+    <!-- Restart if it crashes -->
+    <key>KeepAlive</key>
+    <false/>
+
+    <!-- Run even if on battery -->
+    <key>ProcessType</key>
+    <string>Background</string>
+  </dict>
+</plist>

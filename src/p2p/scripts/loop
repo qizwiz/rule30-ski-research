@@ -17,22 +17,23 @@ LOCK_FILE="$LOG_DIR/loop.lock"
 # --- Lock: only one iteration at a time ---
 if ! (set -C; echo $$ > "$LOCK_FILE") 2>/dev/null; then
   existing_pid="$(cat "$LOCK_FILE" 2>/dev/null || echo '?')"
-  echo "[$TIMESTAMP] loop already running (PID $existing_pid), skipping" >> "$LOG_DIR/loop-runner.log"
-  exit 0
+  if kill -0 "$existing_pid" 2>/dev/null; then
+    echo "[$TIMESTAMP] loop already running (PID $existing_pid), skipping" >> "$LOG_DIR/loop-runner.log"
+    exit 0
+  else
+    echo "[$TIMESTAMP] loop stale lock (PID $existing_pid dead), removing" >> "$LOG_DIR/loop-runner.log"
+    rm -f "$LOCK_FILE"
+    echo $$ > "$LOCK_FILE"
+  fi
 fi
 trap 'rm -f "$LOCK_FILE"' EXIT
 
 echo "[$TIMESTAMP] starting loop iteration" | tee -a "$LOG_DIR/loop-runner.log"
 
-# --- Run one iteration ---
+# --- Run one queued packet ---
 cd "$PROJECT_ROOT"
-export PATH="/Users/jonathanhill/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
-/Users/jonathanhill/.local/bin/claude \
-  --dangerously-skip-permissions \
-  --print \
-  --max-budget-usd 6 \
-  < "$SCRIPT_DIR/loop-prompt.md" \
-  > "$LOG_FILE" 2>&1
+export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:/Users/jonathanhill/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+python3 "$SCRIPT_DIR/run_rule30_queue.py" --engine auto > "$LOG_FILE" 2>&1
 
 EXIT_CODE=$?
 echo "[$TIMESTAMP] claude exited $EXIT_CODE" | tee -a "$LOG_DIR/loop-runner.log"

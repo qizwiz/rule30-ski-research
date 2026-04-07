@@ -117,29 +117,46 @@ lake env lean /tmp/probe.lean 2>&1 | grep -A 20 "unsolved goals\|⊢\|error"
 
 ---
 
-## CURRENT STATE (auto-updated by loop-A)
+## CURRENT STATE (updated by interactive session Apr 6 ~2AM CDT)
 
-**Obligations**: 2 (as of interactive session Apr 6)
-- `subcaseB_mgt30_split` — axiom in SubcaseB_Firewall.lean:108
-  - Computationally verified inactive for m≥40 over n'∈[3087,5000]
-  - Requires Phi_3/LFSR algebraic characterization of inactive m
-  - `subcaseB_resolution_ge3087` IS a THEOREM (0 code sorrys); calls subcaseB_mgt30_split
-- `lifting_lemma` — axiom in Prize3_Complete.lean:309
-  - `rule30_bs_ge_n_direct` (LiftingLemma_LeftPermutive.lean) proves prize WITHOUT this axiom
-  - Only 1 remaining axiom for the direct path: subcaseB_mgt30_split
+**File architecture**: Consolidated 93→22 active .lean files, single-root DAG (P2p.lean).
+Dead experiments moved to archive/. Build verified: 765 jobs, 0 errors.
 
-**Build status** (Apr 6 ~6AM CDT):
-- CA_Array_m28_residues.lean: ✓ clean olean
-- CA_Array_m30_residues.lean: ✓ clean olean
-- CA_Array_m34_residues.lean: ✓ clean olean
-- CA_Array_m36_residues.lean: BUILDING (PID 94883, ~2.5h elapsed, watcher auto-starts m38_residues)
-- CA_Array_m38.lean: BUILDING (PID 83151, ~1.2h elapsed)
-- CA_Array_m38_residues.lean: WAITING (auto-starts when m36+m38 done, watcher PID 68265)
-- SubcaseBPeriod.lean: WAITING (auto-starts when m38+m38_residues done, watcher PID 72358)
-- LiftingLemma_LeftPermutive.lean: WAITING (auto-starts after SubcaseBPeriod, same watcher)
+**Obligations**: 1 sorry + 2 axioms
 
-**Recent work**: Added rule30_bs_ge_n_direct to LiftingLemma_LeftPermutive.lean — prize theorem
-proved WITHOUT lifting_lemma axiom (depends only on subcaseB_mgt30_split)
+### The single sorry (THE BLOCKER):
+- `twoSpike_center_complement` sorry in `P2p/SpinePass.lean:309`
+  - Claims: at non-right-mirror SubcaseB events for m≥40, T≥3088:
+    G_{2,m}(T) = !F_2(T) (spike at position 2 is a universal sensitivity witness)
+  - Computationally verified: m=40 (6 events), m=42 (T=118805), m=46 (T=106523) — all delta=1
+  - Requires LFSR/D-chain algebraic proof of the interaction term I(2,m) = 1 at SubcaseB events
+  - SpinePass.lean has all D-chain building blocks proved:
+    dChain_1_parity, dChain_2_parity, dChain_3_parity, dChain_4_antiperiod,
+    dChain_beyond_false, dChain_last_true, rule30n_spike_dChain
+
+### The two axioms:
+- `subcaseB_mgt38_witness` — TRUE axiom in SubcaseB_Firewall.lean:149
+  - Existential: at SubcaseB events for m≥40, some parity-clean config is a sensitivity witness
+  - SpinePass.lean's `subcaseB_mgt38_witness_proved` proves this from twoSpike_center_complement
+  - BLOCKS: subcaseB_resolution_ge3087 (which calls this for the m≥40 case)
+- `lifting_lemma` — axiom in Prize3_Complete.lean:309 (NOT blocking the direct path)
+  - `rule30_prize3_direct` and `rule30_bs_ge_n_direct` prove prize WITHOUT lifting_lemma
+  - The direct path only needs subcaseB_mgt38_witness (via subcaseB_resolution_ge3087)
+
+### DEAD axiom (do NOT use):
+- `subcaseB_mgt30_split` — KEPT IN SubcaseB_Firewall.lean:116 FOR DOCUMENTATION ONLY
+  - This axiom is FALSE: SubcaseB fires for m=40 at T=40984, m=42 at T=118805, etc.
+  - Do NOT try to prove it — the claim is wrong.
+
+**Prize theorem dependency chain**:
+`rule30_bs_ge_n_direct` → `subcaseB_resolution_ge3087` → `subcaseB_mgt38_witness` (axiom)
+Closing `twoSpike_center_complement` → closes `subcaseB_mgt38_witness` → full axiom-free proof.
+
+**Build status** (Apr 6):
+- All CA_Array_m*.lean: ✓ clean oleans
+- SubcaseBPeriod.lean: ✓ subcaseB_resolution_ge3087 IS A THEOREM (0 sorrys, 0 code axioms)
+- LiftingLemma_LeftPermutive.lean: ✓ rule30_prize3_direct IS A THEOREM (0 sorrys, uses subcaseB_mgt38_witness)
+- SpinePass.lean: ✓ builds, 1 sorry (twoSpike_center_complement)
 
 ---
 
