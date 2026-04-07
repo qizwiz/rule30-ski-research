@@ -117,15 +117,15 @@ lake env lean /tmp/probe.lean 2>&1 | grep -A 20 "unsolved goals\|⊢\|error"
 
 ---
 
-## CURRENT STATE (updated by interactive session Apr 6 ~2AM CDT)
+## CURRENT STATE (updated loop-A98 Apr 7)
 
 **File architecture**: Consolidated 93→22 active .lean files, single-root DAG (P2p.lean).
-Dead experiments moved to archive/. Build verified: 765 jobs, 0 errors.
+Dead experiments moved to archive/. Build verified: 766 jobs, 0 errors.
 
 **Obligations**: 1 sorry + 2 axioms
 
 ### The single sorry (THE BLOCKER):
-- `twoSpike_center_complement` sorry in `P2p/SpinePass.lean:479`
+- `twoSpike_center_complement` sorry in `P2p/SpinePass.lean:480`
   - Claims: at non-right-mirror SubcaseB events for m≥40, T≥3088:
     G_{2,m}(T) = !F_2(T) (spike at position 2 is a universal sensitivity witness)
   - Computationally verified: m=40 (6 events), m=42 (T=118805), m=46 (T=106523) — all delta=1
@@ -133,57 +133,20 @@ Dead experiments moved to archive/. Build verified: 765 jobs, 0 errors.
   - SpinePass.lean has all D-chain building blocks proved:
     dChain_1_parity, dChain_2_parity, dChain_3_parity, dChain_4_antiperiod,
     dChain_beyond_false, dChain_last_true, rule30n_spike_dChain
+  - KNOWN FACTS that help: (a) I(m,last)=0 [from hts + inclusion-exclusion],
+    (b) I(2,last)=!F_2 [from dChain_2_last_false ✓], (c) Need: I(2,m)=1
 
-### FREE WIN: G_{2,last}(T) = 0 for T≥2 (no sorry needed, add to SpinePass.lean)
+### ✓ FREE WIN DONE: G_{2,last}(T) = 0 for T≥2 (loop-A98)
 
-**Statement**: `∀ T ≥ 2, rule30n T (fun j : Fin (2*T+1) => decide (j.val = 2 ∨ j.val = 2*T)) = false`
-Computationally verified T=2..200 (T=1 is the only exception).
+`dChain_2_last_false` and its helper `twoSpikeList_2_last_step2` are now PROVED in SpinePass.lean.
+The 2-step recursion approach worked: caEvolve 2 (twoSpike at {2,2T}) = twoSpike at {2,2T-4}.
+Both sorrys closed. SpinePass.lean now has exactly 1 sorry: twoSpike_center_complement.
 
-**Proof path — TWO-STEP RECURSION** (verified computationally):
-1. `caEvolve 2 (twoSpike_list T) = twoSpike_list (T-2)` for T≥4
-   - Where `twoSpike_list T` = list with 1s at positions 2 and 2*T, width 2*T+1
-   - Intermediate: step1 gives `frontThreeRightSpike T` = 1s at {0,1,2,2*(T-1)}, width 2*T-1
-2. Base cases: T=2 → [0], T=3 → [0,0,0] → [0] (all by native_decide or direct computation)
-3. Induction on T by 2: G_{2,last}(T) = G_{2,last}(T-2) → reduce to base
-
-**Lean structure**:
-```lean
-private def twoSpike_list (T : Nat) : List Bool :=
-  (List.range (2*T+1)).map fun i => decide (i = 2 ∨ i = 2*T)
-
-private def frontThreeRightSpike_list (T : Nat) : List Bool :=
-  (List.range (2*T-1)).map fun i => decide (i ≤ 2 ∨ i = 2*(T-1))
-
--- Key step lemmas (prove via List.ext + caStepList_getD_eq):
-private lemma step1_twoSpike (T : Nat) (hT : 3 ≤ T) :
-    caEvolve 1 (twoSpike_list T) = frontThreeRightSpike_list T
-
-private lemma step1_frontThree (T : Nat) (hT : 4 ≤ T) :
-    caEvolve 1 (frontThreeRightSpike_list T) = twoSpike_list (T-2)
-
--- Main lemma by induction + 2-step reduction
-lemma dChain_2_last_false (T : Nat) (hT : 2 ≤ T) :
-    rule30n T (fun j : Fin (2*T+1) => decide (j.val = 2 ∨ j.val = 2*T)) = false
-```
-
-**Status**: Lean structure WRITTEN (SpinePass.lean, 2 sorrys only). NEEDS: prove `twoSpikeList_2_last_step2`.
-
-**Prove twoSpikeList_2_last_step2** (the ONLY sorry needed for dChain_2_last_false):
-Located at SpinePass.lean ~line 519.
-Goal: `caEvolve 2 (twoSpikeList 2 (2*T) (2*T+1)) = twoSpikeList 2 (2*(T-2)) (2*(T-2)+1)` for T≥4.
-
-Proof via `List.ext_getElem?` + `caEvolve_getD_shift` + `caEvolve_agree`:
-For each position i in [0, 2*(T-2)]:
-- Use `caEvolve_getD_shift 2 _ i` to reduce to 5-cell window
-- Match the 5-cell window against canonical using `caEvolve_agree 2` + `twoSpikeList_getD`
-- Compute canonical result by `native_decide`
-Five canonical patterns (all verified by native_decide):
-  [0,0,1,0,0]→0, [0,1,0,0,0]→0, [1,0,0,0,0]→1, [0,0,0,0,0]→0, [0,0,0,0,1]→1
-Use omega for the case split on i (i=0, i=1, i=2, i∈middle, i=2*(T-2)).
-
-Also verify lengths equal: `caEvolve_length_le 2 ... (by simp [twoSpikeList_length]; omega)`.
-
-SHORTCUT: also verified by native_decide for T=4..11 (Fin 8 check passes in Lean, see probe).
+**Key algebraic consequence**:
+From dChain_2_last_false: I(2,last,T) = !F_2(T) for all T≥2.
+Combined with I(m,last,T)=0 (from hts), at SubcaseB events:
+- I(2,m,T) = 1 iff three-body term I(2,m,last,T) = !F_2(T) XOR C(threeSpike 2 m last)
+- This is the remaining gap: need to understand I(2,m,T) or the three-body term independently
 
 ### The two axioms:
 - `subcaseB_mgt38_witness` — TRUE axiom in SubcaseB_Firewall.lean:149
@@ -350,3 +313,4 @@ Always increment N from the last loop-A commit's number (check git log).
 | A95 | subcaseB_resolution_ge3087 axiom→theorem; m=2,m=18 closed | period certs + base case native_decide for inactive m |
 | A96 | m=32 inactive case added; CA_Array_m32_residues.lean | checkResiduesBool empty valid set, period 4096 |
 | A97 | G_{2,last}=0 free-win lemma added to CURRENT STATE | Interactive session: SubcaseB locking confirmed, mod-8 structure |
+| A98 | dChain_2_last_false + twoSpikeList_2_last_step2 PROVED | 2→1 sorrys; free win complete; algebraic consequence noted |
