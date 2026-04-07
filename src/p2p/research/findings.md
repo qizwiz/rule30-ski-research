@@ -6844,3 +6844,90 @@ The answer must involve:
 Conjecture: For m≥40, the SubcaseB conditions (F_m=0 AND G_{m,last}=1) are satisfied ONLY
 at T values where I(2,m)=1. For m<40, SubcaseB fires at BOTH types of T values.
 
+---
+
+## Session 2026-04-07: Both-Zero Impossibility and Right-Mirror Structure
+
+### Context
+The sole remaining sorry is `twoSpike_center_complement` (SpinePass.lean:480).
+Two Opus consultations ran (consult_20260407T052328Z_claude.md,
+consult_20260407T055801Z_claude.md). This section summarizes the session findings.
+
+### The Sorry Reduces to: a_{2,m}(T) = 1 at SubcaseB
+
+Using GF(2) multilinear decomposition:
+- F_m = dChain T m = 0 (SubcaseB)
+- F_last = dChain T (2T) = 1 (proved: dChain_last_true)
+- G_{m,last} = 1 (SubcaseB hypothesis hts)
+- a_{m,last} = G_{m,last} XOR F_m XOR F_last = 1 XOR 0 XOR 1 = 0 [ALGEBRAIC, no computation]
+- G_{2,m} = F_2 XOR F_m XOR a_{2,m} = F_2 XOR a_{2,m}
+- Goal: G_{2,m} = !F_2 iff a_{2,m} = 1
+
+The sorry is EXACTLY equivalent to: a_{2,m}(T) = 1 at SubcaseB events for m>=40.
+
+### The Both-Zero Impossibility
+
+Define: "both-zero state" = (a_{2,m}=0 AND a_{m,last}=0) when F_m=0.
+
+KEY FACT (algebraic): a_{m,last}=0 at EVERY SubcaseB event (regardless of m or T).
+
+Therefore: the sorry reduces to proving NOT both-zero at SubcaseB, which is a_{2,m}=1
+(since a_{m,last} is always 0 at SubcaseB).
+
+### Right-Mirror Structure (KEY FINDING)
+
+For m>=40, violations of a_{2,m}=1 at SubcaseB events occur ONLY when
+m = 2T-8 (the right-mirror position, excluded by hypothesis hm_not_rm).
+
+Pattern: Violations of a_{2,m}=0 at SubcaseB:
+- m=0 mod 8 (m=40,48,...): NO violations at any T
+- m=2 mod 8 (m=42,46,...): NO violations at any T
+- m=4 mod 8 (m=44,52,60,...): EXACTLY ONE violation, at T=(m+8)/2 where m=2T-8
+
+Verified (Python): m=44 T=26, m=52 T=30, m=60 T=34, m=68 T=38, m=76 T=42,
+m=84 T=46, m=92 T=50. ALL are right-mirror (excluded by hm_not_rm).
+
+SIGNIFICANCE: hm_not_rm is EXACTLY what's needed. The right-mirror is the sole exception.
+
+### D-Chain Cascade Hypothesis: REFUTED
+
+"When D_{m+1}=0, boundary coupling forces a_{m,last}=1." We proved a_{m,last}=0 algebraically,
+so if D_{m+1}=0 -> a_{m,last}=1 were true there'd be no SubcaseB with D_{m+1}=0.
+
+At m=40 SubcaseB events:
+- T=40984: D_41=True, a_{2,40}=1
+- T=106520: D_41=False, a_{2,40}=1 (both-zero still impossible with D_{41}=0)
+- T=172056: D_41=True, a_{2,40}=1
+
+D_{m+1}=False at SubcaseB AND a_{2,m}=1. D_{m+1} value does NOT determine a_{2,m}.
+
+### Large T/m Hypothesis
+
+Violations of a_{2,m}=1 correlate with T small relative to m:
+- m=12, T=14 (violation): T/m=1.2, m is at tape center
+- m=12, T=74 (no violation): T/m=6.2, m near left boundary
+
+For m>=40 SubcaseB: T/m >= 40984/40 = 1025. Position m is close to left boundary.
+Hypothesis: in this "linear regime" (m << T), a_{2,m}=1 always holds at SubcaseB.
+
+Connects to the "linearity corridor" analysis (CLAUDE.md m=4 Level 3+): for large T/m,
+D-chain values in [0..m] stabilize to a pattern ensuring a_{2,m}=1 at SubcaseB.
+
+### Key Reference Quantities
+
+- m=40: period P=65536, first SubcaseB at T=40984, T/m=1025
+- m=42: period P=131072, first SubcaseB at T=118804, T/m=2829
+- m=46: first SubcaseB at T=106523, T/m=2316
+- For all m>=40: T/m at first SubcaseB > 1000 (linear regime)
+
+### Proof Status
+
+What's proved:
+- a_{m,last}=0 at SubcaseB (algebraic)
+- Right-mirror is the ONLY exception (computationally verified)
+- D_{m+1} doesn't determine a_{2,m}
+
+Best candidate approach: **LFSR orbit characterization** — for fixed even m>=40,
+prove that on the SubcaseB sub-orbit, a_{2,m}(T)=1 except at m=2T-8.
+Alternatively: **linearity corridor** (same approach as m=4 Level 3+).
+

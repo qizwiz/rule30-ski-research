@@ -424,49 +424,63 @@ lemma dChain_5_period (T : Nat) : dChain (T + 8) 5 = dChain T 5 := by
 SECTION 3: THE DELTA — Δ(T, m) = G_{2,m}(T) XOR F_2(T) = 1 at SubcaseB events
 ================================================================================
 
-KEY FACTS (verified computationally 2026-04-06):
-1. All SubcaseB events for m≥40 in T=20..200 are RIGHT-MIRROR (m=2*T-8).
-   Non-right-mirror SubcaseB fires first at T=40984 (m=40, n'=40983).
-2. At right-mirror events, delta alternates: 0 (even T), 1 (odd T).
-   ⇒ RIGHT-MIRROR EXCLUDED from this lemma (hm_not_rm).
-3. At non-right-mirror SubcaseB events (T≥3088, m≥40, all exclusions):
-   delta = G_{2,m}(T) XOR F_2(T) = 1.
+KEY ALGEBRAIC REDUCTION (2026-04-07):
+
+The sorry reduces to proving a_{2,m}(T) = 1 at SubcaseB events for m≥40, where:
+  a_{2,m}(T) = G_{2,m}(T) XOR F_2(T) XOR F_m(T)  [GF(2) degree-2 interaction coeff]
+
+Proof that the sorry reduces to this:
+  At SubcaseB: F_m=0, F_last=1 (dChain_last_true), G_{m,last}=1 (hts).
+  → a_{m,last} = G_{m,last} XOR F_m XOR F_last = 1 XOR 0 XOR 1 = 0  [ALGEBRAIC]
+  G_{2,m} = F_2 XOR F_m XOR a_{2,m} = F_2 XOR 0 XOR a_{2,m} = F_2 XOR a_{2,m}
+  Goal: G_{2,m} = !F_2 ⟺ a_{2,m} = 1.
+
+RIGHT-MIRROR STRUCTURE (verified computationally 2026-04-07):
+Violations of a_{2,m}=1 at SubcaseB events for m≥40 occur ONLY at m=2T-8 (right-mirror):
+  - m≡0 mod 8 (m=40,48,...): NO violations at any T
+  - m≡2 mod 8 (m=42,46,...): NO violations at any T
+  - m≡4 mod 8 (m=44,52,...): exactly one violation at T=(m+8)/2 where m=2T-8 [excluded]
+Pattern verified: m=44@T=26, m=52@T=30, m=60@T=34, m=68@T=38, m=76@T=42, ...
+All right-mirror violations are excluded by hm_not_rm.
+
+D-CHAIN CASCADE HYPOTHESIS REFUTED (2026-04-07):
+D_{m+1} value does NOT determine a_{2,m}. At m=40 SubcaseB events:
+  T=40984: D_41=True, a_{2,40}=1
+  T=106520: D_41=False, a_{2,40}=1  [D_{m+1}=0 but complement still holds]
+
+BEST PROOF CANDIDATES:
+1. LFSR orbit characterization: For fixed even m≥40, prove that the SubcaseB sub-orbit
+   {T : F_m=0 ∧ G_{m,last}=1} lies entirely in the a_{2,m}=1 orbit (except at m=2T-8).
+2. Linearity corridor: For T >> m (T/m ≥ 1000 for all m≥40 SubcaseB events),
+   the spike at m is near the left boundary in the "linear regime" where a_{2,m}=1.
+   Same approach as m=4 Level 3+ linearity corridor (CLAUDE.md).
+   Note: for m=40, T/m ≥ 1025 at ALL SubcaseB events; for m=42, T/m ≥ 2829.
+
+KEY FACTS:
+1. Non-right-mirror SubcaseB for m≥40 fires first at T=40984 (m=40, n'=40983).
+2. At SubcaseB: delta = G_{2,m}(T) XOR F_2(T) = 1.
    Verified: m=40@T=40984 (F_2=0, G_{2,m}=1), m=42@T=118805 (F_2=1, G_{2,m}=0),
              m=46@T=106523 (F_2=1, G_{2,m}=0).
-
-PROOF OBLIGATION: The sorry below requires LFSR algebraic theory.
-Proof path: The period of F_m for m≥40 is 2^{m/2}. SubcaseB fires when dChain T m = 0
-and G_{m,last}(T) = 1 simultaneously. At those T values, the D-chain cascade from
-position 2 to m ensures G_{2,m}(T) = !F_2(T). Formalization requires:
-  (a) LFSR period characterization of F_m for active even m≥40
-  (b) Phase-lock lemma: G_{m,last}=1 when F_m=0 implies D-chain activation
-  (c) Flip-propagation: activated D-chain at m flips the parity contribution to center
+3. Violations ONLY at right-mirror m=2T-8 (excluded by hm_not_rm).
 -/
 
 /-- The REAL content: at non-right-mirror SubcaseB events for m≥40 with n'≥3087,
     G_{2,m}(T) = !F_2(T), making twoSpike(2,m) a sensitivity witness.
 
-    NOTE: hm_ge40 is ESSENTIAL. For m=4 at T≥3088, SubcaseB fires (T≡6 mod 8)
-    and delta=0 — the lemma is FALSE without m≥40. Computationally verified:
-    - m=4: delta=0 at ALL SubcaseB events (right-mirror excluded or not)
-    - m=6,12,14: delta alternates 0/1 at SubcaseB events
-    - m≥40: delta=1 at ALL SubcaseB events verified (T=40984, 106522, 118804)
+    ALGEBRAIC REDUCTION (2026-04-07):
+    The sorry is equivalent to: a_{2,m}(T) = 1 at SubcaseB events for m≥40.
+    Proof: F_m=0, F_last=1 (dChain_last_true), G_{m,last}=1 (hts) →
+           a_{m,last}=0 algebraically → a_{2,m}=1 ← this is what's needed.
 
-    HYPOTHESES NEEDED (matching subcaseB_mgt38_witness exactly):
-    - T ≥ 3088 (n' = T-1 ≥ 3087)
-    - m ≥ 40, m even (hm_ge40, hm_even)
-    - m ≠ 2*(T-1) = 2*n' (hm_ne_r: not right-boundary)
-    - m ≠ 2*T - 8 = 2*(n'+1) - 8 (hm_not_rm: not right-mirror)
-    - dChain T m = false (SubcaseB condition: F_m(T) = 0)
-    - G_{m,last}(T) = true (SubcaseB condition: twoSpike with last = 1)
+    RIGHT-MIRROR EXCLUSION is ESSENTIAL:
+    Violations of a_{2,m}=1 for m≥40 occur ONLY at m=2T-8 (excluded by hm_not_rm).
+    Pattern: m≡4 mod 8 (m=44,52,...) have one violation each at T=(m+8)/2.
 
-    Computational evidence: verified for all 3 known large SubcaseB events (m=40,42,46).
-    Proof status: OPEN — requires LFSR/D-chain algebraic theory.
+    NOTE: hm_ge40 is ESSENTIAL. For m=4: delta=0 at ALL SubcaseB events.
+    For m=6,12,14: delta alternates. For m≥40: delta=1 at all non-right-mirror SubcaseB.
 
-    Algebraic argument sketch:
-    For m≥40, SubcaseB fires at T with T%2 = (m/2)%2 (parity lock from D-chain cascade).
-    The D-chain cascade from position 2 to m is fully activated at SubcaseB events,
-    which forces G_{2,m}(T) = !D_2[T] = !(T%2==1). -/
+    Proof status: OPEN — requires LFSR orbit characterization or linearity corridor.
+    Best approach: "large T/m linearity corridor" (T/m≥1000 for all m≥40 SubcaseB). -/
 lemma twoSpike_center_complement (T m : Nat)
     (hT : 3088 ≤ T)
     (hm_ge40 : 40 ≤ m) (hm_even : m % 2 = 0)
