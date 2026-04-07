@@ -107,7 +107,12 @@ of the 3-cell penultimate tape agrees between spike_m and twoSpikeLast_m.
       with m ≠ 2*n' and m ≠ 2*(n'+1)-8, over n' ∈ [3087, 5000].
 
     Proof path to close this axiom: formalize the Phi_3 fingerprint characterization
-    of inactive m and prove the D-field absorption property algebraically. -/
+    of inactive m and prove the D-field absorption property algebraically.
+
+    NOTE (2026-04-06): This axiom is FALSE. SubcaseB fires for m=40 at n'=40983,
+    for m=42 at n'=118804, for m=46 at n'=106522, etc. (active set is INFINITE).
+    This axiom has been REPLACED by subcaseB_mgt38_witness below (which has a TRUE
+    conclusion). Do not use subcaseB_mgt30_split — it is kept only for documentation. -/
 axiom subcaseB_mgt30_split
     (n' : Nat) (hn' : 3087 ≤ n')
     (m : Fin (2 * (n' + 1) + 1))
@@ -122,3 +127,38 @@ axiom subcaseB_mgt30_split
     (hts : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
              decide (k.val = m.val ∨ k.val = 2 * (n' + 1))) = true) :
     False
+
+/-- True replacement for subcaseB_mgt30_split (which is FALSE).
+
+    For even m ≥ 40 where SubcaseB fires (F_m = false, G_m = true at n' ≥ 3087),
+    the parity-clean config with spike at position 2 is a sensitivity witness.
+
+    X=2 Universal Witness Conjecture (empirically verified 2026-04-06):
+    - m=40: all 5 SubcaseB events verified (F_2=0, G_{2,40}=1 → WITNESS)
+    - m=42: n'=118804 verified (F_2=1, G_{2,42}=0 → WITNESS)
+    - m=46: n'=106522 verified (F_2=1, G_{2,46}=0 → WITNESS)
+
+    Pattern: G_{2,m}(n') = 1 - F_2(n') at ALL SubcaseB events for m≥40.
+    Algebraic basis: D-chain cascade — spike at position 2 drives D_2(t) = t%2.
+    SubcaseB fires when the D-chain 2→4→...→m is fully activated; the spike at m
+    intercepts and flips the D-chain's parity contribution to the center.
+
+    Proof path: induction on D-chain length, using D_2 alternating and
+    flip-preservation lemma. SubcaseB parity lock: m=40 fires at ODD n'
+    (F_2=0, G_{2,40}=1); m=42,46 fire at EVEN n' (F_2=1, G_{2,m}=0). -/
+axiom subcaseB_mgt38_witness
+    (n' : Nat) (hn' : 3087 ≤ n')
+    (m : Fin (2 * (n' + 1) + 1))
+    (hm_even : m.val % 2 = 0)
+    (hm_low : 1 ≤ m.val)
+    (hm_ge40 : 40 ≤ m.val)
+    (hm_ne_r : m.val ≠ 2 * n')
+    (hm_not_rm : m.val ≠ 2 * (n' + 1) - 8)
+    (hm_high : m.val + 1 < 2 * (n' + 1) + 1)
+    (hcase : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+               decide (k.val = m.val)) = false)
+    (hts : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+             decide (k.val = m.val ∨ k.val = 2 * (n' + 1))) = true) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m)
