@@ -6766,3 +6766,81 @@ native_decide verification (works in Lean):
 -- [0,0,0,0,1] → 1: (caEvolve 2 [false,false,false,false,true]).getD 0 false = true
 ```
 All verified: native_decide EXIT 0.
+
+## INTERACTION TERM I(2,m) ANALYSIS AT SubcaseB EVENTS (loop-A99, 2026-04-07)
+
+### The Open Problem
+
+`twoSpike_center_complement` in SpinePass.lean (line 480) requires proving:
+For even m≥40, T≥3088, with SubcaseB conditions (F_m=0, G_{m,last}=1):
+  G_{2,m}(T) = !F_2(T)
+equivalently: I(2,m) = G_{2,m} XOR F_2 XOR F_m = G_{2,m} XOR F_2 = 1 (at SubcaseB events).
+
+Computationally verified: m=40@T=40984, 61460; m=42@T=118805; m=46@T=106523.
+
+### Known Algebraic Facts (at SubcaseB events)
+
+From proved lemmas + inclusion-exclusion:
+- F_m = 0 (given: hSB)
+- G_{m,last} = 1 → I(m,last) = 0 (since F_last=1 always)
+- G_{2,last} = 0 (proved: dChain_2_last_false) → I(2,last) = !F_2
+- G_{2,m,last} = I(2,m) XOR I(2,m,last)  [algebraic identity]
+- NEED: I(2,m) = 1
+
+### Small-m Data (with right-mirror+boundary exclusions applied)
+
+| m | SubcaseB events (T range) | I(2,m)=1 always? |
+|---|--------------------------|------------------|
+| 4 | T=14,22,30,... | NO (always 0) |
+| 6 | T=7,11,23,27,... | NO (alternates) |
+| 8 | T=12,44,76,... | YES |
+| 10 | T=49,113,... | YES |
+| 12 | T=14,74,78,138,... | NO |
+| 14 | T=11,15,75,79,... | NO |
+| 16 | T=136,140,... | NO |
+| 20 | T=270 | YES (1 sample) |
+| 22 | T=271 | NO (I=0) |
+| 36 | T=4114, T=4118 | NO (I=1 at T=4114, I=0 at T=4118) |
+| 38 | T=8211, T=8215 | NO (I=1 at T=8211, I=0 at T=8215) |
+| 40 | T=40984, 61460 | YES (verified) |
+
+### Key Observations
+
+1. m=36,38 have ONE "good" residue (I=1, w=2 works) and ONE "bad" residue (I=0, w=4 needed).
+   SubcaseBPeriod.lean handles this with two different witnesses per m.
+   
+2. For m≥40, the claim is ALL SubcaseB residue classes are "good" (I=1, w=2 works).
+   Why? The algebraic structure for m=40 gives SubcaseB at T≡0,4 (mod 8), different from m=36,38.
+   
+3. I(2,m)(T) is NOT globally 1 for T in [m/2+1, 1500]. It alternates between 0 and 1.
+   The claim is specifically at SubcaseB T values.
+
+4. Period of I(2,40)(T): > 370 (not found in T=21..1500 search). Likely 2^20=1048576.
+   So native_decide for period reduction is INFEASIBLE.
+
+5. The three-body term I(2,m,last) at SubcaseB events:
+   - m=6,10: I(2,m,last)=0 → G_{2,m,last} = I(2,m)
+   - m=8: I(2,m,last)=1 → G_{2,m,last} ≠ I(2,m)
+   - So three-body term is NOT universally 0 at SubcaseB events.
+
+### Proof Attempts and Failures
+
+1. NATIVE_DECIDE: Infeasible for m≥40 (T=40984, tape width 81969, too large).
+2. PERIOD REDUCTION: Period of I(2,40) >> 10000, too large.  
+3. INCLUSION-EXCLUSION: Known facts I(m,last)=0 and I(2,last)=!F_2 don't determine I(2,m).
+4. D-CHAIN INDUCTION: No clean k-recurrence for G_{2,k}(T); single-spike structure doesn't extend.
+5. CONTRADICTION: Assuming I(2,m)=0 + SubcaseB conditions doesn't yield contradiction algebraically.
+
+### Open Research Question
+
+Why do SubcaseB residue classes for m=40 EXCLUSIVELY fall in the "I(2,m)=1" category,
+while m=36,38 have mixed categories?
+
+The answer must involve:
+- The specific LFSR structure of F_{40} (period 2^20)  
+- The SubcaseB firing conditions at residues {40983, 61459} mod 65536
+- The interaction I(2,40) at those specific residues
+
+Conjecture: For m≥40, the SubcaseB conditions (F_m=0 AND G_{m,last}=1) are satisfied ONLY
+at T values where I(2,m)=1. For m<40, SubcaseB fires at BOTH types of T values.
+
