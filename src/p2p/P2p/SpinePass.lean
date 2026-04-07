@@ -185,6 +185,69 @@ lemma dChain_last_true (T : Nat) : dChain T (2 * T) = true := by
     -- rule30Local false false true = false XOR (false OR true) = true
     simp [hf1, hf2, ih]
 
+/-- D_3[T] OR D_2[T] = (T % 4 ≠ 0): the "not divisible by 4" clock. -/
+private lemma dChain_3_or_2 (T : Nat) : (dChain T 3 || dChain T 2) = decide (T % 4 ≠ 0) := by
+  rw [dChain_3_parity, dChain_2_parity]
+  -- goal: (T/2%2==1) || (T%2==1) = decide (T%4 ≠ 0)
+  -- Case split on T % 4
+  have hd : T / 2 % 2 = (T % 4) / 2 := by omega
+  have hm : T % 2 = (T % 4) % 2 := by omega
+  rw [hd, hm]
+  have h0123 : T % 4 = 0 ∨ T % 4 = 1 ∨ T % 4 = 2 ∨ T % 4 = 3 := by
+    have := Nat.mod_lt T (show 0 < 4 by omega); omega
+  rcases h0123 with h | h | h | h <;> simp [h]
+
+/-- The 4-step telescoped XOR is always true:
+    (T%4≠0) XOR ((T+1)%4≠0) XOR ((T+2)%4≠0) XOR ((T+3)%4≠0) = true -/
+private lemma four_antiperiod_xor (T : Nat) :
+    (decide (T % 4 ≠ 0) ^^ decide ((T + 1) % 4 ≠ 0) ^^
+     decide ((T + 2) % 4 ≠ 0) ^^ decide ((T + 3) % 4 ≠ 0)) = true := by
+  -- In any 4 consecutive naturals, exactly one is divisible by 4.
+  -- Strategy: case-split on T % 4 ∈ {0,1,2,3} using omega + decide.
+  have h1 : (T + 1) % 4 = (T % 4 + 1) % 4 := by omega
+  have h2 : (T + 2) % 4 = (T % 4 + 2) % 4 := by omega
+  have h3 : (T + 3) % 4 = (T % 4 + 3) % 4 := by omega
+  rw [h1, h2, h3]
+  have hlt : T % 4 < 4 := Nat.mod_lt T (by omega)
+  -- Case split: T % 4 = 0, 1, 2, or 3
+  have h0123 : T % 4 = 0 ∨ T % 4 = 1 ∨ T % 4 = 2 ∨ T % 4 = 3 := by omega
+  rcases h0123 with h | h | h | h <;> simp only [h] <;> decide
+
+/-- D_4[T] has anti-period 4: D_4[T+4] = !D_4[T]. Equivalently, D_4 has period 8. -/
+lemma dChain_4_antiperiod (T : Nat) : dChain (T + 4) 4 = !dChain T 4 := by
+  -- Step function: dChain (S+1) 4 = dChain S 4 XOR (dChain S 3 || dChain S 2)
+  -- step : one-step recurrence for D_4
+  -- Note: precedence issue — = binds tighter than ^^, so we must parenthesize the RHS.
+  have step : ∀ S : Nat, dChain (S + 1) 4 = (dChain S 4 ^^ (dChain S 3 || dChain S 2)) := by
+    intro S
+    -- dChain (S+1) (2+2) = rule30Local (dChain S (2+2)) (dChain S (2+1)) (dChain S 2)
+    -- rule30Local a b c = xor a (b || c) = a ^^ (b || c) definitionally.
+    rfl
+  -- rewrite using the clock lemma
+  have step' : ∀ S : Nat, dChain (S + 1) 4 = (dChain S 4 ^^ decide (S % 4 ≠ 0)) := by
+    intro S
+    rw [step S, dChain_3_or_2]
+  -- telescope 4 steps using calc
+  calc dChain (T + 4) 4
+      = (dChain (T + 3) 4 ^^ decide ((T + 3) % 4 ≠ 0)) := by
+          rw [show T + 4 = T + 3 + 1 from by omega, step' (T + 3)]
+    _ = ((dChain (T + 2) 4 ^^ decide ((T + 2) % 4 ≠ 0)) ^^ decide ((T + 3) % 4 ≠ 0)) := by
+          rw [show T + 3 = T + 2 + 1 from by omega, step' (T + 2)]
+    _ = (((dChain (T + 1) 4 ^^ decide ((T + 1) % 4 ≠ 0)) ^^ decide ((T + 2) % 4 ≠ 0)) ^^ decide ((T + 3) % 4 ≠ 0)) := by
+          rw [show T + 2 = T + 1 + 1 from by omega, step' (T + 1)]
+    _ = ((((dChain T 4 ^^ decide (T % 4 ≠ 0)) ^^ decide ((T + 1) % 4 ≠ 0)) ^^ decide ((T + 2) % 4 ≠ 0)) ^^ decide ((T + 3) % 4 ≠ 0)) := by
+          rw [show T + 1 = T + 1 from rfl, step' T]
+    _ = !dChain T 4 := by
+          have hxor := four_antiperiod_xor T
+          revert hxor
+          generalize dChain T 4 = b
+          generalize decide (T % 4 ≠ 0) = x
+          generalize decide ((T + 1) % 4 ≠ 0) = y
+          generalize decide ((T + 2) % 4 ≠ 0) = z
+          generalize decide ((T + 3) % 4 ≠ 0) = w
+          intro h
+          cases b <;> cases x <;> cases y <;> cases z <;> cases w <;> simp_all
+
 /-
 ================================================================================
 SECTION 3: THE DELTA — Δ(T, m) = G_{2,m}(T) XOR F_2(T) = 1 at SubcaseB events
