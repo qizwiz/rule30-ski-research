@@ -23,6 +23,8 @@ Key Lean 4 lemmas used:
 -/
 
 import P2p.CA_ArrayDef
+import P2p.CA_Array_m28_residues
+import P2p.CA_Array_m30_residues
 
 /-
 ================================================================================
@@ -36,21 +38,8 @@ Firing positions: m=28 → {1293,1297,2065} mod 2048; m=30 → {4114} mod 4096.
 Pending a faster proof strategy (LFSR algebraic approach or BitVec CA).
 -/
 
-/-- m=28: Only firing residues in one period window are {1293,1297,2065}.
-    Verified computationally (Python). Pending machine-checked proof. -/
-axiom subcaseB_m28_residue_3class_proved :
-    ∀ j : Fin 2048,
-    (caEvolve (j.val + 28 + 1) (spikeAtList 28 (2*(j.val+28+1)+1))).getD 0 false = false →
-    (caEvolve (j.val + 28 + 1) (twoSpikeLastList 28 (2*(j.val+28+1)+1))).getD 0 false = true →
-    j.val + 28 = 1293 ∨ j.val + 28 = 1297 ∨ j.val + 28 = 2065
-
-/-- m=30: Only firing residue in one period window is {4114}.
-    Verified computationally (Python). Pending machine-checked proof. -/
-axiom subcaseB_m30_residue_unique_proved :
-    ∀ j : Fin 4096,
-    (caEvolve (j.val + 30 + 1) (spikeAtList 30 (2*(j.val+30+1)+1))).getD 0 false = false →
-    (caEvolve (j.val + 30 + 1) (twoSpikeLastList 30 (2*(j.val+30+1)+1))).getD 0 false = true →
-    j.val + 30 = 4114
+-- subcaseB_m28_residue_3class_proved: proved in CA_Array_m28_residues.lean
+-- subcaseB_m30_residue_unique_proved: proved in CA_Array_m30_residues.lean
 
 /-
 ================================================================================

@@ -30,6 +30,8 @@ lemma caStepList_getD_eq (xs : List Bool) (j : Nat) (h_bound : j + 2 < xs.length
       have h_tail : j' + 2 < (q :: r :: rest).length := by simp at h_bound ⊢; omega
       exact caStepList_getD_eq (q :: r :: rest) j' h_tail
 
+@[simp] lemma caEvolve_zero (l : List Bool) : caEvolve 0 l = l := rfl
+
 /-!
 ## Lemma 1: caEvolve_add
 -/
@@ -817,9 +819,20 @@ The right spike for positions i ≤ 2*(n'+1)-1 is outside the causal cone (> 2*P
 so cannot affect those positions.
 -/
 
+/-- A list of length N with `true` at interior positions p AND q (neither need be last). -/
+def twoSpikeList (p q N : Nat) : List Bool :=
+  List.ofFn (fun k : Fin N => decide (k.val = p ∨ k.val = q))
+
 /-- A list of length N with `true` at position m AND at position N-1 (last). -/
 def twoSpikeLastList (m N : Nat) : List Bool :=
   List.ofFn (fun k : Fin N => decide (k.val = m || k.val = N - 1))
+
+lemma twoSpikeList_length (p q N : Nat) : (twoSpikeList p q N).length = N := by
+  simp [twoSpikeList, List.length_ofFn]
+
+lemma twoSpikeList_getD (p q N i : Nat) (hi : i < N) :
+    (twoSpikeList p q N).getD i false = decide (i = p ∨ i = q) := by
+  simp [twoSpikeList, List.getD_eq_getElem?_getD, hi]
 
 lemma twoSpikeLastList_length (m N : Nat) : (twoSpikeLastList m N).length = N := by
   simp [twoSpikeLastList, List.length_ofFn]
@@ -1141,3 +1154,286 @@ Workaround options:
 -- lemma rule30n_twoSpikeLast34_period8192 : ... := rule30n_twoSpikeLast_period 34 8192 ...
 -- (analogously for m=36,38)
 -/
+
+/-!
+## Right-spike structural lemma
+
+A spike at the rightmost position of a width-(2T+1) tape, after T steps of the shrinking CA,
+gives center output = true. This is because the right spike propagates as a single 1 at the
+last position at every step: caStepList [F,...,F,T] = [F,...,F,T] (2 cells shorter).
+
+Key for SubcaseB analysis: F_last(T) = 1 for all T ≥ 1.
+-/
+
+/-- One step of shrinking CA on a right-spike agrees with the shorter right-spike at every position.
+    Specifically: caStepList (spikeAtList (2T+2) (2T+3)) agrees with spikeAtList (2T) (2T+1)
+    at all positions 0..2T. -/
+lemma caStepList_spikeAtLast_getD (T : Nat) (i : Nat) (hi : i ≤ 2 * T) :
+    (caStepList (spikeAtList (2 * T + 2) (2 * T + 3))).getD i false =
+    (spikeAtList (2 * T) (2 * T + 1)).getD i false := by
+  have hlen : i + 2 < (spikeAtList (2 * T + 2) (2 * T + 3)).length := by
+    rw [spikeAtList_length]; omega
+  rw [caStepList_getD_eq _ i hlen]
+  rw [spikeAtList_getD (2 * T + 2) (2 * T + 3) i (by omega)]
+  rw [spikeAtList_getD (2 * T + 2) (2 * T + 3) (i + 1) (by omega)]
+  rw [spikeAtList_getD (2 * T + 2) (2 * T + 3) (i + 2) (by omega)]
+  rw [spikeAtList_getD (2 * T) (2 * T + 1) i (by omega)]
+  simp only [rule30Local]
+  by_cases hi2T : i = 2 * T
+  · subst hi2T
+    simp [show 2 * T ≠ 2 * T + 2 from by omega,
+          show 2 * T + 1 ≠ 2 * T + 2 from by omega,
+          show 2 * T + 2 = 2 * T + 2 from rfl]
+  · have hi_lt : i < 2 * T := by omega
+    have hi_ne_succ : i ≠ 2 * T + 1 := by omega
+    simp [show i ≠ 2 * T + 2 from by omega,
+          show i + 1 ≠ 2 * T + 2 from by omega,
+          show i + 2 ≠ 2 * T + 2 from by omega,
+          show i ≠ 2 * T + 1 from hi_ne_succ,
+          show i ≠ 2 * T from hi2T]
+
+/-- A spike at the rightmost position gives center=true after T steps.
+    F_last(T) = true for all T ≥ 1. -/
+theorem caEvolve_spikeAtLast (T : Nat) (hT : T ≥ 1) :
+    (caEvolve T (spikeAtList (2 * T) (2 * T + 1))).getD 0 false = true := by
+  induction T with
+  | zero => omega
+  | succ T ih =>
+    rw [show 2 * (T + 1) = 2 * T + 2 from by omega]
+    rw [show 2 * T + 2 + 1 = 2 * T + 3 from by omega]
+    rw [caEvolve_succ]
+    cases T with
+    | zero =>
+      -- T=0: caEvolve 0+1 (spikeAtList 2 3) = caStepList [F,F,T] = [T]
+      native_decide
+    | succ T' =>
+      -- T=T'+1 ≥ 1: use caEvolve_agree with the caStepList_spikeAtLast_getD lemma
+      apply (caEvolve_agree (T' + 1)
+        (caStepList (spikeAtList (2 * T' + 4) (2 * T' + 5)))
+        (spikeAtList (2 * (T' + 1)) (2 * (T' + 1) + 1))
+        (by
+          have hlen : (spikeAtList (2 * T' + 4) (2 * T' + 5)).length ≥ 2 := by
+            rw [spikeAtList_length]
+            omega
+          have hstep := caStep_length (spikeAtList (2 * T' + 4) (2 * T' + 5)) hlen
+          rw [spikeAtList_length] at hstep
+          omega)
+        (by rw [spikeAtList_length]; omega)
+        (fun i hi => ?_)).trans (ih (by omega))
+      rw [show 2 * T' + 4 = 2 * (T' + 1) + 2 from by omega,
+          show 2 * T' + 5 = 2 * (T' + 1) + 3 from by omega]
+      exact caStepList_spikeAtLast_getD (T' + 1) i (by omega)
+
+/-!
+## Recurrence infrastructure: G_m(t+1) = rule30Local(F_m(t), F_{m-1}(t), G_{m-2}(t))
+
+These lemmas are used by CA_ArrayDef.lean to define and prove correct
+the `gCenterSeq` precomputed array for SubcaseB residue checks.
+-/
+
+/-- Helper: caEvolve (t+1) l = caStepList (caEvolve t l). -/
+lemma caEvolve_succ_comm (t : Nat) (l : List Bool) :
+    caEvolve (t + 1) l = caStepList (caEvolve t l) := by
+  rw [show t + 1 = 1 + t from by omega]
+  simp [caEvolve_add, caEvolve]
+
+/-- F_0(t) = true for all t: spike-at-0 always gives center=true. -/
+private lemma f0_always_true (t : Nat) :
+    (caEvolve t (spikeAtList 0 (2 * t + 1))).getD 0 false = true := by
+  induction t with
+  | zero =>
+    simp only [caEvolve, spikeAtList, List.getD_eq_getElem?_getD, List.getElem?_ofFn]
+    simp
+  | succ t ih =>
+    have hlen3 : (caEvolve t (spikeAtList 0 (2 * (t + 1) + 1))).length = 3 := by
+      rw [caEvolve_length_le t _ (by rw [spikeAtList_length]; omega)]
+      rw [spikeAtList_length]; omega
+    rw [caEvolve_succ_comm, caStepList_getD_eq _ 0 (by omega)]
+    have hp0 : (caEvolve t (spikeAtList 0 (2 * (t + 1) + 1))).getD 0 false = true :=
+      (caEvolve_spikeAt_agree t 0 (2 * (t + 1) + 1) (2 * t + 1) 0 (by omega) (by omega)).trans ih
+    have hp1 : (caEvolve t (spikeAtList 0 (2 * (t + 1) + 1))).getD 1 false = false := by
+      rw [caEvolve_getD_shift t _ 1]
+      exact caEvolve_allFalse t _ (spikeAtList_drop_allFalse 0 (2 * (t + 1) + 1) 1 (by omega))
+    have hp2 : (caEvolve t (spikeAtList 0 (2 * (t + 1) + 1))).getD 2 false = false := by
+      rw [caEvolve_getD_shift t _ 2]
+      exact caEvolve_allFalse t _ (spikeAtList_drop_allFalse 0 (2 * (t + 1) + 1) 2 (by omega))
+    rw [hp0, hp1, hp2]; simp [rule30Local]
+
+/-- G_0(t+1) = false: twoSpikeLastList 0 gives center=false after t+1 steps. -/
+lemma twoSpikeLastList0_center_false (t : Nat) :
+    (caEvolve (t + 1) (twoSpikeLastList 0 (2 * (t + 1) + 1))).getD 0 false = false := by
+  have hlen3 : (caEvolve t (twoSpikeLastList 0 (2 * (t + 1) + 1))).length = 3 := by
+    rw [caEvolve_length_le t _ (by rw [twoSpikeLastList_length]; omega)]
+    rw [twoSpikeLastList_length]; omega
+  rw [caEvolve_succ_comm, caStepList_getD_eq _ 0 (by omega)]
+  -- p0 = true
+  have hp0 : (caEvolve t (twoSpikeLastList 0 (2 * (t + 1) + 1))).getD 0 false = true := by
+    rw [caEvolve_twoSpike_eq_spikeAt t 0 (2 * (t + 1) + 1) 0 (by omega) (by omega)]
+    exact (caEvolve_spikeAt_agree t 0 (2 * (t + 1) + 1) (2 * t + 1) 0
+            (by omega) (by omega)).trans (f0_always_true t)
+  -- p1 = false: position 1 after t steps. The right spike is outside the causal cone.
+  have hp1 : (caEvolve t (twoSpikeLastList 0 (2 * (t + 1) + 1))).getD 1 false = false := by
+    rw [caEvolve_getD_shift t _ 1]
+    -- drop 1 has spike at position 2*t+1 (last spike). Spike is at 2*t+1 > 2*t = causal cone.
+    -- Step 1: compare drop-1 tape with spikeAtList(2*t+2, 2*t+3) on positions 0..2*t (both false)
+    apply (caEvolve_agree t
+      ((twoSpikeLastList 0 (2 * (t + 1) + 1)).drop 1)
+      (spikeAtList (2 * t + 2) (2 * t + 3))
+      (by rw [List.length_drop, twoSpikeLastList_length]; omega)
+      (by rw [spikeAtList_length]; omega)
+      (fun j hj => by
+        rw [twoSpikeLastList_drop_getD 0 (2 * (t + 1) + 1) 1 j (by omega),
+            spikeAtList_getD (2 * t + 2) (2 * t + 3) j (by omega)]
+        rw [decide_eq_decide]
+        constructor
+        · rintro (h | h) <;> omega
+        · intro h; omega)).trans
+    -- Step 2: spikeAtList(2*t+2, 2*t+3): spike outside causal cone, compare with all-false
+    apply (caEvolve_agree t
+      (spikeAtList (2 * t + 2) (2 * t + 3))
+      (List.replicate (2 * t + 3) false)
+      (by rw [spikeAtList_length]; omega)
+      (by simp only [List.length_replicate]; omega)
+      (fun j hj => by
+        rw [spikeAtList_getD (2 * t + 2) (2 * t + 3) j (by omega)]
+        simp only [List.getD_eq_getElem?_getD, List.getElem?_replicate,
+                   show j < 2 * t + 3 from by omega]
+        simp [show ¬(j = 2 * t + 2) from by omega])).trans
+    exact caEvolve_allFalse t _ (fun i hi => by
+      simp only [List.length_replicate] at hi
+      simp [List.getD_eq_getElem?_getD, List.getElem?_replicate, show i < 2 * t + 3 from hi])
+  -- p2 = true (drop 2 gives spike at exactly 2*t, use caEvolve_spikeAtLast)
+  have hp2 : (caEvolve t (twoSpikeLastList 0 (2 * (t + 1) + 1))).getD 2 false = true := by
+    rw [caEvolve_getD_shift t _ 2]
+    apply (caEvolve_agree t
+      ((twoSpikeLastList 0 (2 * (t + 1) + 1)).drop 2)
+      (spikeAtList (2 * t) (2 * t + 1))
+      (by rw [List.length_drop, twoSpikeLastList_length]; omega)
+      (by rw [spikeAtList_length]; omega)
+      (fun j hj => ?_)).trans
+    · cases Nat.eq_zero_or_pos t with
+      | inl ht => subst ht; native_decide
+      | inr ht => exact caEvolve_spikeAtLast t ht
+    · rw [twoSpikeLastList_drop_getD 0 (2 * (t + 1) + 1) 2 j (by omega),
+          spikeAtList_getD (2 * t) (2 * t + 1) j (by omega)]
+      -- LHS: decide(2+j=0 ∨ 2+j=2*(t+1)+1-1) = decide(2+j=2*(t+1)) = decide(j=2*t)
+      -- RHS: decide(j=2*t). Need: (2+j=0 ∨ 2+j=2*t+1) ↔ j=2*t.
+      -- 2+j=0: impossible. 2*t+1-1=2*t so 2+j=2*t ↔ j=2*t-2... wait
+      -- Actually 2*(t+1)+1-1 = 2*t+2 = 2*(t+1). Hmm but 2*t+1-1=2*t.
+      -- twoSpikeLastList 0 N has last spike at N-1 = 2*(t+1)+1-1 = 2*t+2.
+      -- So LHS = decide(2+j=0 ∨ 2+j=2*t+2) = decide(j=2*t).
+      -- RHS = decide(j=2*t). Equal!
+      -- decide(2+j=0 ∨ 2+j=2*(t+1)+1-1) = decide(j=2*t)
+      rw [decide_eq_decide]
+      constructor
+      · rintro (h | h) <;> omega
+      · intro h; right; omega
+  rw [hp0, hp1, hp2]; simp [rule30Local, Bool.xor_true]
+
+/-- Center-output recurrence: G_{m+2}(s+1) = rule30Local(F_{m+2}(s), F_{m+1}(s), G_m(s)). -/
+lemma twoSpikeLastList_center_recurrence (m s : Nat) :
+    (caEvolve (s + 1) (twoSpikeLastList (m + 2) (2 * (s + 1) + 1))).getD 0 false =
+    rule30Local
+      ((caEvolve s (spikeAtList (m + 2) (2 * s + 1))).getD 0 false)
+      ((caEvolve s (spikeAtList (m + 1) (2 * s + 1))).getD 0 false)
+      ((caEvolve s (twoSpikeLastList m (2 * s + 1))).getD 0 false) := by
+  -- Let l = caEvolve s (twoSpikeLastList (m+2) (2*(s+1)+1)), length = 3
+  set l := caEvolve s (twoSpikeLastList (m + 2) (2 * (s + 1) + 1))
+  have hlen3 : l.length = 3 := by
+    simp only [l]
+    rw [caEvolve_length_le s _ (by rw [twoSpikeLastList_length]; omega), twoSpikeLastList_length]
+    omega
+  rw [caEvolve_succ_comm, caStepList_getD_eq l 0 (by omega)]
+  -- Identify positions 0, 1, 2 of l
+  -- p0 = F_{m+2}(s)
+  have hp0 : l.getD 0 false = (caEvolve s (spikeAtList (m + 2) (2 * s + 1))).getD 0 false := by
+    simp only [l]
+    rw [caEvolve_twoSpike_eq_spikeAt s (m + 2) (2 * (s + 1) + 1) 0 (by omega) (by omega)]
+    exact caEvolve_spikeAt_agree s (m + 2) (2 * (s + 1) + 1) (2 * s + 1) 0 (by omega) (by omega)
+  -- p1 = F_{m+1}(s)
+  have hp1 : l.getD 1 false = (caEvolve s (spikeAtList (m + 1) (2 * s + 1))).getD 0 false := by
+    simp only [l]
+    rw [caEvolve_getD_shift s _ 1]
+    -- drop 1 of (twoSpikeLastList (m+2) (2*(s+1)+1)) agrees with spikeAtList (m+1) (2*s+2)
+    have agree : (caEvolve s ((twoSpikeLastList (m + 2) (2 * (s + 1) + 1)).drop 1)).getD 0 false =
+        (caEvolve s (spikeAtList (m + 1) (2 * s + 2))).getD 0 false :=
+      caEvolve_agree s _ _ (by rw [List.length_drop, twoSpikeLastList_length]; omega)
+        (by rw [spikeAtList_length]; omega) (fun j hj => by
+          rw [twoSpikeLastList_drop_getD (m + 2) (2 * (s + 1) + 1) 1 j (by omega),
+              spikeAtList_getD (m + 1) (2 * s + 2) j (by omega)]
+          -- decide(1+j=m+2 ∨ 1+j=2*(s+1)+1-1) = decide(j=m+1)
+          -- j ≤ 2*s, so 1+j ≤ 2*s+1 < 2*(s+1)+1-1=2*s+1: second disjunct impossible
+          rw [decide_eq_decide]
+          constructor
+          · rintro (h | h) <;> omega
+          · intro h; left; omega)
+    rw [agree]
+    exact caEvolve_spikeAt_agree s (m + 1) (2 * s + 2) (2 * s + 1) 0 (by omega) (by omega)
+  -- p2 = G_m(s)
+  have hp2 : l.getD 2 false = (caEvolve s (twoSpikeLastList m (2 * s + 1))).getD 0 false := by
+    simp only [l]
+    rw [caEvolve_getD_shift s _ 2]
+    -- drop 2 of (twoSpikeLastList (m+2) (2*(s+1)+1)) equals twoSpikeLastList m (2*s+1)
+    apply caEvolve_agree s _ _ (by rw [List.length_drop, twoSpikeLastList_length]; omega)
+      (by rw [twoSpikeLastList_length]; omega)
+    intro j hj
+    rw [twoSpikeLastList_drop_getD (m + 2) (2 * (s + 1) + 1) 2 j (by omega),
+        twoSpikeLastList_getD m (2 * s + 1) j (by omega)]
+    -- decide(2+j=m+2 ∨ 2+j=2*(s+1)+1-1) = decide(j=m ∨ j=2*s+1-1)
+    -- 2*(s+1)+1-1=2*s+2 so 2+j=2*s+2 ↔ j=2*s; 2*s+1-1=2*s. Equal!
+    rw [decide_eq_decide]
+    constructor
+    · rintro (h | h) <;> [left; right] <;> omega
+    · rintro (h | h) <;> [left; right] <;> omega
+  rw [hp0, hp1, hp2]
+
+/-- Center-output recurrence for spike: F_{m+2}(s+1) = rule30Local(F_{m+2}(s), F_{m+1}(s), F_m(s)).
+    Mirrors twoSpikeLastList_center_recurrence but for spikeAtList (no right spike).
+    The drop-2 argument: (spikeAtList (m+2) N).drop 2 agrees with spikeAtList m (N-2)
+    since position j of the drop = decide(j+2 = m+2) = decide(j = m). -/
+lemma spikeAtList_center_recurrence (m s : Nat) :
+    (caEvolve (s + 1) (spikeAtList (m + 2) (2 * (s + 1) + 1))).getD 0 false =
+    rule30Local
+      ((caEvolve s (spikeAtList (m + 2) (2 * s + 1))).getD 0 false)
+      ((caEvolve s (spikeAtList (m + 1) (2 * s + 1))).getD 0 false)
+      ((caEvolve s (spikeAtList m (2 * s + 1))).getD 0 false) := by
+  set l := caEvolve s (spikeAtList (m + 2) (2 * (s + 1) + 1))
+  have hlen3 : l.length = 3 := by
+    simp only [l]
+    rw [caEvolve_length_le s _ (by rw [spikeAtList_length]; omega), spikeAtList_length]
+    omega
+  rw [caEvolve_succ_comm, caStepList_getD_eq l 0 (by omega)]
+  -- p0 = F_{m+2}(s): position 0 of l equals caEvolve s (spikeAtList (m+2) (2*s+1)) .getD 0
+  have hp0 : l.getD 0 false = (caEvolve s (spikeAtList (m + 2) (2 * s + 1))).getD 0 false := by
+    simp only [l]
+    exact caEvolve_spikeAt_agree s (m + 2) (2 * (s + 1) + 1) (2 * s + 1) 0 (by omega) (by omega)
+  -- p1 = F_{m+1}(s): drop 1 of spikeAtList(m+2, N) agrees with spikeAtList(m+1, N-1)
+  have hp1 : l.getD 1 false = (caEvolve s (spikeAtList (m + 1) (2 * s + 1))).getD 0 false := by
+    simp only [l]
+    rw [caEvolve_getD_shift s _ 1]
+    have agree : (caEvolve s ((spikeAtList (m + 2) (2 * (s + 1) + 1)).drop 1)).getD 0 false =
+        (caEvolve s (spikeAtList (m + 1) (2 * s + 2))).getD 0 false :=
+      caEvolve_agree s _ _ (by rw [List.length_drop, spikeAtList_length]; omega)
+        (by rw [spikeAtList_length]; omega) (fun j hj => by
+          rw [show ((spikeAtList (m + 2) (2 * (s + 1) + 1)).drop 1).getD j false =
+              (spikeAtList (m + 2) (2 * (s + 1) + 1)).getD (1 + j) false from by
+            simp only [List.getD_eq_getElem?_getD, List.getElem?_drop]]
+          rw [spikeAtList_getD (m + 2) (2 * (s + 1) + 1) (1 + j) (by omega)]
+          rw [spikeAtList_getD (m + 1) (2 * s + 2) j (by omega)]
+          rw [decide_eq_decide]; omega)
+    rw [agree]
+    exact caEvolve_spikeAt_agree s (m + 1) (2 * s + 2) (2 * s + 1) 0 (by omega) (by omega)
+  -- p2 = F_m(s): drop 2 of spikeAtList(m+2, N) agrees with spikeAtList(m, N-2)
+  have hp2 : l.getD 2 false = (caEvolve s (spikeAtList m (2 * s + 1))).getD 0 false := by
+    simp only [l]
+    rw [caEvolve_getD_shift s _ 2]
+    apply caEvolve_agree s _ _ (by rw [List.length_drop, spikeAtList_length]; omega)
+      (by rw [spikeAtList_length]; omega)
+    intro j hj
+    rw [show ((spikeAtList (m + 2) (2 * (s + 1) + 1)).drop 2).getD j false =
+        (spikeAtList (m + 2) (2 * (s + 1) + 1)).getD (2 + j) false from by
+      simp [List.getD_eq_getElem?_getD, List.getElem?_drop]]
+    rw [spikeAtList_getD (m + 2) (2 * (s + 1) + 1) (2 + j) (by omega)]
+    rw [spikeAtList_getD m (2 * s + 1) j (by omega)]
+    rw [decide_eq_decide]; omega
+  rw [hp0, hp1, hp2]
