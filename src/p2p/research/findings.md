@@ -6646,3 +6646,66 @@ AND T(2,m,last)=0, then I(2,m)=1 follows immediately.
 **QUESTION for loop-B**: Is T(2,m,last)=0 at SubcaseB events? (3-spike inclusion-exclusion term)
 And can G_{2,m,last} be characterized algebraically?
 
+
+---
+
+## Structural reduction: G_{2,last}=0 via two-step recursion (2026-04-06)
+
+### THE KEY RECURSION (computationally verified T=4..19):
+
+`caEvolve 2 (twoSpike T) = twoSpike (T-2)` for T≥4
+
+where `twoSpike T` = List Bool with 1s at positions 2 and 2*T, zeros elsewhere.
+
+Proof by two intermediate steps:
+1. `caEvolve 1 (twoSpike T) = frontThreeRightSpike T` for T≥3
+   where `frontThreeRightSpike T` = 1s at {0,1,2} and {2*(T-1)}, width 2*T-1
+
+2. `caEvolve 1 (frontThreeRightSpike T) = twoSpike (T-2)` for T≥4
+
+Base cases:
+- T=2: caEvolve 2 [0,0,1,0,1] = [0]
+- T=3: caEvolve 3 [0,0,1,0,0,0,1] = caEvolve 1 [0,0,0] = [0]
+
+### LEAN PROOF STRUCTURE for dChain_2_last_false:
+
+```lean
+/-- Two spikes at positions 2 and 2*T always give center = false for T≥2 -/
+lemma dChain_2_last_false (T : Nat) (hT : 2 ≤ T) :
+    rule30n T (fun j : Fin (2 * T + 1) => decide (j.val = 2 ∨ j.val = 2 * T)) = false := by
+  -- Step 1: unfold rule30n to caEvolve on list
+  -- Step 2: use two-step reduction: caEvolve 2 (twoSpike T) = twoSpike (T-2) for T≥4
+  --         base cases T=2,3 by native_decide (or direct computation)
+  -- Step 3: induction on T by 2, reducing to T=2 or T=3
+  induction ...
+```
+
+The single-step lemmas needed:
+```lean
+lemma twoSpike_step1 (T : Nat) (hT : 3 ≤ T) :
+    caEvolve 1 (twoSpike_list T) = frontThreeRightSpike_list T
+    
+lemma frontThreeRightSpike_step1 (T : Nat) (hT : 4 ≤ T) :
+    caEvolve 1 (frontThreeRightSpike_list T) = twoSpike_list (T-2)
+```
+
+where:
+```lean
+def twoSpike_list (T : Nat) : List Bool := 
+  spikeAtList 2 (2*T+1) |>.set (2*T) true  -- or construct directly
+  
+def frontThreeRightSpike_list (T : Nat) : List Bool :=
+  -- 1s at {0,1,2} and {2*(T-1)}, width 2*T-1
+```
+
+**NOTE**: These are `List Bool` lemmas about specific-position tapes, not about dChain directly.
+The proof uses `caStepList_getD_eq` cell by cell or `List.ext`.
+
+### ALTERNATIVE: native_decide up to T=N + period argument
+
+Since `rule30n T (twoSpike T)` depends on T in a regular way, could use:
+1. native_decide for T ∈ Fin N (N chosen large enough for loop-A's context)
+2. Show G_{2,last}(T) = G_{2,last}(T-2) via the above reduction
+3. The whole proof follows from base cases
+
+The reduction IS the proof — no LFSR theory needed. This is the "free win" lemma.

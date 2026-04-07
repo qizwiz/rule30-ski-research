@@ -135,16 +135,39 @@ Dead experiments moved to archive/. Build verified: 765 jobs, 0 errors.
     dChain_beyond_false, dChain_last_true, rule30n_spike_dChain
 
 ### FREE WIN: G_{2,last}(T) = 0 for T≥2 (no sorry needed, add to SpinePass.lean)
-- `∀ T ≥ 2, rule30n T (fun j : Fin (2*T+1) => decide (j.val = 2 ∨ j.val = 2*T)) = false`
-- Computationally verified T=2..200 (T=1 is the only exception)
-- Proof path: use dChain framework — G_{2,2T} = F_2 XOR F_{2T} XOR I(2,2T)
-  - F_{2T} = dChain T (2*T) = 1 (dChain_last_true — proved)
-  - F_2 = dChain T 2 = (T%2==1) (dChain_2_parity — proved)
-  - G_{2,2T} = 0 requires showing I(2,2T) = F_2 XOR 1 = !(T%2==1)
-  - Alternative: direct induction proof using caEvolve recurrence
-- This lemma is NOT needed for the sorry directly, but establishes structural facts about
-  the three-spike identity useful for the algebraic approach to twoSpike_center_complement.
-- **Attempt this before the main sorry**: small, self-contained, builds intuition.
+
+**Statement**: `∀ T ≥ 2, rule30n T (fun j : Fin (2*T+1) => decide (j.val = 2 ∨ j.val = 2*T)) = false`
+Computationally verified T=2..200 (T=1 is the only exception).
+
+**Proof path — TWO-STEP RECURSION** (verified computationally):
+1. `caEvolve 2 (twoSpike_list T) = twoSpike_list (T-2)` for T≥4
+   - Where `twoSpike_list T` = list with 1s at positions 2 and 2*T, width 2*T+1
+   - Intermediate: step1 gives `frontThreeRightSpike T` = 1s at {0,1,2,2*(T-1)}, width 2*T-1
+2. Base cases: T=2 → [0], T=3 → [0,0,0] → [0] (all by native_decide or direct computation)
+3. Induction on T by 2: G_{2,last}(T) = G_{2,last}(T-2) → reduce to base
+
+**Lean structure**:
+```lean
+private def twoSpike_list (T : Nat) : List Bool :=
+  (List.range (2*T+1)).map fun i => decide (i = 2 ∨ i = 2*T)
+
+private def frontThreeRightSpike_list (T : Nat) : List Bool :=
+  (List.range (2*T-1)).map fun i => decide (i ≤ 2 ∨ i = 2*(T-1))
+
+-- Key step lemmas (prove via List.ext + caStepList_getD_eq):
+private lemma step1_twoSpike (T : Nat) (hT : 3 ≤ T) :
+    caEvolve 1 (twoSpike_list T) = frontThreeRightSpike_list T
+
+private lemma step1_frontThree (T : Nat) (hT : 4 ≤ T) :
+    caEvolve 1 (frontThreeRightSpike_list T) = twoSpike_list (T-2)
+
+-- Main lemma by induction + 2-step reduction
+lemma dChain_2_last_false (T : Nat) (hT : 2 ≤ T) :
+    rule30n T (fun j : Fin (2*T+1) => decide (j.val = 2 ∨ j.val = 2*T)) = false
+```
+
+**Status**: Proof path clear; Lean code not yet written.
+**This is the PRIORITY A-TRACK TASK before the sorry**: it's self-contained, builds List Bool machinery needed for the main proof, and gives a clean structural lemma.
 
 ### The two axioms:
 - `subcaseB_mgt38_witness` — TRUE axiom in SubcaseB_Firewall.lean:149
