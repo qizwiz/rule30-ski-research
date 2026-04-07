@@ -23,6 +23,7 @@ PROOF STRUCTURE:
 import P2p.Prize3_Complete
 import P2p.SubcaseB_Firewall
 import P2p.CausalConeLemmas
+import Mathlib.Data.List.GetD
 
 set_option maxHeartbeats 800000
 
@@ -499,24 +500,140 @@ private lemma configToList_twoSpike2last (T : Nat) :
     twoSpikeList 2 (2 * T) (2 * T + 1) := by
   simp [configToList, twoSpikeList]
 
+-- Helper: drop i of twoSpikeList gives decide (i+j = p ∨ i+j = q) for in-bounds j
+private lemma twoSpikeList_drop_getD' (p q N i j : Nat) (h : i + j < N) :
+    (List.drop i (twoSpikeList p q N)).getD j false = decide (i + j = p ∨ i + j = q) := by
+  rw [show ((List.drop i (twoSpikeList p q N)).getD j false) =
+        (twoSpikeList p q N).getD (i + j) false from by
+    simp [List.getD_eq_getElem?_getD, List.getElem?_drop]]
+  rw [twoSpikeList_getD p q N (i + j) h]
+
+-- Window agreement lemmas: show each position j ≤ 4 of (drop i input) agrees with canonical list
+-- i=0: canonical [F,F,T,F,F]
+private lemma agree_window_i0 (T : Nat) (hT : 4 ≤ T) (j : Nat) (hj : j ≤ 4) :
+    (List.drop 0 (twoSpikeList 2 (2 * T) (2 * T + 1))).getD j false =
+    [false, false, true, false, false].getD j false := by
+  simp only [List.drop_zero]
+  rw [twoSpikeList_getD _ _ _ _ (by omega)]
+  match j with
+  | 0 => simp only [show (0:Nat) ≠ 2 from by omega, show (0:Nat) ≠ 2*T from by omega, or_self, decide_false, List.getD_cons_zero]
+  | 1 => simp only [show (1:Nat) ≠ 2 from by omega, show (1:Nat) ≠ 2*T from by omega, or_self, decide_false]; rfl
+  | 2 => simp [show (2:Nat) = 2 from rfl]
+  | 3 => simp only [show (3:Nat) ≠ 2 from by omega, show (3:Nat) ≠ 2*T from by omega, or_self, decide_false]; rfl
+  | 4 => simp only [show (4:Nat) ≠ 2 from by omega, show (4:Nat) ≠ 2*T from by omega, or_self, decide_false]; rfl
+  | j+5 => omega
+
+-- i=1: canonical [F,T,F,F,F]
+private lemma agree_window_i1 (T : Nat) (hT : 4 ≤ T) (j : Nat) (hj : j ≤ 4) :
+    (List.drop 1 (twoSpikeList 2 (2 * T) (2 * T + 1))).getD j false =
+    [false, true, false, false, false].getD j false := by
+  rw [twoSpikeList_drop_getD' _ _ _ _ _ (by omega)]
+  match j with
+  | 0 => simp only [show 1+(0:Nat) ≠ 2 from by omega, show 1+(0:Nat) ≠ 2*T from by omega, or_self, decide_false, List.getD_cons_zero]
+  | 1 => simp [show 1+(1:Nat) = 2 from rfl]
+  | 2 => simp only [show 1+(2:Nat) ≠ 2 from by omega, show 1+(2:Nat) ≠ 2*T from by omega, or_self, decide_false]; rfl
+  | 3 => simp only [show 1+(3:Nat) ≠ 2 from by omega, show 1+(3:Nat) ≠ 2*T from by omega, or_self, decide_false]; rfl
+  | 4 => simp only [show 1+(4:Nat) ≠ 2 from by omega, show 1+(4:Nat) ≠ 2*T from by omega, or_self, decide_false]; rfl
+  | j+5 => omega
+
+-- i=2: canonical [T,F,F,F,F]
+private lemma agree_window_i2 (T : Nat) (hT : 4 ≤ T) (j : Nat) (hj : j ≤ 4) :
+    (List.drop 2 (twoSpikeList 2 (2 * T) (2 * T + 1))).getD j false =
+    [true, false, false, false, false].getD j false := by
+  rw [twoSpikeList_drop_getD' _ _ _ _ _ (by omega)]
+  match j with
+  | 0 => simp [show 2+(0:Nat) = 2 from rfl]
+  | 1 => simp only [show 2+(1:Nat) ≠ 2 from by omega, show 2+(1:Nat) ≠ 2*T from by omega, or_self, decide_false]; rfl
+  | 2 => simp only [show 2+(2:Nat) ≠ 2 from by omega, show 2+(2:Nat) ≠ 2*T from by omega, or_self, decide_false]; rfl
+  | 3 => simp only [show 2+(3:Nat) ≠ 2 from by omega, show 2+(3:Nat) ≠ 2*T from by omega, or_self, decide_false]; rfl
+  | 4 => simp only [show 2+(4:Nat) ≠ 2 from by omega, show 2+(4:Nat) ≠ 2*T from by omega, or_self, decide_false]; rfl
+  | j+5 => omega
+
+-- middle (3≤i<2*(T-2)): canonical [F,F,F,F,F]
+private lemma agree_window_mid (T : Nat) (hT : 4 ≤ T) (i : Nat)
+    (hi_lo : 3 ≤ i) (hi_hi : i < 2 * (T - 2))
+    (j : Nat) (hj : j ≤ 4) :
+    (List.drop i (twoSpikeList 2 (2 * T) (2 * T + 1))).getD j false =
+    [false, false, false, false, false].getD j false := by
+  rw [twoSpikeList_drop_getD' _ _ _ _ _ (by omega)]
+  simp only [show i+j ≠ 2 from by omega, show i+j ≠ 2*T from by omega, or_self, decide_false]
+  match j, hj with
+  | 0, _ => rfl | 1, _ => rfl | 2, _ => rfl | 3, _ => rfl | 4, _ => rfl | j+5, hj => omega
+
+-- i=2*(T-2): canonical [F,F,F,F,T]
+private lemma agree_window_last (T : Nat) (hT : 4 ≤ T) (j : Nat) (hj : j ≤ 4) :
+    (List.drop (2 * (T - 2)) (twoSpikeList 2 (2 * T) (2 * T + 1))).getD j false =
+    [false, false, false, false, true].getD j false := by
+  rw [twoSpikeList_drop_getD' _ _ _ _ _ (by omega)]
+  match j with
+  | 0 => simp only [show 2*(T-2)+(0:Nat) ≠ 2 from by omega, show 2*(T-2)+(0:Nat) ≠ 2*T from by omega, or_self, decide_false, List.getD_cons_zero]
+  | 1 => simp only [show 2*(T-2)+(1:Nat) ≠ 2 from by omega, show 2*(T-2)+(1:Nat) ≠ 2*T from by omega, or_self, decide_false]; rfl
+  | 2 => simp only [show 2*(T-2)+(2:Nat) ≠ 2 from by omega, show 2*(T-2)+(2:Nat) ≠ 2*T from by omega, or_self, decide_false]; rfl
+  | 3 => simp only [show 2*(T-2)+(3:Nat) ≠ 2 from by omega, show 2*(T-2)+(3:Nat) ≠ 2*T from by omega, or_self, decide_false]; rfl
+  | 4 => simp [show 2*(T-2)+(4:Nat) = 2*T from by omega]
+  | j+5 => omega
+
+-- Canonical 5-cell computation results
+private lemma step2_canon_FFTff : (caEvolve 2 [false, false, true, false, false]).getD 0 false = false := by native_decide
+private lemma step2_canon_FTfff : (caEvolve 2 [false, true, false, false, false]).getD 0 false = false := by native_decide
+private lemma step2_canon_Tffff : (caEvolve 2 [true, false, false, false, false]).getD 0 false = true := by native_decide
+private lemma step2_canon_fffFT : (caEvolve 2 [false, false, false, false, true]).getD 0 false = true := by native_decide
+private lemma step2_canon_fffff : (caEvolve 2 [false, false, false, false, false]).getD 0 false = false := by native_decide
+
 /-- After 2 evolution steps, twoSpikeList 2 (2*T) (2*T+1) reduces to
     twoSpikeList 2 (2*(T-2)) (2*(T-2)+1), for T≥4.
     This is the key 2-step recursion. Computationally verified T=4..19.
 
-    PROOF SKETCH (for loop-A):
-    Use caEvolve_getD_shift: (caEvolve 2 l).getD j false = (caEvolve 2 (l.drop j)).getD 0 false
-    For each j in [0, 2*(T-2)], the 5-element window [j..j+4] of the input determines result.
-    Spikes at 2 and 2*T are ≥6 apart for T≥4, so no window contains both.
-    Three canonical window types (compute with decide/native_decide):
-      [1,0,0,0,0] → 1, [0,0,0,0,1] → 1, all-zero → 0, others → 0
-    For j=2: window has spike at pos 0 → result 1 = decide(2=2)
-    For j=2*(T-2): window has spike at pos 4 → result 1 = decide(j=2*(T-2))
-    All other j: zero window → result 0 = decide(j=2 ∨ j=2*(T-2))
-    Steps: apply List.ext_getElem?, case split on j, use caEvolve_getD_shift + twoSpikeList_getD -/
+    Proof: pointwise getD equality. For each output position i ∈ [0, 2*(T-2)], use
+    caEvolve_getD_shift to reduce to position-0 of a dropped input, then caEvolve_agree
+    to reduce to a 5-cell canonical computation. Five cases by the spike positions:
+      i=0: window [F,F,T,F,F] → false;  i=1: [F,T,F,F,F] → false;  i=2: [T,F,F,F,F] → true
+      3≤i<2*(T-2): [F,F,F,F,F] → false;  i=2*(T-2): [F,F,F,F,T] → true -/
 private lemma twoSpikeList_2_last_step2 (T : Nat) (hT : 4 ≤ T) :
     caEvolve 2 (twoSpikeList 2 (2 * T) (2 * T + 1)) =
     twoSpikeList 2 (2 * (T - 2)) (2 * (T - 2) + 1) := by
-  sorry  -- PROOF TODO for loop-A (see proof sketch above)
+  have hlen_out : (caEvolve 2 (twoSpikeList 2 (2 * T) (2 * T + 1))).length = 2 * (T - 2) + 1 := by
+    rw [caEvolve_length_le 2 _ (by rw [twoSpikeList_length]; omega), twoSpikeList_length]; omega
+  have hlen_rhs : (twoSpikeList 2 (2 * (T - 2)) (2 * (T - 2) + 1)).length = 2 * (T - 2) + 1 :=
+    twoSpikeList_length 2 (2 * (T - 2)) (2 * (T - 2) + 1)
+  apply List.ext_getElem (by omega)
+  intro i hi_lhs hi_rhs
+  rw [← List.getD_eq_getElem _ false hi_rhs, ← List.getD_eq_getElem _ false hi_lhs]
+  rw [caEvolve_getD_shift 2 (twoSpikeList 2 (2 * T) (2 * T + 1)) i]
+  have hi_val : i < 2 * (T - 2) + 1 := by rw [hlen_rhs] at hi_rhs; exact hi_rhs
+  rw [twoSpikeList_getD 2 (2 * (T - 2)) (2 * (T - 2) + 1) i hi_val]
+  by_cases hi0 : i = 0
+  · subst hi0
+    rw [caEvolve_agree 2 _ [false, false, true, false, false]
+        (by simp [twoSpikeList_length]; omega) (by simp) (agree_window_i0 T hT),
+        step2_canon_FFTff]
+    simp only [show (0:Nat) ≠ 2 from by omega, show (0:Nat) ≠ 2*(T-2) from by omega, or_self, decide_false]
+  · by_cases hi1 : i = 1
+    · subst hi1
+      rw [caEvolve_agree 2 _ [false, true, false, false, false]
+          (by rw [List.length_drop, twoSpikeList_length]; omega) (by simp) (agree_window_i1 T hT),
+          step2_canon_FTfff]
+      simp only [show (1:Nat) ≠ 2 from by omega, show (1:Nat) ≠ 2*(T-2) from by omega, or_self, decide_false]
+    · by_cases hi2 : i = 2
+      · subst hi2
+        rw [caEvolve_agree 2 _ [true, false, false, false, false]
+            (by rw [List.length_drop, twoSpikeList_length]; omega) (by simp) (agree_window_i2 T hT),
+            step2_canon_Tffff]
+        simp [show (2:Nat) = 2 from rfl]
+      · by_cases hiL : i = 2 * (T - 2)
+        · subst hiL
+          rw [caEvolve_agree 2 _ [false, false, false, false, true]
+              (by rw [List.length_drop, twoSpikeList_length]; omega) (by simp)
+              (agree_window_last T hT),
+              step2_canon_fffFT]
+          simp [show 2*(T-2) = 2*(T-2) from rfl]
+        · have hi_ge3 : 3 ≤ i := by omega
+          have hi_lt : i < 2 * (T - 2) := by omega
+          rw [caEvolve_agree 2 _ [false, false, false, false, false]
+              (by rw [List.length_drop, twoSpikeList_length]; omega) (by simp)
+              (agree_window_mid T hT i hi_ge3 hi_lt),
+              step2_canon_fffff]
+          simp only [show i ≠ 2 from by omega, show i ≠ 2*(T-2) from by omega, or_self, decide_false]
 
 /-- Auxiliary lemma for dChain_2_last_false: induction by 2 using twoSpikeList_2_last_step2. -/
 private lemma dChain_2_last_false_aux (n : Nat) :
@@ -534,8 +651,7 @@ private lemma dChain_2_last_false_aux (n : Nat) :
       exact ih n (by omega)
 
 /-- Two spikes at positions 2 and 2T always give center = false for T ≥ 2.
-    Computationally verified T=2..200. Proof: 2-step recursion.
-    Only sorry: twoSpikeList_2_last_step2 (the list equality after 2 evolution steps). -/
+    Computationally verified T=2..200. Proof: 2-step recursion (no sorry). -/
 lemma dChain_2_last_false (T : Nat) (hT : 2 ≤ T) :
     rule30n T (fun j : Fin (2 * T + 1) => decide (j.val = 2 ∨ j.val = 2 * T)) = false := by
   have key := dChain_2_last_false_aux (T - 2)
