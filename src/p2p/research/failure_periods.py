@@ -1,140 +1,214 @@
 #!/usr/bin/env python3
 """
-Unit 4: Period-Doubling Failure Map for Shadow Coverage.
+Unit 4: Period-Doubling Failure Map for Shadow Lifting.
 
-KEY RESULTS (verified n=0..500):
-1. {0, 1, 4, 6, rightmost} covers ALL 134,528 shadows -- ZERO failures
-2. {0, rightmost} alone covers 134,277/134,528 (99.81%)
-3. x=0 and rightmost split coverage ~50/50 (boundary vs boundary)
-4. The 251 gaps of {0, rightmost} are at j=8k+4, j=8k+6 near n~j/2
-   with period structure (j=12 has period 128)
-5. x=1 covers almost all remaining gaps; x=4/x=6 handle edge cases
+For each shadow position (n,j) with n<=500:
+1. Check if spikeAt(j) is a liftable witness for Essential(n,j) → Essential(n+1,j+1)
+2. If not, try spikes at other positions {rightmost, 1, 6, j-1, j+1}
+3. Record ALL failures (where no spike works)
+4. Map out the period structure for each j
 
-IMPLICATION FOR LIFTING LEMMA:
-The lifting lemma requires: for each (n,j), exists witness config c s.t.
-flipping position j changes rule30n(n+1, c). We need this to lift
-Essential(n,j) to Essential(n+1,j+1).
+Key question: does period(j) = 2^floor(j/2)?
 
-The spike witness set {0, 1, 4, 6, rightmost} provides 5 FIXED spike
-positions that witness ALL shadow positions. Since non-shadow positions
-are witnessed by their own spike (by definition of D-chain), this means:
-  For ALL (n,j) with n<=500, there exists x in {0,1,4,6,2*(n+1)}
-  such that spike(x) witnesses Essential(n+1, j).
-
-This is a finite spike set witnessing universal essentiality.
+Lifting definition:
+  spike_is_liftable(n, j, spike_pos):
+    - spike_pos is in tape of width 2*(n+1)+1 (the Essential(n+1,j) level)
+    - For (n,j) shadow: spikeAt(spike_pos) in width 2*(n+1)+1 tape
+    - Embed as c' = [b0] + spikeAt(spike_pos)[1:-1] + [b1]  ... no.
+    - Actually: we need a witness for Essential(n+1, j+1).
+    - The canonical lifting: take spike at spike_pos in tape of width 2*n+1,
+      pad with [b0, b1] to get tape of width 2*n+3 = 2*(n+1)+1.
+    - Then test if this pad witnesses Essential(n+1, j+1).
 
 Shadow(n,j): dChain(n+1,j)=False AND dChain(n,j)=False.
 """
 
+import sys
+import time
 import numpy as np
 from collections import defaultdict
 from math import gcd
 from functools import reduce
-import sys
-import time
 
+
+# ---------- dChain table ----------
 
 def build_dchain(T_MAX, K_MAX):
-    D = np.zeros((T_MAX + 2, K_MAX + 1), dtype=np.bool_)
+    D = np.zeros((T_MAX + 2, K_MAX + 2), dtype=np.bool_)
     D[:, 0] = True
     for t in range(1, T_MAX + 2):
-        D[t, 1] = not D[t - 1, 1]
-        for k in range(2, min(K_MAX + 1, t + 2)):
+        D[t, 1] = ~D[t - 1, 1]
+        for k in range(2, K_MAX + 2):
             D[t, k] = D[t - 1, k] ^ (D[t - 1, k - 1] | D[t - 1, k - 2])
     return D
 
 
-def rule30_evolve_np(tape):
-    return tape[:-2] ^ (tape[1:-1] | tape[2:])
+# ---------- Rule 30 ----------
 
-
-def rule30_center_np(steps, config):
+def rule30_center(steps, config):
+    """Evolve config (list/array of bool) for `steps` steps, return center bit."""
     tape = np.asarray(config, dtype=np.bool_).copy()
     for _ in range(steps):
-        tape = rule30_evolve_np(tape)
+        tape = tape[:-2] ^ (tape[1:-1] | tape[2:])
     return bool(tape[0])
 
 
-def spike_witnesses_np(N, j, x):
-    L = 2 * N + 1
-    if x < 0 or x >= L:
+# ---------- Liftability ----------
+
+def spike_is_liftable(n, j, spike_pos):
+    """
+    Does spikeAt(spike_pos) in tape of width 2*n+1 lift to a witness for Essential(n+1, j+1)?
+
+    Lifting: c' = [b0] + spike + [b1] for some b0, b1 in {0,1}.
+    Then test if flipping position j+1 in c' changes rule30_center(n+1, c').
+    """
+    width_n = 2 * n + 1
+    if spike_pos < 0 or spike_pos >= width_n:
         return False
-    config = np.zeros(L, dtype=np.bool_)
-    config[x] = True
-    flipped = config.copy()
-    flipped[j] = not flipped[j]
-    return rule30_center_np(N, config) != rule30_center_np(N, flipped)
+    spike = [0] * width_n
+    spike[spike_pos] = 1
+
+    for b0 in (0, 1):
+        for b1 in (0, 1):
+            c_prime = [b0] + spike + [b1]
+            j_plus_1 = j + 1
+            c_flipped = list(c_prime)
+            c_flipped[j_plus_1] ^= 1
+            f_c = rule30_center(n + 1, c_prime)
+            f_f = rule30_center(n + 1, c_flipped)
+            if f_c != f_f:
+                return True
+    return False
+
+
+def find_liftable_spike(n, j, extra_positions=None):
+    """
+    Try to find a liftable spike for shadow (n,j).
+
+    Priority order: spikeAt(j), rightmost, 1, 6, j-1, j+1, then extra_positions.
+    Returns (spike_pos, label) or (None, None) if no spike works.
+    """
+    width_n = 2 * n + 1
+    rightmost_n = width_n - 1  # = 2*n
+
+    candidates = []
+    candidates.append((j, f"spikeAt(j={j})"))
+    candidates.append((rightmost_n, "rightmost"))
+    candidates.append((1, "x=1"))
+    candidates.append((6, "x=6"))
+    if j > 0:
+        candidates.append((j - 1, f"j-1={j-1}"))
+    if j < width_n - 1:
+        candidates.append((j + 1, f"j+1={j+1}"))
+    if extra_positions:
+        for xp in extra_positions:
+            candidates.append((xp, f"x={xp}"))
+
+    for xp, label in candidates:
+        if 0 <= xp < width_n:
+            if spike_is_liftable(n, j, xp):
+                return xp, label
+
+    return None, None
+
+
+def min_liftable_weight(n, j):
+    """
+    For a shadow where no spike lifts, find the minimum weight config that lifts.
+    Weight = number of 1s in the config of width 2*n+1.
+    Returns (min_weight, config) or (None, None) if width is too large.
+    """
+    width_n = 2 * n + 1
+    if width_n > 20:  # too expensive
+        return None, None
+
+    for w in range(1, width_n + 1):
+        # try all configs of weight w
+        from itertools import combinations
+        for ones_pos in combinations(range(width_n), w):
+            config = [0] * width_n
+            for p in ones_pos:
+                config[p] = 1
+            # test if this config lifts
+            j_plus_1 = j + 1
+            for b0 in (0, 1):
+                for b1 in (0, 1):
+                    c_prime = [b0] + config + [b1]
+                    c_flipped = list(c_prime)
+                    c_flipped[j_plus_1] ^= 1
+                    if rule30_center(n + 1, c_prime) != rule30_center(n + 1, c_flipped):
+                        return w, config
+    return None, None
 
 
 def compute_period(ns):
-    """Given sorted list of n values, return (period, residue) or (None, ns[0])."""
-    if len(ns) >= 3:
+    """Given sorted list of n values, return period (gcd of differences)."""
+    if len(ns) >= 2:
         diffs = [ns[i + 1] - ns[i] for i in range(len(ns) - 1)]
         period = reduce(gcd, diffs)
-        return period, ns[0] % period
-    elif len(ns) == 2:
-        period = ns[1] - ns[0]
-        return period, ns[0] % period
-    return None, ns[0]
+        return period
+    return None
 
 
 def main():
     N_MAX = int(sys.argv[1]) if len(sys.argv) > 1 else 500
-    K_MAX = 2 * (N_MAX + 2)
+    K_MAX = 2 * (N_MAX + 2) + 4
     t0 = time.time()
 
+    print(f"Unit 4: Period-Doubling Failure Map (n=0..{N_MAX})")
     print(f"Building D-chain table T_MAX={N_MAX+1}, K_MAX={K_MAX}...")
     sys.stdout.flush()
     D = build_dchain(N_MAX + 1, K_MAX)
     print(f"  Done in {time.time()-t0:.1f}s")
 
     # ===================================================================
-    # MAIN: {0, 1, 4, 6, rightmost} coverage -- prioritize x=0 first
+    # MAIN SCAN: for each shadow (n,j), test liftability of spike candidates
     # ===================================================================
-    print(f"\nScanning n=0..{N_MAX}: {{0, 1, 4, 6, rightmost}} coverage")
+    total_shadows = 0
+    total_covered = 0
+
+    # failures_by_j[j] = list of n values where no spike lifts
+    failures_by_j = defaultdict(list)
+    # For covered: which spike covered it?
+    coverage_by_spike = defaultdict(int)  # label -> count
+
+    print(f"\nScanning shadows n=0..{N_MAX}...")
     sys.stdout.flush()
 
-    total_shadows = 0
-    covered = {"x=0": 0, "rightmost": 0, "x=1": 0, "x=4": 0, "x=6": 0}
-    penta_failures = []
-    pair_failures = []  # {0, rightmost} failures
+    # Track min weight for small failures
+    small_failures_weights = []  # (n, j, min_weight)
 
     for n in range(N_MAX + 1):
-        N = n + 1
-        L = 2 * N + 1
-        rightmost = 2 * N
+        width_n = 2 * n + 1
 
-        for j in range(L):
-            if j >= D.shape[1] or D[n + 1, j] or D[n, j]:
+        for j in range(width_n):
+            # Check shadow condition: dChain(n+1,j)=False AND dChain(n,j)=False
+            if j >= D.shape[1]:
                 continue
+            if D[n + 1, j] or D[n, j]:
+                continue  # not a shadow
+
             total_shadows += 1
 
-            # Test in priority order
-            by_right = spike_witnesses_np(N, j, rightmost)
-            by_left = spike_witnesses_np(N, j, 0)
-
-            if by_right:
-                covered["rightmost"] += 1
-            elif by_left:
-                covered["x=0"] += 1
+            xp, label = find_liftable_spike(n, j)
+            if xp is not None:
+                total_covered += 1
+                coverage_by_spike[label] += 1
             else:
-                # Neither boundary covers -- need interior spikes
-                pair_failures.append((n, j))
-                if spike_witnesses_np(N, j, 1):
-                    covered["x=1"] += 1
-                elif spike_witnesses_np(N, j, 6):
-                    covered["x=6"] += 1
-                elif spike_witnesses_np(N, j, 4):
-                    covered["x=4"] += 1
-                else:
-                    penta_failures.append((n, j))
+                failures_by_j[j].append(n)
+                # For small n, find min liftable weight
+                if n <= 9:
+                    w, cfg = min_liftable_weight(n, j)
+                    small_failures_weights.append((n, j, w))
 
         if (n + 1) % 50 == 0:
+            total_failures = sum(len(v) for v in failures_by_j.values())
             elapsed = time.time() - t0
-            print(f"  n={n}: shadows={total_shadows} pair_fails={len(pair_failures)} "
-                  f"penta_fails={len(penta_failures)} t={elapsed:.1f}s", flush=True)
+            print(f"  n={n}: shadows={total_shadows} covered={total_covered} "
+                  f"failures={total_failures} t={elapsed:.1f}s", flush=True)
 
     elapsed = time.time() - t0
+    total_failures = sum(len(v) for v in failures_by_j.values())
 
     # ===================================================================
     # RESULTS
@@ -142,55 +216,119 @@ def main():
     print(f"\n{'='*80}")
     print(f"RESULTS (n=0..{N_MAX}, {elapsed:.1f}s)")
     print(f"{'='*80}")
-    print(f"Total shadows: {total_shadows}")
+    print(f"Total shadows:   {total_shadows}")
+    print(f"Total covered:   {total_covered} ({100.*total_covered/total_shadows:.2f}%)")
+    print(f"Total failures:  {total_failures} ({100.*total_failures/total_shadows:.2f}%)")
+
     print(f"\nCoverage breakdown:")
-    print(f"  rightmost (x=2N):  {covered['rightmost']:6d} ({covered['rightmost']/total_shadows*100:.1f}%)")
-    print(f"  x=0 (leftmost):   {covered['x=0']:6d} ({covered['x=0']/total_shadows*100:.1f}%)")
-    print(f"  x=1:              {covered['x=1']:6d} ({covered['x=1']/total_shadows*100:.1f}%)")
-    print(f"  x=6:              {covered['x=6']:6d} ({covered['x=6']/total_shadows*100:.1f}%)")
-    print(f"  x=4:              {covered['x=4']:6d} ({covered['x=4']/total_shadows*100:.1f}%)")
-    total_covered = sum(covered.values())
-    print(f"  TOTAL covered:    {total_covered:6d} ({total_covered/total_shadows*100:.1f}%)")
-    print(f"  Penta-failures:   {len(penta_failures):6d}")
+    for label in sorted(coverage_by_spike.keys(), key=lambda l: -coverage_by_spike[l]):
+        count = coverage_by_spike[label]
+        print(f"  {label:20s}: {count:6d} ({100.*count/total_shadows:.2f}%)")
 
-    if penta_failures:
-        print(f"\nPENTA-FAILURES: {penta_failures[:20]}")
-    else:
-        print(f"\n*** {{0, 1, 4, 6, rightmost}} covers ALL {total_shadows} shadows ***")
-
-    # {0, rightmost} failure analysis
+    # ===================================================================
+    # FAILURE PERIOD ANALYSIS
+    # ===================================================================
     print(f"\n{'='*80}")
-    print(f"{{0, rightmost}} failure analysis ({len(pair_failures)} failures)")
+    print(f"FAILURE PERIOD ANALYSIS BY j")
     print(f"{'='*80}")
 
-    by_j = defaultdict(list)
-    for n, j in pair_failures:
-        by_j[j].append(n)
+    import math
 
-    print(f"\n{'j':>4} | {'count':>5} | {'Period':>8} | n values")
-    print("-" * 70)
-    for j in sorted(by_j.keys())[:25]:
-        ns = sorted(by_j[j])
-        period, _ = compute_period(ns)
-        ns_str = str(ns[:8])
-        if len(ns) > 8:
-            ns_str = ns_str[:-1] + ",...]"
-        p_str = str(period) if period is not None else "?"
-        print(f"{j:4d} | {len(ns):5d} | {p_str:>8} | {ns_str}")
+    print(f"\n{'j':>4} | {'#fails':>6} | {'Period':>8} | {'2^floor(j/2)':>12} | {'match?':>6} | first few n")
+    print("-" * 80)
 
-    # Pattern: most single-occurrence failures have j = 2*(n+3) or j = 2*(n+4)
-    print(f"\nSingle-occurrence pattern check (j vs n):")
-    singles = [(n, j) for n, j in pair_failures if len(by_j[j]) == 1]
-    for n, j in singles[:15]:
-        print(f"  n={n}, j={j}: j=2n+{j-2*n}, j/2={j//2}, n+3={n+3}, n+4={n+4}")
+    period_matches = 0
+    period_mismatches = 0
 
-    # Multi-occurrence: period structure
-    print(f"\nMulti-occurrence period structure:")
-    for j in sorted(by_j.keys()):
-        ns = sorted(by_j[j])
-        if len(ns) >= 3:
-            period, residue = compute_period(ns)
-            print(f"  j={j}: P={period}, r={residue}, n={ns}")
+    for j in sorted(failures_by_j.keys()):
+        ns = sorted(failures_by_j[j])
+        period = compute_period(ns)
+        expected = 2 ** (j // 2)
+
+        if period is not None:
+            match = "YES" if period == expected else f"NO({period})"
+            if period == expected:
+                period_matches += 1
+            else:
+                period_mismatches += 1
+        else:
+            match = "single"
+            expected_str = str(expected)
+
+        ns_str = str(ns[:6])
+        if len(ns) > 6:
+            ns_str = ns_str[:-1] + ", ...]"
+        period_str = str(period) if period is not None else "?"
+        expected_str = str(expected)
+        print(f"{j:4d} | {len(ns):6d} | {period_str:>8} | {expected_str:>12} | {match:>6} | {ns_str}")
+
+    print(f"\nPeriod = 2^floor(j/2): {period_matches} YES, {period_mismatches} NO (of multi-occurrence j)")
+
+    # ===================================================================
+    # RESIDUE ANALYSIS
+    # ===================================================================
+    print(f"\n{'='*80}")
+    print(f"RESIDUE ANALYSIS (n mod period for each j with failures)")
+    print(f"{'='*80}")
+
+    for j in sorted(failures_by_j.keys()):
+        ns = sorted(failures_by_j[j])
+        if len(ns) < 2:
+            continue
+        period = compute_period(ns)
+        if period is None:
+            continue
+        residues = sorted(set(n % period for n in ns))
+        expected_period = 2 ** (j // 2)
+        print(f"  j={j}: P={period} (expected {expected_period}), residues={residues}, count={len(ns)}")
+
+    # ===================================================================
+    # SMALL FAILURE WEIGHT ANALYSIS
+    # ===================================================================
+    if small_failures_weights:
+        print(f"\n{'='*80}")
+        print(f"MIN LIFTABLE WEIGHT at failures (n<=9)")
+        print(f"{'='*80}")
+        for n, j, w in small_failures_weights:
+            print(f"  (n={n}, j={j}): min_weight={w}")
+
+    # ===================================================================
+    # SUMMARY
+    # ===================================================================
+    print(f"\n{'='*80}")
+    print(f"SUMMARY")
+    print(f"{'='*80}")
+    print(f"Total shadows n=0..{N_MAX}: {total_shadows}")
+    print(f"Covered by {{spikeAt(j), rightmost, x=1, x=6, j-1, j+1}}: {total_covered} ({100.*total_covered/total_shadows:.2f}%)")
+    print(f"Failures (no spike lifts): {total_failures}")
+
+    if total_failures == 0:
+        print("\n*** ZERO FAILURES: Every shadow has a liftable spike witness ***")
+        print("    Implies lifting_lemma holds for all n <= " + str(N_MAX))
+    else:
+        all_j = sorted(failures_by_j.keys())
+        print(f"\nFailure j-values: {all_j}")
+
+        # Period formula check
+        formula_holds = []
+        formula_fails = []
+        for j in all_j:
+            ns = sorted(failures_by_j[j])
+            if len(ns) < 2:
+                continue
+            p = compute_period(ns)
+            exp = 2 ** (j // 2)
+            if p == exp:
+                formula_holds.append(j)
+            else:
+                formula_fails.append((j, p, exp))
+
+        if formula_holds:
+            print(f"\nPeriod formula period(j) = 2^floor(j/2) HOLDS for j: {formula_holds}")
+        if formula_fails:
+            print(f"Period formula FAILS for: {formula_fails}")
+        if not formula_fails and formula_holds:
+            print(f"\nKEY FINDING: period(j) = 2^floor(j/2) confirmed for all multi-failure j")
 
     print(f"\nTotal time: {time.time()-t0:.1f}s")
 
