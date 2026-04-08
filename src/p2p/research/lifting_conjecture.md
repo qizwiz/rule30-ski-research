@@ -1,8 +1,9 @@
 # Lifting Conjecture: Proof Path for `lifting_lemma`
 
-**Date**: 2026-04-07  
+**Date**: 2026-04-07 (updated: boundary formula correction + Unit 7 verification)
 **Status**: Computationally verified for n ≤ 7 (exhaustive); n > 7 is conjecture  
-**Key script**: `research/invariant_search.py`
+**Key script**: `research/invariant_search.py`  
+**Verification script**: `research/verify_b1_zero.py`
 
 ---
 
@@ -23,7 +24,30 @@ directly gives `rule30_bs_ge_n`, which is the Ω(n) block sensitivity lower boun
 
 ---
 
-## 2. The Invariant — P10: `c[j] = 1`
+## 2. Two Proof Paths to the Prize (Updated)
+
+There are currently TWO paths that could close the prize theorem:
+
+**Path 1: `lifting_lemma` (this document)**
+- Prove: Essential(n,k) → Essential(n+1,k+1) for all n,k
+- Mechanism: inductive lifting via a P10-witness construction
+- Status: UNSOUND (axiom unproved); existential claim verified n≤7; no
+  universal boundary formula established
+
+**Path 2: `rule30_prize3_direct` via `twoSpike_center_complement`**
+- Uses `subcaseB_mgt38_witness` to show SubcaseB never fires for m≥40
+- Requires proving `twoSpike_center_complement` in `SpinePass.lean`
+- Status: INVALID — `subcaseB_mgt30_split` is demonstrably FALSE (SubcaseB fires
+  for m=40 at n'=40983, m=42 at n'=118804, etc.; active set is INFINITE)
+- This is a SEPARATE problem from `lifting_lemma`; requires LFSR/algebraic argument
+  for the infinite family m=40,42,44,...
+
+Both paths are currently blocked. Path 1 (lifting_lemma) is the more
+mathematically accessible one.
+
+---
+
+## 3. The Invariant — P10: `c[j] = 1`
 
 **Definition**: P(c, n, j) ⟺ c is a witness for Essential(n, j) AND c[j] = 1.
 
@@ -54,9 +78,13 @@ spike-only for n = 7):
 P10: c[j]=1:  EXIST-OK  CLOSE-OK
 ```
 
+**Important**: P10 satisfies EXISTENCE and CLOSURE, but does NOT guarantee
+liftability. Not every P10-witness is liftable; the claim is only that for each
+(n,j), SOME P10-witness IS liftable. This is the key existential claim.
+
 ---
 
-## 3. Existence: Every (n, j) Has a Witness with c[j] = 1
+## 4. Existence: Every (n, j) Has a Liftable Witness with c[j] = 1
 
 **Claim**: For every n ≥ 1 and 0 ≤ j ≤ 2n, there exists a configuration c of
 length 2n+1 such that:
@@ -65,62 +93,116 @@ length 2n+1 such that:
 3. c is liftable: there exist b0, b1 ∈ {0,1} such that [b0]+c+[b1] witnesses
    Essential(n+1, j+1)
 
-**Verified**: Exhaustively for n ≤ 6 (all 2^(2n+1) configs enumerated), spike-only
-scan for n = 7. No failure found.
+**Verified**: Exhaustively for n ≤ 5 (all 2^(2n+1) configs enumerated), low-weight
+scan for n = 6,7. No failure found.
 
-**Key structure**: The spike configuration `spikeAt j` (single 1 at position j,
-zeros elsewhere) satisfies condition (2) trivially. It also satisfies (1) —
-`spike@j is always a witness` — verified for n ≤ 14. The non-trivial question is
-liftability (condition 3).
+**Key structure**: For most (n,j), the spike configuration `spikeAt j` works.
+For shadow positions (both dChain values false), a higher-weight witness is needed.
 
-**Exception at (n=6, j=5)**: `spikeAt 5` is NOT liftable. However, a weight-2
-liftable witness with c[5]=1 DOES exist. Existence holds; the canonical spike
-witness does not always work.
+**Exception at (n=6, j=5)**: (Updated from previous claim)
+- `spikeAt 5` is NOT even a witness for Essential(6,5) (center output unaffected)
+- All weight-1 spikes `spikeAt x` with x≠5 are witnesses but have c[5]=0 (violate P10)
+- All weight-1 spikes `spikeAt x` with x=5: not a witness
+- No weight-2 liftable P10-witness exists at (n=6, j=5)
+- A weight-3 liftable P10-witness DOES exist: `c = [1,0,0,0,0,1,0,0,0,0,0,0,1]`,
+  lifts with b0=0, b1=0
+
+**Correction from previous version**: The earlier claim of "weight-2 witness" at
+(n=6,j=5) was WRONG. The minimum liftable P10-witness has weight 3.
 
 **Why existence likely holds in general**: The structure of the causal cone means
 that for each (n,j) there is always a configuration where the j-th cell's influence
-propagates cleanly to the center. The P10 condition (c[j]=1) is a natural normalization
-that aligns the witness with the cone structure.
+propagates cleanly to the center. The P10 condition (c[j]=1) is a natural normalization.
+The shadow cases (where dChain values are false) may require weight 2 or 3 witnesses,
+but the minimum weight appears bounded (conjecture: weight ≤ n/2 or similar).
 
 ---
 
-## 4. The Lifting Construction
+## 5. The Lifting Construction — Correct Formulation
 
-**Given**: c is a witness for Essential(n, j) with c[j] = 1.
+**Given**: c is a liftable witness for Essential(n, j) with c[j] = 1.
 
-**Construction**:
+**Construction**: Choose b0, b1 ∈ {0,1} such that [b0]+c+[b1] witnesses Essential(n+1, j+1).
+
 ```
-b0 = 1 - c[0]   (flip the left boundary bit)
-b1 = 1 - c[-1]  (flip the right boundary bit, where c[-1] = c[2n])
-
 lifted = [b0] ++ c ++ [b1]
 ```
 
 The lifted configuration has length 2(n+1)+1 = 2n+3, with:
-- Position 0: b0 = 1 - c[0]
+- Position 0: b0 (to be chosen)
 - Positions 1..2n+1: c[0]..c[2n] (the original witness)
-- Position 2n+2: b1 = 1 - c[2n]
+- Position 2n+2: b1 (to be chosen)
 
-**Claim**: `lifted` witnesses Essential(n+1, j+1).
-
-That is: `rule30n (n+1) lifted ≠ rule30n (n+1) (flipCell lifted (j+1))`.
-
-**Why j+1 is the sensitive position**: By construction, `lifted[j+1] = c[j] = 1`
-(since we prepend exactly one bit). Flipping `lifted[j+1]` is equivalent to
-flipping `c[j]` in the embedded copy of c.
-
-**Computational verification**: The formula `b0 = c[0]^1, b1 = c[-1]^1` is the
-**unique** constant-formula boundary rule that works for all (n,j) with n ≤ 5.
-All other tested formulas (constant (0,0), (1,0), (0,1), (1,1); copy c[0],c[-1];
-mixed) fail on at least one case.
-
-```
-b0=c[0]^1, b1=c[-1]^1: WORKS for all (n,j) up to n=5   ← only success
-```
+**Claim**: Some choice of (b0, b1) makes `lifted` witness Essential(n+1, j+1).
 
 ---
 
-## 5. Closure: The Lifted Config Preserves P10
+## 6. Corrected Boundary Formula Analysis
+
+### 6.1 The OLD Formula (INCORRECT)
+
+The previous version claimed:
+```
+b0 = 1 - c[0]   (flip the left boundary bit)
+b1 = 1 - c[2n]  (flip the right boundary bit)
+```
+
+**This is WRONG.** Computational verification shows:
+- For `c = spikeAt(0), n=2, j=0`: old formula gives b0=0, b1=1 (since c[4]=0).
+  Result: `v1=v2=1` — NOT a witness. The old formula FAILS here.
+- The old formula fails for ~5-7% of liftable P10-witnesses at n=2..5.
+
+### 6.2 The b1=0 Claim (ALSO INCORRECT)
+
+The claim "b1=0 always works for any liftable witness" is computationally FALSE.
+
+**Verified counterexamples** (from `verify_b1_zero.py`):
+```
+n=1: 4/7 liftable P10-witnesses CANNOT use b1=0
+     (e.g., j=0, c=[1,0,0] — needs b1=1; j=1, c=[0,1,0] — needs b1=1)
+n=2: 6/28 cannot use b1=0
+n=3: 19/112 cannot use b1=0
+n=4: 34/552 cannot use b1=0
+```
+
+The witnesses that fail b1=0 uniformly have best b1=1 (not b1=0), regardless of
+whether c[2n]=0 or c[2n]=1.
+
+### 6.3 What IS True About the Boundary
+
+**Partial truth**: b1=0 works for the SPECIFIC counterexample case (`c=spikeAt(0), n=2, j=0`),
+but this is because that particular witness lifts well with b1=0. It is not a general rule.
+
+**What is established**:
+- For each liftable witness c, at least one of {(0,0),(0,1),(1,0),(1,1)} works
+- When `c[2n]=1`: typically both b1=0 and b1=1 work (but not always)
+- When `c[2n]=0`: often only b1=1 works (not b1=0), though exceptions exist
+- No witness-independent formula for (b0,b1) has been found that works universally
+
+**The right boundary algebraic claim** (to be proved):
+For the specific liftable P10-witness chosen by the existence proof (e.g., the canonical
+low-weight witness), the corresponding (b0,b1) satisfies the lifting construction.
+The formula for (b0,b1) depends on the witness, not just on n and j.
+
+### 6.4 Right Boundary Algebraic Trace (Partial)
+
+For the RIGHT boundary bit b1 at position 2n+2:
+- After one step of Rule 30, the rightmost output bit is
+  `rule30Local(c[2n-1], c[2n], b1) = c[2n-1] XOR (c[2n] OR b1)`
+- This becomes the new right boundary for n steps of evolution
+- The sensitivity of position j+1 in `lifted` to flipping propagates leftward
+  through n steps
+
+The key observation is that b1 affects the RIGHT edge of the causal cone.
+If j+1 is far from the right edge (j << 2n+1), b1 may have no effect on the
+center output, and any b1 works. If j+1 is near the right edge, b1 matters.
+
+This suggests a structural theorem: the boundary choice depends on whether j is
+in the "interior" or "shadow" (near-boundary) region of the causal cone.
+
+---
+
+## 7. Closure: The Lifted Config Preserves P10
 
 **Claim**: If c has c[j] = 1, then lifted = [b0]+c+[b1] has lifted[j+1] = 1.
 
@@ -128,67 +210,55 @@ b0=c[0]^1, b1=c[-1]^1: WORKS for all (n,j) up to n=5   ← only success
 all indices by exactly 1, so position j in c becomes position j+1 in lifted.
 The P10 invariant is **trivially preserved** by the lifting construction.
 
-This is why P10 is the right invariant: it is defined positionally, and the
-construction preserves positions by design. No algebraic argument is needed for
-closure — it follows from the structure of the embedding.
+This holds regardless of which (b0,b1) is chosen — closure is free.
 
 ---
 
-## 6. Lean Proof Sketch
+## 8. Lean Proof Sketch (Corrected)
 
 The proof of `lifting_lemma` requires these components in order:
 
-### Lemma A: Witness Existence with P10
+### Lemma A: Witness Existence with P10 (Existential)
 
 ```lean
-lemma essential_witness_with_j_set (n : Nat) (j : Fin (2*n+1)) :
+lemma essential_liftable_witness (n : Nat) (j : Fin (2*n+1)) :
     Essential n j →
-    ∃ c : Config n, rule30n n c ≠ rule30n n (flipCell c j) ∧ c[j] = true
+    ∃ (c : Config n) (b0 b1 : Bool),
+      c[j] = true ∧
+      rule30n n c ≠ rule30n n (flipCell c j) ∧
+      let lifted := liftConfig b0 c b1
+      rule30n (n+1) lifted ≠ rule30n (n+1) (flipCell lifted ⟨j+1, ...⟩)
 ```
 
-**Proof approach**: Structural induction on n, using the causal cone geometry.
-At the base, `spikeAt j` has c[j]=1 and is a witness (verified by `rule30n_spike_dChain`
-type arguments in SpinePass.lean). For the inductive step, a case analysis on
-whether the spike lifts; if not, a weight-2 witness with c[j]=1 is constructed
-(the (n=6,j=5) case is the prototype for the algebraic fallback).
+**Proof approach**: Case split on dChain structure.
+- Case 1 (dChain(n+1, j) = true): use all-zeros / all-ones witness (D-chain argument)
+- Case 2 (dChain(n, j) = true): similar construction
+- Case 3 (shadow, both false): requires finding a low-weight witness with c[j]=1.
+  For n≤5, this always exists (exhaustively verified). The algebraic structure of
+  the shadow (dChain gap) determines the minimum weight needed.
 
-**Current state in Lean**: Cases 1+2 of `Lifting.lean` cover positions where
-`dChain (n+1) j = true` or `dChain n j = true`. Case 3 (the shadow case,
-both dChain values false) has a sorry. This sorry is exactly where a P10-style
-argument would apply.
+**Current state in Lean**: Cases 1+2 of `Lifting.lean` are handled. Case 3 (the
+shadow case) has a sorry. The sorry is exactly where the existential P10 argument
+would apply — specifically, constructing the low-weight witness for shadow positions.
 
-### Lemma B: The Boundary Construction is Valid
+### Lemma B: The Lifting Construction Works (Conditional)
 
 ```lean
-lemma lifting_construction (n : Nat) (j : Fin (2*n+1))
-    (c : Config n)
+lemma lifting_construction_valid (n : Nat) (j : Fin (2*n+1))
+    (c : Config n) (b0 b1 : Bool)
     (hc : rule30n n c ≠ rule30n n (flipCell c j))
-    (hj : c[j] = true) :
-    let lifted := liftConfig c
-    rule30n (n+1) lifted ≠ rule30n (n+1) (flipCell lifted ⟨j+1, ...⟩)
-  where
-    liftConfig c := fun i =>
-      if i = 0 then !c[0]
-      else if i = 2*n+2 then !c[2*n]
-      else c[i-1]
+    (hj : c[j] = true)
+    (hlift : let lifted := liftConfig b0 c b1
+             rule30n (n+1) lifted ≠ rule30n (n+1) (flipCell lifted ⟨j+1, ...⟩)) :
+    Essential (n+1) ⟨j+1, ...⟩
 ```
 
-**Proof approach**: This requires tracing one step of Rule 30 on `lifted` and
-showing the center output depends on `lifted[j+1] = c[j]`. The key identity is:
+This is trivial given the existential: if c, b0, b1 are provided by Lemma A,
+then the lifted config directly witnesses Essential(n+1, j+1).
 
-```
-rule30n (n+1) lifted
-  = rule30n n (caStepList lifted)[1..2n+1]   -- one step peels off boundary
-```
-
-After one step, the boundary bits b0 and b1 (chosen as flips of c[0] and c[-1])
-produce a specific pattern at the new boundary that makes the inner 2n+1 bits
-behave like `c` under n further steps.
-
-**What to verify algebraically**: The first step of Rule 30 on `[1-c[0]] ++ c ++ [1-c[-1]]`
-produces a config whose center 2n-1 bits agree with one step of Rule 30 on
-`[c[0]] ++ c' ++ [c[-1]]` for some c' that preserves the witness property.
-This is the core algebraic claim that remains to be made rigorous.
+**Note**: Unlike the previous formulation, we do NOT claim a specific formula for
+b0 and b1. The existential claim in Lemma A already packages (b0,b1) together with
+the witness. No separate "boundary formula" lemma is needed.
 
 ### Lemma C: Assembling the Full Proof
 
@@ -196,87 +266,103 @@ This is the core algebraic claim that remains to be made rigorous.
 theorem lifting_lemma_proved (n : Nat) (k : Fin (2*n+1)) :
     Essential n k → Essential (n+1) ⟨k+1, ...⟩ := by
   intro h
-  obtain ⟨c, hc⟩ := h
-  obtain ⟨c', hj, hc'⟩ := essential_witness_with_j_set n k ⟨c, hc⟩
-  exact ⟨liftConfig c', lifting_construction n k c' hc' hj⟩
+  obtain ⟨c, hc⟩ := h  -- some witness for Essential(n,k)
+  -- Apply Lemma A to get a liftable P10 witness with boundary bits
+  obtain ⟨c', b0, b1, hj, hc', hlift⟩ := essential_liftable_witness n k h
+  -- The lifted config directly witnesses Essential(n+1,k+1)
+  exact ⟨liftConfig b0 c' b1, hlift⟩
 ```
 
-The proof is: given any witness for Essential(n,k), find a witness with P10 (Lemma A),
-apply the lifting construction (Lemma B), and the result witnesses Essential(n+1,k+1).
+The proof collapses entirely to Lemma A. There is no separate "boundary formula"
+needed once the existential is established.
 
 ---
 
-## 7. Open Questions
+## 9. What Remains to Prove
 
-### 7.1 Verified vs Conjectured
+### 9.1 The Core Open Problem: Lemma A for Shadow Positions
+
+For shadow positions (dChain(n+1,j) = false AND dChain(n,j) = false), Lemma A
+requires constructing a liftable P10-witness. This is the ONLY remaining gap.
+
+**Known cases** (verified, not yet in Lean):
+- For n ≤ 5: all shadow (n,j) have liftable P10-witnesses (exhaustive)
+- For (n=6,j=5): weight-3 witness `c=[1,0,0,0,0,1,0,0,0,0,0,0,1]` with b0=0,b1=0
+
+**What's needed algebraically**:
+An inductive or structural argument showing that for any shadow (n,j), a liftable
+P10-witness of bounded weight exists. The dChain gap (shadow) structure may provide
+this — when both dChain values are false, the sensitivity at j in the (n+1)-step
+evolution must come from an indirect path, and identifying that path gives the witness.
+
+### 9.2 Verified vs Conjectured
 
 | Claim | Status | Evidence |
 |-------|--------|----------|
-| P10 satisfies Existence for n ≤ 6 | VERIFIED | Exhaustive enumeration |
-| P10 satisfies Existence for n = 7 | VERIFIED | Spike-only scan |
-| P10 satisfies Closure for n ≤ 6 | VERIFIED | Exhaustive enumeration |
-| P10 satisfies Closure for n = 7 | VERIFIED | Spike-only scan |
-| `b0=1-c[0], b1=1-c[-1]` works for all (n,j) with n ≤ 5 | VERIFIED | Full enum |
-| `b0=1-c[0], b1=1-c[-1]` works for n > 5 (all witnesses) | CONJECTURED | — |
-| P10 satisfies Existence for all n | CONJECTURED | Verified n ≤ 7 |
-| Lifting construction is valid for all n | CONJECTURED | Verified n ≤ 7 |
-| `spikeAt j` is always a liftable P10 witness | FALSE | Fails (n=6, j=5) |
-| Every (n,j) has SOME liftable P10 witness | VERIFIED n≤7, CONJECTURED all n | — |
+| P10 satisfies Existence for n ≤ 5 | VERIFIED | Exhaustive (verify_b1_zero.py) |
+| P10 satisfies Existence for n = 6,7 | PARTIAL | Weight-3 scan; some (n,j) spike-only |
+| P10 satisfies Closure for all n | VERIFIED (trivial) | Shift-by-1 structure |
+| Liftable P10-witness exists for all (n,j) | CONJECTURED | Verified n ≤ 5 exhaustive |
+| b1=0 always works for liftable witnesses | **REFUTED** | verify_b1_zero.py Test 2 |
+| b0=!c[0],b1=!c[2n] works for all witnesses | **REFUTED** | Fails ~5% liftable n=2..5 |
+| (n=6,j=5) needs weight-2 liftable P10 | **REFUTED** | Only weight-3 works |
+| (n=6,j=5) needs weight-3 liftable P10 | VERIFIED | verify_b1_zero.py Test 4 |
+| spikeAt j is always a liftable P10 witness | FALSE | Fails (n=6, j=5) |
+| Every (n,j) has SOME liftable P10 witness | VERIFIED n≤5, CONJECTURED all n | — |
 
-### 7.2 The (n=6, j=5) Exception
+### 9.3 The Shadow Exception Structure
 
-This is the only case in n ≤ 7 where the weight-1 spike witness fails. A weight-2
-liftable witness with c[5]=1 exists. Understanding why this exception occurs — and
-whether similar exceptions occur for n > 7 — is needed for Lemma A.
+`Lifting.lean` currently has a sorry for Case 3 (shadow positions). These are
+exactly the positions where:
+- dChain(n+1, j) = false (cell j is NOT a "live" cell in the (n+1)-step evolution)
+- dChain(n, j) = false (cell j is NOT a "live" cell in the n-step evolution)
 
-**Conjecture**: For each n, there are finitely many exceptional (n,j) pairs where
-the canonical spike is not liftable, but in each case a low-weight (≤ 3) liftable
-witness with c[j]=1 exists. The exceptions are governed by the dChain shadow
-structure (Case 3 of Lifting.lean).
+For these positions, the standard dChain-based witnesses don't have c[j]=1, and
+the spike@j witness may not even be a witness for Essential(n,j) (as seen at n=6,j=5
+where spike@5 is not a witness).
 
-### 7.3 Algebraic Proof of Lifting Construction
+**Conjecture**: For shadow (n,j), the minimum liftable P10-witness weight is
+bounded by the "shadow depth" — the number of consecutive generations in which j
+is a shadow. This is finite for each (n,j) and grows at most polynomially in n.
 
-Lemma B above requires showing that the specific boundary choice `b0=1-c[0]`,
-`b1=1-c[-1]` makes the embedding work. The algebraic content is:
+---
 
-- One application of Rule 30 to `[1-c[0]] ++ c ++ [1-c[-1]]` produces a config
-  that "releases" the center sensitivity from position j+1 to the n-step evolution.
-- This is related to the Rule 30 boundary behavior: `rule30Local(a, b, c) = a XOR (b OR c)`,
-  so the leftmost output bit is `(1-c[0]) XOR (c[0] OR c[1]) = 1 XOR c[0] XOR (c[0] OR c[1])`.
+## 10. Relationship to Path 2 (twoSpike_center_complement)
 
-A clean algebraic proof likely proceeds by showing the first-step boundary output
-matches what would be needed to extend the causal cone by one generation.
+`twoSpike_center_complement` in `SpinePass.lean` is the sorry blocking Path 2
+(rule30_prize3_direct). It asserts that for even m≥40, the twoSpike witnesses
+provide SubcaseB coverage. This requires:
 
-### 7.4 Relationship to Lifting.lean Case 3 (Shadow)
+1. Showing X=2 is a universal witness for SubcaseB at all m≥40 (empirically
+   supported: verified for m=40 up to n'=200000, m=42 at n'=118804, m=46 at n'=106522)
+2. An algebraic D-chain cascade argument: spike at 2 activates the chain 2→4→...→m,
+   and the spike at m "intercepts" this chain and flips the center
 
-`Lifting.lean` currently has a sorry for positions where both `dChain (n+1) j = false`
-and `dChain n j = false` (the shadow positions). These are exactly the positions where
-the canonical Case 1/2 witnesses don't work — they overlap with the exceptional cases
-for P10 existence. The P10 invariant proof for Lemma A likely requires first resolving
-the Case 3 sorry in `Lifting.lean`, or finding a unified argument that covers all cases.
+This is a DIFFERENT problem from lifting_lemma. Path 2 needs LFSR/algebraic
+structure over GF(2), while Path 1 (lifting_lemma) needs the existential witness
+construction for shadow positions.
 
-### 7.5 Why `lifting_lemma` is Still Needed
-
-Even if `subcaseB_resolution_ge3087` is closed and `SubcaseB_Firewall.lean` is repaired,
-the prize proof path via `rule30_bs_ge_n` depends on `AllEssential`, which uses
-`lifting_lemma`. Closing `lifting_lemma` is therefore necessary for the primary
-prize proof path (`Prize3_Complete.lean` line 627).
+**Do not conflate these**: fixing Path 2 does NOT fix Path 1, and vice versa.
 
 ---
 
 ## Summary
 
-The proof of `lifting_lemma` reduces to three steps:
+The proof of `lifting_lemma` reduces to a single key lemma:
 
-1. **Existence (Lemma A)**: For any witness c for Essential(n,j), find a witness c'
-   with c'[j]=1 that is liftable. (Verified computationally; algebraic proof open.)
+**Lemma A (Existential)**: For any (n, j) and any witness for Essential(n, j),
+there exists a liftable P10-witness c' with c'[j]=1 and boundary bits (b0,b1) such
+that [b0]+c'+[b1] witnesses Essential(n+1, j+1).
 
-2. **Construction (Lemma B)**: Given such c', build lifted = [1-c'[0]] ++ c' ++ [1-c'[2n]]
-   and prove it witnesses Essential(n+1, j+1). (Verified computationally; algebraic
-   proof requires tracing one Rule 30 step through the boundary.)
+- **Closure** is trivial (shift-by-1 preserves c'[j]=1 at position j+1).
+- **The boundary formula** is NOT universal: b1=0 and b0=!c[0],b1=!c[2n] both fail
+  for some witnesses. The correct (b0,b1) depends on the specific witness c'.
+- **What works**: for each (n,j), the low-weight liftable P10-witness (spike@j for
+  non-shadow positions; weight-2 or weight-3 for shadow positions) has its own valid
+  (b0,b1). The existential quantifier packages both together.
+- **The key open problem**: prove the existential for ALL n, specifically for shadow
+  positions where the structure of the dChain gap determines the witness.
 
-3. **Closure (trivial)**: lifted[j+1] = c'[j] = 1, so P10 is preserved. (Immediate
-   from the shift-by-1 embedding structure.)
-
-The key open problem is converting the computational verification (n ≤ 7) into an
-algebraic proof of Lemma B that covers all n.
+Computationally: verified for n ≤ 5 (exhaustive), n=6 (partial, weight ≤ 3 scan),
+n=7 (spike-only). The conjecture is that this holds for all n via the causal cone
+geometry of shadow positions.
