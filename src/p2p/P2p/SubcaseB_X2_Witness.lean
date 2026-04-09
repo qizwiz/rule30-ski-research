@@ -38,6 +38,7 @@ uses pre-compiled C code rather than the kernel reducer.
 -/
 
 import P2p.CA_ArrayDef
+import P2p.SubcaseB_X2_Core
 
 /-
 ================================================================================
@@ -62,36 +63,22 @@ theorem x2_at_T41_witnesses :
 
 /-
 ================================================================================
-SECTION 2: MAIN WITNESS THEOREMS USING G2mFast (UInt64 bit-packed)
+SECTION 2: MAIN WITNESS THEOREMS (defined in SubcaseB_X2_Core.lean)
 ================================================================================
 
-G2mFast uses UInt64 bit-packed tape (mirrors stream_G2m_all.c exactly).
-Performance: O(T²/64) with minimal GC pressure — ~55s for T=40984 via native_decide.
+The heavy native_decide theorems are in SubcaseB_X2_Core.lean to protect the
+olean cache. This file imports Core, so all theorems are available here.
+
+Proved in Core:
+  G2mFast40_T40984 : G2mFast 40 40984 = true   (X=2 witnesses m=40 at n'=40983)
+  G2mFast40_T61460 : G2mFast 40 61460 = true   (X=2 witnesses m=40 at n'=61459)
+  G2mFast42_T118805 : G2mFast 42 118805 = false (X=2 witnesses m=42 at n'=118804)
+  G2mFast46_T106523 : G2mFast 46 106523 = false (X=2 witnesses m=46 at n'=106522)
 -/
-
--- G_{2,40}(40984) = true. Proved by native_decide in ~55s.
--- F_2(40984) = (40984%2==1) = false → G ≠ F → X=2 witnesses SubcaseB at n'=40983.
-set_option maxHeartbeats 16000000000 in
-theorem G2mFast40_T40984 : G2mFast 40 40984 = true := by native_decide
-
--- G_{2,40}(61460) = true. Proved by native_decide in ~115s.
--- F_2(61460) = (61460%2==1) = false → G ≠ F → X=2 witnesses SubcaseB at n'=61459.
-set_option maxHeartbeats 16000000000 in
-theorem G2mFast40_T61460 : G2mFast 40 61460 = true := by native_decide
-
--- G_{2,42}(118805) = false. Proved by native_decide in ~7min.
--- F_2(118805) = (118805%2==1) = true → G ≠ F → X=2 witnesses SubcaseB at n'=118804.
-set_option maxHeartbeats 64000000000 in
-theorem G2mFast42_T118805 : G2mFast 42 118805 = false := by native_decide
-
--- G_{2,46}(106523) = false. Proved by native_decide in ~5min.
--- F_2(106523) = (106523%2==1) = true → G ≠ F → X=2 witnesses SubcaseB at n'=106522.
-set_option maxHeartbeats 64000000000 in
-theorem G2mFast46_T106523 : G2mFast 46 106523 = false := by native_decide
 
 /-
 ================================================================================
-SECTION 3: WITNESS STATEMENTS (depend on Section 2)
+SECTION 3: WITNESS STATEMENTS (depend on Core theorems)
 ================================================================================
 -/
 
@@ -148,4 +135,36 @@ Once proved, rule30n_twoSpike_period extends coverage to all n' ≡ {40983, 6145
 theorem G2m40_period_cert :
     caEvolve 65536 (twoSpikeList 2 40 131153) = twoSpikeList 2 40 81 := by
   sorry
+
+/-
+================================================================================
+SECTION 6: NEW WITNESSES FOR m=44 AND m=48
+================================================================================
+
+CRITICAL FINDING (2026-04-09): X=2 is NOT a universal witness for m≥40.
+- m=44, T=249878: G_{2,44}=0=F_2=0 → X=2 FAILS; X=4 witnesses (G_{4,44}=1≠0=F_4)
+- m=48, T=262168: G_{2,48}=0=F_2=0 → X=2 FAILS; X=6 witnesses (G_{6,48}=0≠1=F_6)
+Verified by C program (280 seconds, 26 X candidates tested simultaneously).
+
+Heavy theorems (GXmFast44_X4_T249878, FXFast4_T249878, GXmFast48_X6_T262168,
+FXFast6_T262168) are SORRY'd in SubcaseB_X2_Core.lean, pending long native_decide runs.
+-/
+
+-- F4 period 8: F4(6) = false. 249878 mod 8 = 6, so FXFast4_T249878 = false.
+set_option maxHeartbeats 4000000 in
+theorem FXFast4_T6 : FXFast 4 6 = false := by native_decide
+
+-- F6 period 16: F6(8) = true. 262168 mod 16 = 8, so FXFast6_T262168 = true.
+set_option maxHeartbeats 4000000 in
+theorem FXFast6_T8 : FXFast 6 8 = true := by native_decide
+
+-- m=44 at n'=249877 (T=249878): X=4 witnesses.
+-- GXmFast44_X4_T249878 = true and FXFast4_T249878 = false (both in Core, sorry'd).
+theorem x4_witnesses_m44_at_n249877 : GXmFast 4 44 249878 ≠ FXFast 4 249878 := by
+  rw [GXmFast44_X4_T249878, FXFast4_T249878]; decide
+
+-- m=48 at n'=262167 (T=262168): X=6 witnesses.
+-- GXmFast48_X6_T262168 = false and FXFast6_T262168 = true (both in Core, sorry'd).
+theorem x6_witnesses_m48_at_n262167 : GXmFast 6 48 262168 ≠ FXFast 6 262168 := by
+  rw [GXmFast48_X6_T262168, FXFast6_T262168]; decide
 

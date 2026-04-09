@@ -588,3 +588,20 @@ def G2mFast (m T : Nat) : Bool :=
   let init := setbitU64 (setbitU64 (Array.replicate nWords (0 : UInt64)) 2) m
   let evolved := caEvolveU64 T init
   getbitU64 evolved T
+
+/-- G_{X,m}(T): center after T steps from spikes at X and m (generalized witness).
+    G2mFast = GXmFast 2.
+    Used to verify non-X=2 witnesses: X=4 for m=44, X=6 for m=48. -/
+def GXmFast (X m T : Nat) : Bool :=
+  let nWords := (2 * T + 1 + 63) / 64
+  let init := setbitU64 (setbitU64 (Array.replicate nWords (0 : UInt64)) X) m
+  let evolved := caEvolveU64 T init
+  getbitU64 evolved T
+
+/-- FXFast X T: center after T steps from single spike at X.
+    FXFast 2 T = (T % 2 == 1) by Spike2Parity.lean. -/
+def FXFast (X T : Nat) : Bool :=
+  let nWords := (2 * T + 1 + 63) / 64
+  let init := setbitU64 (Array.replicate nWords (0 : UInt64)) X
+  let evolved := caEvolveU64 T init
+  getbitU64 evolved T
