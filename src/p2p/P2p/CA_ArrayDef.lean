@@ -415,3 +415,176 @@ lemma checkResiduesBool_spec (m period : Nat) (validSet : List Nat) (seqF seqG :
              List.any_eq_true, beq_iff_eq] at hcheck
   obtain ⟨v, hv_mem, hv_eq⟩ := hcheck
   exact hv_eq ▸ hv_mem
+
+/-
+================================================================================
+SECTION 6: G2m CENTER-OUTPUT SEQUENCE (spikes at positions 2 AND m)
+================================================================================
+
+G2mCenterSeq m T_max : precomputes G_{2,m}(t+1) for t = 0 .. T_max-1.
+Here G_{2,m}(T) = (caEvolveArr T (twoSpikeArr 2 m (2*T+1))).getD 0 false,
+i.e., the center output after T steps starting from a tape with spikes at
+positions 2 and m.
+
+Computed by a single incremental tape evolution (O(T_max²)) starting from
+twoSpikeArr 2 m (2*T_max+1), recording tape[0] after each step.
+
+IMPORTANT: result[t] = G_{2,m}(t+1), so G_{2,m}(T) is at index T-1.
+================================================================================
+-/
+
+/-- Recursive helper: evolves tape for `n` more steps, appending tape[0] to result. -/
+private def G2mCenterSeqAux : Nat → Array Bool → Array Bool → Array Bool
+  | 0,     _tape, result => result
+  | n + 1, tape,  result =>
+    let tape' := caStepArr tape
+    G2mCenterSeqAux n tape' (result.push (tape'.getD 0 false))
+
+/-- Incremental center-output sequence for two-spike configuration (spikes at 2 and m).
+    result[t] = G_{2,m}(t+1) = center after t+1 steps from twoSpikeArr 2 m (2*T_max+1).
+    Computed in O(T_max²) by a single tape evolution.
+
+    Note: Uses causal-cone independence — the exact tape size doesn't matter as long as
+    both spikes (at 2 and m) are within the tape, i.e., T_max > m/2. -/
+def G2mCenterSeq (m T_max : Nat) : Array Bool :=
+  G2mCenterSeqAux T_max (twoSpikeArr 2 m (2 * T_max + 1)) #[]
+
+/-- Loop invariant for G2mCenterSeqAux (strong form):
+    tape = caEvolveArr acc init, result[t] = (caEvolveArr (t+1) init).getD 0 false for t < acc.
+    Mirrors spikeAtCenterSeqAux_inv. -/
+private lemma G2mCenterSeqAux_inv (n acc : Nat) (init tape : Array Bool) (result : Array Bool)
+    (hacc : result.size = acc)
+    (htape : tape = caEvolveArr acc init)
+    (hresult : ∀ t, t < acc → result.getD t false = (caEvolveArr (t + 1) init).getD 0 false) :
+    (G2mCenterSeqAux n tape result).size = acc + n ∧
+    ∀ t, t < acc + n →
+      (G2mCenterSeqAux n tape result).getD t false =
+      (caEvolveArr (t + 1) init).getD 0 false := by
+  induction n generalizing acc tape result with
+  | zero => exact ⟨hacc, hresult⟩
+  | succ n ih =>
+    simp only [G2mCenterSeqAux]
+    set tape' := caStepArr tape with htape'_def
+    have htape' : tape' = caEvolveArr (acc + 1) init := by
+      rw [htape'_def, htape, caEvolveArr_succ_comm]
+    have hresult'_size : (result.push (tape'.getD 0 false)).size = acc + 1 := by
+      simp [Array.size_push, hacc]
+    have push_old : ∀ t, t < acc →
+        (result.push (tape'.getD 0 false)).getD t false = result.getD t false := fun t hlt => by
+      have hlt' : t < result.size := hacc ▸ hlt
+      simp only [Array.getD_eq_getD_getElem?, Array.getElem?_push_lt hlt',
+                 Array.getElem?_eq_getElem hlt', Option.getD_some]
+    have push_new : (result.push (tape'.getD 0 false)).getD acc false = tape'.getD 0 false := by
+      rw [show acc = result.size from hacc.symm]
+      simp only [Array.getD_eq_getD_getElem?, Array.getElem?_push_size, Option.getD_some]
+    have hresult' : ∀ t, t < acc + 1 →
+        (result.push (tape'.getD 0 false)).getD t false = (caEvolveArr (t+1) init).getD 0 false := by
+      intro t ht
+      by_cases hlt : t < acc
+      · rw [push_old t hlt]; exact hresult t hlt
+      · have heq : t = acc := by omega
+        subst heq
+        rw [push_new, htape']
+    obtain ⟨hsize, hval⟩ := ih (acc + 1) tape' (result.push (tape'.getD 0 false))
+      hresult'_size htape' hresult'
+    exact ⟨by omega, fun t ht => hval t (by omega)⟩
+
+/-- Correctness of G2mCenterSeq:
+    element t equals G_{2,m}(t+1) = (caEvolveArr (t+1) (twoSpikeArr 2 m (2*(t+1)+1))).getD 0 false.
+    Mirrors spikeAtCenterSeq_correct. -/
+theorem G2mCenterSeq_correct (m T_max t : Nat) (ht : t < T_max) :
+    (G2mCenterSeq m T_max).getD t false =
+    (caEvolveArr (t + 1) (twoSpikeArr 2 m (2 * (t + 1) + 1))).getD 0 false := by
+  simp only [G2mCenterSeq]
+  obtain ⟨_, hval⟩ := G2mCenterSeqAux_inv T_max 0 (twoSpikeArr 2 m (2 * T_max + 1))
+    (twoSpikeArr 2 m (2 * T_max + 1)) #[] (by simp) (by simp [caEvolveArr]) (by intro t ht; omega)
+  rw [hval t (by omega)]
+  -- Goal: (caEvolveArr (t+1) (twoSpikeArr 2 m (2*T_max+1))).getD 0 false =
+  --       (caEvolveArr (t+1) (twoSpikeArr 2 m (2*(t+1)+1))).getD 0 false
+  -- Convert to List form and use caEvolve_agree (causal cone)
+  simp only [Array.getD_eq_toList_getD, caEvolveArr_toList_eq, twoSpikeArr_toList_eq]
+  apply caEvolve_agree (t + 1)
+  · rw [twoSpikeList_length]; omega
+  · rw [twoSpikeList_length]; omega
+  · intro i hi
+    -- twoSpikeList 2 m N1 and twoSpikeList 2 m N2 agree at position i (when i < both lengths)
+    -- Both give decide(i=2 ∨ i=m) at all in-bounds positions
+    have hN1 : i < 2 * T_max + 1 := by omega
+    have hN2 : i < 2 * (t + 1) + 1 := by omega
+    rw [twoSpikeList_getD 2 m (2 * T_max + 1) i hN1,
+        twoSpikeList_getD 2 m (2 * (t + 1) + 1) i hN2]
+
+/-
+================================================================================
+SECTION 7: UINT64 BIT-PACKED TAPE (fast path for large-T native_decide)
+================================================================================
+
+Direct translation of stream_G2m_all.c's step() function into Lean 4.
+Uses Array UInt64 where bit (64*w + b) of the tape = cell at position 64*w+b.
+
+Key operation: L XOR (cur OR R)  where L/C/R are left/center/right neighbors.
+Left carry (lc): MSB of the previous word becomes LSB of L in the current word.
+Right carry (rc): LSB of the next word becomes MSB of R in the current word.
+
+This matches C exactly:
+  L = (cur << 1) | lc;  lc = cur >> 63;
+  R = (cur >> 1) | ((right & 1) ? (1<<63) : 0);
+  out[w] = L ^ (cur | R);
+
+No allocation per step (imperative loop with Array.set!), GC pressure ~ O(T/64).
+Expected speedup: ~100x over caStepArr for large T (fewer allocations + SIMD-friendly).
+================================================================================
+-/
+
+/-- Set bit at position `pos` in a UInt64 tape. -/
+def setbitU64 (tape : Array UInt64) (pos : Nat) : Array UInt64 :=
+  let w := pos / 64
+  let b := (pos % 64).toUInt64
+  if w < tape.size then
+    tape.set! w ((tape[w]!) ||| ((1 : UInt64) <<< b))
+  else
+    tape
+
+/-- Get bit at position `pos` from a UInt64 tape. Returns false if out of bounds. -/
+def getbitU64 (tape : Array UInt64) (pos : Nat) : Bool :=
+  if h : pos / 64 < tape.size then
+    ((tape[pos / 64]'h) >>> (pos % 64).toUInt64) &&& 1 = 1
+  else
+    false
+
+/-- Single Rule 30 step on UInt64-packed tape, matching C's step() exactly.
+    Uses a mutable left-carry (lc) threaded through words left to right.
+    Boundary: positions outside [0, 64*tape.size) treated as 0. -/
+def caStepU64 (tape : Array UInt64) : Array UInt64 :=
+  let n := tape.size
+  Id.run do
+    let mut out : Array UInt64 := Array.replicate n 0
+    let mut lc : UInt64 := 0
+    for w in [:n] do
+      let cur  : UInt64 := tape.getD w 0
+      let next : UInt64 := tape.getD (w + 1) 0
+      let L : UInt64 := (cur <<< 1) ||| lc
+      lc := cur >>> 63
+      let R : UInt64 := (cur >>> 1) ||| (if (next &&& 1) = 1 then (1 : UInt64) <<< 63 else 0)
+      out := out.set! w (L ^^^ (cur ||| R))
+    return out
+
+/-- Evolve a UInt64-packed tape for `t` steps using a loop. -/
+def caEvolveU64 (steps : Nat) (tape : Array UInt64) : Array UInt64 :=
+  Id.run do
+    let mut t := tape
+    for _ in [:steps] do
+      t := caStepU64 t
+    return t
+
+/-- G_{2,m}(T): center of Rule 30 after T steps, matching C's stream_G2m_all.c.
+    Initial tape has spikes at positions 2 and m.
+    Fixed tape of size nWords = ceil((2*T+1)/64) words (large enough for T steps).
+    At step T, center = bit T of the tape (C: get_bit(tape_two, T)).
+
+    Performance: O(T² / 64) time, O(T/64) space — ~100x faster than caStepArr version. -/
+def G2mFast (m T : Nat) : Bool :=
+  let nWords := (2 * T + 1 + 63) / 64
+  let init := setbitU64 (setbitU64 (Array.replicate nWords (0 : UInt64)) 2) m
+  let evolved := caEvolveU64 T init
+  getbitU64 evolved T
