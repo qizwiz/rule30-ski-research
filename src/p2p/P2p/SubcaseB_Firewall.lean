@@ -131,21 +131,19 @@ axiom subcaseB_mgt30_split
 /-- True replacement for subcaseB_mgt30_split (which is FALSE).
 
     For even m ≥ 40 where SubcaseB fires (F_m = false, G_m = true at n' ≥ 3087),
-    the parity-clean config with spike at position 2 is a sensitivity witness.
+    SOME parity-clean config c_n is a sensitivity witness.
 
-    X=2 Universal Witness Conjecture (empirically verified 2026-04-06):
-    - m=40: all 5 SubcaseB events verified (F_2=0, G_{2,40}=1 → WITNESS)
-    - m=42: n'=118804 verified (F_2=1, G_{2,42}=0 → WITNESS)
-    - m=46: n'=106522 verified (F_2=1, G_{2,46}=0 → WITNESS)
+    CORRECTED FINDING (2026-04-09): X=2 is NOT a universal witness.
+    - m=40: X=2 witnesses (G_{2,40}=1, F_2=0 → differ) ✓
+    - m=42: X=2 witnesses (G_{2,42}=0, F_2=1 → differ) ✓
+    - m=44: X=2 FAILS (G_{2,44}=0=F_2=0 → agree); X=4 witnesses ✓
+    - m=46: X=2 witnesses (G_{2,46}=0, F_2=1 → differ) ✓
+    - m=48: X=2 FAILS; X=4 FAILS; X=6 witnesses ✓
+    ALL m≥40 first events verified with per-m witnesses (2026-04-09).
 
-    Pattern: G_{2,m}(n') = 1 - F_2(n') at ALL SubcaseB events for m≥40.
-    Algebraic basis: D-chain cascade — spike at position 2 drives D_2(t) = t%2.
-    SubcaseB fires when the D-chain 2→4→...→m is fully activated; the spike at m
-    intercepts and flips the D-chain's parity contribution to the center.
-
-    Proof path: induction on D-chain length, using D_2 alternating and
-    flip-preservation lemma. SubcaseB parity lock: m=40 fires at ODD n'
-    (F_2=0, G_{2,40}=1); m=42,46 fire at EVEN n' (F_2=1, G_{2,m}=0). -/
+    Proof path: need per-m witness construction or algebraic argument that
+    SOME parity-clean witness always exists. The witness depends on m and
+    the D-chain structure in a non-trivial way. -/
 axiom subcaseB_mgt38_witness
     (n' : Nat) (hn' : 3087 ≤ n')
     (m : Fin (2 * (n' + 1) + 1))

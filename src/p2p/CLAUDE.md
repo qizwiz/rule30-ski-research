@@ -32,34 +32,37 @@ output requires checking at least n cells → Ω(n) work.
 - Core definitions: `rule30Local`, `Config`, `Essential`, `HasBlockSensitivity`
 - Base cases n=0..5 via `native_decide`
 - `AllEssential`: all 2n+1 cells essential at every level
-- `rule30_bs_ge_n`: prize theorem **via `lifting_lemma` axiom**
-- `rule30_bs_ge_n_direct`: prize theorem **via `subcaseB_mgt30_split` axiom** (no lifting_lemma needed!)
+- `rule30_bs_ge_n`: prize theorem **via `lifting_lemma` axiom** (UNSOUND — lifting_lemma untried)
+- `rule30_bs_ge_n_direct`: prize theorem **via `subcaseB_mgt30_split` axiom** (INVALID — axiom is FALSE)
 - `subcaseB_resolution_ge3087`: **THEOREM** (0 code sorrys, 0 axioms in proof body)
 
-### TWO REMAINING AXIOMS
+### ⚠️ CRITICAL DISCOVERY (2026-04-06): subcaseB_mgt30_split is FALSE
+
+**Both proof paths are currently invalid.** The axiom subcaseB_mgt30_split claims:
+"SubcaseB never fires for even m ≥ 40 at n' ≥ 3087." This is DEMONSTRABLY FALSE:
+- SubcaseB fires at (m=40, n'=40983): verified by direct Rule 30 simulation
+- Active set is INFINITE: m=40,42,44,46,48,50,52,54,... all fire SubcaseB at large n'
+- First firings: m=40@40983, m=46@106522, m=42@118804, m=48,50@~262K, m=52,54@~2M
+- Period: m=40 fires with period 65536 at residues {40983, 61459} mod 65536
+
+The axiom was only computationally verified over [3087,5000] — far below the first
+firing at n'=40983. The "Phi_3 fingerprint → inactive" theory was WRONG.
+
+### AXIOMS (both currently untried/invalid)
 ```lean
 axiom lifting_lemma : ...           -- Prize3_Complete.lean:309
-axiom subcaseB_mgt30_split : ...    -- SubcaseB_Firewall.lean:108
+axiom subcaseB_mgt30_split : ...    -- SubcaseB_Firewall.lean:108 (FALSE)
 ```
-
-`rule30_bs_ge_n_direct` (LiftingLemma_LeftPermutive.lean) proves Prize 3 with ONLY `subcaseB_mgt30_split`.
-`lifting_lemma` is only needed for the induction-based `rule30_bs_ge_n` path.
-
-**Closing `subcaseB_mgt30_split` = near-axiom-free proof of Prize 3.**
-
-`subcaseB_mgt30_split`: SubcaseB never fires for inactive even m ≥ 40 at n' ≥ 3087.
-Computationally verified over [3087, 5000]. Requires Phi_3/LFSR algebraic proof.
 
 ## DEPENDENCY TREE (CURRENT STATE Apr 6 2026)
 
 ```
-rule30_bs_ge_n_direct             ← THE GOAL (1 axiom)
-└── subcaseB_mgt30_split          ← ONLY remaining axiom (SubcaseB_Firewall.lean:108)
-    (via subcaseB_resolution_ge3087 → all m-cases closed ✓)
+rule30_bs_ge_n_direct             ← INVALID (subcaseB_mgt30_split is FALSE)
+└── subcaseB_mgt30_split          ← FALSE axiom (SubcaseB_Firewall.lean:108)
 
-rule30_bs_ge_n (via lifting_lemma) ← Old path (2 axioms)
-├── lifting_lemma                 ← axiom (Prize3_Complete.lean:309)
-└── subcaseB_mgt30_split          ← same axiom
+rule30_bs_ge_n (via lifting_lemma) ← UNSOUND (lifting_lemma unproved; also uses false axiom)
+├── lifting_lemma                 ← unproved axiom (Prize3_Complete.lean:309)
+└── subcaseB_mgt30_split          ← same FALSE axiom
 ```
 
 ```
@@ -89,12 +92,50 @@ subcaseB_resolution_ge3087  ✓ THEOREM (all m-cases proved)
 - Requires Phi_3/LFSR algebraic proof that inactive even m≥40 never fires SubcaseB
 - Computationally verified for n'∈[3087,5000]
 
-### Priority 2: Build chain running — wait and verify
-- CA_Array_m36_residues: building (ETA ~6:10AM)
-- CA_Array_m38 period cert: building (ETA ~7:30AM)
-- CA_Array_m38_residues: auto-starts (~7:30AM, ETA ~11:30AM)
-- SubcaseBPeriod.lean: auto-starts when both done (watcher PID 72358)
+### Priority 1 (NEW — CRITICAL): Repair prize proof after subcaseB_mgt30_split is FALSE
+
+subcaseB_mgt30_split is DEMONSTRABLY FALSE. Both proof paths (rule30_bs_ge_n_direct
+and rule30_bs_ge_n) are currently invalid. The prize theorem is still true but unproved.
+
+**Option A: Per-m witness construction (PARTIALLY VERIFIED)**
+CORRECTION (2026-04-09): X=2 is NOT a universal witness. It fails for m=44 and m=48.
+Verified per-m witnesses at first SubcaseB events:
+  - m=40: X=2 witnesses (G_{2,40}(40984)=1≠0=F_2) ✓ PROVED IN LEAN
+  - m=42: X=2 witnesses (G_{2,42}(118805)=0≠1=F_2) ✓ PROVED IN LEAN
+  - m=44: X=4 witnesses (G_{4,44}(249878)=1≠0=F_4) — X=2 FAILS
+  - m=46: X=2 witnesses (G_{2,46}(106523)=0≠1=F_2) ✓ PROVED IN LEAN
+  - m=48: X=6 witnesses (G_{6,48}(262168)=0≠1=F_6) — X=2 and X=4 FAIL
+
+The witness X depends on m in a non-trivial way. No single universal X.
+The D-chain cascade argument for X=2 universality was INCORRECT.
+
+The axiom `subcaseB_mgt38_witness` (SubcaseB_Firewall.lean:149) claims ∃ parity-clean
+witness for all m≥40 SubcaseB events. Still believed TRUE but needs algebraic proof.
+
+Per-m native_decide proofs are feasible for specific events but:
+- Period certs are needed to extend to all periodic events (too slow for large P)
+- Active set is infinite, so this approach cannot close the axiom by itself
+
+**True path to Option A**: Need algebraic proof that SOME parity-clean spike witnesses
+each SubcaseB event, based on the D-chain structure. The witness is NOT always X=2.
+
+Lean proof path: Find algebraic characterization of which X witnesses each (m, n') pair,
+then prove that characterization implies subcaseB_mgt38_witness.
+
+**Option B: Prove lifting_lemma**
+If lifting_lemma can be proved, the SubcaseB handling becomes irrelevant — the base
+case n'≤3086 (which is bounded) handles small n, and lifting handles large n.
+The diagonal recurrence structure (D_k[t] = rule30(D_k[t-1], D_{k-1}[t-1], D_{k-2}[t-1]))
+might provide the algebraic structure needed for lifting_lemma.
+
+**DO NOT pursue Option C (finite case analysis for m=40,42,...)**
+The active set is infinite. This approach cannot close the axiom.
+
+### Priority 2: Build chain running — wait and verify (still valid, m=4..38 proofs OK)
+- CA_Array_m38_residues: building (PID 7379, started ~8:18AM, ETA ~11:30AM)
+- SubcaseBPeriod.lean: auto-starts when done (watcher PID 72358)
 - LiftingLemma_LeftPermutive.lean: auto-starts after SubcaseBPeriod
+- NOTE: LiftingLemma_LeftPermutive.lean proof is now INVALID (depends on false axiom)
 
 ### (Deprecated) Priority 1: m=22 SORRY OPEN
 - CLOSED: m=22 proved via right-edge witnesses (loop commit 82576a4)
