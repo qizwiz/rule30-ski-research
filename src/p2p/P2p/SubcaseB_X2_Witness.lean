@@ -154,12 +154,12 @@ set_option maxHeartbeats 4000000 in
 theorem FXFast6_T8 : FXFast 6 8 = true := by native_decide
 
 -- m=44 at n'=249877 (T=249878): X=4 witnesses.
--- GXmFast44_X4_T249878 = true and FXFast4_T249878 = false (both in Core, sorry'd).
-theorem x4_witnesses_m44_at_n249877 : GXmFast 4 44 249878 ≠ FXFast 4 249878 := by
-  rw [GXmFast44_X4_T249878, FXFast4_T249878]; decide
+-- Proved directly in Core via native_decide: GXmFast 4 44 249878 ≠ FXFast 4 249878.
+theorem x4_witnesses_m44_at_n249877 : GXmFast 4 44 249878 ≠ FXFast 4 249878 :=
+  x4_witnesses_m44_at_n249877_core
 
 -- m=48 at n'=262167 (T=262168): X=6 witnesses.
--- GXmFast48_X6_T262168 = false and FXFast6_T262168 = true (both in Core, sorry'd).
-theorem x6_witnesses_m48_at_n262167 : GXmFast 6 48 262168 ≠ FXFast 6 262168 := by
-  rw [GXmFast48_X6_T262168, FXFast6_T262168]; decide
+-- Proved directly in Core via native_decide: GXmFast 6 48 262168 ≠ FXFast 6 262168.
+theorem x6_witnesses_m48_at_n262167 : GXmFast 6 48 262168 ≠ FXFast 6 262168 :=
+  x6_witnesses_m48_at_n262167_core
 
