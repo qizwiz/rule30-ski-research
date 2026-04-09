@@ -17,14 +17,19 @@ Notation:
   SubcaseB at n': F_m(n'+1)=false AND G_{m,last}(n'+1)=true
   X witnesses at n': G_{X,m}(n'+1) ≠ F_X(n'+1)
 
-Architecture: heavy native_decide proofs are in SubcaseB_X2_Core.lean (imported).
-This file imports Core and contains only fast theorems (FXFast small-T, witnesses).
+Architecture:
+  SubcaseB_X2_Core.lean    : Section A heavy native_decide (~30-35 min)
+  SubcaseB_X2_PeriodCerts.lean : period certs (heavy native_decide)
+  SubcaseB_X2_SectionD.lean    : Section D combined witnesses (heavy native_decide)
+  SubcaseB_X2_Witness.lean : fast theorems only (~5s)
 
-Build times: this file ~5s. Core.lean ~30-35 min (heavy native_decides).
+Build times: this file ~5s. Core.lean ~30-35 min.
 -/
 
 import P2p.CA_ArrayDef
 import P2p.SubcaseB_X2_Core
+import P2p.SubcaseB_X2_PeriodCerts
+import P2p.SubcaseB_X2_SectionD
 
 /-
 ================================================================================
@@ -114,7 +119,7 @@ SECTION 5: PERIOD CERTIFICATE (via caEvolveArr Array Bool native_decide)
 
 G_{2,40} has period 65536 (verified by LFSR analysis in patterns.md).
 
-Strategy: prove G2m40_period_cert_arr (Array Bool version) in Core.lean via
+Strategy: prove G2m40_period_cert_arr (Array Bool version) in PeriodCerts.lean via
 native_decide, then convert using caEvolveArr_toList_eq + twoSpikeArr_toList_eq.
 
 caEvolveArr shrinks the array: 131153 - 2*65536 = 81 elements after 65536 steps.
@@ -124,7 +129,7 @@ Once proved, sensitivity_transfer extends coverage to all n' ≡ {40983, 61459} 
 -/
 
 /-- Period cert: G_{2,40} sequence has period 65536. Derived from G2m40_period_cert_arr
-    (proved in Core.lean via native_decide on caEvolveArr). -/
+    (proved in PeriodCerts.lean via native_decide on caEvolveArr). -/
 theorem G2m40_period_cert :
     caEvolve 65536 (twoSpikeList 2 40 131153) = twoSpikeList 2 40 81 := by
   have h := congrArg Array.toList G2m40_period_cert_arr
