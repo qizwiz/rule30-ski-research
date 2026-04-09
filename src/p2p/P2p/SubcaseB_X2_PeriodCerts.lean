@@ -107,20 +107,48 @@ ALTERNATIVE NEEDED: UInt64 approach or algebraic proof.
 SECTION 3: G_{4,44} PERIOD CERTIFICATE (period = 262144 = 2^18)
 ================================================================================
 
-G_{4,44} has period dividing 262144 (LFSR analysis: P=2^18).
-Tape for sensitivity_transfer: twoSpikeArr 4 44 N where N = 2*P + 2*44 + 1 = 524377.
+G_{4,44} has period dividing 262144 (LFSR analysis: P=2^18, L=131073=2^17+1).
+Tape: twoSpikeArr 4 44 524377 where N = 2*262144 + 2*44 + 1 = 524377.
 After P steps: 524377 - 2*262144 = 89 = 2*44 + 1.
 
-TODO: Python-verify first.
+Python-verified 2026-04-09 (numpy shrinking tape, 239s):
+  caEvolve 262144 (twoSpikeList 4 44 524377) = twoSpikeList 4 44 89  ← MATCH: True
+
+Build time estimate: ~4x G2m40 cert ≈ 20 min - 2 hours (Array Bool).
 -/
 
--- TODO: Python verification then native_decide
+/-- Period cert for G_{4,44}: Array Bool version, proved via native_decide.
+    Tape: twoSpikeArr 4 44 524377 (size 524377). After 262144 steps → size 89.
+    Result = twoSpikeArr 4 44 89 (spikes at 4 and 44 on 89-cell tape).
+    Python-verified 2026-04-09 (239s): MATCH True. -/
+set_option maxHeartbeats 1200000000000 in
+theorem G4m44_period_cert_arr :
+    caEvolveArr 262144 (twoSpikeArr 4 44 524377) = twoSpikeArr 4 44 89 := by
+  native_decide  -- estimated 20 min - 2 hours
+
+/-- Period cert for G_{4,44}: list version. Derived from G4m44_period_cert_arr. -/
+theorem G4m44_period_cert :
+    caEvolve 262144 (twoSpikeList 4 44 524377) = twoSpikeList 4 44 89 := by
+  have h := congrArg Array.toList G4m44_period_cert_arr
+  simp only [caEvolveArr_toList_eq, twoSpikeArr_toList_eq] at h
+  exact h
 
 /-
 ================================================================================
 SECTION 4: G_{6,48} PERIOD CERTIFICATE
 ================================================================================
 
-G_{6,48} period unknown. Need computational analysis.
-TODO: Determine period by LFSR analysis or C program.
+G_{6,48}: P=2^20=1048576. X=6 witnesses first SubcaseB at n'=262167.
+LFSR analysis: m≡0 mod 8 pattern → large L ≈ P - 8187 ≈ 1040389.
+BM on 1.1M terms: L > 550K (not converged; need >2M samples).
+
+Tape: N = 2*1048576 + 2*48 + 1 = 2097249.
+After P steps: 2097249 - 2*1048576 = 97 = 2*48 + 1.
+
+Feasibility: Array Bool native_decide would need ~64x G2m40 cert time = several hours.
+UInt64 bridge needed for practical computation.
+TODO: Python-verify then consider UInt64 approach.
 -/
+
+-- G6m48 period cert: requires UInt64 approach or very long native_decide.
+-- Postponed pending UInt64 bridge theorem.

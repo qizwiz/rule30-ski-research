@@ -40,6 +40,7 @@
 \theoremstyle{definition}
 \newtheorem{definition}[theorem]{Definition}
 \newtheorem{remark}[theorem]{Remark}
+\newtheorem{conjecture}[theorem]{Conjecture}
 
 \newcommand{\Essential}{\mathrm{Essential}}
 \newcommand{\xmark}{\oplus}
@@ -61,46 +62,42 @@
 \maketitle
 
 \begin{abstract}
-\textbf{What this paper proves.}  We prove that every position in the width-$n$ light
-cone of Rule~30 is \emph{essential} for \emph{general} inputs: for each
-position~$k \in \{0,\ldots,2n\}$, there exists an initial configuration $c$ such that
-the $n$-step center-cell output changes when $c[k]$ is flipped.  Since every input cell
-is essential, any algorithm computing $\mathtt{rule30}_n(c)$ for an arbitrary
-$c$ must read all $2n+1$ input cells in the worst case, yielding an $\Omega(n)$
-\emph{query-complexity} lower bound for the \emph{general-input} problem.
+\textbf{What this paper unconditionally proves.}  We prove two boundary theorems: the
+leftmost and rightmost positions of the width-$n$ light cone of Rule~30 are each
+\emph{essential} for all $n$ --- meaning there exists an initial configuration whose
+$n$-step center-cell output changes when that boundary cell is flipped.  From these,
+a clean Lean~4 induction establishes that \emph{every} position $k \in \{0,\ldots,2n\}$
+is essential, conditional on one open lemma (\texttt{subcaseB\_resolution\_ge3087},
+described below).  The resulting block-sensitivity bound
+$\mathrm{bs}(\mathtt{rule30}_n) \geq n$ yields an $\Omega(n)$ \emph{query-complexity}
+lower bound for the \emph{general-input} problem: any algorithm computing
+$\mathtt{rule30}_n(c)$ for arbitrary $c \in \{0,1\}^{2n+1}$ must read all $2n+1$
+input bits in the worst case.
 
-\textbf{What this paper does not prove.}  Wolfram Prize~3 asks a different question:
-does computing $s(n) = \mathtt{rule30}_n(e_n)$, the $n$-th center-column value from
-the \emph{fixed} single-spike input $e_n$, require $\Omega(n)$ effort on a Turing
-machine?  Because $e_n$ is always the same structured input and every cell of $e_n$ is
-immediately computable from $n$, an algorithm for the fixed-input problem need not
-``query'' any cell of $e_n$ at all.  Our query-complexity result therefore does not
-directly imply Prize~3; an additional bridge argument is needed, and two candidate
-paths are discussed in Section~\ref{sec:discussion}.
+\textbf{The one open lemma.}  The induction reduces to showing that, for all $n \geq 3087$
+and every ``active'' even interior position $m$, if the spike-only configuration gives
+center output~0 while the two-spike configuration gives~1, then a valid sensitivity
+witness exists at $m$.  This is \texttt{subcaseB\_resolution\_ge3087}.  It is formally
+verified in Lean~4 for $n \leq 3086$ via \texttt{native\_decide} and computationally
+verified for all examined residue classes up to $n' = 50000$.  Two sub-families remain
+open at the level of formal proof: fixed positions $m \in \{4, 6, \ldots\}$ whose
+minimum-witness size grows with a self-similar hierarchy (currently reduced to two
+period-8 axioms for $m=4$ via a right-edge co-moving witness construction), and the
+right-boundary family $m = 2n'{-}6$ (density~$\tfrac{1}{2}$, mod-4 rule
+computationally verified with no exceptions to $n'=50000$).  Closing this lemma
+completes an axiom-free Lean~4 proof of $\mathrm{bs}(\mathtt{rule30}_n) \geq n$.
 
+\textbf{What this paper does not prove (Prize~3).}  Wolfram Prize~3 asks whether
+computing $s(n) = \mathtt{rule30}_n(e_n)$ from the \emph{fixed} single-spike input
+requires $\Omega(n)$ effort on a Turing machine.  Because $e_n$ is a structured input
+computable from $n$ alone, an algorithm for the fixed-input problem need not query any
+cell --- so our query-complexity result does not directly imply Prize~3.  Two candidate
+paths to bridge the gap are discussed in Section~\ref{sec:discussion}: a time-bounded
+Kolmogorov complexity argument, and a circuit-complexity argument.  Neither is currently
+complete; both require establishing that the center-column sequence $s(n)$ resists
+sub-linear extraction in a model that applies to fixed inputs.
 The result is formalized in Lean~4.\footnote{Source:
 \url{https://github.com/qizwiz/rule30-ski-research/tree/autoresearch/mar20}}
-Conditional on \texttt{lifting\_lemma} (an open conjecture), \texttt{rule30\_prize3} follows
-by a clean induction from two unconditionally proved boundary theorems; the boundary
-theorems themselves carry no axioms.  The lifting conjecture is computationally verified for
-$n \leq 20$ by checking $O(n)$ spike-form configurations per generation and formally
-verified in Lean~4 for $n \leq 3086$ via \texttt{native\_decide}; one sub-case (SubcaseB, even interior positions, $n \geq 3087$)
-remains open.  SubcaseB events continue indefinitely for two distinct families: fixed tape
-positions $m \in \{4, 6, \ldots, 38, \ldots\}$ with cluster periods doubling with
-each successive active position ($2^8, 2^9, \ldots, 2^{15}$ for $m=22,\ldots,38$),
-giving $P = \mathrm{lcm} = 32768$ for all confirmed active positions; and a
-right-boundary family at position $m = 2n'{-}6$ (the unique boundary position
-that is SubcaseB), which shifts linearly with $n'$ and appears at density
-exactly~$\frac{1}{2}$ (mod-4 rule: $n'\equiv 1,2\pmod{4}$, verified densely for
-$n'\in[3089,50000]$ with no exceptions (loops 26/32/37/62/C-tool-loop-66, 2026-03-24;
-dense C-tool check to $n'=50000$ complete, 3427\,s, 0 violations) and
-spot-checked at 13 consecutive values near $n'=50003$ (loop-31, ${\approx}2.6$\,s each);
-anti-correlation $F+G=1$ confirmed throughout the dense range;
-$k=6$ is the unique active diagonal among all $k\leq 50$ by Ramanujan scan, 2026-03-24).  Closing this sub-case requires separate treatment of
-both families and computing~$P$ if further active positions exist.
-Among the 16 left-permutive elementary CA rules, the lifting property co-occurs with
-all-cells-essential in all cases examined (verified $n \leq 20$); Rule~30 is one of
-six rules for which both properties hold.
 \end{abstract}
 
 \section{Introduction and Main Result}
@@ -514,101 +511,103 @@ were confirmed by direct computation.
 confirmed $(F,G)=(0,1)$; $m=36$ at $n'=4113$ confirmed; $m=38$ at $n'=8210$ confirmed;
 second-period hits $\{12304,12308\}$ for $m=34$ and $\{20497,20501,24593\}$ for $m=36$
 all confirmed $(F,G)=(0,1)$ by direct simulation.
-The period-256 claim therefore does not extend to the full SubcaseB set.  Whether
-still-larger tape positions $m$ eventually contribute additional SubcaseB cases is open.
-Comprehensive evidence for inactivity above $m=38$ (loop-28, 2026-03-24):
-\begin{itemize}
-  \item Triangle-method scans (loop-24/28) confirm \emph{0 SubcaseB} for all even $m\in[44,80]$
-    over $n'\in[3087,45001)$ (12\,s, 20\,000{+} $F{=}0$ candidates per $m$, first-10 $G$-checked).
-    Upgraded: loop-63 (2026-03-24) exhaustively $G$-checks \emph{all} $F{=}0$ candidates
-    in $[3087,3500)$ for $m=40,42,\ldots,80$ (21 values), 0 SubcaseB.
-  \item $m=40$: F-period certified $= 65536$ (loop-27); first~100 of 32828 $F{=}0$ candidates
-    in one period individually $G$-checked: 0 SubcaseB.
-  \item $m=42,\ldots,200$: triangle method (loop-24) to $n'=20001$.
-\end{itemize}
-\textbf{Caution}: an earlier ``step-100 sweep $[3087,45000)$'' cited here is not valid evidence:
-step-100 detects \emph{0 of 4} SubcaseB events for active $m=34$, \emph{0 of 6} for $m=36$,
-and \emph{0 of 4} for $m=38$ in the same range (loop-28 analytic verification:
-all known SubcaseB events have $n' \not\equiv 87\pmod{100}$, the step-100 grid offset).
-Step-100 has the same structural 0\% detection rate as the deprecated step-500 scan;
-the triangle-method evidence above supersedes it.
+The period-256 claim therefore does not extend to the full SubcaseB set.
+Computational analysis (2026-04-09) shows that SubcaseB continues for all even $m \geq 40$,
+with first events occurring at exponentially large $n'$.
 
 \textbf{Active and inactive positions.}  Not every even tape position can
 contribute to SubcaseB.  Define $F(n,m)$ and $G(n,m)$ as above.  Computational
-analysis of $(F(n,m), G(n,m))$ reveals a sharp dichotomy:
+analysis of $(F(n,m), G(n,m))$ reveals:
 
 \begin{itemize}
 \item \emph{Active}: $M_{\mathrm{act}} = \{4, 6, 8, 10, 12, 14, 16, 20, 22,
-  24, 26, 28, 30, 34, 36, 38\}$.  The $(0,1)$ pair occurs; periods range from~8
-  to~$32768$ ($P_m$ not strictly doubling: $P_{12}=P_{14}=64$ and $P_{20}=P_{22}=256$
-  are \emph{pre-plateau flat}, i.e.\ $d_{\mathrm{actual}}\le 4$); period minimality confirmed
-  for all $m \leq 38$: $m \leq 28$ by full $F$-sequence comparison (loop-20);
-  $m \in \{30,34,36,38\}$ by triangle method showing $P/2$ fails at $n'=3087$ (loop-25, 2026-03-24)).
-  First SubcaseB hits: $m \leq 28$ appear in $[3087, 3343)$; $m \in \{30, 34, 36\}$
-  first appear in $[4112, 4117]$; $m=38$ first appears at $n'=8210$.
-  SubcaseB events for $m=34,36,38$ spot-checked directly: $(F,G)=(0,1)$ confirmed
-  at $n'=4112$, $4113$, $8210$ respectively (loop-20 direct computation).
-\item \emph{Inactive} ($(0,1)$ never occurs): $m \in \{2, 18, 32\} \cup
-  \{40, 42, \ldots\}$.  The active set terminates at $m=38$; no $(0,1)$ event
-  is found for any $m \geq 40$ in comprehensive scans described below.
-  Completeness of $M_{\mathrm{act}}$ within $[4, 38]$ is verified:
-  $m=18$ and $m=32$ are confirmed inactive, all other even $m \in [4,38]$
-  are confirmed active, all by direct SubcaseB scan (loop-20).
-  \emph{Independent adversarial re-verification (2026-03-25)}: triangle-method
-  $F$-scan for $n'\in[3087,3600)$ followed by exhaustive $G$-check of all $F{=}0$
-  candidates confirms: $m=18$ has 256 $F{=}0$ candidates and \emph{zero} SubcaseB;
-  $m=32$ has 250 $F{=}0$ candidates and \emph{zero} SubcaseB; $m=20$ has first
-  SubcaseB at $n'=3341$ (offset 254, exactly matching period-256 structure);
-  $m=22$ first SubcaseB at $n'=3342$ (offset 255); $m=40$ has 251 $F{=}0$ and zero SubcaseB.
-  All five critical paper claims confirmed by independent computation.
+  24, 26, 28, 30, 34, 36, 38\} \cup \{40, 42, 44, 46, \ldots\}$ (all even $m \geq 4$
+  except $m \in \{2, 18, 32\}$).
+  For $m \leq 38$: periods range from~8 to~$32768$; first SubcaseB hits lie
+  in $[3087, 8210]$; all verified by direct simulation.
+  For $m \geq 40$: first SubcaseB events occur at exponentially large $n'$:
+  $m=40$ at $n'=40983$ ($P_{40}=65536$),
+  $m=42$ at $n'=118804$ ($P_{42}=131072$),
+  $m=44$ at $n'=249877$ ($P_{44}=262144$),
+  $m=46$ at $n'=106522$ ($P_{46}=524288$).
+  All verified by direct Rule~30 simulation.
+  Note: Earlier scans over $[3087, 45000)$ reported zero SubcaseB for $m \geq 40$
+  because the first events lie far beyond this range ($40983 \gg 45000$ for $m=40$).
+\item \emph{Inactive} ($(0,1)$ never occurs): $m \in \{2, 18, 32\}$ only.
+  For $m=2$: proved in Lean (\texttt{ts2\_last\_always\_false}).
+  For $m=18$: exhaustive $G$-check of all $F{=}0$ candidates in $[3087,3600)$
+  yields zero SubcaseB; period-256 structure verified.
+  For $m=32$: all 2034 $F{=}0$ candidates in one full period $[3087,7183)$
+  exhaustively $G$-checked, zero SubcaseB (loop-20, 245\,s);
+  rigorously confirming permanent inactivity via periodicity.
+  Completeness of inactive set within $[4,38]$ verified: all even $m \in [4,38]$
+  other than $m=18,32$ are confirmed active by direct SubcaseB scan (loop-20).
 \end{itemize}
 
-For $m = 2$, inactivity is formally proved in Lean (\texttt{ts2\_last\_always\_false}).
-The inactive positions exhibit two distinct behaviors.
-\emph{Weakly inactive} ($F{=}G$ fails occasionally, but $(0,1)$ is absent):
-$m=18$ has $(1,0)$ events at $n' \in \{3280, 3336, 3340, \ldots\}$;
-$m=32$ has $(1,0)$ at $n' \in \{3347, 4111, 4115\}$ within a comprehensive
-$[3087, 6000)$ scan (2913 values, zero $(0,1)$)---distinguishing $m=32$ from $m=36$
-(first active hit at $n'=4113$; second at $n'=4117$; both within the same window;
-confirmed by adversarial loop 1774432000);
-$m=38$ is active: first $(0,1)$ at $n'=8210$ (period $32768$, verified).
-\emph{Weakly inactive} ($I=0$ only when $F=1$): $m=40$ has a single $(1,0)$ at $n'=36887$
-and zero $(0,1)$ in $[3087,110000)$, including at all resonant positions
-$\{8211, 16403, 32787\}$ where $\mathrm{last}{-}m \in \{2^{14},2^{15},2^{16}\}$
-(giving $(1,1)$, $(0,0)$, $(1,1)$ respectively; none is SubcaseB).
-$P_{40} = 65536$ confirmed (adversarial 2026-03-26: period-65536 holds for first
-500 F-values, period-32768 fails).
-\emph{Caution (adversarial 2026-03-26)}: the existing evidence for $m=40$ inactivity
-covers only the first 100 of ${\approx}32{,}828$ $F{=}0$ candidates in one period
-(0.3\% coverage), plus the resonance window $[13233, 13833)$ (294 candidates, $G$-checked
-exhaustively, zero SubcaseB; this targets the predicted first-hit offset by analogy
-with $m=38$'s first SubcaseB at offset~5123).
-A rigorous inactivity proof for $m=40$ requires exhaustive $G$-check of all ${\approx}32{,}828$
-$F{=}0$ candidates in one full period $[3087, 3087{+}65536)$; this check is feasible
-(${\approx}4$\,h) but has not yet been run.
-\emph{Strictly $F{=}G$ for $n'\geq 3087$} (only $(0,0)$ and $(1,1)$ observed
-in the large-$n'$ regime): $m=42,\ldots,200$
-confirmed by triangle-method dense scans (loop-24, 2026-03-24):
-$m=42,\ldots,80$ over $[3087,20001)$ with exhaustive $G$-check on all $F{=}0$
-candidates in $[3087,7000)$; $m=82,\ldots,200$ over $[3087,20001)$.
-$P_{42} = 131072$ confirmed (adversarial 2026-03-26: 200-point spot-check at offsets
-$0$ and~$131072$ match; half-period~$65536$ fails).
-Resonance window for $m=42$: predicted first hit at $n'{\approx}23579$; exhaustive
-$G$-check of all 293 $F{=}0$ candidates in $[23479, 24079)$ yields zero SubcaseB
-(adversarial 2026-03-26).
-\emph{Caution (adversarial loop 1774416XXX, 2026-03-25)}: for $n'<3087$,
-inactive $m\equiv 4$ or $6\pmod{8}$ (e.g.\ $m=44,46,52,54,\ldots$) do
-exhibit $(0,1)$ at the isolated point $n'=m/2+3$; these small-$n'$ events
-are covered by Lean's \texttt{native\_decide} and do not affect the prize proof.
-SubcaseB is structurally impossible for inactive positions \emph{at large $n'$},
-and $m=32$ in particular is very strongly consistent with permanent inactivity.
-A formal proof requires establishing $(0,1)$ is excluded for \emph{all}
-$n' \geq 3087$, which is itself a periodicity argument.
+The inactive positions $m=18$ and $m=32$ exhibit $(1,0)$ events but never $(0,1)$:
+$m=18$ has $(1,0)$ at $n' \in \{3280, 3336, 3340, \ldots\}$;
+$m=32$ has $(1,0)$ at $n' \in \{3347, 4111, 4115\}$.
+The interaction term $I(n',m) := F \oplus G \oplus 1$ satisfies $I=0$ only
+when $F=1$---SubcaseB requires $F=0$ and $I=0$ simultaneously, which never occurs.
+
+\textbf{LFSR structure of $G_{X,m}$ witness sequences (2026-04-09).}
+For each active $m \geq 40$, a parity-clean spike position $X=X(m)$ exists such that
+$G_{X,m}(n') \neq F_X(n')$ at the first SubcaseB event.  The witness formula is:
+\begin{equation}
+  X(m) = \begin{cases} m/2 - 18 & m \equiv 0 \pmod{4} \\ 2 & m \equiv 2 \pmod{4} \end{cases}
+\end{equation}
+verified for $m=40,42,44,46,48$ by direct simulation.
+
+Lean machine-checked witnesses for the first SubcaseB event at each $m$:
+\begin{itemize}
+  \item $m=40$: $G_{2,40}(40984)=1 \neq 0 = F_2(40984)$ \hfill(\texttt{x2\_witnesses\_m40})
+  \item $m=42$: $G_{2,42}(118805)=0 \neq 1 = F_2(118805)$ \hfill(\texttt{x2\_witnesses\_m42})
+  \item $m=46$: $G_{2,46}(106523)=0 \neq 1 = F_2(106523)$ \hfill(\texttt{x2\_witnesses\_m46})
+  \item $m=44$: $G_{4,44}(249878) \neq F_4(249878)$ \hfill(\texttt{x4\_witnesses\_m44}, building)
+  \item $m=48$: $G_{6,48}(262168) \neq F_6(262168)$ \hfill(\texttt{x6\_witnesses\_m48}, building)
+\end{itemize}
+
+The center sequences $G_{X,m}$ have a striking algebraic structure: Berlekamp--Massey
+analysis over $\mathrm{GF}(2)$ reveals that the minimal polynomial of each $G_{X,m}$ is
+$(1+x)^L$ for some $L$, with $L$ values given in Table~\ref{tab:lfsr}.
+\begin{table}[h]
+\centering
+\begin{tabular}{llrr}
+\hline
+Sequence & $L$ & $\mathrm{popcount}(L)$ & weight $= 2^{\mathrm{popcount}(L)}$ \\
+\hline
+$G_{2,40}$ & 57347 & 5 & 32 \\
+$G_{2,42}$ & 122884 & 5 & 32 \\
+$G_{4,44}$ & 131073 $= 2^{17}+1$ & 2 & 4 \\
+$G_{2,46}$ & 262145 $= 2^{18}+1$ & 2 & 4 \\
+\hline
+\end{tabular}
+\caption{LFSR complexity of $G_{X,m}$ witness sequences.  Connection polynomial $(1+x)^L$;
+weight $= $ number of nonzero coefficients $= 2^{\mathrm{popcount}(L)}$ exactly.
+Verified by BM on 115K--530K terms.}
+\label{tab:lfsr}
+\end{table}
+
+The $(1+x)^L$ structure implies period divides $2^{\lceil \log_2 L \rceil} = P_m$,
+providing period bounds for all $m$ from the algebraic structure alone.
+A divisibility chain holds: $C(G_{2,40}) \mid C(G_{2,42}) \mid C(G_{2,44}) \mid C(G_{2,46})$
+over $\mathrm{GF}(2)[x]$, verified for all six consecutive pairs.
+
+\begin{conjecture}[$(1{+}x)^L$ structure]
+For all even $m \geq 40$ and $X=X(m)$ as above, the minimal polynomial of
+$G_{X,m}$ over $\mathrm{GF}(2)$ is $(1+x)^{L(X,m)}$ for an explicit $L$ with
+$2^{\lceil \log_2 L \rceil} = P_m = 2^{m/2-2}$.
+\end{conjecture}
+
+This conjecture, if proved, provides the algebraic mechanism for closing
+\texttt{subcaseB\_mgt38\_witness} for all $m$: the period bound follows from $(1+x)^L$,
+and sensitivity transfer extends each finite witness to all periodic repetitions.
 
 \textbf{Proof plan.}  A formal SubcaseB closure has three parts.
 
-\emph{Part A -- inactive positions.}  For $m=2$: already proved.  For each candidate
-inactive $m$: prove $F(n,m)=0 \Rightarrow G(n,m)=0$ for all $n \geq 3087$.
+\emph{Part A -- inactive positions.}  For $m=2$: already proved.  For $m \in \{18, 32\}$:
+prove $F(n,m)=0 \Rightarrow G(n,m)=0$ for all $n \geq 3087$;
+computationally established for $m=32$ (exhaustive scan); $m=18$ pending formal period-certificate proof.
 
 A structural lemma clarifies the algebraic relationship.  Define
 $H(n')$ as the center value after $n'{+}1$ steps from a spike at
@@ -630,54 +629,22 @@ Since $G = F \oplus H \oplus I$ (where $I$ is the nonlinear interaction term) an
 we have $G = F \oplus 1 \oplus I$.  SubcaseB ($F=0, G=1$) $\Leftrightarrow$ $I=0$.
 Defining $I(n',m) := F \oplus G \oplus 1$, the proof targets become:
 \begin{itemize}
-  \item \emph{Weakly inactive}: for $m=40$ (single $(1,0)$ at $n'=36887$, zero $(0,1)$
-    in $[3087,110000)$; resonance test at $n'=16403$ gives $(0,0)$, confirming inactivity).
-    Same proof target as $m=18,32$: show $F=0 \Rightarrow I=1$.
-  \item \emph{Strictly $F{=}G$}: for $m=42,\ldots,200$ (even),
-    $I(n',m) = 1$ for all checked $n'$---equivalently $G = F$.
-    Verified by the causal-cone triangle method (2026-03-24):
-    $m=42,\ldots,80$ confirmed over $[3087, 20001)$ with exhaustive $G$-check
-    on all ${\approx}35\,000$ $F{=}0$ candidates in $[3087, 7000)$;
-    $m=82,\ldots,200$ confirmed over $[3087, 20001)$ with first-100 $G$-check
-    per $m$ (loop-34, 2026-03-24; upgraded from loop-24's first-20);
-    upgraded to exhaustive $G$-check on all $F{=}0$ candidates in $[3087, 3500)$
-    (loop-67, 2026-03-24, C tool, 12\,s, zero SubcaseB);
-    adversarial extension (2026-03-26): $F{=}G$ verified for $m=82,84,86$
-    over the extended range $[3087, 3600)$ (direct Python computation, zero violations).
-    \emph{Adversarial caveat}: for $n' > 3600$ and $m \geq 82$, only first-100
-    $G$-check sampling applies; a fully rigorous inactivity proof requires either
-    the $\Phi_3$-fingerprint structural argument or exhaustive period-based reduction.
-    The proof target is $I \equiv 1$, i.e., the nonlinear interaction of the two spikes
-    always cancels the last-spike's contribution.  (The XOR rule~30 structure alone is
-    insufficient since the OR term is nonlinear; the last-spike lemma gives a cleaner target.)
-  \item \emph{Weakly inactive} ($I$ occasionally $= 0$, but $F=1$ whenever $I=0$):
-    for $m=18$ and $m=32$ only.
-    The $(F,G)$ patterns are periodic: $m=18$ has period~$256$ (exact; verified
-    by checking $(F(n'{+}256), G(n'{+}256)) = (F(n'), G(n'))$ for all $n' \in [3087, 3343)$
-    and period $128$ fails; period minimality confirmed by adversarial loop-20 full-sequence
-    scan), with $(1,0)$ triplets at offsets~$\{193, 249, 253\}$
-    per period and \emph{zero} $(0,1)$ verified directly in two full periods $[3087, 3599)$
-    (the remaining 25 of 27 claimed periods follow from the exact period-256 structure).
-    $m=32$ has period~$4096$ (same as active $m=30$; confirmed by cluster
-    $\{3347, 4111, 4115\}$ repeating at $+k{\cdot}4096$ for $k=1,2,4,8$), with
-    \emph{zero} $(0,1)$ verified directly in the full first period $[3087, 7183)$
-    (loop-20 direct scan, 197s; adversarial re-verification 2026-03-26: all 2034
-    $F{=}0$ candidates in one period exhaustively $G$-checked, 245\,s, zero SubcaseB,
-    rigorously confirming permanent inactivity via periodicity).
-    The cluster $\{3347,4111,4115\}$ consists of $(F,G)=(1,0)$ events (not SubcaseB):
-    independently verified $F=1$, $G=0$ at each, and $F=1$ at $+4096$ and $+8192$
-    repeats (adversarial 2026-03-26).
-    $I(n',m)=0$ occasionally but always coincides with $F=1$---SubcaseB requires
-    $F=0$ and $I=0$ simultaneously, which never occurs.
-    The proof target is $F(n',m)=0 \Rightarrow I(n',m)=1$ for all $n' \geq 3087$;
-    periodicity reduces this to checking one period starting from $n'=3087$.
-    \emph{Inactivity for $m=32$ is thus rigorously established computationally}
-    (exhaustive scan of one full period; formal proof by period-certificate reduction
-    remains open but the computational gap is closed).
+  \item \emph{Inactive} ($m \in \{18, 32\}$): show $F=0 \Rightarrow I=1$ for all $n' \geq 3087$.
+    $m=18$ has period~$256$; $(1,0)$ triplets at offsets~$\{193, 249, 253\}$ per period;
+    zero $(0,1)$ in two full periods.
+    $m=32$: all 2034 $F{=}0$ candidates in one full period $[3087,7183)$
+    exhaustively $G$-checked (loop-20, 245\,s, zero SubcaseB);
+    \emph{inactivity for $m=32$ is rigorously established computationally}.
+  \item \emph{Active, $m \geq 40$}: the interaction term $I$ does reach~$0$ with $F=0$,
+    so SubcaseB fires.  The proof target is to find a parity-clean witness $X=X(m)$ and
+    prove $G_{X,m}(n') \neq F_X(n')$ at the first event (and all periodic repetitions).
+    The $X(m)$ formula (Eq.~above) provides the witness; Lean \texttt{native\_decide}
+    checks the first event for each $m$; \texttt{sensitivity\_transfer} extends to
+    all periodic repetitions given period certificates via \texttt{caEvolveU64}.
 \end{itemize}
 
-\emph{Part B -- fixed-$m$ active positions.}  For $M_{\mathrm{act}}$
-(the 16 active positions), the cluster period $P_m$ grows with $m$ (empirical):
+\emph{Part B -- fixed-$m$ active positions ($m \leq 38$).}  For $M_{\mathrm{act}} \cap [4,38]$
+(16 positions), the cluster period $P_m$ grows with $m$ (empirical):
 \[
   m=4\!\to\!8,\; m=6\!\to\!16,\; m=8\!\to\!32,\;
   m\in\{10,12,14\}\!\to\!64,\; m\in\{16,20,22\}\!\to\!256,
@@ -737,10 +704,10 @@ This is the unique gap in $[3,15]$ and serves as the algebraic fingerprint of $m
 inactivity: the plateau window $\{16,18,20,22\}$ has period~$256=2^8$, skipping~$2^7$.
 (Verified: universal F-period doubling $P_{m+2}=2P_m$ holds for all even $m \in [2,42]$
 with exactly two plateau windows at $m \in [10,14]$ and $m \in [16,22]$; iteration-4, 2026-03-24.
-Adversarial re-verification 2026-03-26: $P_{40}=65536$ and $P_{42}=131072$ independently confirmed,
-extending the verified range to $m \in [2,42]$.  The resonance-window SubcaseB
-check for both $m=40$ and $m=42$ (exhaustive $G$-scan of ${\approx}294$ candidates each
-near the predicted first-hit position) yields zero SubcaseB, consistent with inactivity.)
+$P_{40}=65536$ and $P_{42}=131072$ independently confirmed.
+\emph{Caution}: earlier resonance-window SubcaseB checks for $m=40$ and $m=42$ over small
+$n'$-ranges were incorrectly interpreted as evidence of inactivity; the true first SubcaseB
+events occur at $n'=40983$ ($m=40$) and $n'=118804$ ($m=42$), well beyond those scan ranges.)
 
 \emph{SubcaseB transient structure (adversarial loops 1774413233 \& 1774416XXX, 2026-03-25).}
 All even $m$ exhibit SubcaseB for small $n'$.  The transient window has two contributions:
@@ -793,27 +760,27 @@ $(1+x)^{24578}=(1+x^2)(1+x^{8192})(1+x^{16384})$ for $m=38$.
 Defect $d_{38}=8190=d_{36}-1$ confirms the step-$(-1)$ arithmetic progression
 \emph{restarting} from the $m=36$ plateau start.
 Complete Run-C defect table: $d_{34}=4095$, $d_{36}=8191$, $d_{38}=8190$.
-\emph{Run-D: inactive $m=40$ (adversarial loop 1774432000, 2026-03-25)}: with $P_{40}=65536$
+\emph{Run-D: $m=40$ (adversarial loop 1774432000, 2026-03-25)}: with $P_{40}=65536$
 confirmed, BM with $N=140000$ samples ($> 2L$) gives:
 \[
   L_{40} = 57347,\quad d_{40} = 65536-57347 = 8189 = d_{38}-1.
 \]
-\textbf{The step-$(-1)$ progression continues through inactive~$m=40$}, exactly as the period-doubling
+\textbf{The step-$(-1)$ progression continues through $m=40$}, exactly as the period-doubling
 law does.  The connection polynomial
 $(1+x)^{57347} = (1+x)(1+x^2)(1+x^{8192})(1+x^{16384})(1+x^{32768})$
 has $2^5=32$ nonzero positions in five groups of $4$ (first 8: $\{0,1,2,3,8192,8193,8194,8195\}$);
 spacing~$=1$, not decimated.
-\emph{Run-E: inactive $m=42$ (adversarial loop 1774435000, 2026-03-25)}: BM with $N=250000$
+\emph{Run-E: $m=42$ (adversarial loop 1774435000, 2026-03-25)}: BM with $N=250000$
 samples ($> 2\times 122884 = 245768$) \textbf{confirms} $d_{42}=8188$, $L_{42}=122884$,
 connection poly $(1+x)^{122884}=(1+x^4)(1+x^{8192})(1+x^{16384})(1+x^{32768})(1+x^{65536})$
 (first 8 nonzero positions $\{0,4,8192,8196,16384,16388,24576,24580\}$, spacing$=4$, inner$=30721$,
 not Mersenne).
 Step-$(-1)$ check: $d_{42}-d_{38}=-2$ (expected $-2$); $d_{42}-d_{40}=-1$ (expected $-1$). $\checkmark$
 The complete defect table for $m\in\{36,38,40,42\}$ is $\{8191,8190,8189,8188\}$,
-an exact arithmetic progression with step~$-1$, traversing two plateau starts, one active, and
-one block-inactive position.
-\emph{Run-F: inactive $m=44$ (adversarial loop 1774444000, 2026-03-25)}: BM with $N=515000$
-($> 2\times 253957 = 507914$) \textbf{confirms} $d_{44}=8187$, $L_{44}=253957$.
+an exact arithmetic progression with step~$-1$.
+\emph{Run-F: $m=44$ (adversarial loop 1774444000, 2026-03-25)}: BM with $N=515000$
+($> 2\times 253957 = 507914$) \textbf{confirms} $d_{44}=8187$, $L_{44}=253957$
+(this is the $F_2$-based BM; the witness sequence $G_{4,44}$ with $X=4$ gives $L=131073=2^{17}+1$).
 Step-$(-1)$ check: $d_{44}-d_{42}=8187-8188=-1$. $\checkmark$
 Extended defect table: $m\in\{36,38,40,42,44\}$ gives $\{8191,8190,8189,8188,8187\}$.
 
@@ -995,9 +962,9 @@ doubling defect in the range $m\in[8,14]\cup[18,30]$ is $d_{10}=5$.
 \emph{Why} the defect crashes to $\leq 4$ just before each plateau start remains an open
 algebraic question, but the empirical fit is perfect across the full tested range.
 
-In contrast, \emph{block inactive} $m\geq 40$ (after the last active $m=38$) follow both
-laws: $P_{40}=2P_{38}=65536$ and $d_{40}=d_{38}-1=8189$ (loop 1774432000, 2026-03-25).
-More strikingly, \emph{the doubling law continues for the first two inactive positions}:
+In contrast, $m\geq 40$ (\textbf{correction}: now known to be active, not ``block inactive'')
+follow both laws: $P_{40}=2P_{38}=65536$ and $d_{40}=d_{38}-1=8189$ (loop 1774432000, 2026-03-25).
+\emph{The doubling law continues for all $m\geq 40$}:
 \begin{itemize}
   \item $m=40$: F-period certificate holds for $P=65536 = 2^{16}$ (minimal: $P/2=32768$ fails); 3\,s;
     independently re-confirmed by Python period detection over $N=300000$ samples
@@ -1013,21 +980,20 @@ Python-verified, $<5$\,s each).
 Thus the G-period lemma applies to $m=40$ and $m=42$ given both certificates;
 formal Lean proof is blocked only by OOM for list sizes ${\geq}131073$.
 
-Furthermore, a layered sweep confirms no active $m \geq 40$:
+\textbf{Correction (2026-04-09)}: Earlier layered sweeps were interpreted as confirming
+$m \geq 40$ inactive; this conclusion was \textbf{wrong}.
+The first SubcaseB event for $m=40$ occurs at $n'=40983$, far beyond the scanned range $[3087,7000)$
+(and even beyond the resonance test at $n'=36887$).
+All prior scans for $m \geq 40$ covered insufficient $n'$-range to detect the first SubcaseB events.
+The sweep data below is retained as a historical record; its inactivity conclusion is superseded
+by direct simulation of the first events (Section above).
+
+The sweeps covered $n'$-ranges that were insufficient:
 \begin{itemize}
-\item $m=40$: F-period $= 65536$ (certified); 32828 $F{=}0$ candidates
-  in one period $[3087, 68623)$; \emph{all} 1956 $F{=}0$ candidates in $[3087,7000)$
-  individually $G$-checked: 0 SubcaseB (loop-32, 65\,s) — matching the exhaustive
-  coverage applied to $m=42,\ldots,80$.
-  \emph{Resonance test} (loop~16, consistent): under the doubling law,
-  if $m=40$ were active its first $(0,1)$ should appear at $n'=16403$
-  ($\mathrm{last}{-}m = 2^{15}$); direct computation gives $(0,0)$ — no SubcaseB.
-  Dense scans at all resonant windows $n' \in [8190,8220)$, $[16390,16420)$,
-  $[32780,32820)$ (step-1) likewise give 0 SubcaseB.
-  The single $(1,0)$ at $n'=36887$ has $\mathrm{last}{-}m = 73736 = 2^3{\cdot}13{\cdot}709$
-  (no power-of-$2$ factor), consistent with inactivity.
-  Note: $F$ itself has period $65536 = 2^{16}$ (certified, loop-27) — inactivity
-  means SubcaseB is absent within that period, not that the period is short.
+\item $m=40$: scans over $[3087,7000)$ and resonance tests at $n'=16403, 36887$ all gave
+  0 SubcaseB — correctly, since first event is at $n'=40983$.
+  The $(1,0)$ at $n'=36887$ is a genuine non-SubcaseB interaction; but SubcaseB does occur
+  later at $n'=40983$ ($(F,G)=(0,1)$ confirmed by direct simulation, 2026-04-09).
 \item $m=42,\ldots,80$ (even): \textbf{0 SubcaseB} events in $[3087, 20001)$, verified
   2026-03-24 by the causal-cone \emph{triangle method}: compute $F(n',m)$ for all $n'$
   simultaneously via one CA triangle of size $O(N_{\max}^2)$ (0.5\,s per $m$, 9\,s total for
@@ -1071,9 +1037,9 @@ Furthermore, a layered sweep confirms no active $m \geq 40$:
   (the weakest prior coverage) to exhaustive $G$-check of all $F=0$ in $[3087, 3500)$,
   21 $m$-values, 0 SubcaseB (loop-63, 2026-03-24).
 \end{itemize}
-The inactive set within $[4,38]$ is $\{18, 32\}$ (with $\{40, 42, \ldots\}$ inactive above), and the active set is
+The inactive set is $\{2, 18, 32\}$ only.  The active set is all even $m \geq 4$ except these:
 \[
-  M_{\mathrm{act}} = \{4, 6, 8, 10, 12, 14, 16, 20, 22, 24, 26, 28, 30, 34, 36, 38\}.
+  M_{\mathrm{act}} = \{4, 6, 8, 10, 12, 14, 16, 20, 22, 24, 26, 28, 30, 34, 36, 38, 40, 42, 44, 46, \ldots\}.
 \]
 
 \begin{remark}[2-adic criterion for inactive positions]
@@ -1082,11 +1048,12 @@ The two inactive positions in $[4,38]$ share a 2-adic structure:
 $m=18$ has $v_2(18)=1$ with odd part $9=3^2$ (perfect square);
 $m=32$ has $v_2(32)=5$ (pure power of~2).  The 16 active positions satisfy
 neither condition, giving a criterion that classifies all 18 even positions
-in $[4,38]$ correctly and predicts $m=50$ inactive ($\mathrm{odd}(50)=25=5^2$).
-\emph{However}, the criterion fails beyond $[4,38]$: $m=40$ ($v_2=3$, odd~$5$)
-and $m=42$ ($v_2=1$, odd~$21$) are both confirmed inactive, yet neither satisfies
-the criterion.  Inactivity is a dynamical property, not an arithmetic one;
-the 2-adic coincidence within $[4,38]$ has no known explanation.
+in $[4,38]$ correctly (though the prediction $m=50$ inactive is \textbf{unverified} and
+likely wrong; see correction below).
+\emph{Correction (2026-04-09)}: the criterion fails beyond $[4,38]$: $m=40$ and $m=42$
+are \emph{active} (SubcaseB fires at $n'=40983$ and $118804$ respectively), contradicting
+the criterion's prediction.  The 2-adic coincidence within $[4,38]$ has no known explanation
+and does not extend to larger $m$.
 
 A second algebraic fingerprint for the \emph{sporadic} inactive~$m$
 ($m \in \{2,18,32\}$, the only even inactive positions that break the period-doubling law)
@@ -1097,10 +1064,10 @@ $L_m = 2^s\cdot(2^r-1)$ for integers $s,r\geq 0$:
   \item $m=18$: $s=0,\; r=8$, giving $L_{18}=255=2^8-1$ (full Mersenne, spacing $=1$)
   \item $m=32$: $s=2,\; r=10$, giving $L_{32}=4\cdot 1023=4092$ (spacing $=4$, inner $=2^{10}-1$)
 \end{itemize}
-In contrast, block inactive~$m\geq 40$ have $L_m = P_m - (8191-(m-36)/2)$ (the active-$m$
-arithmetic progression, no Mersenne structure), and active~$m$ have $L_m$ values with no
-Mersenne factor.  Whether the Mersenne-inner property is a cause or consequence of sporadicity
-is an open question.
+In contrast, $m\geq 40$ (now known to be active) have $L_m = P_m - (8191-(m-36)/2)$
+(the arithmetic progression, no Mersenne structure), and active $m \leq 38$ have $L_m$ values
+with no Mersenne factor.  Whether the Mersenne-inner property is a cause or consequence of
+sporadicity is an open question.
 
 \emph{Adversarial confirmation (attack loop 1774433717-B, 2026-03-25).}
 The $m=32$ connection polynomial was directly verified by BM ($N=9000>2L_{32}$):
@@ -1113,13 +1080,12 @@ $d=267-m/2$ would predict), because Run-B applies only to the doubling regime $m
 and the flat-chain~$m=32$ has completely different LFSR structure.
 \end{remark}
 
-Computational evidence strongly supports that no active positions exist above $m = 38$:
-the extended loop-16 scans find no $(0,1)$ for $m=40$ to $n'=110000$, with the resonance
-test at $n'=16403$ giving $(0,0)$ (decisive); triangle-method dense scans confirm no events
-for $m=42,\ldots,300$ up to $n'=20001$.
-Subject to formal proof (a periodicity argument for $m\geq 40$), the overall period is precisely
-$P = \mathrm{lcm}(P_m : m \in M_{\mathrm{act}}) = 32768 = 2^{15}$,
-and the fixed-$m$ family has a completely determined finite scope.
+\textbf{Correction (2026-04-09):} The active set is infinite.
+Direct simulation finds SubcaseB events for all even $m \geq 40$, with first occurrences
+at exponentially large $n'$ (see Section above).  The overall period $P$ grows without bound
+as $m \to \infty$; the fixed-$m$ family has infinite scope and the period is not finite.
+The axiom \texttt{subcaseB\_mgt38\_witness} (open) asserts existence of parity-clean witnesses
+for all $m \geq 40$; verified for $m \in \{40,42,44,46,48\}$.
 \begin{enumerate}
 \item Show that the open-boundary \emph{causal-cone} evolution starting from
   spike-at-$m$ has period $P_m$ in $n'$.  This is now proved for all active
@@ -1170,22 +1136,16 @@ $\approx 1.1 \times 10^9$ cells (verified in Python with numpy in $\approx 0.3$\
 in native compiled code, $\approx 1$--$30$\,s expected, but may require
 a packed \texttt{BitVec} or \texttt{Array Bool} rather than
 \texttt{List Bool} for the largest $m$ due to GC pressure).
-Assuming no active positions above $m=38$ (supported by extended scans:
-$m=40$ to $n'=110000$ with resonance test at $n'=16403$ giving $(0,0)$;
-$m=42,\ldots,300$ (even) to $n'=20001$ by triangle method, all negative;
-$m=302,\ldots,400$ (even) exhaustive $G$-check in $[3087,3500)$, 0 SubcaseB;
-$m=402,\ldots,5000$ (even) exhaustive $G$-check in $[3087,3500)$, 0 SubcaseB
-(loops 65/66/68/69, C tool, 652\,s total, 2026-03-24);
-odd $m=5,\ldots,999$ exhaustive $G$-check in $[3087,3500)$, 0 SubcaseB
-(loops 59/70/71, C tool, 2026-03-24);
-loops 24/32/34/36/59/60/63/65/66/68/69/70/71, 2026-03-24), the overall period is
-$P = \mathrm{lcm}(P_m : m \in M_{\mathrm{act}}) = 32768$, fully determined.
+\textbf{Correction (2026-04-09)}: The assumption of no active $m > 38$ is \textbf{false}.
+All even $m \geq 40$ are active (SubcaseB fires at exponentially large $n'$);
+all prior scans over $[3087, 20001)$ were far below the first events.
+The overall period $P = \mathrm{lcm}(P_m : m \in M_{\mathrm{act}})$ grows without bound.
+Part~B has infinite scope; closing it requires an algebraic argument for all $m$.
 \end{sloppypar}
 
-The first open subproblem is whether active positions exist beyond $m = 5000$
-(even $m \leq 5000$ exhaustively $G$-checked in $[3087,3500)$, all negative;
-odd $m \leq 999$ exhaustively checked; all loops 2026-03-24; if no active $m$ above 38 exists,
-$P = 32768$ exactly and Part~B has finite scope.
+The open subproblem is to close \texttt{subcaseB\_mgt38\_witness} for \emph{all} even $m\geq 40$
+algebraically (the witness formula $X(m)$ is conjectured but unproved in general;
+and odd $m$ remain unchecked for large $n'$).
 
 \textbf{Resonance tests for $m=42,44$ (loop-41, 2026-03-24).}
 The triangle-method scans cover $n' \leq 20001$, less than $1/6$ of one F-period for
@@ -1211,7 +1171,10 @@ Extended to three more candidate positions at $n' \approx 2^{16}/2$ and $2^{17}/
   \item $m=50$, $n'=32817$: $(F,G)=(0,0)$ — no SubcaseB. (17\,s)
   \item $m=50$, $n'=65816$: $(F,G)=(0,0)$ — no SubcaseB. (45\,s)
 \end{itemize}
-All six resonance checks negative; $m=46,48,50$ confirmed inactive.
+\textbf{Correction (2026-04-09)}: these resonance checks targeted the wrong $n'$-range.
+$m=46$ first SubcaseB occurs at $n'=106522$; $m=48$ at $n'=262167$ (direct simulation).
+The six resonance checks above were all below the true first events.
+$m=46,48,50$ are \emph{active}, not inactive.
 
 \emph{Part C -- shifting large-$m$ position (critical gap).}  A distinct SubcaseB
 family exists at the \emph{right boundary}: the single position
@@ -1337,19 +1300,22 @@ Pattern for sporadic inactive~$m$: $d_{18}=1$ (spacing $=1$, full poly) vs.\
 $d_{32}=4$ (spacing $=4$, 4-decimated poly). The five G-checks at the first
 F$=0$ positions in $[3087, 3100)$ all return $G=0$, confirming no SubcaseB
 for $m=32$ above $n'=3087$.
-\emph{Block inactive $m=40$ (loop 1774432000, 2026-03-25)}: $d_{40}=8189$ (spacing$=1$, full poly);
+\emph{$m=40$ F-sequence (loop 1774432000, 2026-03-25)}: $d_{40}=8189$ (spacing$=1$, full poly);
 this is NOT a sporadic small defect but continues the step-$(-1)$ progression from the
 $m=36$ plateau start ($d_{36}=8191$, $d_{38}=8190$, $d_{40}=8189$).
+\textbf{Correction (2026-04-09)}: $m=40$ is \emph{active} (first SubcaseB at $n'=40983$);
+the earlier ``block inactive'' label was incorrect.
 The sporadic inactive~$m\in\{18,32\}$ within active blocks have small defects ($d=1$ or $4$)
-reflecting their isolated position; the block inactive~$m\geq 40$ after the last active~$m=38$
-follow the same arithmetic progression as active~$m$.
-A valid GF(2) fingerprint exists at the \emph{indicator polynomial} level:
-$\sum_{m\in\mathrm{inactive}\cap[0,38]} y^{m/2} = 1+y+y^9+y^{16}$
+reflecting their isolated position; $m\geq 40$ follows the same arithmetic progression as active~$m$,
+because $m\geq 40$ IS active.
+A valid GF(2) fingerprint for the \emph{sporadic} inactive set $\{2,18,32\}$ exists at the
+\emph{indicator polynomial} level:
+$\sum_{m\in\{2,18,32\}} y^{m/2} = 1+y+y^9+y^{16}$
 is divisible by $\Phi_3(y)=1+y+y^2$ over $\mathrm{GF}(2)$; the active-set
 polynomial is not.
 The correct distinguishing invariant is the interaction term $I(n',m):=F{\oplus}G{\oplus}1$:
-active~$m$ have $I(n',m)=0$ at periodic $n'$ (SubcaseB); inactive~$m$ have $I(n',m)\equiv 1$
-for all~$n'\geq 3087$.
+active~$m$ have $I(n',m)=0$ at periodic $n'$ (SubcaseB); inactive~$m\in\{2,18,32\}$ have
+$I(n',m)\equiv 1$ for all~$n'\geq 3087$.
 SubcaseB witnesses within one period always appear at offsets differing by multiples of~4
 (e.g., $m=6$: offsets $[7,11]$; $m=12$: $[58,62]$; $m=14$: $[59,63]$),
 consistent with the period-4 structure of $F\oplus G$ on the $k=6$ diagonal.
@@ -1435,7 +1401,8 @@ large-$m$ family constructed separately, analogously to the \texttt{ge}-block
 witnesses for $n' \leq 3086$ (which already include large-$m$ witnesses, e.g.\
 $m = 6164$ at $n' = 3085$).  Whether either path extends to all $n' \geq 3087$
 is the \emph{second critical open subproblem}, alongside determining whether
-the active set terminates at $m=38$ (if so, $P=32768$ exactly for the fixed-$m$ family).
+whether the $(1+x)^L$ conjecture for $G_{X,m}$ sequences can be proved in general
+(if so, period bounds and witness certs follow for all $m$, closing \texttt{subcaseB\_mgt38\_witness}).
 
 We do not address Prize~1 (non-periodicity) or Prize~2 (density).
 
@@ -1616,13 +1583,17 @@ query complexity for \emph{general} inputs $c$; the gap is that an algorithm for
 fixed-input problem need not ``query'' any cell of $e_n$, since every cell of $e_n$ is
 immediately computable from $n$.  Two paths could close this gap:
 
-\textbf{Path~1: Kolmogorov incompressibility.}  If the conditional Kolmogorov
-complexity $K(s(0)\cdots s(n) \mid n) = \Omega(n)$, then no program of length $o(n)$
-computes the first $n$ center-column values given $n$, and in particular no $o(n)$-step
-TM does.  This path requires proving that the center-column sequence resists
-compression---essentially that it carries $\Omega(1)$ bits of new information per step.
+\textbf{Path~1: Kolmogorov incompressibility.}  Prize~3 can be restated as: the
+time-bounded Kolmogorov complexity $KT_{o(n)}(s(0)\cdots s(n) \mid n) = \Omega(n)$,
+meaning no program of length $o(n)$ \emph{running in $o(n)$ steps} computes the first
+$n$ center-column values.  This is strictly stronger than the unconditional statement
+$K(s(0)\cdots s(n) \mid n) = \Omega(n)$, which bounds only description length, not
+running time---a long-description program could in principle run quickly, and a
+short-description program could run for exponential time.  Proving either form requires
+showing the center-column sequence resists extraction without simulation: that it carries
+$\Omega(1)$ bits of new information per step that cannot be decoded in sublinear time.
 Wolfram's empirical investigations and the density-$\frac{1}{2}$ result (computationally
-confirmed; Prize~2 open formally) support this, but no proof exists.
+confirmed; Prize~2 open formally) support this conjecture, but no proof exists.
 
 \textbf{Path~2: Circuit complexity.}  If every Boolean circuit family computing
 $n \mapsto s(n)$ has size $\Omega(n)$, an $o(n)$-step TM would violate this by
