@@ -1,40 +1,26 @@
 /-
-SubcaseB_X2_Witness.lean — X=2 Sensitivity Witness for SubcaseB at m ≥ 40
-=============================================================================
+SubcaseB_X2_Witness.lean — Per-m Sensitivity Witnesses for SubcaseB at m ≥ 40
+===============================================================================
 
-For even m ≥ 40, SubcaseB fires at infinitely many n'. We prove that X=2
-(spike at position 2) is a sensitivity witness at every SubcaseB firing.
+For even m ≥ 40, SubcaseB fires at infinitely many n'. We verify sensitivity
+witnesses at specific SubcaseB events. CORRECTION (2026-04-09): X=2 is NOT a
+universal witness — it fails for m=44 and m=48.
 
-Notation (following SubcaseBPeriod.lean convention):
-  F_2(n'+1) = ((n'+1) % 2 == 1)  (proved: Spike2Parity.lean)
-  G_{2,m}(n'+1) = center output after n'+1 steps from tape with spikes at 2 AND m
-               = (caEvolveArr (n'+1) (twoSpikeArr 2 m (2*(n'+1)+1))).getD 0 false
+Per-m witnesses verified:
+  m=40, m=42, m=46: X=2 witnesses (G_{2,m} ≠ F_2 at first SubcaseB events)
+  m=44: X=4 witnesses (G_{4,44} ≠ F_4; X=2 fails)
+  m=48: X=6 witnesses (G_{6,48} ≠ F_6; X=2, X=4 fail)
 
-  G2mCenterSeq m T_max : result[t] = G_{2,m}(t+1) for t = 0..T_max-1
-  So: G_{2,m}(n'+1) = (G2mCenterSeq m T_max).getD n' false  (index = n')
+Notation:
+  F_X(T) = FXFast X T = center after T steps from single spike at X
+  G_{X,m}(T) = GXmFast X m T = center after T steps from spikes at X AND m
+  SubcaseB at n': F_m(n'+1)=false AND G_{m,last}(n'+1)=true
+  X witnesses at n': G_{X,m}(n'+1) ≠ F_X(n'+1)
 
-SubcaseB fires at n' when F_m(n'+1)=false AND G_{m,last}(n'+1)=true.
-X=2 witnesses at n' when G_{2,m}(n'+1) ≠ F_2(n'+1).
+Architecture: heavy native_decide proofs are in SubcaseB_X2_Core.lean (imported).
+This file imports Core and contains only fast theorems (FXFast small-T, witnesses).
 
-Verified data (triple-confirmed, patterns.md 2026-04-08):
-  m=40: SubcaseB residues {40983, 61459} mod 65536.
-        n'=40983: G_{2,40}(40984)=true, F_2(40984)=false → differ ✓ [Python: 5.63s]
-        n'=61459: G_{2,40}(61460)=true, F_2(61460)=false → differ ✓ [Python: 13.9s]
-
-  Also verified by small-T native_decide:
-        G_{2,40}(41) = false, F_2(41) = true → differ ✓ [Lean: 5.6s total build]
-
-Indexing in G2mCenterSeq:
-  G_{2,40}(40984) = G2mCenterSeq 40 40984 .getD 40983 false = true
-  G_{2,40}(61460) = G2mCenterSeq 40 61460 .getD 61459 false = true
-
-PERFORMANCE NOTE: native_decide for G2mCenterSeq 40 40984 takes ~95+ minutes
-due to O(T²) computation with GC overhead in Lean's native evaluator. The calls
-are correct but deferred to a dedicated build environment. Proven correct by Python
-simulation using numpy (5.63s for T=40984, 13.9s for T=61460).
-
-IMPORTANT: G2mCenterSeq is defined in CA_ArrayDef (imported) so native_decide
-uses pre-compiled C code rather than the kernel reducer.
+Build times: this file ~5s. Core.lean ~30-35 min (heavy native_decides).
 -/
 
 import P2p.CA_ArrayDef
