@@ -464,23 +464,26 @@ KEY FACTS:
 3. Violations ONLY at right-mirror m=2T-8 (excluded by hm_not_rm).
 -/
 
-/-- The REAL content: at non-right-mirror SubcaseB events for m≥40 with n'≥3087,
+/-- CLAIM: at non-right-mirror SubcaseB events for m≥40 with n'≥3087,
     G_{2,m}(T) = !F_2(T), making twoSpike(2,m) a sensitivity witness.
 
-    ALGEBRAIC REDUCTION (2026-04-07):
-    The sorry is equivalent to: a_{2,m}(T) = 1 at SubcaseB events for m≥40.
-    Proof: F_m=0, F_last=1 (dChain_last_true), G_{m,last}=1 (hts) →
-           a_{m,last}=0 algebraically → a_{2,m}=1 ← this is what's needed.
+    *** THIS CLAIM IS FALSE (2026-04-09) ***
 
-    RIGHT-MIRROR EXCLUSION is ESSENTIAL:
-    Violations of a_{2,m}=1 for m≥40 occur ONLY at m=2T-8 (excluded by hm_not_rm).
-    Pattern: m≡4 mod 8 (m=44,52,...) have one violation each at T=(m+8)/2.
+    COUNTEREXAMPLE: m=44, T=249878 (first non-right-mirror SubcaseB event for m=44):
+    - F_44(249878) = 0 (SubcaseB condition)
+    - G_{44,last}(249878) = 1 (SubcaseB condition)
+    - F_2(249878) = 0 (249878 even)
+    - G_{2,44}(249878) = 0 ← AGREES with F_2, NOT complement
+    Verified by C program stream_G2m_all.c (280 seconds).
 
-    NOTE: hm_ge40 is ESSENTIAL. For m=4: delta=0 at ALL SubcaseB events.
-    For m=6,12,14: delta alternates. For m≥40: delta=1 at all non-right-mirror SubcaseB.
+    The April-7 analysis "violations only at right-mirror m=2T-8" was checked only for
+    small T (where the only right-mirror event occurs at T=(m+8)/2). The first actual
+    SubcaseB event for m=44 is at T=249878, which is non-right-mirror but has G_{2,44}=F_2.
 
-    Proof status: OPEN — requires LFSR orbit characterization or linearity corridor.
-    Best approach: "large T/m linearity corridor" (T/m≥1000 for all m≥40 SubcaseB). -/
+    WHAT IS TRUE instead: some X witnesses (X=4 for m=44, X=6 for m=48; X=2 for m=40,42,46).
+    The correct replacement is `subcaseB_mgt38_witness` (existential, no specific X).
+
+    This sorry cannot be closed as stated. The theorem is FALSE. -/
 lemma twoSpike_center_complement (T m : Nat)
     (hT : 3088 ≤ T)
     (hm_ge40 : 40 ≤ m) (hm_even : m % 2 = 0)
