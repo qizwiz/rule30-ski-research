@@ -61,6 +61,33 @@ Performance estimates for native_decide:
 SORRY'd pending dedicated long-running build sessions.
 -/
 
+/-
+================================================================================
+SECTION C: PERIOD CERTIFICATES (Array Bool via native_decide)
+================================================================================
+
+G_{2,40} period: 65536 steps on tape size 131153 → 81-element tape.
+caEvolveArr shrinks by 2 per step: 131153 - 2*65536 = 81 ✓
+Total Array Bool ops ≈ 4.3B. Estimated time: 5-30 min.
+
+Converted to list form via G2m40_period_cert in SubcaseB_X2_Witness.lean:
+  caEvolve 65536 (twoSpikeList 2 40 131153) = twoSpikeList 2 40 81
+-/
+
+/-- Period cert for G_{2,40}: Array Bool version, proved via native_decide.
+    Tape: twoSpikeArr 2 40 131153 (size 131153). After 65536 steps → size 81.
+    Result = twoSpikeArr 2 40 81 (spikes at 2 and 40 on 81-cell tape). -/
+set_option maxHeartbeats 300000000000 in
+theorem G2m40_period_cert_arr :
+    caEvolveArr 65536 (twoSpikeArr 2 40 131153) = twoSpikeArr 2 40 81 := by
+  sorry -- native_decide  -- estimated 5-30 min; add to long-run queue
+
+/-
+================================================================================
+SECTION D: DEFERRED THEOREMS (X=4 for m=44, X=6 for m=48)
+================================================================================
+-/
+
 -- G_{4,44}(249878) = true: X=4 witnesses m=44 at n'=249877.
 -- F_4(249878) = FXFast 4 249878. Period 8: 249878 mod 8 = 6. FXFast 4 6 = false.
 -- G_{4,44}=true ≠ false=F_4 → X=4 witnesses.

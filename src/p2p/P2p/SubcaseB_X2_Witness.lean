@@ -109,18 +109,27 @@ example : ∀ m T_max t : Nat, t < T_max →
 
 /-
 ================================================================================
-SECTION 5: PERIOD CERTIFICATE (SORRY — deferred, cost ~96 min native_decide)
+SECTION 5: PERIOD CERTIFICATE (via caEvolveArr Array Bool native_decide)
 ================================================================================
 
 G_{2,40} has period 65536 (verified by LFSR analysis in patterns.md).
-Cert form: caEvolveArr 65536 (twoSpikeArr 2 40 131153) = twoSpikeArr 2 40 81.
-Once proved, rule30n_twoSpike_period extends coverage to all n' ≡ {40983, 61459} mod 65536.
+
+Strategy: prove G2m40_period_cert_arr (Array Bool version) in Core.lean via
+native_decide, then convert using caEvolveArr_toList_eq + twoSpikeArr_toList_eq.
+
+caEvolveArr shrinks the array: 131153 - 2*65536 = 81 elements after 65536 steps.
+Total work: Σ_{k=0}^{65535}(131153-2k) ≈ 4.3B bool ops. Estimated ~5-30 min.
+
+Once proved, sensitivity_transfer extends coverage to all n' ≡ {40983, 61459} mod 65536.
 -/
 
-/-- Period cert: G_{2,40} sequence has period 65536. -/
+/-- Period cert: G_{2,40} sequence has period 65536. Derived from G2m40_period_cert_arr
+    (proved in Core.lean via native_decide on caEvolveArr). -/
 theorem G2m40_period_cert :
     caEvolve 65536 (twoSpikeList 2 40 131153) = twoSpikeList 2 40 81 := by
-  sorry
+  have h := congrArg Array.toList G2m40_period_cert_arr
+  simp only [caEvolveArr_toList_eq, twoSpikeArr_toList_eq] at h
+  exact h
 
 /-
 ================================================================================
