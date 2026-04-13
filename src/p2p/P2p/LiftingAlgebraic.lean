@@ -208,66 +208,140 @@ theorem F_diag_recurrence (m n : Nat) (hm : 2 ≤ m) (hn : 1 ≤ n) :
         apply caEvolve_spike_getD0_eq_F; omega
       rw [hpos0, hpos1, hpos2]
 
-/-- Direct period lookup for active m values (periods verified by native_decide in CausalConeLemmas). -/
-def periodOf : Nat → Nat
-  | 4  => 8    | 6  => 16   | 8  => 32
-  | 10 => 64   | 12 => 64   | 14 => 64
-  | 16 => 256  | 20 => 256  | 22 => 256
-  | 24 => 512  | 26 => 1024 | 28 => 2048
-  | 30 => 4096 | _  => 1
-
 /-- Bridge: convert rule30n_spikeAt_period output into F-notation equality. -/
 private lemma F_period_from_cert (m P : Nat)
     (hcert : caEvolve P (spikeAtList m (2*P+2*m+1)) = spikeAtList m (2*m+1))
     (n : Nat) (hn : n ≥ 1) :
     F m n = F m (n + P) := by
   simp only [F]
-  -- rule30n_spikeAt_period applied at (n-1) gives:
-  --   caEvolve (n-1+1) ... = caEvolve ((n-1+1)+P) ...
-  -- which is caEvolve n ... = caEvolve (n+P) ... after arithmetic
   obtain ⟨n', rfl⟩ : ∃ n', n = n' + 1 := ⟨n - 1, by omega⟩
   exact rule30n_spikeAt_period m P hcert n'
 
-theorem F_periodic (m : Nat) :
-    ∀ n : Nat, n ≥ 1 → F m (n + periodOf m) = F m n := by
-  intro n hn
-  match m with
-  | 4  => exact (F_period_from_cert 4  8    caEvolve_cert_m4_p8    n hn).symm
-  | 6  => exact (F_period_from_cert 6  16   caEvolve_cert_m6_p16   n hn).symm
-  | 8  => exact (F_period_from_cert 8  32   caEvolve_cert_m8_p32   n hn).symm
-  | 10 => exact (F_period_from_cert 10 64   caEvolve_cert_m10_p64  n hn).symm
-  | 12 => exact (F_period_from_cert 12 64   caEvolve_cert_m12_p64  n hn).symm
-  | 14 => exact (F_period_from_cert 14 64   caEvolve_cert_m14_p64  n hn).symm
-  | 16 => exact (F_period_from_cert 16 256  caEvolve_cert_m16_p256 n hn).symm
-  | 20 => exact (F_period_from_cert 20 256  caEvolve_cert_m20_p256 n hn).symm
-  | 22 => exact (F_period_from_cert 22 256  caEvolve_cert_m22_p256 n hn).symm
-  | 24 => exact (F_period_from_cert 24 512  caEvolve_cert_m24_p512 n hn).symm
-  | 26 => exact (F_period_from_cert 26 1024 caEvolve_cert_m26_p1024 n hn).symm
-  | 28 => exact (F_period_from_cert 28 2048 caEvolve_cert_m28_p2048 n hn).symm
-  | 30 => exact (F_period_from_cert 30 4096 caEvolve_cert_m30_p4096 n hn).symm
-  | _  => sorry  -- inactive m and m ≥ 32: period = 1 is not right; needs algebraic proof
+/-!
+### twoSpike period infrastructure
 
-theorem G_periodic (X m : Nat) :
-    ∀ n : Nat, n ≥ 1 → G X m (n + periodOf m) = G X m n := by sorry
+The following private lemmas provide the algebraic backbone for G_period_from_cert.
+They mirror the structure in SubcaseBPeriod.lean but are self-contained here.
+-/
 
-/-- Uniform sensitivity transfer: SubcaseB at n₀ implies SubcaseB at all n₀+k*P_m. -/
-theorem uniform_sensitivity_transfer (X m n₀ k : Nat)
+/-- Two twoSpikeLists of different sizes agree at the same interior positions. -/
+private lemma drop_twoSpike_agree' (p q N1 N2 i j : Nat)
+    (h1 : i + j < N1) (h2 : i + j < N2) :
+    (List.drop i (twoSpikeList p q N1)).getD j false =
+    (List.drop i (twoSpikeList p q N2)).getD j false := by
+  simp only [twoSpikeList, List.getD_eq_getElem?_getD, List.getElem?_drop, List.getElem?_ofFn]
+  simp [h1, h2]
+
+/-- Drop past max(p,q) gives all-false in a twoSpikeList. -/
+private lemma twoSpikeList_drop_allFalse' (p q N i : Nat) (hi : i > p) (hiq : i > q) :
+    ∀ j, j < (List.drop i (twoSpikeList p q N)).length →
+         (List.drop i (twoSpikeList p q N)).getD j false = false := by
+  intro j hj
+  simp only [List.length_drop, twoSpikeList_length] at hj
+  rw [show ((twoSpikeList p q N).drop i).getD j false = (twoSpikeList p q N).getD (i + j) false from by
+    simp [List.getD_eq_getElem?_getD, List.getElem?_drop]]
+  by_cases h : i + j < N
+  · rw [twoSpikeList_getD p q N (i + j) h]; simp; omega
+  · simp only [List.getD_eq_getElem?_getD, twoSpikeList, List.getElem?_ofFn]
+    simp [show ¬(i + j < N) from h]
+
+/-- Causal-cone independence for twoSpikeList. -/
+private lemma caEvolve_twoSpike_agree' (P p q N1 N2 i : Nat)
+    (h1 : i + 2 * P < N1) (h2 : i + 2 * P < N2) :
+    (caEvolve P (twoSpikeList p q N1)).getD i false =
+    (caEvolve P (twoSpikeList p q N2)).getD i false := by
+  rw [caEvolve_getD_shift P (twoSpikeList p q N1) i,
+      caEvolve_getD_shift P (twoSpikeList p q N2) i]
+  apply caEvolve_agree P
+  · rw [List.length_drop, twoSpikeList_length]; omega
+  · rw [List.length_drop, twoSpikeList_length]; omega
+  · intro j hj; exact drop_twoSpike_agree' p q N1 N2 i j (by omega) (by omega)
+
+/-- Parametric period lemma for two-spike-at-{p,q} interior config.
+
+Given a `native_decide` certificate
+  caEvolve P (twoSpikeList p q (2*P+2*(max p q)+1)) = twoSpikeList p q (2*(max p q)+1),
+proves that the center value is periodic with period P. -/
+private lemma rule30n_twoSpike_period' (p q P : Nat)
+    (hcert : caEvolve P (twoSpikeList p q (2*P+2*(max p q)+1)) = twoSpikeList p q (2*(max p q)+1))
+    (n : Nat) :
+    (caEvolve (n + 1) (twoSpikeList p q (2*(n+1)+1))).getD 0 false =
+    (caEvolve ((n + 1) + P) (twoSpikeList p q (2*((n+1)+P)+1))).getD 0 false := by
+  have rhs_len : 2*(n+1) < (caEvolve P (twoSpikeList p q (2*((n+1)+P)+1))).length := by
+    have hlen := caEvolve_length_le P (twoSpikeList p q (2*((n+1)+P)+1))
+                (by rw [twoSpikeList_length]; omega)
+    rw [twoSpikeList_length] at hlen; omega
+  conv_rhs => rw [caEvolve_add (n+1) P]
+  apply caEvolve_agree (n+1)
+  · rw [twoSpikeList_length]; omega
+  · exact rhs_len
+  · intro i hi
+    suffices h : (twoSpikeList p q (2*(n+1)+1)).getD i false =
+                 (caEvolve P (twoSpikeList p q (2*(n+1+P)+1))).getD i false by exact h
+    by_cases hm : i ≤ max p q
+    · rw [twoSpikeList_getD p q (2*(n+1)+1) i (by omega)]
+      rw [caEvolve_twoSpike_agree' P p q (2*(n+1+P)+1) (2*P+2*(max p q)+1) i (by omega) (by omega)]
+      rw [hcert]
+      rw [twoSpikeList_getD p q (2*(max p q)+1) i (by omega)]
+    · have lhs_false : (twoSpikeList p q (2*(n+1)+1)).getD i false = false := by
+        rw [twoSpikeList_getD p q (2*(n+1)+1) i (by omega)]; simp; omega
+      have rhs_false : (caEvolve P (twoSpikeList p q (2*(n+1+P)+1))).getD i false = false := by
+        rw [caEvolve_getD_shift P _ i]
+        apply caEvolve_allFalse
+        exact twoSpikeList_drop_allFalse' p q (2*(n+1+P)+1) i (by omega) (by omega)
+      rw [lhs_false, rhs_false]
+
+/-- Bridge: convert a twoSpikeList period cert into G-notation equality.
+
+    Given `caEvolve P (twoSpikeList X m (2*P+2*(max X m)+1)) = twoSpikeList X m (2*(max X m)+1)`,
+    proves G X m n = G X m (n + P) for all n ≥ 1. -/
+lemma G_period_from_cert (X m P : Nat)
+    (hcert : caEvolve P (twoSpikeList X m (2*P+2*(max X m)+1)) = twoSpikeList X m (2*(max X m)+1))
+    (n : Nat) (hn : n ≥ 1) :
+    G X m n = G X m (n + P) := by
+  simp only [G]
+  obtain ⟨n', rfl⟩ : ∃ n', n = n' + 1 := ⟨n - 1, by omega⟩
+  exact rule30n_twoSpike_period' X m P hcert n'
+
+/-- Uniform sensitivity transfer with explicit common period P.
+
+    If F_m and G_{X,m} are both periodic with period P,
+    and F_m(n₀) ≠ G_{X,m}(n₀) at some n₀ ≥ 1,
+    then F_m(n₀ + k*P) ≠ G_{X,m}(n₀ + k*P) for all k.
+
+    Callers supply the period certs via h_F_per and h_G_per. -/
+theorem uniform_sensitivity_transfer (X m n₀ P k : Nat)
     (h_base : F m n₀ ≠ G X m n₀)
-    (h_transient : n₀ ≥ 1) :
-    F m (n₀ + k * periodOf m) ≠ G X m (n₀ + k * periodOf m) := by
+    (h_transient : n₀ ≥ 1)
+    (h_F_per : ∀ n, n ≥ 1 → F m (n + P) = F m n)
+    (h_G_per : ∀ n, n ≥ 1 → G X m (n + P) = G X m n) :
+    F m (n₀ + k * P) ≠ G X m (n₀ + k * P) := by
   induction k with
   | zero => simpa
   | succ k ih =>
-    have hstep : n₀ + (k + 1) * periodOf m = (n₀ + k * periodOf m) + periodOf m := by
-      simp [Nat.succ_mul]; omega
-    have hge : n₀ + k * periodOf m ≥ 1 :=
+    have hstep : n₀ + (k + 1) * P = (n₀ + k * P) + P := by
+      rw [Nat.succ_mul]; omega
+    have hge : n₀ + k * P ≥ 1 :=
       Nat.le_trans h_transient (Nat.le_add_right _ _)
-    rw [hstep, F_periodic m _ hge, G_periodic X m _ hge]
+    rw [hstep, h_F_per _ hge, h_G_per _ hge]
     exact ih
 
--- Type-checks successfully with one sorry (G_periodic):
 #check @uniform_sensitivity_transfer
--- : uniform_sensitivity_transfer :
---   ∀ (X m n₀ k : ℕ),
---   F m n₀ ≠ G X m n₀ → n₀ ≥ 1 → F m (n₀ + k * periodOf m) ≠ G X m (n₀ + k * periodOf m)
+-- uniform_sensitivity_transfer :
+--   ∀ (X m n₀ P k : ℕ),
+--   F m n₀ ≠ G X m n₀ → n₀ ≥ 1 →
+--   (∀ n ≥ 1, F m (n + P) = F m n) →
+--   (∀ n ≥ 1, G X m (n + P) = G X m n) →
+--   F m (n₀ + k * P) ≠ G X m (n₀ + k * P)
+
+#check @F_period_from_cert
+-- F_period_from_cert :
+--   ∀ (m P : ℕ), caEvolve P (spikeAtList m (2 * P + 2 * m + 1)) = spikeAtList m (2 * m + 1) →
+--   ∀ n ≥ 1, F m n = F m (n + P)
+
+#check @G_period_from_cert
+-- G_period_from_cert :
+--   ∀ (X m P : ℕ),
+--   caEvolve P (twoSpikeList X m (2 * P + 2 * max X m + 1)) = twoSpikeList X m (2 * max X m + 1) →
+--   ∀ n ≥ 1, G X m n = G X m (n + P)
 
