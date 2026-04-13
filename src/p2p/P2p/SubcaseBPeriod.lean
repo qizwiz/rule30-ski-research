@@ -45,7 +45,14 @@ import P2p.CA_Array_m34
 import P2p.CA_Array_m36
 -- CA_Array_m36_residues: Fin 16384 native_decide deferred (infeasible compile time)
 import P2p.CA_Array_m38
--- CA_Array_m38_residues: Fin 32768 native_decide deferred (infeasible compile time)
+import P2p.CA_Array_m40
+import P2p.CA_Array_m42
+import P2p.CA_Array_m40_residues
+import P2p.CA_Array_m42_residues
+import P2p.CA_Array_m44
+import P2p.CA_Array_m44_residues
+import P2p.CA_Array_m46
+import P2p.CA_Array_m46_residues
 import P2p.SubcaseB_BaseSens
 import P2p.SubcaseB_m4_RightEdge
 import P2p.SubcaseB_m22_RightEdge
@@ -3932,13 +3939,13 @@ lemma twoSpikeLast36_iterated_period16384 (n k : Nat) (hn : n ≥ 36) :
     rw [hstep]
     exact rule30n_twoSpikeLast36_period16384 (n + k * 16384) (by omega)
 
--- subcaseB_m36_residue_2class: imported from CA_Array_m36_residues.lean
+-- subcaseB_m36_residue_4class: imported from CA_Array_m36_residues.lean
 
-/-- SubcaseB for `m=36` fires only at `n'' ∈ {4113, 4117}` in `[3087, 19471)`. -/
+/-- SubcaseB for `m=36` fires only at `n'' ∈ {4113, 4117, 8209, 16405}` in `[3087, 19471)`. -/
 lemma subcaseB_m36_unique_in_period (n'' : Nat) (hn''_lo : 3087 ≤ n'') (hn''_hi : n'' < 19471)
     (hcase'' : (caEvolve (n''+1) (spikeAtList 36 (2*(n''+1)+1))).getD 0 false = false)
     (hts'' : (caEvolve (n''+1) (twoSpikeLastList 36 (2*(n''+1)+1))).getD 0 false = true) :
-    n'' = 4113 ∨ n'' = 4117 := by
+    n'' = 4113 ∨ n'' = 4117 ∨ n'' = 8209 ∨ n'' = 16405 := by
   set k := (n'' - 36) / 16384
   set j' := (n'' - 36) % 16384 + 36 with hj'_def
   have hj'_range : 36 ≤ j' ∧ j' < 16420 := by
@@ -3968,27 +3975,79 @@ lemma subcaseB_m36_unique_in_period (n'' : Nat) (hn''_lo : 3087 ≤ n'') (hn''_h
     rw [heq] at hperiod
     rw [hperiod]
     exact hts''
-  have hj'_cases : j' = 4113 ∨ j' = 4117 := by
+  have hj'_cases : j' = 4113 ∨ j' = 4117 ∨ j' = 8209 ∨ j' = 16405 := by
     have hval : (⟨j' - 36, hj'lt⟩ : Fin 16384).val = j' - 36 := rfl
-    have h2 := subcaseB_m36_residue_2class ⟨j' - 36, hj'lt⟩
+    have h2 := subcaseB_m36_residue_4class ⟨j' - 36, hj'lt⟩
       (by
         simp only [hval]
         convert hF_j' using 2 <;> omega)
       (by
         simp only [hval]
         convert hG_j' using 2 <;> omega)
-    rcases h2 with h | h
-    · left
-      omega
-    · right
-      omega
-  rcases hj'_cases with h1 | h2
-  · left
-    omega
-  · right
-    omega
+    rcases h2 with h | h | h | h
+    · left; omega
+    · right; left; omega
+    · right; right; left; omega
+    · right; right; right; omega
+  rcases hj'_cases with h1 | h2 | h3 | h4
+  · left; omega
+  · right; left; omega
+  · right; right; left; omega
+  · right; right; right; omega
 
-/-- SubcaseB resolution for `m=36`, `n' ≥ 3087`. Witnesses: `spike_2` (residue 4113) and `spike_4` (residue 4117). -/
+/-- `m=36`, residue `8209 mod 16384`: witness `w=2`. Uses same period cert as residue 4113. -/
+theorem subcaseB_m36_residue_8209_w2 (n' k : Nat)
+    (hk : n' = 8209 + k * 16384)
+    (m : Fin (2 * (n' + 1) + 1)) (hm36 : m.val = 36) :
+    ∃ c_n : Config (n' + 1),
+      (∀ j : Fin (n' + 1), c_n ⟨2 * j.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  use spikeConfig 2 n'
+  refine ⟨spikeConfig_odd_false 2 (by decide) n', ?_⟩
+  rw [rule30n_spikeConfig_eq 2 n', rule30n_flipCell_spikeConfig_eq' 2 n' m (by omega) (by omega)]
+  simp only [hm36]
+  have h_H : caEvolve 16384 (twoSpikeList 2 36 (2 * 16384 + 2 * (max 2 36) + 1)) =
+      twoSpikeList 2 36 (2 * (max 2 36) + 1) := by
+    have hmax : max 2 36 = 36 := by decide
+    rw [hmax]
+    exact caEvolve_cert_ts236_p16384
+  rw [show n' + 1 = 8209 + 1 + k * 16384 from by omega]
+  exact sensitivity_transfer_div 2 36 2 16384 8209 k 8192
+    (by omega) (by omega) (by decide)
+    caEvolve_cert_m2_p2 h_H subcaseB_m36_base_sens_8209_w2
+
+/-- `m=36`, residue `16405 mod 16384`: witness `w=16`, period `P=32768`.
+    Splits k into even/odd since twoSpike(16,36) cert is at P=32768 not 16384. -/
+theorem subcaseB_m36_residue_16405_w16 (n' k : Nat)
+    (hk : n' = 16405 + k * 16384)
+    (m : Fin (2 * (n' + 1) + 1)) (hm36 : m.val = 36) :
+    ∃ c_n : Config (n' + 1),
+      (∀ j : Fin (n' + 1), c_n ⟨2 * j.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  use spikeConfig 16 n'
+  refine ⟨spikeConfig_odd_false 16 (by decide) n', ?_⟩
+  rw [rule30n_spikeConfig_eq 16 n', rule30n_flipCell_spikeConfig_eq' 16 n' m (by omega) (by omega)]
+  simp only [hm36]
+  have h_H : caEvolve 32768 (twoSpikeList 16 36 (2 * 32768 + 2 * (max 16 36) + 1)) =
+      twoSpikeList 16 36 (2 * (max 16 36) + 1) := by
+    have hmax : max 16 36 = 36 := by decide
+    rw [hmax]
+    exact caEvolve_cert_ts1636_p32768
+  -- Split k into even (k=2j) and odd (k=2j+1)
+  rcases Nat.even_or_odd k with ⟨j, hj⟩ | ⟨j, hj⟩
+  · -- k = 2j: n' = 16405 + j * 32768
+    rw [show n' + 1 = 16405 + 1 + j * 32768 from by omega]
+    exact sensitivity_transfer_div 16 36 256 32768 16405 j 128
+      (by omega) (by omega) (by decide)
+      caEvolve_cert_m16_p256 h_H subcaseB_m36_base_sens_16405_w16
+  · -- k = 2j+1: n' = 32789 + j * 32768
+    rw [show n' + 1 = 32789 + 1 + j * 32768 from by omega]
+    exact sensitivity_transfer_div 16 36 256 32768 32789 j 128
+      (by omega) (by omega) (by decide)
+      caEvolve_cert_m16_p256 h_H subcaseB_m36_base_sens_32789_w16
+
+/-- SubcaseB resolution for `m=36`, `n' ≥ 3087`. Witnesses: `spike_2` (residues 4113, 8209),
+    `spike_4` (residue 4117), `spike_16` (residue 16405). -/
 theorem subcaseB_m36_ge3087_proved (n' : Nat) (hn' : 3087 ≤ n')
     (m : Fin (2 * (n' + 1) + 1)) (hm36 : m.val = 36)
     (hcase : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
@@ -4025,11 +4084,13 @@ theorem subcaseB_m36_ge3087_proved (n' : Nat) (hn' : 3087 ≤ n')
     rw [heq] at hperiod
     rw [hperiod]
     exact hts36
-  have hn''_cases : n'' = 4113 ∨ n'' = 4117 :=
+  have hn''_cases : n'' = 4113 ∨ n'' = 4117 ∨ n'' = 8209 ∨ n'' = 16405 :=
     subcaseB_m36_unique_in_period n'' hn''_range.1 hn''_range.2 hcase'' hts''
-  rcases hn''_cases with h1 | h2
+  rcases hn''_cases with h1 | h2 | h3 | h4
   · exact subcaseB_m36_residue_4113_w2 n' k (by omega) m hm36
   · exact subcaseB_m36_residue_4117_w4 n' k (by omega) m hm36
+  · exact subcaseB_m36_residue_8209_w2 n' k (by omega) m hm36
+  · exact subcaseB_m36_residue_16405_w16 n' k (by omega) m hm36
 
 /-!
 ## SubcaseB resolution for m=38
@@ -4050,7 +4111,7 @@ lemma twoSpikeLast38_iterated_period32768 (n k : Nat) (hn : n ≥ 38) :
     rw [hstep]
     exact rule30n_twoSpikeLast38_period32768 (n + k * 32768) (by omega)
 
--- subcaseB_m38_residue_2class_proved: imported from CA_Array_m38_residues.lean
+-- subcaseB_m38_residue_3class: imported from CA_Array_m38_residues.lean
 
 /-- Witness for m=38 SubcaseB at n' = 8210 (w=2). -/
 private lemma subcaseB_m38_residue_8210_w2 (n' k : Nat) (hn' : n' = 8210 + k * 32768)
@@ -4092,6 +4153,26 @@ private lemma subcaseB_m38_residue_8214_w4 (n' k : Nat) (hn' : n' = 8214 + k * 3
     (by omega) (by omega) (by decide)
     caEvolve_cert_m4_p8 h_H subcaseB_m38_base_sens_8214_w4
 
+/-- Witness for m=38 SubcaseB at n' = 32790 (w=2). -/
+private lemma subcaseB_m38_residue_32790_w2 (n' k : Nat) (hn' : n' = 32790 + k * 32768)
+    (m : Fin (2 * (n' + 1) + 1)) (hm38 : m.val = 38) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  use spikeConfig 2 n'
+  refine ⟨spikeConfig_odd_false 2 (by decide) n', ?_⟩
+  rw [rule30n_spikeConfig_eq 2 n', rule30n_flipCell_spikeConfig_eq' 2 n' m (by omega) (by omega)]
+  simp only [hm38]
+  have h_H : caEvolve 32768 (twoSpikeList 2 38 (2 * 32768 + 2 * (max 2 38) + 1)) =
+      twoSpikeList 2 38 (2 * (max 2 38) + 1) := by
+    have hmax : max 2 38 = 38 := by decide
+    rw [hmax]
+    exact caEvolve_cert_ts238_p32768
+  rw [show n' + 1 = 32790 + 1 + k * 32768 from by omega]
+  exact sensitivity_transfer_div 2 38 2 32768 32790 k 16384
+    (by omega) (by omega) (by decide)
+    caEvolve_cert_m2_p2 h_H subcaseB_m38_base_sens_32790_w2
+
 theorem subcaseB_m38_ge3087_proved (n' : Nat) (hn' : 3087 ≤ n')
     (m : Fin (2 * (n' + 1) + 1)) (hm38 : m.val = 38)
     (hcase : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
@@ -4118,15 +4199,339 @@ theorem subcaseB_m38_ge3087_proved (n' : Nat) (hn' : 3087 ≤ n')
     have hperiod := twoSpikeLast38_iterated_period32768 n'' k (by omega)
     have heq : n'' + 1 + k * 32768 = n' + 1 := by omega
     rw [heq] at hperiod; rw [hperiod]; exact hts38
-  have hn''_cases : n'' = 8210 ∨ n'' = 8214 := by
+  have hn''_cases : n'' = 8210 ∨ n'' = 8214 ∨ n'' = 32790 := by
     have hj : n'' - 38 < 32768 := by omega
-    have := subcaseB_m38_residue_2class_proved ⟨n'' - 38, hj⟩
+    have := subcaseB_m38_residue_3class ⟨n'' - 38, hj⟩
+      (by simp; convert hcase'' using 5 <;> omega)
+      (by simp; convert hts'' using 5 <;> omega)
+    omega
+  rcases hn''_cases with h1 | h2 | h3
+  · exact subcaseB_m38_residue_8210_w2 n' k (by omega) m hm38
+  · exact subcaseB_m38_residue_8214_w4 n' k (by omega) m hm38
+  · exact subcaseB_m38_residue_32790_w2 n' k (by omega) m hm38
+
+/-!
+## SubcaseB resolution for m=40 at n' ≥ 3087
+
+Active m=40: SubcaseB fires at n'' ≡ {40983, 61459} (mod 65536).
+Witness: w=2 (spike at position 2) for both residue classes.
+Period P=65536. Certs in CA_Array_m40.lean, residues in CA_Array_m40_residues.lean.
+-/
+
+lemma twoSpikeLast40_iterated_period65536 (n k : Nat) (hn : n ≥ 40) :
+    (caEvolve (n + 1) (twoSpikeLastList 40 (2*(n+1)+1))).getD 0 false =
+    (caEvolve (n + 1 + k * 65536) (twoSpikeLastList 40 (2*(n+1+k*65536)+1))).getD 0 false := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [ih]
+    conv_lhs => rw [show n + 1 + k * 65536 = (n + k * 65536) + 1 from by omega]
+    have hstep : n + 1 + (k + 1) * 65536 = (n + k * 65536) + 1 + 65536 := by ring
+    rw [hstep]
+    exact rule30n_twoSpikeLast40_period65536 (n + k * 65536) (by omega)
+
+-- subcaseB_m40_residue_2class: imported from CA_Array_m40_residues.lean
+
+/-- Witness for m=40 SubcaseB at n'' = 40983 (w=2). -/
+private lemma subcaseB_m40_residue_40983_w2 (n' k : Nat) (hn' : n' = 40983 + k * 65536)
+    (m : Fin (2 * (n' + 1) + 1)) (hm40 : m.val = 40) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  use spikeConfig 2 n'
+  refine ⟨spikeConfig_odd_false 2 (by decide) n', ?_⟩
+  rw [rule30n_spikeConfig_eq 2 n', rule30n_flipCell_spikeConfig_eq' 2 n' m (by omega) (by omega)]
+  simp only [hm40]
+  have h_H : caEvolve 65536 (twoSpikeList 2 40 (2 * 65536 + 2 * (max 2 40) + 1)) =
+      twoSpikeList 2 40 (2 * (max 2 40) + 1) := by
+    have hmax : max 2 40 = 40 := by decide
+    rw [hmax]; exact caEvolve_cert_ts240_p65536
+  rw [show n' + 1 = 40983 + 1 + k * 65536 from by omega]
+  exact sensitivity_transfer_div 2 40 2 65536 40983 k 32768
+    (by omega) (by omega) (by decide)
+    caEvolve_cert_m2_p2 h_H subcaseB_m40_base_sens_40983_w2
+
+/-- Witness for m=40 SubcaseB at n'' = 61459 (w=2). -/
+private lemma subcaseB_m40_residue_61459_w2 (n' k : Nat) (hn' : n' = 61459 + k * 65536)
+    (m : Fin (2 * (n' + 1) + 1)) (hm40 : m.val = 40) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  use spikeConfig 2 n'
+  refine ⟨spikeConfig_odd_false 2 (by decide) n', ?_⟩
+  rw [rule30n_spikeConfig_eq 2 n', rule30n_flipCell_spikeConfig_eq' 2 n' m (by omega) (by omega)]
+  simp only [hm40]
+  have h_H : caEvolve 65536 (twoSpikeList 2 40 (2 * 65536 + 2 * (max 2 40) + 1)) =
+      twoSpikeList 2 40 (2 * (max 2 40) + 1) := by
+    have hmax : max 2 40 = 40 := by decide
+    rw [hmax]; exact caEvolve_cert_ts240_p65536
+  rw [show n' + 1 = 61459 + 1 + k * 65536 from by omega]
+  exact sensitivity_transfer_div 2 40 2 65536 61459 k 32768
+    (by omega) (by omega) (by decide)
+    caEvolve_cert_m2_p2 h_H subcaseB_m40_base_sens_61459_w2
+
+theorem subcaseB_m40_ge3087_proved (n' : Nat) (hn' : 3087 ≤ n')
+    (m : Fin (2 * (n' + 1) + 1)) (hm40 : m.val = 40)
+    (hcase : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+               decide (k.val = m.val)) = false)
+    (hts : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+             decide (k.val = m.val ∨ k.val = 2 * (n' + 1))) = true) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  have hcase40 : (caEvolve (n'+1) (spikeAtList 40 (2*(n'+1)+1))).getD 0 false = false := by
+    have hc := hcase; simp only [hm40] at hc
+    rw [← rule30n_spikeAt_eq n' 40]; exact hc
+  have hts40 : (caEvolve (n'+1) (twoSpikeLastList 40 (2*(n'+1)+1))).getD 0 false = true := by
+    have ht := hts; simp only [hm40] at ht
+    rw [← rule30n_twoSpikeLast_eq n' 40]; exact ht
+  -- Use base=40 so periodReduce gives n''∈[40, 65576), ensuring n''-40 < 65536
+  obtain ⟨k, hn'_eq⟩ := periodReduce_diff 40 65536 n' (by omega) (by omega)
+  have hn''_range := periodReduce_range 40 65536 n' (by omega) (by omega)
+  set n'' := periodReduce 40 65536 n' with hn''_def
+  have hcase'' : (caEvolve (n''+1) (spikeAtList 40 (2*(n''+1)+1))).getD 0 false = false := by
+    have hperiod := spikeAt_iterated_period 40 65536 (by omega) caEvolve_cert_spike40_p65536 n'' k
+    have heq : n'' + 1 + k * 65536 = n' + 1 := by omega
+    rw [heq] at hperiod; rw [hperiod]; exact hcase40
+  have hts'' : (caEvolve (n''+1) (twoSpikeLastList 40 (2*(n''+1)+1))).getD 0 false = true := by
+    have hperiod := twoSpikeLast40_iterated_period65536 n'' k (by omega)
+    have heq : n'' + 1 + k * 65536 = n' + 1 := by omega
+    rw [heq] at hperiod; rw [hperiod]; exact hts40
+  have hn''_cases : n'' = 40983 ∨ n'' = 61459 := by
+    -- n'' ∈ [40, 65576), so n''-40 ∈ [0, 65536) — hj is provable by omega
+    have hj : n'' - 40 < 65536 := by omega
+    have := subcaseB_m40_residue_2class ⟨n'' - 40, hj⟩
       (by simp; convert hcase'' using 5 <;> omega)
       (by simp; convert hts'' using 5 <;> omega)
     omega
   rcases hn''_cases with h1 | h2
-  · exact subcaseB_m38_residue_8210_w2 n' k (by omega) m hm38
-  · exact subcaseB_m38_residue_8214_w4 n' k (by omega) m hm38
+  · exact subcaseB_m40_residue_40983_w2 n' k (by omega) m hm40
+  · exact subcaseB_m40_residue_61459_w2 n' k (by omega) m hm40
+
+/-!
+## SubcaseB resolution for m=42 at n' ≥ 3087
+
+Active m=42: SubcaseB fires at n'' ≡ {118804} (mod 131072).
+Witness: w=2 (spike at position 2).
+Period P=131072. Certs in CA_Array_m42.lean, residues in CA_Array_m42_residues.lean.
+-/
+
+lemma twoSpikeLast42_iterated_period131072 (n k : Nat) (hn : n ≥ 42) :
+    (caEvolve (n + 1) (twoSpikeLastList 42 (2*(n+1)+1))).getD 0 false =
+    (caEvolve (n + 1 + k * 131072) (twoSpikeLastList 42 (2*(n+1+k*131072)+1))).getD 0 false := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [ih]
+    conv_lhs => rw [show n + 1 + k * 131072 = (n + k * 131072) + 1 from by omega]
+    have hstep : n + 1 + (k + 1) * 131072 = (n + k * 131072) + 1 + 131072 := by ring
+    rw [hstep]
+    exact rule30n_twoSpikeLast42_period131072 (n + k * 131072) (by omega)
+
+-- subcaseB_m42_residue_1class: imported from CA_Array_m42_residues.lean
+
+/-- Witness for m=42 SubcaseB at n'' = 118804 (w=2). -/
+private lemma subcaseB_m42_residue_118804_w2 (n' k : Nat) (hn' : n' = 118804 + k * 131072)
+    (m : Fin (2 * (n' + 1) + 1)) (hm42 : m.val = 42) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  use spikeConfig 2 n'
+  refine ⟨spikeConfig_odd_false 2 (by decide) n', ?_⟩
+  rw [rule30n_spikeConfig_eq 2 n', rule30n_flipCell_spikeConfig_eq' 2 n' m (by omega) (by omega)]
+  simp only [hm42]
+  have h_H : caEvolve 131072 (twoSpikeList 2 42 (2 * 131072 + 2 * (max 2 42) + 1)) =
+      twoSpikeList 2 42 (2 * (max 2 42) + 1) := by
+    have hmax : max 2 42 = 42 := by decide
+    rw [hmax]; exact caEvolve_cert_ts242_p131072
+  rw [show n' + 1 = 118804 + 1 + k * 131072 from by omega]
+  exact sensitivity_transfer_div 2 42 2 131072 118804 k 65536
+    (by omega) (by omega) (by decide)
+    caEvolve_cert_m2_p2 h_H subcaseB_m42_base_sens_118804_w2
+
+theorem subcaseB_m42_ge3087_proved (n' : Nat) (hn' : 3087 ≤ n')
+    (m : Fin (2 * (n' + 1) + 1)) (hm42 : m.val = 42)
+    (hcase : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+               decide (k.val = m.val)) = false)
+    (hts : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+             decide (k.val = m.val ∨ k.val = 2 * (n' + 1))) = true) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  have hcase42 : (caEvolve (n'+1) (spikeAtList 42 (2*(n'+1)+1))).getD 0 false = false := by
+    have hc := hcase; simp only [hm42] at hc
+    rw [← rule30n_spikeAt_eq n' 42]; exact hc
+  have hts42 : (caEvolve (n'+1) (twoSpikeLastList 42 (2*(n'+1)+1))).getD 0 false = true := by
+    have ht := hts; simp only [hm42] at ht
+    rw [← rule30n_twoSpikeLast_eq n' 42]; exact ht
+  obtain ⟨k, hn'_eq⟩ := periodReduce_diff 42 131072 n' (by omega) (by omega)
+  have hn''_range := periodReduce_range 42 131072 n' (by omega) (by omega)
+  set n'' := periodReduce 42 131072 n' with hn''_def
+  have hcase'' : (caEvolve (n''+1) (spikeAtList 42 (2*(n''+1)+1))).getD 0 false = false := by
+    have hperiod := spikeAt_iterated_period 42 131072 (by omega) caEvolve_cert_spike42_p131072 n'' k
+    have heq : n'' + 1 + k * 131072 = n' + 1 := by omega
+    rw [heq] at hperiod; rw [hperiod]; exact hcase42
+  have hts'' : (caEvolve (n''+1) (twoSpikeLastList 42 (2*(n''+1)+1))).getD 0 false = true := by
+    have hperiod := twoSpikeLast42_iterated_period131072 n'' k (by omega)
+    have heq : n'' + 1 + k * 131072 = n' + 1 := by omega
+    rw [heq] at hperiod; rw [hperiod]; exact hts42
+  have hn''_cases : n'' = 118804 := by
+    have hj : n'' - 42 < 131072 := by omega
+    have := subcaseB_m42_residue_1class ⟨n'' - 42, hj⟩
+      (by simp; convert hcase'' using 5 <;> omega)
+      (by simp; convert hts'' using 5 <;> omega)
+    omega
+  exact subcaseB_m42_residue_118804_w2 n' k (by omega) m hm42
+
+/-!
+## SubcaseB resolution for m=44 at n' ≥ 3087
+
+Active m=44: SubcaseB fires at n'' ≡ {249877} (mod 262144).
+Witness: w=4 (spike at position 4).
+Period P=262144. Certs in CA_Array_m44.lean, residues in CA_Array_m44_residues.lean.
+-/
+
+lemma twoSpikeLast44_iterated_period262144 (n k : Nat) (hn : n ≥ 44) :
+    (caEvolve (n + 1) (twoSpikeLastList 44 (2*(n+1)+1))).getD 0 false =
+    (caEvolve (n + 1 + k * 262144) (twoSpikeLastList 44 (2*(n+1+k*262144)+1))).getD 0 false := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [ih]
+    conv_lhs => rw [show n + 1 + k * 262144 = (n + k * 262144) + 1 from by omega]
+    have hstep : n + 1 + (k + 1) * 262144 = (n + k * 262144) + 1 + 262144 := by ring
+    rw [hstep]
+    exact rule30n_twoSpikeLast44_period262144 (n + k * 262144) (by omega)
+
+-- subcaseB_m44_residue_1class: imported from CA_Array_m44_residues.lean
+
+/-- Witness for m=44 SubcaseB at n'' = 249877 (w=4). -/
+private lemma subcaseB_m44_residue_249877_w4 (n' k : Nat) (hn' : n' = 249877 + k * 262144)
+    (m : Fin (2 * (n' + 1) + 1)) (hm44 : m.val = 44) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  use spikeConfig 4 n'
+  refine ⟨spikeConfig_odd_false 4 (by decide) n', ?_⟩
+  rw [rule30n_spikeConfig_eq 4 n', rule30n_flipCell_spikeConfig_eq' 4 n' m (by omega) (by omega)]
+  simp only [hm44]
+  have h_H : caEvolve 262144 (twoSpikeList 4 44 (2 * 262144 + 2 * (max 4 44) + 1)) =
+      twoSpikeList 4 44 (2 * (max 4 44) + 1) := by
+    have hmax : max 4 44 = 44 := by decide
+    rw [hmax]; exact caEvolve_cert_ts444_p262144
+  rw [show n' + 1 = 249877 + 1 + k * 262144 from by omega]
+  exact sensitivity_transfer_div 4 44 8 262144 249877 k 32768
+    (by omega) (by omega) (by decide)
+    caEvolve_cert_m4_p8 h_H subcaseB_m44_base_sens_249877_w4
+
+theorem subcaseB_m44_ge3087_proved (n' : Nat) (hn' : 3087 ≤ n')
+    (m : Fin (2 * (n' + 1) + 1)) (hm44 : m.val = 44)
+    (hcase : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+               decide (k.val = m.val)) = false)
+    (hts : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+             decide (k.val = m.val ∨ k.val = 2 * (n' + 1))) = true) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  have hcase44 : (caEvolve (n'+1) (spikeAtList 44 (2*(n'+1)+1))).getD 0 false = false := by
+    have hc := hcase; simp only [hm44] at hc
+    rw [← rule30n_spikeAt_eq n' 44]; exact hc
+  have hts44 : (caEvolve (n'+1) (twoSpikeLastList 44 (2*(n'+1)+1))).getD 0 false = true := by
+    have ht := hts; simp only [hm44] at ht
+    rw [← rule30n_twoSpikeLast_eq n' 44]; exact ht
+  obtain ⟨k, hn'_eq⟩ := periodReduce_diff 44 262144 n' (by omega) (by omega)
+  have hn''_range := periodReduce_range 44 262144 n' (by omega) (by omega)
+  set n'' := periodReduce 44 262144 n' with hn''_def
+  have hcase'' : (caEvolve (n''+1) (spikeAtList 44 (2*(n''+1)+1))).getD 0 false = false := by
+    have hperiod := spikeAt_iterated_period 44 262144 (by omega) caEvolve_cert_spike44_p262144 n'' k
+    have heq : n'' + 1 + k * 262144 = n' + 1 := by omega
+    rw [heq] at hperiod; rw [hperiod]; exact hcase44
+  have hts'' : (caEvolve (n''+1) (twoSpikeLastList 44 (2*(n''+1)+1))).getD 0 false = true := by
+    have hperiod := twoSpikeLast44_iterated_period262144 n'' k (by omega)
+    have heq : n'' + 1 + k * 262144 = n' + 1 := by omega
+    rw [heq] at hperiod; rw [hperiod]; exact hts44
+  have hn''_cases : n'' = 249877 := by
+    have hj : n'' - 44 < 262144 := by omega
+    have := subcaseB_m44_residue_1class ⟨n'' - 44, hj⟩
+      (by simp; convert hcase'' using 5 <;> omega)
+      (by simp; convert hts'' using 5 <;> omega)
+    omega
+  exact subcaseB_m44_residue_249877_w4 n' k (by omega) m hm44
+
+/-!
+## SubcaseB resolution for m=46 at n' ≥ 3087
+
+Active m=46: SubcaseB fires at n'' ≡ {106522} (mod 524288).
+Witness: w=2 (spike at position 2).
+Period P=524288. Certs in CA_Array_m46.lean, residues in CA_Array_m46_residues.lean.
+-/
+
+lemma twoSpikeLast46_iterated_period524288 (n k : Nat) (hn : n ≥ 46) :
+    (caEvolve (n + 1) (twoSpikeLastList 46 (2*(n+1)+1))).getD 0 false =
+    (caEvolve (n + 1 + k * 524288) (twoSpikeLastList 46 (2*(n+1+k*524288)+1))).getD 0 false := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [ih]
+    conv_lhs => rw [show n + 1 + k * 524288 = (n + k * 524288) + 1 from by omega]
+    have hstep : n + 1 + (k + 1) * 524288 = (n + k * 524288) + 1 + 524288 := by ring
+    rw [hstep]
+    exact rule30n_twoSpikeLast46_period524288 (n + k * 524288) (by omega)
+
+-- subcaseB_m46_residue_1class: imported from CA_Array_m46_residues.lean
+
+/-- Witness for m=46 SubcaseB at n'' = 106522 (w=2). -/
+private lemma subcaseB_m46_residue_106522_w2 (n' k : Nat) (hn' : n' = 106522 + k * 524288)
+    (m : Fin (2 * (n' + 1) + 1)) (hm46 : m.val = 46) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  use spikeConfig 2 n'
+  refine ⟨spikeConfig_odd_false 2 (by decide) n', ?_⟩
+  rw [rule30n_spikeConfig_eq 2 n', rule30n_flipCell_spikeConfig_eq' 2 n' m (by omega) (by omega)]
+  simp only [hm46]
+  have h_H : caEvolve 524288 (twoSpikeList 2 46 (2 * 524288 + 2 * (max 2 46) + 1)) =
+      twoSpikeList 2 46 (2 * (max 2 46) + 1) := by
+    have hmax : max 2 46 = 46 := by decide
+    rw [hmax]; exact caEvolve_cert_ts246_p524288
+  rw [show n' + 1 = 106522 + 1 + k * 524288 from by omega]
+  exact sensitivity_transfer_div 2 46 2 524288 106522 k 262144
+    (by omega) (by omega) (by decide)
+    caEvolve_cert_m2_p2 h_H subcaseB_m46_base_sens_106522_w2
+
+theorem subcaseB_m46_ge3087_proved (n' : Nat) (hn' : 3087 ≤ n')
+    (m : Fin (2 * (n' + 1) + 1)) (hm46 : m.val = 46)
+    (hcase : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+               decide (k.val = m.val)) = false)
+    (hts : rule30n (n' + 1) (fun k : Fin (2 * (n' + 1) + 1) =>
+             decide (k.val = m.val ∨ k.val = 2 * (n' + 1))) = true) :
+    ∃ c_n : Config (n' + 1),
+      (∀ k : Fin (n' + 1), c_n ⟨2 * k.val + 1, by omega⟩ = false) ∧
+      rule30n (n' + 1) c_n ≠ rule30n (n' + 1) (flipCell c_n m) := by
+  have hcase46 : (caEvolve (n'+1) (spikeAtList 46 (2*(n'+1)+1))).getD 0 false = false := by
+    have hc := hcase; simp only [hm46] at hc
+    rw [← rule30n_spikeAt_eq n' 46]; exact hc
+  have hts46 : (caEvolve (n'+1) (twoSpikeLastList 46 (2*(n'+1)+1))).getD 0 false = true := by
+    have ht := hts; simp only [hm46] at ht
+    rw [← rule30n_twoSpikeLast_eq n' 46]; exact ht
+  obtain ⟨k, hn'_eq⟩ := periodReduce_diff 46 524288 n' (by omega) (by omega)
+  have hn''_range := periodReduce_range 46 524288 n' (by omega) (by omega)
+  set n'' := periodReduce 46 524288 n' with hn''_def
+  have hcase'' : (caEvolve (n''+1) (spikeAtList 46 (2*(n''+1)+1))).getD 0 false = false := by
+    have hperiod := spikeAt_iterated_period 46 524288 (by omega) caEvolve_cert_spike46_p524288 n'' k
+    have heq : n'' + 1 + k * 524288 = n' + 1 := by omega
+    rw [heq] at hperiod; rw [hperiod]; exact hcase46
+  have hts'' : (caEvolve (n''+1) (twoSpikeLastList 46 (2*(n''+1)+1))).getD 0 false = true := by
+    have hperiod := twoSpikeLast46_iterated_period524288 n'' k (by omega)
+    have heq : n'' + 1 + k * 524288 = n' + 1 := by omega
+    rw [heq] at hperiod; rw [hperiod]; exact hts46
+  have hn''_cases : n'' = 106522 := by
+    have hj : n'' - 46 < 524288 := by omega
+    have := subcaseB_m46_residue_1class ⟨n'' - 46, hj⟩
+      (by simp; convert hcase'' using 5 <;> omega)
+      (by simp; convert hts'' using 5 <;> omega)
+    omega
+  exact subcaseB_m46_residue_106522_w2 n' k (by omega) m hm46
 
 /-!
 ## SubcaseB resolution for the "other" m at n' ≥ 3087
@@ -5865,8 +6270,16 @@ theorem subcaseB_resolution_ge3087
           · exact subcaseB_m36_ge3087_proved n' hn' m hm36 hcase hts
           · by_cases hm38 : m.val = 38
             · exact subcaseB_m38_ge3087_proved n' hn' m hm38 hcase hts
-            · -- m ≥ 40, not right-mirror: use X=2 universal witness (empirically verified conjecture)
-              exact subcaseB_mgt38_witness n' hn' m hm_even hm_low (by omega) hm_ne_r hrm hm_high hcase hts
+            · by_cases hm40 : m.val = 40
+              · exact subcaseB_m40_ge3087_proved n' hn' m hm40 hcase hts
+              · by_cases hm42 : m.val = 42
+                · exact subcaseB_m42_ge3087_proved n' hn' m hm42 hcase hts
+                · by_cases hm44 : m.val = 44
+                  · exact subcaseB_m44_ge3087_proved n' hn' m hm44 hcase hts
+                  · by_cases hm46 : m.val = 46
+                    · exact subcaseB_m46_ge3087_proved n' hn' m hm46 hcase hts
+                    · -- m ≥ 48, not right-mirror: use witness axiom (m=48,50 active; m≥52 inactive)
+                      exact subcaseB_mgt38_witness n' hn' m hm_even hm_low (by omega) hm_ne_r hrm hm_high hcase hts
 
 -- subcaseB_resolution_ge3087 is the public API (called by LiftingLemma_LeftPermutive).
 -- The n'∈[5,3086] case is handled directly by the native_decide tower in
