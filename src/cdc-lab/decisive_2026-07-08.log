@@ -1,0 +1,727 @@
+[09:39:37] decisive sweep v2: sides=[15, 22, 32, 64] seeds=[30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41] workers=12 -> 504 run cells (0 done, resuming)
+[09:39:37] side=15: 12 seed-tasks (maxr=40000)
+[09:39:39] side=15 seed=34: built ['curved', 'flat', 'localrand'] in 2.09s (edges flat=420 curved=420 localrand=420)
+[09:39:39] side=15 seed=39: built ['curved', 'flat', 'localrand'] in 2.11s (edges flat=420 curved=421 localrand=420)
+[09:39:39] side=15 seed=30: built ['curved', 'flat', 'localrand'] in 2.23s (edges flat=420 curved=421 localrand=420)
+[09:39:39] side=15 seed=33: built ['curved', 'flat', 'localrand'] in 2.27s (edges flat=420 curved=420 localrand=420)
+[09:39:39] side=15 seed=32: built ['curved', 'flat', 'localrand'] in 2.27s (edges flat=420 curved=420 localrand=420)
+[09:39:39] side=15 seed=36: built ['curved', 'flat', 'localrand'] in 2.33s (edges flat=420 curved=420 localrand=420)
+[09:39:39]   side=15 seed=34 flat      stats: lam2=0.01210832 max_deg=4 (0.3s)
+[09:39:40]   side=15 seed=34 flat      heat    eps3=846 eps6=1983
+[09:39:40]   side=15 seed=39 flat      stats: lam2=0.01210832 max_deg=4 (0.4s)
+[09:39:40]   side=15 seed=34 flat      pushsum eps3=536 eps6=1261
+[09:39:40]   side=15 seed=34 flat      gossip  eps3=560 eps6=1322
+[09:39:40]   side=15 seed=39 flat      heat    eps3=616 eps6=1753
+[09:39:40]   side=15 seed=39 flat      pushsum eps3=371 eps6=1096
+[09:39:40]   side=15 seed=39 flat      gossip  eps3=386 eps6=1148
+[09:39:40] side=15 seed=35: built ['curved', 'flat', 'localrand'] in 2.89s (edges flat=420 curved=421 localrand=420)
+[09:39:40]   side=15 seed=30 flat      stats: lam2=0.01210832 max_deg=4 (0.7s)
+[09:39:40]   side=15 seed=33 flat      stats: lam2=0.01210832 max_deg=4 (0.6s)
+[09:39:40]   side=15 seed=32 flat      stats: lam2=0.01210832 max_deg=4 (0.6s)
+[09:39:40]   side=15 seed=30 flat      heat    eps3=689 eps6=1826
+[09:39:40]   side=15 seed=30 flat      pushsum eps3=407 eps6=1132
+[09:39:40]   side=15 seed=32 flat      heat    eps3=656 eps6=1793
+[09:39:40]   side=15 seed=33 flat      heat    eps3=670 eps6=1807
+[09:39:40]   side=15 seed=36 flat      stats: lam2=0.01210832 max_deg=4 (0.7s)
+[09:39:40]   side=15 seed=30 flat      gossip  eps3=420 eps6=1182
+[09:39:40] side=15 seed=38: built ['curved', 'flat', 'localrand'] in 3.12s (edges flat=420 curved=421 localrand=420)
+[09:39:40]   side=15 seed=32 flat      pushsum eps3=440 eps6=1165
+[09:39:40] side=15 seed=40: built ['curved', 'flat', 'localrand'] in 3.13s (edges flat=420 curved=421 localrand=420)
+[09:39:40]   side=15 seed=33 flat      pushsum eps3=431 eps6=1156
+[09:39:40]   side=15 seed=36 flat      heat    eps3=702 eps6=1839
+[09:39:40]   side=15 seed=33 flat      gossip  eps3=451 eps6=1212
+[09:39:40]   side=15 seed=32 flat      gossip  eps3=460 eps6=1222
+[09:39:40]   side=15 seed=36 flat      pushsum eps3=439 eps6=1164
+[09:39:40]   side=15 seed=36 flat      gossip  eps3=458 eps6=1219
+[09:39:40]   side=15 seed=34 curved    stats: lam2=0.12001283 max_deg=91 adds=199 (0.7s)
+[09:39:40] side=15 seed=41: built ['curved', 'flat', 'localrand'] in 3.36s (edges flat=420 curved=420 localrand=420)
+[09:39:40]   side=15 seed=34 curved    heat    eps3=75 eps6=179
+[09:39:40]   side=15 seed=34 curved    pushsum eps3=66 eps6=149
+[09:39:41]   side=15 seed=39 curved    stats: lam2=0.13360332 max_deg=88 adds=193 (0.6s)
+[09:39:41]   side=15 seed=39 curved    heat    eps3=69 eps6=162
+[09:39:41]   side=15 seed=39 curved    pushsum eps3=50 eps6=112
+[09:39:41]   side=15 seed=34 curved    gossip  eps3=1238 eps6=3171
+[09:39:41]   side=15 seed=35 flat      stats: lam2=0.01210832 max_deg=4 (0.7s)
+[09:39:41]   side=15 seed=39 curved    gossip  eps3=617 eps6=1850
+[09:39:41]   side=15 seed=38 flat      stats: lam2=0.01210832 max_deg=4 (0.9s)
+[09:39:41]   side=15 seed=35 flat      heat    eps3=744 eps6=1882
+[09:39:41]   side=15 seed=30 curved    stats: lam2=0.11719496 max_deg=110 adds=202 (0.9s)
+[09:39:41]   side=15 seed=30 curved    heat    eps3=89 eps6=203
+[09:39:41]   side=15 seed=30 curved    pushsum eps3=68 eps6=149
+[09:39:41]   side=15 seed=35 flat      pushsum eps3=482 eps6=1207
+[09:39:41]   side=15 seed=40 flat      stats: lam2=0.01210832 max_deg=4 (1.1s)
+[09:39:41]   side=15 seed=32 curved    stats: lam2=0.11760754 max_deg=58 adds=200 (1.1s)
+[09:39:41]   side=15 seed=33 curved    stats: lam2=0.10458887 max_deg=54 adds=200 (1.1s)
+[09:39:41]   side=15 seed=35 flat      gossip  eps3=504 eps6=1266
+[09:39:41]   side=15 seed=38 flat      heat    eps3=835 eps6=1973
+[09:39:41]   side=15 seed=33 curved    heat    eps3=88 eps6=216
+[09:39:41]   side=15 seed=32 curved    heat    eps3=80 eps6=186
+[09:39:41]   side=15 seed=33 curved    pushsum eps3=79 eps6=183
+[09:39:41]   side=15 seed=32 curved    pushsum eps3=63 eps6=143
+[09:39:41]   side=15 seed=36 curved    stats: lam2=0.13025459 max_deg=101 adds=201 (1.1s)
+[09:39:41]   side=15 seed=30 curved    gossip  eps3=1668 eps6=3992
+[09:39:41]   side=15 seed=36 curved    heat    eps3=63 eps6=163
+[09:39:42]   side=15 seed=36 curved    pushsum eps3=59 eps6=139
+[09:39:42]   side=15 seed=33 curved    gossip  eps3=493 eps6=1259
+[09:39:42]   side=15 seed=40 flat      heat    eps3=701 eps6=1838
+[09:39:42]   side=15 seed=38 flat      pushsum eps3=533 eps6=1258
+[09:39:42] side=15 seed=37: built ['curved', 'flat', 'localrand'] in 4.47s (edges flat=420 curved=420 localrand=420)
+[09:39:42]   side=15 seed=32 curved    gossip  eps3=661 eps6=1540
+[09:39:42]   side=15 seed=40 flat      pushsum eps3=453 eps6=1178
+[09:39:42]   side=15 seed=41 flat      stats: lam2=0.01210832 max_deg=4 (1.2s)
+[09:39:42]   side=15 seed=36 curved    gossip  eps3=1172 eps6=3287
+[09:39:42]   side=15 seed=38 flat      gossip  eps3=558 eps6=1319
+[09:39:42]   side=15 seed=40 flat      gossip  eps3=473 eps6=1235
+[09:39:42]   side=15 seed=34 localrand stats: lam2=0.00809838 max_deg=9 adds=147 (1.1s)
+[09:39:42]   side=15 seed=39 localrand stats: lam2=0.00607338 max_deg=9 adds=160 (1.0s)
+[09:39:42] side=15 seed=31: built ['curved', 'flat', 'localrand'] in 4.71s (edges flat=420 curved=420 localrand=420)
+[09:39:42]   side=15 seed=41 flat      heat    eps3=770 eps6=1907
+[09:39:42]   side=15 seed=41 flat      pushsum eps3=498 eps6=1223
+[09:39:42]   side=15 seed=41 flat      gossip  eps3=521 eps6=1283
+[09:39:42]   side=15 seed=39 localrand heat    eps3=742 eps6=2824
+[09:39:42]   side=15 seed=34 localrand heat    eps3=1261 eps6=2964
+[09:39:42]   side=15 seed=35 curved    stats: lam2=0.12936908 max_deg=118 adds=207 (0.8s)
+[09:39:42]   side=15 seed=35 curved    heat    eps3=67 eps6=165
+[09:39:42]   side=15 seed=35 curved    pushsum eps3=62 eps6=144
+[09:39:42]   side=15 seed=34 localrand pushsum eps3=753 eps6=1842
+[09:39:42]   side=15 seed=39 localrand pushsum eps3=669 eps6=2111
+[09:39:43]   side=15 seed=30 localrand stats: lam2=0.00914917 max_deg=8 adds=161 (1.0s)
+[09:39:43]   side=15 seed=33 localrand stats: lam2=0.00725453 max_deg=9 adds=171 (1.0s)
+[09:39:43]   side=15 seed=37 flat      stats: lam2=0.01210832 max_deg=4 (1.0s)
+[09:39:43]   side=15 seed=34 localrand gossip  eps3=969 eps6=2388
+[09:39:43]   side=15 seed=36 localrand stats: lam2=0.00898789 max_deg=9 adds=163 (1.0s)
+[09:39:43]   side=15 seed=39 localrand gossip  eps3=984 eps6=3035
+[09:39:43]   side=15 seed=30 localrand heat    eps3=784 eps6=2244
+[09:39:43]   side=15 seed=32 localrand stats: lam2=0.00987491 max_deg=8 adds=166 (1.2s)
+[09:39:43]   side=15 seed=35 curved    gossip  eps3=1624 eps6=4113
+[09:39:43]   side=15 seed=30 localrand pushsum eps3=603 eps6=1563
+[09:39:43]   side=15 seed=33 localrand heat    eps3=867 eps6=2628
+[09:39:43]   side=15 seed=37 flat      heat    eps3=730 eps6=1868
+[09:39:43]   side=15 seed=30 localrand gossip  eps3=816 eps6=2124
+[09:39:43]   side=15 seed=31 flat      stats: lam2=0.01210832 max_deg=4 (1.1s)
+[09:39:43]   side=15 seed=40 curved    stats: lam2=0.05821095 max_deg=58 adds=207 (1.2s)
+[09:39:43]   side=15 seed=37 flat      pushsum eps3=469 eps6=1194
+[09:39:43]   side=15 seed=33 localrand pushsum eps3=587 eps6=1629
+[09:39:43]   side=15 seed=40 curved    heat    eps3=159 eps6=393
+[09:39:43]   side=15 seed=38 curved    stats: lam2=0.1151536 max_deg=84 adds=191 (1.3s)
+[09:39:43]   side=15 seed=40 curved    pushsum eps3=141 eps6=327
+[09:39:43]   side=15 seed=36 localrand heat    eps3=753 eps6=2247
+[09:39:43]   side=15 seed=37 flat      gossip  eps3=490 eps6=1252
+[09:39:43]   side=15 seed=38 curved    heat    eps3=84 eps6=200
+[09:39:43]   side=15 seed=38 curved    pushsum eps3=70 eps6=161
+[09:39:43]   side=15 seed=32 localrand heat    eps3=795 eps6=2122
+[09:39:43]   side=15 seed=33 localrand gossip  eps3=787 eps6=2171
+[09:39:43]   side=15 seed=31 flat      heat    eps3=573 eps6=1710
+[09:39:43]   side=15 seed=40 curved    gossip  eps3=599 eps6=1699
+[09:39:43]   side=15 seed=31 flat      pushsum eps3=407 eps6=1132
+[09:39:43]   side=15 seed=31 flat      gossip  eps3=424 eps6=1186
+[09:39:43]   side=15 seed=41 curved    stats: lam2=0.12920129 max_deg=122 adds=204 (1.0s)
+[09:39:43]   side=15 seed=41 curved    heat    eps3=66 eps6=166
+[09:39:43]   side=15 seed=32 localrand pushsum eps3=555 eps6=1443
+[09:39:43]   side=15 seed=41 curved    pushsum eps3=61 eps6=144
+[09:39:43]   side=15 seed=36 localrand pushsum eps3=601 eps6=1561
+[09:39:43]   side=15 seed=38 curved    gossip  eps3=770 eps6=2537
+[09:39:43]   side=15 seed=32 localrand gossip  eps3=761 eps6=1987
+[09:39:43]   side=15 seed=36 localrand gossip  eps3=772 eps6=2019
+[09:39:43]   side=15 seed=41 curved    gossip  eps3=1629 eps6=4168
+[09:39:43]   side=15 seed=35 localrand stats: lam2=0.00761388 max_deg=9 adds=179 (0.7s)
+[09:39:44]   side=15 seed=40 localrand stats: lam2=0.01034368 max_deg=8 adds=167 (0.6s)
+[09:39:44]   side=15 seed=37 curved    stats: lam2=0.12158305 max_deg=115 adds=206 (0.6s)
+[09:39:44]   side=15 seed=37 curved    heat    eps3=76 eps6=183
+[09:39:44]   side=15 seed=35 localrand heat    eps3=1054 eps6=2787
+[09:39:44]   side=15 seed=37 curved    pushsum eps3=60 eps6=142
+[09:39:44]   side=15 seed=35 localrand pushsum eps3=662 eps6=1828
+[09:39:44]   side=15 seed=31 curved    stats: lam2=0.0943329 max_deg=91 adds=204 (0.7s)
+[09:39:44]   side=15 seed=31 curved    heat    eps3=87 eps6=228
+[09:39:44]   side=15 seed=31 curved    pushsum eps3=68 eps6=181
+[09:39:44]   side=15 seed=40 localrand heat    eps3=924 eps6=2257
+[09:39:44]   side=15 seed=35 localrand gossip  eps3=855 eps6=2457
+[09:39:44]   side=15 seed=37 curved    gossip  eps3=1601 eps6=4013
+[09:39:44]   side=15 seed=40 localrand pushsum eps3=514 eps6=1362
+[09:39:44]   side=15 seed=38 localrand stats: lam2=0.00847778 max_deg=8 adds=159 (0.8s)
+[09:39:44]   side=15 seed=31 curved    gossip  eps3=1000 eps6=2881
+[09:39:44]   side=15 seed=40 localrand gossip  eps3=695 eps6=1856
+[09:39:44]   side=15 seed=41 localrand stats: lam2=0.0070716 max_deg=9 adds=160 (0.7s)
+[09:39:44]   side=15 seed=41 localrand heat    eps3=1258 eps6=3203
+[09:39:44]   side=15 seed=38 localrand heat    eps3=1216 eps6=2842
+[09:39:44]   side=15 seed=41 localrand pushsum eps3=746 eps6=1983
+[09:39:44]   side=15 seed=41 localrand gossip  eps3=1056 eps6=2810
+[09:39:44]   side=15 seed=37 localrand stats: lam2=0.00883501 max_deg=9 adds=166 (0.4s)
+[09:39:44]   side=15 seed=38 localrand pushsum eps3=782 eps6=1812
+[09:39:44]   side=15 seed=31 localrand stats: lam2=0.00841027 max_deg=8 adds=154 (0.4s)
+[09:39:44]   side=15 seed=38 localrand gossip  eps3=1034 eps6=2402
+[09:39:44]   side=15 seed=37 localrand heat    eps3=914 eps6=2448
+[09:39:44]   side=15 seed=31 localrand heat    eps3=1009 eps6=2647
+[09:39:44]   side=15 seed=37 localrand pushsum eps3=556 eps6=1498
+[09:39:44]   side=15 seed=31 localrand pushsum eps3=605 eps6=1656
+[09:39:45]   side=15 seed=37 localrand gossip  eps3=810 eps6=2165
+[09:39:45]   side=15 seed=31 localrand gossip  eps3=783 eps6=2206
+[09:39:45] side=22: 12 seed-tasks (maxr=40000)
+[09:39:54] side=22 seed=30: built ['curved', 'flat', 'localrand'] in 9.18s (edges flat=924 curved=924 localrand=924)
+[09:39:54] side=22 seed=34: built ['curved', 'flat', 'localrand'] in 9.34s (edges flat=924 curved=926 localrand=925)
+[09:39:54] side=22 seed=39: built ['curved', 'flat', 'localrand'] in 9.79s (edges flat=924 curved=926 localrand=924)
+[09:39:55] side=22 seed=35: built ['curved', 'flat', 'localrand'] in 10.2s (edges flat=924 curved=924 localrand=926)
+[09:39:55] side=22 seed=36: built ['curved', 'flat', 'localrand'] in 10.45s (edges flat=924 curved=926 localrand=924)
+[09:39:56] side=22 seed=33: built ['curved', 'flat', 'localrand'] in 11.32s (edges flat=924 curved=926 localrand=924)
+[09:39:56] side=22 seed=38: built ['curved', 'flat', 'localrand'] in 11.38s (edges flat=924 curved=925 localrand=925)
+[09:39:56] side=22 seed=32: built ['curved', 'flat', 'localrand'] in 11.51s (edges flat=924 curved=924 localrand=924)
+[09:39:56] side=22 seed=41: built ['curved', 'flat', 'localrand'] in 11.73s (edges flat=924 curved=925 localrand=925)
+[09:39:57] side=22 seed=31: built ['curved', 'flat', 'localrand'] in 12.39s (edges flat=924 curved=924 localrand=925)
+[09:39:57] side=22 seed=37: built ['curved', 'flat', 'localrand'] in 12.76s (edges flat=924 curved=924 localrand=924)
+[09:39:58]   side=22 seed=30 flat      stats: lam2=0.00545551 max_deg=4 (4.1s)
+[09:39:59]   side=22 seed=30 flat      heat    eps3=1530 eps6=4059
+[09:39:59] side=22 seed=40: built ['curved', 'flat', 'localrand'] in 14.38s (edges flat=924 curved=924 localrand=924)
+[09:40:00]   side=22 seed=30 flat      pushsum eps3=969 eps6=2571
+[09:40:00]   side=22 seed=34 flat      stats: lam2=0.00545551 max_deg=4 (6.1s)
+[09:40:00]   side=22 seed=30 flat      gossip  eps3=998 eps6=2654
+[09:40:01]   side=22 seed=34 flat      heat    eps3=1258 eps6=3787
+[09:40:02]   side=22 seed=34 flat      pushsum eps3=845 eps6=2446
+[09:40:02]   side=22 seed=39 flat      stats: lam2=0.00545551 max_deg=4 (8.0s)
+[09:40:03]   side=22 seed=34 flat      gossip  eps3=870 eps6=2526
+[09:40:03]   side=22 seed=39 flat      heat    eps3=1089 eps6=3613
+[09:40:04]   side=22 seed=39 flat      pushsum eps3=668 eps6=2264
+[09:40:04]   side=22 seed=35 flat      stats: lam2=0.00545551 max_deg=4 (9.3s)
+[09:40:04]   side=22 seed=39 flat      gossip  eps3=683 eps6=2333
+[09:40:05]   side=22 seed=36 flat      stats: lam2=0.00545551 max_deg=4 (9.6s)
+[09:40:05]   side=22 seed=35 flat      heat    eps3=1362 eps6=3891
+[09:40:05]   side=22 seed=32 flat      stats: lam2=0.00545551 max_deg=4 (9.3s)
+[09:40:06]   side=22 seed=35 flat      pushsum eps3=897 eps6=2499
+[09:40:06]   side=22 seed=36 flat      heat    eps3=1525 eps6=4053
+[09:40:06]   side=22 seed=35 flat      gossip  eps3=925 eps6=2581
+[09:40:06]   side=22 seed=33 flat      stats: lam2=0.00545551 max_deg=4 (10.2s)
+[09:40:06]   side=22 seed=36 flat      pushsum eps3=954 eps6=2556
+[09:40:06]   side=22 seed=38 flat      stats: lam2=0.00545551 max_deg=4 (10.3s)
+[09:40:06]   side=22 seed=32 flat      heat    eps3=1636 eps6=4164
+[09:40:07]   side=22 seed=36 flat      gossip  eps3=983 eps6=2639
+[09:40:07]   side=22 seed=32 flat      pushsum eps3=1029 eps6=2630
+[09:40:07]   side=22 seed=41 flat      stats: lam2=0.00545551 max_deg=4 (10.5s)
+[09:40:07]   side=22 seed=33 flat      heat    eps3=1606 eps6=4135
+[09:40:07]   side=22 seed=38 flat      heat    eps3=1153 eps6=3681
+[09:40:07]   side=22 seed=32 flat      gossip  eps3=1058 eps6=2714
+[09:40:07]   side=22 seed=38 flat      pushsum eps3=753 eps6=2355
+[09:40:07]   side=22 seed=33 flat      pushsum eps3=1049 eps6=2650
+[09:40:07]   side=22 seed=31 flat      stats: lam2=0.00545551 max_deg=4 (10.4s)
+[09:40:08]   side=22 seed=41 flat      heat    eps3=1734 eps6=4263
+[09:40:08]   side=22 seed=33 flat      gossip  eps3=1081 eps6=2737
+[09:40:08]   side=22 seed=38 flat      gossip  eps3=777 eps6=2433
+[09:40:08]   side=22 seed=41 flat      pushsum eps3=1107 eps6=2709
+[09:40:08]   side=22 seed=37 flat      stats: lam2=0.00545551 max_deg=4 (10.6s)
+[09:40:08]   side=22 seed=41 flat      gossip  eps3=1142 eps6=2798
+[09:40:08]   side=22 seed=31 flat      heat    eps3=1054 eps6=3582
+[09:40:09]   side=22 seed=31 flat      pushsum eps3=623 eps6=2221
+[09:40:09]   side=22 seed=37 flat      heat    eps3=1312 eps6=3841
+[09:40:09]   side=22 seed=31 flat      gossip  eps3=644 eps6=2297
+[09:40:09]   side=22 seed=40 flat      stats: lam2=0.00545551 max_deg=4 (10.3s)
+[09:40:09]   side=22 seed=37 flat      pushsum eps3=846 eps6=2448
+[09:40:10]   side=22 seed=37 flat      gossip  eps3=870 eps6=2526
+[09:40:10]   side=22 seed=40 flat      heat    eps3=1436 eps6=3965
+[09:40:11]   side=22 seed=30 curved    stats: lam2=0.0874065 max_deg=127 adds=400 (10.5s)
+[09:40:11]   side=22 seed=30 curved    heat    eps3=103 eps6=254
+[09:40:11]   side=22 seed=30 curved    pushsum eps3=71 eps6=170
+[09:40:11]   side=22 seed=40 flat      pushsum eps3=931 eps6=2532
+[09:40:12]   side=22 seed=40 flat      gossip  eps3=958 eps6=2614
+[09:40:12]   side=22 seed=30 curved    gossip  eps3=1807 eps6=4508
+[09:40:13]   side=22 seed=34 curved    stats: lam2=0.07486906 max_deg=171 adds=421 (10.3s)
+[09:40:13]   side=22 seed=34 curved    heat    eps3=105 eps6=286
+[09:40:13]   side=22 seed=34 curved    pushsum eps3=55 eps6=174
+[09:40:14]   side=22 seed=34 curved    gossip  eps3=2150 eps6=5691
+[09:40:14]   side=22 seed=39 curved    stats: lam2=0.06780055 max_deg=104 adds=408 (10.1s)
+[09:40:15]   side=22 seed=39 curved    heat    eps3=111 eps6=301
+[09:40:15]   side=22 seed=39 curved    pushsum eps3=97 eps6=246
+[09:40:15]   side=22 seed=39 curved    gossip  eps3=863 eps6=2982
+[09:40:16]   side=22 seed=35 curved    stats: lam2=0.05233391 max_deg=87 adds=409 (10.3s)
+[09:40:16]   side=22 seed=35 curved    heat    eps3=182 eps6=442
+[09:40:16]   side=22 seed=35 curved    pushsum eps3=127 eps6=305
+[09:40:17]   side=22 seed=36 curved    stats: lam2=0.07108874 max_deg=92 adds=404 (10.5s)
+[09:40:17]   side=22 seed=35 curved    gossip  eps3=1351 eps6=3791
+[09:40:17]   side=22 seed=36 curved    heat    eps3=98 eps6=254
+[09:40:17]   side=22 seed=36 curved    pushsum eps3=89 eps6=224
+[09:40:18]   side=22 seed=32 curved    stats: lam2=0.10581509 max_deg=224 adds=440 (10.4s)
+[09:40:18]   side=22 seed=32 curved    heat    eps3=85 eps6=202
+[09:40:18]   side=22 seed=32 curved    pushsum eps3=69 eps6=152
+[09:40:18]   side=22 seed=36 curved    gossip  eps3=1676 eps6=4278
+[09:40:18]   side=22 seed=41 curved    stats: lam2=0.07592854 max_deg=207 adds=442 (10.4s)
+[09:40:19]   side=22 seed=41 curved    heat    eps3=102 eps6=269
+[09:40:19]   side=22 seed=41 curved    pushsum eps3=79 eps6=219
+[09:40:19]   side=22 seed=33 curved    stats: lam2=0.07793632 max_deg=117 adds=414 (11.0s)
+[09:40:19]   side=22 seed=33 curved    heat    eps3=109 eps6=280
+[09:40:19]   side=22 seed=38 curved    stats: lam2=0.07085754 max_deg=95 adds=408 (11.0s)
+[09:40:19]   side=22 seed=33 curved    pushsum eps3=86 eps6=208
+[09:40:19]   side=22 seed=38 curved    heat    eps3=126 eps6=311
+[09:40:19]   side=22 seed=38 curved    pushsum eps3=101 eps6=223
+[09:40:19]   side=22 seed=32 curved    gossip  eps3=3580 eps6=8467
+[09:40:19]   side=22 seed=38 curved    gossip  eps3=933 eps6=2262
+[09:40:19]   side=22 seed=33 curved    gossip  eps3=1263 eps6=3317
+[09:40:20]   side=22 seed=41 curved    gossip  eps3=3522 eps6=9063
+[09:40:20]   side=22 seed=31 curved    stats: lam2=0.07047413 max_deg=134 adds=424 (11.1s)
+[09:40:20]   side=22 seed=31 curved    heat    eps3=94 eps6=268
+[09:40:20]   side=22 seed=31 curved    pushsum eps3=99 eps6=244
+[09:40:21]   side=22 seed=37 curved    stats: lam2=0.08699856 max_deg=207 adds=440 (11.2s)
+[09:40:21]   side=22 seed=37 curved    heat    eps3=104 eps6=251
+[09:40:21]   side=22 seed=37 curved    pushsum eps3=89 eps6=212
+[09:40:22]   side=22 seed=31 curved    gossip  eps3=2029 eps6=5480
+[09:40:23]   side=22 seed=40 curved    stats: lam2=0.05339268 max_deg=82 adds=423 (11.0s)
+[09:40:23]   side=22 seed=40 curved    heat    eps3=171 eps6=424
+[09:40:23]   side=22 seed=37 curved    gossip  eps3=3234 eps6=7566
+[09:40:23]   side=22 seed=40 curved    pushsum eps3=135 eps6=328
+[09:40:23]   side=22 seed=30 localrand stats: lam2=0.0040148 max_deg=8 adds=352 (11.3s)
+[09:40:24]   side=22 seed=40 curved    gossip  eps3=1553 eps6=4079
+[09:40:25]   side=22 seed=30 localrand heat    eps3=1697 eps6=5047
+[09:40:25]   side=22 seed=34 localrand stats: lam2=0.0037218 max_deg=9 adds=331 (10.7s)
+[09:40:26]   side=22 seed=30 localrand pushsum eps3=1242 eps6=3412
+[09:40:26]   side=22 seed=39 localrand stats: lam2=0.00444822 max_deg=9 adds=347 (10.6s)
+[09:40:26]   side=22 seed=34 localrand heat    eps3=2022 eps6=5713
+[09:40:26]   side=22 seed=30 localrand gossip  eps3=1585 eps6=4402
+[09:40:27]   side=22 seed=39 localrand heat    eps3=1814 eps6=4908
+[09:40:27]   side=22 seed=34 localrand pushsum eps3=1393 eps6=3733
+[09:40:27]   side=22 seed=39 localrand pushsum eps3=847 eps6=2796
+[09:40:28]   side=22 seed=35 localrand stats: lam2=0.00423146 max_deg=8 adds=349 (10.5s)
+[09:40:28]   side=22 seed=34 localrand gossip  eps3=1757 eps6=4697
+[09:40:28]   side=22 seed=39 localrand gossip  eps3=1148 eps6=3801
+[09:40:29]   side=22 seed=36 localrand stats: lam2=0.0043051 max_deg=10 adds=361 (10.5s)
+[09:40:29]   side=22 seed=35 localrand heat    eps3=1580 eps6=4827
+[09:40:29]   side=22 seed=35 localrand pushsum eps3=1152 eps6=3219
+[09:40:29]   side=22 seed=33 localrand stats: lam2=0.00262448 max_deg=10 adds=371 (9.8s)
+[09:40:29]   side=22 seed=36 localrand heat    eps3=1929 eps6=5115
+[09:40:30]   side=22 seed=38 localrand stats: lam2=0.00411399 max_deg=9 adds=356 (10.2s)
+[09:40:30]   side=22 seed=32 localrand stats: lam2=0.00414439 max_deg=9 adds=361 (10.4s)
+[09:40:30]   side=22 seed=35 localrand gossip  eps3=1571 eps6=4357
+[09:40:30]   side=22 seed=36 localrand pushsum eps3=1209 eps6=3227
+[09:40:30]   side=22 seed=41 localrand stats: lam2=0.00403174 max_deg=9 adds=356 (10.1s)
+[09:40:30]   side=22 seed=36 localrand gossip  eps3=1531 eps6=4129
+[09:40:30]   side=22 seed=38 localrand heat    eps3=1332 eps6=4102
+[09:40:30]   side=22 seed=33 localrand heat    eps3=2842 eps6=8099
+[09:40:30]   side=22 seed=32 localrand heat    eps3=2029 eps6=5334
+[09:40:30]   side=22 seed=41 localrand heat    eps3=1884 eps6=4966
+[09:40:30]   side=22 seed=38 localrand pushsum eps3=1012 eps6=3095
+[09:40:30]   side=22 seed=31 localrand stats: lam2=0.00453583 max_deg=9 adds=344 (8.8s)
+[09:40:30]   side=22 seed=41 localrand pushsum eps3=1203 eps6=3026
+[09:40:30]   side=22 seed=32 localrand pushsum eps3=1279 eps6=3388
+[09:40:31]   side=22 seed=33 localrand pushsum eps3=1834 eps6=5145
+[09:40:31]   side=22 seed=31 localrand heat    eps3=1268 eps6=4286
+[09:40:31]   side=22 seed=31 localrand pushsum eps3=609 eps6=2216
+[09:40:31]   side=22 seed=32 localrand gossip  eps3=1712 eps6=4551
+[09:40:31]   side=22 seed=31 localrand gossip  eps3=831 eps6=2946
+[09:40:31]   side=22 seed=41 localrand gossip  eps3=1668 eps6=4289
+[09:40:31]   side=22 seed=38 localrand gossip  eps3=1385 eps6=4226
+[09:40:31]   side=22 seed=40 localrand stats: lam2=0.00478106 max_deg=10 adds=368 (7.3s)
+[09:40:31]   side=22 seed=37 localrand stats: lam2=0.0045463 max_deg=12 adds=359 (8.1s)
+[09:40:31]   side=22 seed=33 localrand gossip  eps3=2406 eps6=6756
+[09:40:31]   side=22 seed=40 localrand heat    eps3=1603 eps6=4470
+[09:40:31]   side=22 seed=40 localrand pushsum eps3=982 eps6=2716
+[09:40:31]   side=22 seed=37 localrand heat    eps3=1559 eps6=4578
+[09:40:31]   side=22 seed=40 localrand gossip  eps3=1359 eps6=3772
+[09:40:31]   side=22 seed=37 localrand pushsum eps3=1068 eps6=2988
+[09:40:31]   side=22 seed=37 localrand gossip  eps3=1401 eps6=3956
+[09:40:31] side=32: 12 seed-tasks (maxr=40000)
+[09:41:18] side=32 seed=39: built ['curved', 'flat', 'localrand'] in 46.64s (edges flat=1984 curved=1988 localrand=1985)
+[09:41:19] side=32 seed=34: built ['curved', 'flat', 'localrand'] in 48.07s (edges flat=1984 curved=1986 localrand=1984)
+[09:41:24] side=32 seed=36: built ['curved', 'flat', 'localrand'] in 52.86s (edges flat=1984 curved=1988 localrand=1986)
+[09:41:26]   side=32 seed=39 flat      stats: lam2=0.00252477 max_deg=4 (7.6s)
+[09:41:26] side=32 seed=33: built ['curved', 'flat', 'localrand'] in 54.33s (edges flat=1984 curved=1986 localrand=1984)
+[09:41:26]   side=32 seed=39 flat      heat    eps3=3092 eps6=8561
+[09:41:26]   side=32 seed=39 flat      pushsum eps3=1944 eps6=5394
+[09:41:26]   side=32 seed=39 flat      gossip  eps3=1983 eps6=5511
+[09:41:27] side=32 seed=32: built ['curved', 'flat', 'localrand'] in 55.68s (edges flat=1984 curved=1987 localrand=1984)
+[09:41:28]   side=32 seed=34 flat      stats: lam2=0.00252477 max_deg=4 (8.2s)
+[09:41:29]   side=32 seed=34 flat      heat    eps3=2891 eps6=8359
+[09:41:29] side=32 seed=30: built ['curved', 'flat', 'localrand'] in 57.6s (edges flat=1984 curved=1988 localrand=1984)
+[09:41:30]   side=32 seed=34 flat      pushsum eps3=1839 eps6=5289
+[09:41:30]   side=32 seed=34 flat      gossip  eps3=1875 eps6=5403
+[09:41:31] side=32 seed=35: built ['curved', 'flat', 'localrand'] in 59.38s (edges flat=1984 curved=1988 localrand=1985)
+[09:41:32] side=32 seed=41: built ['curved', 'flat', 'localrand'] in 60.76s (edges flat=1984 curved=1987 localrand=1987)
+[09:41:35] side=32 seed=31: built ['curved', 'flat', 'localrand'] in 63.97s (edges flat=1984 curved=1987 localrand=1986)
+[09:41:41]   side=32 seed=36 flat      stats: lam2=0.00252477 max_deg=4 (16.6s)
+[09:41:43]   side=32 seed=36 flat      heat    eps3=2926 eps6=8394
+[09:41:43] side=32 seed=40: built ['curved', 'flat', 'localrand'] in 72.06s (edges flat=1984 curved=1985 localrand=1985)
+[09:41:43] side=32 seed=37: built ['curved', 'flat', 'localrand'] in 72.16s (edges flat=1984 curved=1986 localrand=1985)
+[09:41:44] side=32 seed=38: built ['curved', 'flat', 'localrand'] in 72.52s (edges flat=1984 curved=1988 localrand=1985)
+[09:41:44]   side=32 seed=36 flat      pushsum eps3=1870 eps6=5319
+[09:41:44]   side=32 seed=33 flat      stats: lam2=0.00252477 max_deg=4 (18.7s)
+[09:41:45]   side=32 seed=36 flat      gossip  eps3=1907 eps6=5435
+[09:41:46]   side=32 seed=33 flat      heat    eps3=2953 eps6=8422
+[09:41:48]   side=32 seed=39 curved    stats: lam2=0.0489236 max_deg=306 adds=892 (21.5s)
+[09:41:48]   side=32 seed=39 curved    heat    eps3=124 eps6=396
+[09:41:48]   side=32 seed=33 flat      pushsum eps3=1934 eps6=5384
+[09:41:48]   side=32 seed=39 curved    pushsum eps3=104 eps6=316
+[09:41:49]   side=32 seed=32 flat      stats: lam2=0.00252477 max_deg=4 (22.1s)
+[09:41:50]   side=32 seed=33 flat      gossip  eps3=1972 eps6=5500
+[09:41:52]   side=32 seed=32 flat      heat    eps3=2780 eps6=8249
+[09:41:52]   side=32 seed=39 curved    gossip  eps3=5261 eps6=15159
+[09:41:53]   side=32 seed=30 flat      stats: lam2=0.00252477 max_deg=4 (24.2s)
+[09:41:54]   side=32 seed=32 flat      pushsum eps3=1787 eps6=5236
+[09:41:55]   side=32 seed=32 flat      gossip  eps3=1824 eps6=5352
+[09:41:55]   side=32 seed=30 flat      heat    eps3=2718 eps6=8186
+[09:41:56]   side=32 seed=34 curved    stats: lam2=0.04441893 max_deg=272 adds=910 (25.2s)
+[09:41:56]   side=32 seed=34 curved    heat    eps3=166 eps6=458
+[09:41:56]   side=32 seed=35 flat      stats: lam2=0.00252477 max_deg=4 (25.2s)
+[09:41:56]   side=32 seed=34 curved    pushsum eps3=125 eps6=326
+[09:41:56]   side=32 seed=30 flat      pushsum eps3=1693 eps6=5142
+[09:41:57]   side=32 seed=30 flat      gossip  eps3=1725 eps6=5253
+[09:41:58]   side=32 seed=41 flat      stats: lam2=0.00252477 max_deg=4 (26.0s)
+[09:41:58]   side=32 seed=35 flat      heat    eps3=2368 eps6=7835
+[09:41:59]   side=32 seed=34 curved    gossip  eps3=5561 eps6=14622
+[09:42:00]   side=32 seed=35 flat      pushsum eps3=1496 eps6=4945
+[09:42:01]   side=32 seed=41 flat      heat    eps3=2376 eps6=7844
+[09:42:01]   side=32 seed=35 flat      gossip  eps3=1522 eps6=5049
+[09:42:02]   side=32 seed=41 flat      pushsum eps3=1394 eps6=4842
+[09:42:03]   side=32 seed=31 flat      stats: lam2=0.00252477 max_deg=4 (28.0s)
+[09:42:04]   side=32 seed=41 flat      gossip  eps3=1420 eps6=4947
+[09:42:06]   side=32 seed=31 flat      heat    eps3=3492 eps6=8960
+[09:42:08]   side=32 seed=31 flat      pushsum eps3=2181 eps6=5630
+[09:42:10]   side=32 seed=31 flat      gossip  eps3=2224 eps6=5752
+[09:42:13]   side=32 seed=37 flat      stats: lam2=0.00252477 max_deg=4 (29.1s)
+[09:42:13]   side=32 seed=40 flat      stats: lam2=0.00252477 max_deg=4 (29.7s)
+[09:42:13]   side=32 seed=38 flat      stats: lam2=0.00252477 max_deg=4 (29.6s)
+[09:42:14]   side=32 seed=36 curved    stats: lam2=0.04495201 max_deg=274 adds=895 (29.4s)
+[09:42:15]   side=32 seed=36 curved    heat    eps3=161 eps6=449
+[09:42:15]   side=32 seed=36 curved    pushsum eps3=118 eps6=297
+[09:42:15]   side=32 seed=37 flat      heat    eps3=3470 eps6=8939
+[09:42:16]   side=32 seed=40 flat      heat    eps3=2817 eps6=8286
+[09:42:16]   side=32 seed=38 flat      heat    eps3=2771 eps6=8239
+[09:42:17]   side=32 seed=37 flat      pushsum eps3=2187 eps6=5636
+[09:42:17]   side=32 seed=40 flat      pushsum eps3=1684 eps6=5134
+[09:42:17]   side=32 seed=38 flat      pushsum eps3=1751 eps6=5201
+[09:42:18]   side=32 seed=36 curved    gossip  eps3=4968 eps6=12555
+[09:42:18]   side=32 seed=40 flat      gossip  eps3=1716 eps6=5244
+[09:42:18]   side=32 seed=37 flat      gossip  eps3=2229 eps6=5757
+[09:42:18]   side=32 seed=38 flat      gossip  eps3=1787 eps6=5315
+[09:42:20]   side=32 seed=33 curved    stats: lam2=0.07036218 max_deg=333 adds=916 (29.7s)
+[09:42:20]   side=32 seed=33 curved    heat    eps3=114 eps6=290
+[09:42:20]   side=32 seed=33 curved    pushsum eps3=98 eps6=241
+[09:42:21]   side=32 seed=39 localrand stats: lam2=0.00194329 max_deg=10 adds=742 (29.3s)
+[09:42:24]   side=32 seed=39 localrand heat    eps3=3387 eps6=10283
+[09:42:24]   side=32 seed=33 curved    gossip  eps3=5550 eps6=14655
+[09:42:24]   side=32 seed=32 curved    stats: lam2=0.05674619 max_deg=219 adds=872 (29.4s)
+[09:42:25]   side=32 seed=32 curved    heat    eps3=122 eps6=321
+[09:42:25]   side=32 seed=32 curved    pushsum eps3=93 eps6=229
+[09:42:26]   side=32 seed=39 localrand pushsum eps3=2221 eps6=6590
+[09:42:27]   side=32 seed=32 curved    gossip  eps3=3631 eps6=9674
+[09:42:28]   side=32 seed=30 curved    stats: lam2=0.04021476 max_deg=144 adds=885 (30.1s)
+[09:42:28]   side=32 seed=30 curved    heat    eps3=173 eps6=496
+[09:42:28]   side=32 seed=30 curved    pushsum eps3=130 eps6=329
+[09:42:28]   side=32 seed=39 localrand gossip  eps3=2913 eps6=8561
+[09:42:30]   side=32 seed=34 localrand stats: lam2=0.00181508 max_deg=10 adds=762 (30.2s)
+[09:42:30]   side=32 seed=30 curved    gossip  eps3=2680 eps6=7724
+[09:42:30]   side=32 seed=35 curved    stats: lam2=0.04545386 max_deg=325 adds=915 (29.4s)
+[09:42:31]   side=32 seed=35 curved    heat    eps3=128 eps6=379
+[09:42:31]   side=32 seed=35 curved    pushsum eps3=119 eps6=334
+[09:42:32]   side=32 seed=34 localrand heat    eps3=3988 eps6=11565
+[09:42:33]   side=32 seed=41 curved    stats: lam2=0.0638305 max_deg=368 adds=930 (29.4s)
+[09:42:33]   side=32 seed=41 curved    heat    eps3=133 eps6=337
+[09:42:33]   side=32 seed=41 curved    pushsum eps3=110 eps6=253
+[09:42:34]   side=32 seed=35 curved    gossip  eps3=5720 eps6=15292
+[09:42:34]   side=32 seed=34 localrand pushsum eps3=2232 eps6=6893
+[09:42:36]   side=32 seed=34 localrand gossip  eps3=2958 eps6=9036
+[09:42:37]   side=32 seed=41 curved    gossip  eps3=7350 eps6=18721
+[09:42:38]   side=32 seed=31 curved    stats: lam2=0.03494962 max_deg=162 adds=893 (28.3s)
+[09:42:38]   side=32 seed=31 curved    heat    eps3=218 eps6=608
+[09:42:38]   side=32 seed=31 curved    pushsum eps3=133 eps6=376
+[09:42:40]   side=32 seed=31 curved    gossip  eps3=2417 eps6=7996
+[09:42:46]   side=32 seed=36 localrand stats: lam2=0.00184293 max_deg=10 adds=772 (28.3s)
+[09:42:46]   side=32 seed=37 curved    stats: lam2=0.05268372 max_deg=361 adds=940 (28.0s)
+[09:42:46]   side=32 seed=37 curved    heat    eps3=147 eps6=400
+[09:42:46]   side=32 seed=37 curved    pushsum eps3=114 eps6=277
+[09:42:47]   side=32 seed=40 curved    stats: lam2=0.04321748 max_deg=203 adds=898 (28.3s)
+[09:42:47]   side=32 seed=40 curved    heat    eps3=188 eps6=502
+[09:42:47]   side=32 seed=40 curved    pushsum eps3=122 eps6=317
+[09:42:47]   side=32 seed=38 curved    stats: lam2=0.04829333 max_deg=268 adds=873 (28.3s)
+[09:42:47]   side=32 seed=38 curved    heat    eps3=175 eps6=451
+[09:42:47]   side=32 seed=38 curved    pushsum eps3=124 eps6=299
+[09:42:47]   side=32 seed=37 curved    gossip  eps3=7388 eps6=17444
+[09:42:48]   side=32 seed=36 localrand heat    eps3=3155 eps6=10296
+[09:42:48]   side=32 seed=40 curved    gossip  eps3=2746 eps6=7210
+[09:42:49]   side=32 seed=36 localrand pushsum eps3=1929 eps6=6317
+[09:42:49]   side=32 seed=38 curved    gossip  eps3=4845 eps6=12557
+[09:42:50]   side=32 seed=36 localrand gossip  eps3=2663 eps6=8521
+[09:42:51]   side=32 seed=33 localrand stats: lam2=0.00211914 max_deg=10 adds=751 (26.6s)
+[09:42:53]   side=32 seed=33 localrand heat    eps3=3607 eps6=9640
+[09:42:53]   side=32 seed=32 localrand stats: lam2=0.00216362 max_deg=11 adds=745 (26.0s)
+[09:42:54]   side=32 seed=33 localrand pushsum eps3=2194 eps6=6007
+[09:42:55]   side=32 seed=30 localrand stats: lam2=0.00195051 max_deg=10 adds=760 (25.1s)
+[09:42:55]   side=32 seed=32 localrand heat    eps3=3209 eps6=9248
+[09:42:56]   side=32 seed=33 localrand gossip  eps3=2884 eps6=7971
+[09:42:57]   side=32 seed=32 localrand pushsum eps3=1982 eps6=5882
+[09:42:57]   side=32 seed=30 localrand heat    eps3=3830 eps6=10818
+[09:42:58]   side=32 seed=32 localrand gossip  eps3=2622 eps6=7822
+[09:42:58]   side=32 seed=35 localrand stats: lam2=0.00200364 max_deg=10 adds=782 (24.3s)
+[09:42:58]   side=32 seed=30 localrand pushsum eps3=1953 eps6=6178
+[09:43:00]   side=32 seed=30 localrand gossip  eps3=2639 eps6=8117
+[09:43:00]   side=32 seed=41 localrand stats: lam2=0.00195574 max_deg=11 adds=756 (23.0s)
+[09:43:00]   side=32 seed=35 localrand heat    eps3=3502 eps6=10138
+[09:43:01]   side=32 seed=35 localrand pushsum eps3=1916 eps6=6149
+[09:43:01]   side=32 seed=41 localrand heat    eps3=1915 eps6=8942
+[09:43:02]   side=32 seed=31 localrand stats: lam2=0.00188011 max_deg=11 adds=781 (21.5s)
+[09:43:02]   side=32 seed=35 localrand gossip  eps3=2438 eps6=7832
+[09:43:02]   side=32 seed=41 localrand pushsum eps3=1653 eps6=5876
+[09:43:02]   side=32 seed=41 localrand gossip  eps3=2225 eps6=7687
+[09:43:03]   side=32 seed=31 localrand heat    eps3=3565 eps6=10167
+[09:43:03]   side=32 seed=31 localrand pushsum eps3=2403 eps6=6422
+[09:43:04]   side=32 seed=31 localrand gossip  eps3=3211 eps6=8504
+[09:43:04]   side=32 seed=37 localrand stats: lam2=0.00217426 max_deg=10 adds=742 (16.3s)
+[09:43:04]   side=32 seed=40 localrand stats: lam2=0.00208041 max_deg=10 adds=771 (16.3s)
+[09:43:04]   side=32 seed=38 localrand stats: lam2=0.00202881 max_deg=10 adds=771 (15.2s)
+[09:43:05]   side=32 seed=37 localrand heat    eps3=3545 eps6=9788
+[09:43:05]   side=32 seed=38 localrand heat    eps3=3212 eps6=9829
+[09:43:05]   side=32 seed=40 localrand heat    eps3=3540 eps6=9972
+[09:43:05]   side=32 seed=37 localrand pushsum eps3=2454 eps6=6439
+[09:43:05]   side=32 seed=38 localrand pushsum eps3=2073 eps6=6039
+[09:43:05]   side=32 seed=40 localrand pushsum eps3=1980 eps6=6144
+[09:43:05]   side=32 seed=37 localrand gossip  eps3=3216 eps6=8409
+[09:43:05]   side=32 seed=38 localrand gossip  eps3=2665 eps6=7787
+[09:43:05]   side=32 seed=40 localrand gossip  eps3=2558 eps6=8007
+[09:43:05] PHASE-1 COMPLETE (sides 15,22,32 done -- Q-LOCAL answerable; run --analyze)
+[09:43:05] side=64: 12 seed-tasks (maxr=200000)
+[10:02:45] side=64 seed=31: built ['curved', 'flat', 'localrand', 'rreg4', 'shuffled'] in 1180.24s (edges flat=8064 curved=8082 localrand=8069)
+[10:02:49]   side=64 seed=31 flat      stats: lam2=0.00061665 max_deg=4 (3.4s)
+[10:02:49] side=64 seed=38: built ['curved', 'flat', 'localrand', 'rreg4', 'shuffled'] in 1183.76s (edges flat=8064 curved=8076 localrand=8067)
+[10:02:52] side=64 seed=33: built ['curved', 'flat', 'localrand', 'rreg4', 'shuffled'] in 1186.63s (edges flat=8064 curved=8079 localrand=8065)
+[10:02:52]   side=64 seed=38 flat      stats: lam2=0.00061665 max_deg=4 (3.2s)
+[10:02:52]   side=64 seed=31 flat      heat    eps3=10456 eps6=32857
+[10:02:53] side=64 seed=39: built ['curved', 'flat', 'localrand', 'rreg4', 'shuffled'] in 1188.05s (edges flat=8064 curved=8082 localrand=8065)
+[10:02:54]   side=64 seed=38 flat      heat    eps3=8321 eps6=30721
+[10:02:54]   side=64 seed=33 flat      stats: lam2=0.00061665 max_deg=4 (2.7s)
+[10:02:55]   side=64 seed=31 flat      pushsum eps3=6540 eps6=20605
+[10:02:56]   side=64 seed=38 flat      pushsum eps3=5401 eps6=19466
+[10:02:56]   side=64 seed=31 flat      gossip  eps3=6595 eps6=20817
+[10:02:56]   side=64 seed=39 flat      stats: lam2=0.00061665 max_deg=4 (3.0s)
+[10:02:57]   side=64 seed=33 flat      heat    eps3=11279 eps6=33680
+[10:02:57]   side=64 seed=38 flat      gossip  eps3=5454 eps6=19676
+[10:02:58]   side=64 seed=39 flat      heat    eps3=7057 eps6=29456
+[10:02:58]   side=64 seed=33 flat      pushsum eps3=7120 eps6=21186
+[10:03:00]   side=64 seed=39 flat      pushsum eps3=4636 eps6=18701
+[10:03:00]   side=64 seed=33 flat      gossip  eps3=7188 eps6=21411
+[10:03:01]   side=64 seed=39 flat      gossip  eps3=4676 eps6=18899
+[10:03:01]   side=64 seed=31 curved    stats: lam2=0.03318774 max_deg=505 adds=3573 (4.5s)
+[10:03:01]   side=64 seed=31 curved    heat    eps3=192 eps6=588
+[10:03:01]   side=64 seed=31 curved    pushsum eps3=130 eps6=374
+[10:03:03]   side=64 seed=38 curved    stats: lam2=0.0330963 max_deg=481 adds=3534 (5.6s)
+[10:03:03]   side=64 seed=38 curved    heat    eps3=210 eps6=622
+[10:03:03]   side=64 seed=38 curved    pushsum eps3=136 eps6=368
+[10:03:04]   side=64 seed=33 curved    stats: lam2=0.04300972 max_deg=720 adds=3553 (4.0s)
+[10:03:04]   side=64 seed=33 curved    heat    eps3=172 eps6=471
+[10:03:04]   side=64 seed=33 curved    pushsum eps3=133 eps6=345
+[10:03:04]   side=64 seed=31 curved    gossip  eps3=9398 eps6=24858
+[10:03:06]   side=64 seed=38 curved    gossip  eps3=7205 eps6=20363
+[10:03:07]   side=64 seed=39 curved    stats: lam2=0.03297199 max_deg=400 adds=3585 (6.7s)
+[10:03:07]   side=64 seed=33 curved    gossip  eps3=14037 eps6=36668
+[10:03:07]   side=64 seed=39 curved    heat    eps3=185 eps6=560
+[10:03:08]   side=64 seed=39 curved    pushsum eps3=144 eps6=417
+[10:03:10]   side=64 seed=39 curved    gossip  eps3=7110 eps6=19881
+[10:03:11]   side=64 seed=38 shuffled  stats: lam2=0.05570003 max_deg=481 (5.6s)
+[10:03:11]   side=64 seed=38 shuffled  heat    eps3=113 eps6=356
+[10:03:11]   side=64 seed=38 shuffled  pushsum eps3=95 eps6=288
+[10:03:12] side=64 seed=41: built ['curved', 'flat', 'localrand', 'rreg4', 'shuffled'] in 1206.4s (edges flat=8064 curved=8079 localrand=8068)
+[10:03:12]   side=64 seed=31 shuffled  stats: lam2=0.05126925 max_deg=505 (7.8s)
+[10:03:12]   side=64 seed=38 shuffled  gossip  eps3=3178 eps6=9875
+[10:03:12]   side=64 seed=31 shuffled  heat    eps3=137 eps6=403
+[10:03:12]   side=64 seed=31 shuffled  pushsum eps3=129 eps6=340
+[10:03:14]   side=64 seed=31 shuffled  gossip  eps3=3527 eps6=10529
+[10:03:14]   side=64 seed=33 shuffled  stats: lam2=0.06122928 max_deg=720 (6.8s)
+[10:03:14]   side=64 seed=33 shuffled  heat    eps3=111 eps6=312
+[10:03:14]   side=64 seed=33 shuffled  pushsum eps3=97 eps6=264
+[10:03:15]   side=64 seed=41 flat      stats: lam2=0.00061665 max_deg=4 (3.0s)
+[10:03:16]   side=64 seed=33 shuffled  gossip  eps3=7705 eps6=22835
+[10:03:16]   side=64 seed=41 flat      heat    eps3=11563 eps6=33963
+[10:03:18]   side=64 seed=39 shuffled  stats: lam2=0.02858668 max_deg=400 (7.4s)
+[10:03:18]   side=64 seed=39 shuffled  heat    eps3=169 eps6=648
+[10:03:18]   side=64 seed=39 shuffled  pushsum eps3=153 eps6=532
+[10:03:18]   side=64 seed=41 flat      pushsum eps3=7240 eps6=21306
+[10:03:19]   side=64 seed=39 shuffled  gossip  eps3=2888 eps6=11860
+[10:03:19]   side=64 seed=41 flat      gossip  eps3=7307 eps6=21530
+[10:03:23]   side=64 seed=31 rreg4     stats: lam2=0.13427406 max_deg=4 (8.9s)
+[10:03:23]   side=64 seed=31 rreg4     heat    eps3=62 eps6=153
+[10:03:23]   side=64 seed=31 rreg4     pushsum eps3=38 eps6=94
+[10:03:23]   side=64 seed=31 rreg4     gossip  eps3=38 eps6=94
+[10:03:23]   side=64 seed=41 curved    stats: lam2=0.03912021 max_deg=985 adds=3702 (3.8s)
+[10:03:23]   side=64 seed=41 curved    heat    eps3=200 eps6=543
+[10:03:23]   side=64 seed=41 curved    pushsum eps3=142 eps6=365
+[10:03:25]   side=64 seed=33 rreg4     stats: lam2=0.13581145 max_deg=4 (8.6s)
+[10:03:25]   side=64 seed=33 rreg4     heat    eps3=60 eps6=149
+[10:03:25]   side=64 seed=33 rreg4     pushsum eps3=37 eps6=91
+[10:03:25]   side=64 seed=33 rreg4     gossip  eps3=37 eps6=91
+[10:03:25]   side=64 seed=38 rreg4     stats: lam2=0.1362879 max_deg=4 (13.0s)
+[10:03:25]   side=64 seed=38 rreg4     heat    eps3=61 eps6=151
+[10:03:25]   side=64 seed=38 rreg4     pushsum eps3=37 eps6=92
+[10:03:25]   side=64 seed=38 rreg4     gossip  eps3=37 eps6=92
+[10:03:26]   side=64 seed=31 localrand stats: lam2=0.00054678 max_deg=14 adds=3066 (3.8s)
+[10:03:28]   side=64 seed=41 curved    gossip  eps3=19551 eps6=51098
+[10:03:28]   side=64 seed=39 rreg4     stats: lam2=0.13603342 max_deg=4 (9.3s)
+[10:03:28]   side=64 seed=39 rreg4     heat    eps3=63 eps6=153
+[10:03:28]   side=64 seed=39 rreg4     pushsum eps3=38 eps6=94
+[10:03:28]   side=64 seed=39 rreg4     gossip  eps3=38 eps6=94
+[10:03:28]   side=64 seed=33 localrand stats: lam2=0.00053674 max_deg=12 adds=3084 (3.2s)
+[10:03:29]   side=64 seed=31 localrand heat    eps3=10071 eps6=33873
+[10:03:30]   side=64 seed=38 localrand stats: lam2=0.00052382 max_deg=12 adds=3040 (4.9s)
+[10:03:31]   side=64 seed=41 shuffled  stats: lam2=0.03030765 max_deg=985 (3.8s)
+[10:03:32]   side=64 seed=41 shuffled  heat    eps3=101 eps6=543
+[10:03:32]   side=64 seed=41 shuffled  pushsum eps3=100 eps6=456
+[10:03:32]   side=64 seed=31 localrand pushsum eps3=6947 eps6=21909
+[10:03:34]   side=64 seed=33 localrand heat    eps3=12448 eps6=36283
+[10:03:34]   side=64 seed=41 shuffled  gossip  eps3=9870 eps6=30050
+[10:03:34]   side=64 seed=39 localrand stats: lam2=0.00051996 max_deg=11 adds=3104 (5.6s)
+[10:03:34]   side=64 seed=31 localrand gossip  eps3=9220 eps6=29105
+[10:03:35]   side=64 seed=38 localrand heat    eps3=9961 eps6=35968
+[10:03:36] side=64 seed=40: built ['curved', 'flat', 'localrand', 'rreg4', 'shuffled'] in 1231.13s (edges flat=8064 curved=8074 localrand=8068)
+[10:03:37]   side=64 seed=33 localrand pushsum eps3=7432 eps6=22439
+[10:03:39]   side=64 seed=40 flat      stats: lam2=0.00061665 max_deg=4 (2.7s)
+[10:03:39]   side=64 seed=39 localrand heat    eps3=10533 eps6=35290
+[10:03:39]   side=64 seed=33 localrand gossip  eps3=9859 eps6=29762
+[10:03:40]   side=64 seed=38 localrand pushsum eps3=6137 eps6=22352
+[10:03:41]   side=64 seed=40 flat      heat    eps3=9977 eps6=32377
+[10:03:41]   side=64 seed=41 rreg4     stats: lam2=0.13594115 max_deg=4 (7.5s)
+[10:03:41]   side=64 seed=41 rreg4     heat    eps3=62 eps6=154
+[10:03:41]   side=64 seed=41 rreg4     pushsum eps3=38 eps6=94
+[10:03:41]   side=64 seed=41 rreg4     gossip  eps3=38 eps6=94
+[10:03:42]   side=64 seed=38 localrand gossip  eps3=8002 eps6=29191
+[10:03:42]   side=64 seed=39 localrand pushsum eps3=5458 eps6=21476
+[10:03:42]   side=64 seed=40 flat      pushsum eps3=6192 eps6=20258
+[10:03:43] side=64 seed=30: built ['curved', 'flat', 'localrand', 'rreg4', 'shuffled'] in 1237.79s (edges flat=8064 curved=8074 localrand=8066)
+[10:03:43]   side=64 seed=40 flat      gossip  eps3=6246 eps6=20469
+[10:03:44]   side=64 seed=39 localrand gossip  eps3=7109 eps6=27922
+[10:03:44]   side=64 seed=41 localrand stats: lam2=0.0005361 max_deg=11 adds=3058 (2.6s)
+[10:03:45]   side=64 seed=30 flat      stats: lam2=0.00061665 max_deg=4 (2.4s)
+[10:03:46]   side=64 seed=40 curved    stats: lam2=0.02652458 max_deg=753 adds=3614 (2.7s)
+[10:03:46]   side=64 seed=40 curved    heat    eps3=222 eps6=694
+[10:03:46]   side=64 seed=41 localrand heat    eps3=9757 eps6=34198
+[10:03:46]   side=64 seed=40 curved    pushsum eps3=150 eps6=431
+[10:03:47]   side=64 seed=30 flat      heat    eps3=8993 eps6=31393
+[10:03:47] side=64 seed=35: built ['curved', 'flat', 'localrand', 'rreg4', 'shuffled'] in 1241.9s (edges flat=8064 curved=8077 localrand=8065)
+[10:03:48] side=64 seed=37: built ['curved', 'flat', 'localrand', 'rreg4', 'shuffled'] in 1242.53s (edges flat=8064 curved=8081 localrand=8071)
+[10:03:48]   side=64 seed=30 flat      pushsum eps3=5668 eps6=19733
+[10:03:48]   side=64 seed=40 curved    gossip  eps3=15219 eps6=40681
+[10:03:48]   side=64 seed=41 localrand pushsum eps3=7817 eps6=23057
+[10:03:49]   side=64 seed=30 flat      gossip  eps3=5719 eps6=19942
+[10:03:49]   side=64 seed=35 flat      stats: lam2=0.00061665 max_deg=4 (2.3s)
+[10:03:50]   side=64 seed=37 flat      stats: lam2=0.00061665 max_deg=4 (2.5s)
+[10:03:50]   side=64 seed=41 localrand gossip  eps3=10268 eps6=30253
+[10:03:51]   side=64 seed=35 flat      heat    eps3=6976 eps6=29373
+[10:03:52]   side=64 seed=37 flat      heat    eps3=8213 eps6=30614
+[10:03:52]   side=64 seed=30 curved    stats: lam2=0.03290669 max_deg=299 adds=3562 (2.9s)
+[10:03:52]   side=64 seed=30 curved    heat    eps3=220 eps6=599
+[10:03:52]   side=64 seed=30 curved    pushsum eps3=135 eps6=376
+[10:03:52]   side=64 seed=40 shuffled  stats: lam2=0.06193399 max_deg=753 (3.6s)
+[10:03:52]   side=64 seed=40 shuffled  heat    eps3=115 eps6=329
+[10:03:52]   side=64 seed=40 shuffled  pushsum eps3=94 eps6=260
+[10:03:52]   side=64 seed=35 flat      pushsum eps3=4165 eps6=18229
+[10:03:53]   side=64 seed=30 curved    gossip  eps3=4577 eps6=14271
+[10:03:53]   side=64 seed=35 flat      gossip  eps3=4196 eps6=18417
+[10:03:53]   side=64 seed=37 flat      pushsum eps3=5037 eps6=19102
+[10:03:53]   side=64 seed=40 shuffled  gossip  eps3=5221 eps6=15653
+[10:03:54]   side=64 seed=37 flat      gossip  eps3=5084 eps6=19306
+[10:03:56]   side=64 seed=35 curved    stats: lam2=0.0347695 max_deg=523 adds=3602 (3.0s)
+[10:03:56]   side=64 seed=35 curved    heat    eps3=200 eps6=585
+[10:03:56]   side=64 seed=35 curved    pushsum eps3=135 eps6=340
+[10:03:56] side=64 seed=34: built ['curved', 'flat', 'localrand', 'rreg4', 'shuffled'] in 1251.37s (edges flat=8064 curved=8078 localrand=8065)
+[10:03:57]   side=64 seed=37 curved    stats: lam2=0.02876071 max_deg=310 adds=3521 (3.0s)
+[10:03:57]   side=64 seed=37 curved    heat    eps3=201 eps6=578
+[10:03:57]   side=64 seed=37 curved    pushsum eps3=156 eps6=450
+[10:03:57]   side=64 seed=30 shuffled  stats: lam2=0.06255031 max_deg=299 (4.3s)
+[10:03:57]   side=64 seed=30 shuffled  heat    eps3=105 eps6=296
+[10:03:57]   side=64 seed=30 shuffled  pushsum eps3=87 eps6=242
+[10:03:58]   side=64 seed=35 curved    gossip  eps3=8951 eps6=26386
+[10:03:58]   side=64 seed=30 shuffled  gossip  eps3=2912 eps6=9006
+[10:03:58]   side=64 seed=37 curved    gossip  eps3=5165 eps6=15795
+[10:03:58] side=64 seed=36: built ['curved', 'flat', 'localrand', 'rreg4', 'shuffled'] in 1252.82s (edges flat=8064 curved=8078 localrand=8066)
+[10:03:59]   side=64 seed=34 flat      stats: lam2=0.00061665 max_deg=4 (2.6s)
+[10:04:00]   side=64 seed=40 rreg4     stats: lam2=0.13635724 max_deg=4 (7.2s)
+[10:04:00]   side=64 seed=40 rreg4     heat    eps3=61 eps6=149
+[10:04:00]   side=64 seed=40 rreg4     pushsum eps3=37 eps6=91
+[10:04:00]   side=64 seed=40 rreg4     gossip  eps3=37 eps6=91
+[10:04:01]   side=64 seed=36 flat      stats: lam2=0.00061665 max_deg=4 (2.7s)
+[10:04:01]   side=64 seed=34 flat      heat    eps3=8839 eps6=31231
+[10:04:02]   side=64 seed=35 shuffled  stats: lam2=0.03666256 max_deg=523 (4.2s)
+[10:04:02]   side=64 seed=35 shuffled  heat    eps3=143 eps6=507
+[10:04:02]   side=64 seed=35 shuffled  pushsum eps3=135 eps6=428
+[10:04:02]   side=64 seed=37 shuffled  stats: lam2=0.07126354 max_deg=310 (4.5s)
+[10:04:02]   side=64 seed=37 shuffled  heat    eps3=97 eps6=265
+[10:04:02]   side=64 seed=34 flat      pushsum eps3=5392 eps6=19450
+[10:04:02]   side=64 seed=37 shuffled  pushsum eps3=86 eps6=229
+[10:04:03]   side=64 seed=36 flat      heat    eps3=10898 eps6=33298
+[10:04:03]   side=64 seed=37 shuffled  gossip  eps3=1309 eps6=5380
+[10:04:03]   side=64 seed=35 shuffled  gossip  eps3=4572 eps6=15428
+[10:04:03]   side=64 seed=40 localrand stats: lam2=0.00052803 max_deg=11 adds=3113 (2.8s)
+[10:04:03]   side=64 seed=34 flat      gossip  eps3=5441 eps6=19656
+[10:04:04]   side=64 seed=36 flat      pushsum eps3=6938 eps6=21003
+[10:04:05]   side=64 seed=30 rreg4     stats: lam2=0.13475025 max_deg=4 (7.3s)
+[10:04:05]   side=64 seed=30 rreg4     heat    eps3=61 eps6=149
+[10:04:05]   side=64 seed=30 rreg4     pushsum eps3=37 eps6=91
+[10:04:05]   side=64 seed=30 rreg4     gossip  eps3=37 eps6=91
+[10:04:05]   side=64 seed=36 flat      gossip  eps3=7002 eps6=21224
+[10:04:05]   side=64 seed=40 localrand heat    eps3=10724 eps6=36826
+[10:04:06]   side=64 seed=34 curved    stats: lam2=0.029153 max_deg=572 adds=3642 (2.8s)
+[10:04:06]   side=64 seed=34 curved    heat    eps3=231 eps6=685
+[10:04:06]   side=64 seed=34 curved    pushsum eps3=173 eps6=491
+[10:04:07] side=64 seed=32: built ['curved', 'flat', 'localrand', 'rreg4', 'shuffled'] in 1261.62s (edges flat=8064 curved=8074 localrand=8066)
+[10:04:07]   side=64 seed=30 localrand stats: lam2=0.00050385 max_deg=11 adds=3080 (2.5s)
+[10:04:07]   side=64 seed=40 localrand pushsum eps3=6871 eps6=23241
+[10:04:08]   side=64 seed=36 curved    stats: lam2=0.03056941 max_deg=519 adds=3580 (2.7s)
+[10:04:08]   side=64 seed=36 curved    heat    eps3=249 eps6=682
+[10:04:08]   side=64 seed=36 curved    pushsum eps3=171 eps6=462
+[10:04:08]   side=64 seed=34 curved    gossip  eps3=12216 eps6=32265
+[10:04:09]   side=64 seed=35 rreg4     stats: lam2=0.13469335 max_deg=4 (5.9s)
+[10:04:09]   side=64 seed=35 rreg4     heat    eps3=62 eps6=152
+[10:04:09]   side=64 seed=35 rreg4     pushsum eps3=38 eps6=93
+[10:04:09]   side=64 seed=35 rreg4     gossip  eps3=38 eps6=93
+[10:04:09]   side=64 seed=32 flat      stats: lam2=0.00061665 max_deg=4 (2.0s)
+[10:04:09]   side=64 seed=36 curved    gossip  eps3=8816 eps6=25680
+[10:04:09]   side=64 seed=37 rreg4     stats: lam2=0.13622285 max_deg=4 (6.4s)
+[10:04:09]   side=64 seed=37 rreg4     heat    eps3=60 eps6=151
+[10:04:09]   side=64 seed=37 rreg4     pushsum eps3=37 eps6=93
+[10:04:09]   side=64 seed=37 rreg4     gossip  eps3=37 eps6=93
+[10:04:09]   side=64 seed=40 localrand gossip  eps3=9120 eps6=30620
+[10:04:10]   side=64 seed=30 localrand heat    eps3=13618 eps6=40932
+[10:04:10]   side=64 seed=32 flat      heat    eps3=3705 eps6=25770
+[10:04:11]   side=64 seed=32 flat      pushsum eps3=2327 eps6=16039
+[10:04:11]   side=64 seed=35 localrand stats: lam2=0.00054207 max_deg=11 adds=3042 (2.5s)
+[10:04:11]   side=64 seed=34 shuffled  stats: lam2=0.02653541 max_deg=572 (3.4s)
+[10:04:11]   side=64 seed=34 shuffled  heat    eps3=203 eps6=719
+[10:04:11]   side=64 seed=34 shuffled  pushsum eps3=142 eps6=430
+[10:04:11]   side=64 seed=37 localrand stats: lam2=0.00051905 max_deg=10 adds=3082 (2.4s)
+[10:04:11]   side=64 seed=32 flat      gossip  eps3=2348 eps6=16209
+[10:04:12]   side=64 seed=30 localrand pushsum eps3=6800 eps6=23965
+[10:04:12]   side=64 seed=36 shuffled  stats: lam2=0.03242888 max_deg=519 (3.4s)
+[10:04:12]   side=64 seed=36 shuffled  heat    eps3=178 eps6=596
+[10:04:12]   side=64 seed=36 shuffled  pushsum eps3=158 eps6=489
+[10:04:13]   side=64 seed=34 shuffled  gossip  eps3=4498 eps6=24150
+[10:04:13]   side=64 seed=35 localrand heat    eps3=7986 eps6=33121
+[10:04:14]   side=64 seed=30 localrand gossip  eps3=8723 eps6=30819
+[10:04:14]   side=64 seed=37 localrand heat    eps3=11834 eps6=37703
+[10:04:14]   side=64 seed=32 curved    stats: lam2=0.03104179 max_deg=170 adds=3531 (2.7s)
+[10:04:14]   side=64 seed=36 shuffled  gossip  eps3=8333 eps6=37352
+[10:04:14]   side=64 seed=32 curved    heat    eps3=224 eps6=631
+[10:04:14]   side=64 seed=32 curved    pushsum eps3=178 eps6=496
+[10:04:15]   side=64 seed=32 curved    gossip  eps3=2900 eps6=8537
+[10:04:15]   side=64 seed=35 localrand pushsum eps3=4147 eps6=19725
+[10:04:16]   side=64 seed=37 localrand pushsum eps3=5531 eps6=21266
+[10:04:16]   side=64 seed=35 localrand gossip  eps3=5448 eps6=26181
+[10:04:17]   side=64 seed=37 localrand gossip  eps3=7208 eps6=27571
+[10:04:19]   side=64 seed=32 shuffled  stats: lam2=0.05708713 max_deg=170 (3.7s)
+[10:04:19]   side=64 seed=32 shuffled  heat    eps3=116 eps6=347
+[10:04:19]   side=64 seed=32 shuffled  pushsum eps3=99 eps6=278
+[10:04:19]   side=64 seed=34 rreg4     stats: lam2=0.13430783 max_deg=4 (6.2s)
+[10:04:19]   side=64 seed=34 rreg4     heat    eps3=63 eps6=157
+[10:04:19]   side=64 seed=34 rreg4     pushsum eps3=39 eps6=96
+[10:04:19]   side=64 seed=34 rreg4     gossip  eps3=39 eps6=96
+[10:04:19]   side=64 seed=32 shuffled  gossip  eps3=1867 eps6=6640
+[10:04:21]   side=64 seed=34 localrand stats: lam2=0.00051756 max_deg=10 adds=3061 (2.5s)
+[10:04:22]   side=64 seed=36 rreg4     stats: lam2=0.13628148 max_deg=4 (7.4s)
+[10:04:22]   side=64 seed=36 rreg4     heat    eps3=62 eps6=153
+[10:04:22]   side=64 seed=36 rreg4     pushsum eps3=38 eps6=94
+[10:04:22]   side=64 seed=36 rreg4     gossip  eps3=38 eps6=94
+[10:04:23]   side=64 seed=34 localrand heat    eps3=9761 eps6=34977
+[10:04:24]   side=64 seed=36 localrand stats: lam2=0.00054024 max_deg=11 adds=3080 (2.4s)
+[10:04:25]   side=64 seed=32 rreg4     stats: lam2=0.1350819 max_deg=4 (6.1s)
+[10:04:25]   side=64 seed=32 rreg4     heat    eps3=62 eps6=151
+[10:04:25]   side=64 seed=32 rreg4     pushsum eps3=38 eps6=92
+[10:04:25]   side=64 seed=32 rreg4     gossip  eps3=38 eps6=92
+[10:04:25]   side=64 seed=34 localrand pushsum eps3=5730 eps6=21300
+[10:04:26]   side=64 seed=36 localrand heat    eps3=12134 eps6=36782
+[10:04:27]   side=64 seed=34 localrand gossip  eps3=7406 eps6=27460
+[10:04:27]   side=64 seed=32 localrand stats: lam2=0.00053609 max_deg=11 adds=3113 (2.4s)
+[10:04:28]   side=64 seed=36 localrand pushsum eps3=7411 eps6=22711
+[10:04:29]   side=64 seed=32 localrand heat    eps3=7303 eps6=32269
+[10:04:30]   side=64 seed=36 localrand gossip  eps3=9819 eps6=29932
+[10:04:30]   side=64 seed=32 localrand pushsum eps3=2282 eps6=13904
+[10:04:31]   side=64 seed=32 localrand gossip  eps3=2981 eps6=20675
+[10:04:32] SWEEP COMPLETE

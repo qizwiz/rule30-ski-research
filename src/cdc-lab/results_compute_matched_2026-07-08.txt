@@ -1,0 +1,4 @@
+GEOMETRY-MATCHED computation (lazy random-walk / heat diffusion):
+  FLAT:   570 rounds to consensus
+  CURVED: 83 rounds to consensus
+  => CURVATURE IS A RESOURCE (matched algo): curved 6.9x faster

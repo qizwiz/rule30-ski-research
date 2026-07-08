@@ -1,0 +1,42 @@
+{
+  "sides": [
+    15,
+    22,
+    32
+  ],
+  "seeds": [
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41
+  ],
+  "maxr": 40000,
+  "alpha": 0.5,
+  "eps_list": [
+    0.001,
+    1e-06
+  ],
+  "families": [
+    "flat",
+    "curved",
+    "shuffled",
+    "rreg4"
+  ],
+  "algos": [
+    "heat",
+    "pushsum",
+    "gossip"
+  ],
+  "delta_samples": 4000,
+  "coevolve_rounds": 14,
+  "traffic_per_225": 1200,
+  "started": "2026-07-08 06:48:09"
+}

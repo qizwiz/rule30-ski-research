@@ -1,0 +1,56 @@
+{
+  "sides": [
+    15,
+    22,
+    32,
+    64
+  ],
+  "seeds": [
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41
+  ],
+  "maxr_default": 40000,
+  "maxr_by_side": {
+    "64": 200000
+  },
+  "maxr_override": null,
+  "alpha": 0.5,
+  "eps_list": [
+    0.001,
+    1e-06
+  ],
+  "families_p1": [
+    "flat",
+    "curved",
+    "localrand"
+  ],
+  "families_p2": [
+    "flat",
+    "curved",
+    "shuffled",
+    "rreg4",
+    "localrand"
+  ],
+  "algos": [
+    "heat",
+    "pushsum",
+    "gossip"
+  ],
+  "delta_samples": 4000,
+  "coevolve_rounds": 14,
+  "traffic_per_225": 1200,
+  "localrand_seed_offset": 1000000,
+  "workers": 12,
+  "preregistration": "v2: Q-LOCAL L1/L2/L3+B1, Q-SCALE S1/S2/S3, Q-COST C1..C4, V0/V1 -- module docstring",
+  "started": "2026-07-08 09:39:37"
+}
